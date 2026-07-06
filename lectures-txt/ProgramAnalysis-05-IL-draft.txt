@@ -1,0 +1,858 @@
+# ProgramAnalysis-05-IL-draft
+# auto-extracted from ProgramAnalysis-05-IL-draft.pdf (47 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #5
+Incorrectness Logic
+
+===== slide 2 =====
+Program incorrectness
+
+2
+
+===== slide 3 =====
+POPL 2020
+
+Program incorrectness:
+pragmatic motivations
+
+3
+
+===== slide 4 =====
+Correctness vs incorrectness
+Over-approximation:
+good for proving correctness
+
+[[c]]P
+
+false
+negative
+true
+negatives
+
+Under-approximation:
+bad for proving correctness
+
+[[c]]P
+
+false
+positive
+
+[[c]]P
+bad for bug-finding
+
+true
+positives
+
+4
+
+[[c]]P
+good for bug-finding
+
+===== slide 5 =====
+POPL 2020
+can include
+non reachable
+states
+
+! c"{Q}
+# iff
+iff [["]]$
+⊆Q
+&
+[[c]]P ⊆
+Hoare triples {P}
+
+Program incorrectness:
+pragmatic motivations
+
+over
+approximation
+
+Includes only
+reachable states
+
+IL triples
+
+[P]
+[[c]]P ⊇
+! c" [Q]
+[#] iff
+iff [["]]$
+⊇Q
+&
+
+under
+approximation
+
+5
+
+===== slide 6 =====
+Picturing incorrectness
+
+10:3
+
+over
+approximation
+
+Hoare partial
+correctness triple
+
+strongest
+postcondition
+
+weakest under
+approximated post
+
+O’Hearn
+incorrectness triple
+
+∧∨ Symmetry:
+
+[p]c[q 1 ] ∧ [p]c[q 2 ]
+
+under
+approximation
+6
+
+⇐⇒
+
+[p]c[q 1 ∨ q 2 ]
+
+===== slide 7 =====
+Recall
+stronger P ⊆ Q weaker
+stronger P ⇒ Q weaker
+stronger P ∧ Q ⇒ P ∨ Q weaker
+
+7
+
+===== slide 8 =====
+Correctness workflow, ideally
+>1M
+
+>100K
+
+source control commands
+run per day
+
+commits per week
+
+developer
+
+code repository
+
+deployment
+
+correct!
+facebook.com/careers
+
+facebook.com/careers
+
+facebook.com/careers
+
+warnings
+code inspector
+8
+
+some scalability issues in a
+production environment:
+analysis takes time (overnight?),
+warnings are received late,
+false positives mine credibility
+
+===== slide 9 =====
+Design principles
+Low friction
+
+True positive theorem!
+
+do not rely on manual annotations
+
+(under certain assumptions) the analyzer
+reports no false positives
+
+Act fast
+able to report errors in less than 15’
+
+“do not spam the developers!”
+Be compositional
+whole program analysis is discouraged
+
+Occam
+do not use complex techniques (unless forced)
+9
+
+===== slide 10 =====
+Incorrectness Logic
+(IL)
+
+10
+
+===== slide 11 =====
+Hoare’s triples
+
+O’Hearn’s triples
+pre
+condition
+
+pre
+condition
+
+[P] c [Q]
+
+{P} c {Q}
+
+post
+condition
+
+post
+condition
+
+for any input matching the precondition
+executing the command establishes the postcondition
+
+[[c]]P ⊇ Q
+
+[[c]]P ⊆ Q
+over
+approximation!
+
+any output matching the postcondition
+can be reached by executing the command
+on some input matching the precondition
+
+can include non
+reachable states
+
+11
+
+under
+approximation!
+
+includes just
+reachable states
+
+===== slide 12 =====
+As first order formulas
+{P} c {Q}
+[[c]]P ⊆ Q
+
+≡
+
+∀σ ∈ P . ∀δ ∈ [[c]]σ . δ ∈ Q
+
+Any reachable output satisfies the postcondition
+
+[P] c [Q]
+[[c]]P ⊇ Q
+
+≡
+
+∀δ ∈ Q . ∃σ ∈ P . δ ∈ [[c]]σ
+
+Any output in the postcondition is reachable
+12
+
+===== slide 13 =====
+An example
+{x < 0} c {x ≥ 0}
+can c be x := | x | ?
+and x := | x + 1 | ?
+and x := 0 ?
+
+if x < 0 initially, then x ≥ 0 at the end
+can c diverge?
+is [x ↦ 0] reachable?
+can we produce all non-negative values?
+
+[x < 0] c [x ≥ 0]
+can c be x := | x | ?
+and x := | x + 1 | ?
+and x := 0 ?
+
+any x ≥ 0 is reachable from some x < 0
+can c diverge?
+is [x ↦ 0] reachable?
+can we produce all non-negative values?
+13
+
+===== slide 14 =====
+Regular commands
+regular
+command
+
+atomic
+command
+
+e ::= skip
+| x := a
+| b?
+
+c ::= e
+choice
+| c1; c2
+| c1 + c2
+⋆
+| c
+Kleene
+
+| error( )
+| x := nondet( )
+| ...
+
+star
+
+if b then c1 else c2 ≜ (b?; c1) + ( ¬b?; c2)
+⋆
+while b do c ≜ (b?; c) ; ¬b?
+14
+
+===== slide 15 =====
+Collecting / Relational semantics
+[[c]] : ℘(Σ) → ℘(Σ)
+[[error()]]P ≜ ∅
+[[x := nondet()]]P ≜ { σ[v/x] | σ ∈ P, v ∈ Z }
+[[error()]] ≜ ∅
+
+[[c]] ⊆ Σ × Σ
+
+[[x := nondet()]] ≜ { (σ, σ[v/x]) ∣ σ ∈ Σ, v ∈ Z }
+op
+
+[[error()]] ≜ ∅
+op
+
+[[x := nondet()]] ≜ { (σ[v/x], σ) ∣ σ ∈ Σ, v ∈ Z }
+15
+
+===== slide 16 =====
+Incorrectness logic rules
+
+16
+
+===== slide 17 =====
+Floyd’s axiom for assignment
+[Floyd]
+
+[P] x := a [ ∃x′ . P[x′/x] ∧ x = a[x′/x]]
+
+same as HL!
+
+[y = 7] x := 42 [ ∃x′ . y = 7 ∧ x = 42]
+or more simply
+
+[y = 7] x := 42 [y = 7 ∧ x = 42]
+17
+
+===== slide 18 =====
+Floyd’s axiom for assignment
+[Floyd]
+
+[P] x := a [ ∃x′ . P[x′/x] ∧ x = a[x′/x]]
+
+same as HL!
+
+[y = 42] x := 42 [x = y = 42]
+would [y = x] x := 42 [x = y = 42] be valid as well?
+18
+
+===== slide 19 =====
+Consequence rule
+P′ ⇒ P [P′] c [Q′] Q ⇒ Q′
+[P] c [Q]
+
+[cons]
+
+shrink the post! (scalable bug detection)
+
+[y = x] x := 42 [x = 42] ⇐ [y = x = 42]
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+{P} c {Q}
+we can
+strengthen preconditions
+
+we can
+weaken postconditions
+
+19
+
+{cons}
+
+===== slide 20 =====
+Consequence rules explained
+[P] c [Q]
+
+{P} c {Q}
+can be weakened
+
+⊆
+
+⊆
+
+can be weakened
+
+⊆
+
+[[c]]P ⊇ Q
+
+⊆
+
+[[c]]P ⊆ Q
+can be
+strenghtened
+
+can be
+strenghtened
+20
+
+===== slide 21 =====
+Some dualities
+
+⇒ by rule [disj]
+⇐ by rule [cons]
+
+[P1] c [Q1] [P2] c [Q2]
+[disj]
+[P1 ∨ P2] c [Q1 ∨ Q2]
+
+[P] c [Q1] ∧ [P] c [Q2] ⇔
+
+[P] c [Q1 ∨ Q2]
+
+{P} c {Q1} ∧ {P} c {Q2} ⇔ {P} c {Q1 ∧ Q2}
+{P1} c {Q1} {P2} c {Q2}
+{conj}
+{P1 ∧ P2} c {Q1 ∧ Q2}
+21
+
+⇒ by rule {conj}
+⇐ by rule {cons}
+
+===== slide 22 =====
+Further dualities
+dropping conjuncts by {cons} rule
+
+dropping disjuncts by [cons] rule
+
+{P} c {Q ∧ R}
+{P} c {Q}
+
+[P] c [Q ∨ R]
+[P] c [Q]
+
+Q∧R⇒Q
+
+Q∨R⇐Q
+22
+
+===== slide 23 =====
+Hoare’s axiom for assignment?
+[Hoare]
+sound for HL
+not for IL!
+
+[Q[a/x]] x := a [Q]
+
+[y = 42] x := 42 [y = x]
+unsound!
+
+The post-condition does not
+under-approximate the
+states reachable from the
+pre-condition
+
+δ ≜ [x ↦ 3,y ↦ 3] ⊧ (x = y) is unreachable!
+23
+
+===== slide 24 =====
+Other atomic commands
+[skip]
+
+[P] b? [P ∧ b]
+
+[P] skip [P]
+
+[assume]
+
+[error]
+
+[nondet]
+
+[P] x := nondet( ) [ ∃x . P]
+24
+
+[P] error( ) [false]
+
+===== slide 25 =====
+Sequence
+[seq]
+
+[P] c1 [R] [R] c2 [Q]
+[P] c1; c2 [Q]
+
+same as HL!
+
+[x > 0] (y > x)? ; x := y [x = y > 1]
+[y > x > 0]
+25
+
+===== slide 26 =====
+Choice
+[P] c1 [Q1] [P] c2 [Q2]
+[choice]
+[P] c1 + c2 [Q1 ∨ Q2]
+
+[x > 0] skip + x := x + 1 [x > 0]
+[x > 0]
+[x > 1]
+26
+
+===== slide 27 =====
+Choice + Consequence
+[P] c1 [Q1] [P] c2 [Q2]
+[choice]
+[P] c1 + c2 [Q1 ∨ Q2]
+(Q1 ∨ Q2) ⇐ Q2
+[cons]
+[P] c1 + c2 [Q2]
+
+[x > 0] skip + x := x + 1 [x > 1]
+[x > 0]
+[x > 1]
+27
+
+===== slide 28 =====
+Choice: dropping disjuncts
+[choiceL]
+
+[P] c1 [Q]
+[P] c1 + c2 [Q]
+
+[P] c2 [Q]
+[choiceR]
+[P] c1 + c2 [Q]
+
+sound under-approximation!
+scalable bug detection
+
+[y = x] (x := y − 1) + (x := y + 1) [y − x = 1]
+[y = x] (x := y − 1) + (x := y + 1) [x − y = 1]
+28
+
+===== slide 29 =====
+Example
+[y = 0] if even(x) then y := 42 [y = 42]
+is it a valid IL triple?
+(y = 42) ≜ { [x ↦ 0,y ↦ 42], [x ↦ 1,y ↦ 42], [x ↦ 2,y ↦ 42], ... }
+All the states above satisfy the post [y = 42] since it does not constrain x in any way.
+In particular, the condition is satisfied by states like δ below, where x is odd
+
+δ ≜ [x ↦ 1,y ↦ 42] ⊧ (y = 42)
+
+But δ is unreachable from any σ ⊧ (y = 0)! Therefore the triple is not valid
+29
+
+===== slide 30 =====
+Example
+[y = 0] if even(x) then y := 42 [y = 42 ∧ even(x)]
+is it a valid IL triple?
+(y = 42 ∧ even(x)) ≜ { [x ↦ 0,y ↦ 42], [x ↦ 2,y ↦ 42], ... }
+
+30
+
+===== slide 31 =====
+IL vs HL
+[y = 0] if even(x) then y := 42 [y = 42 ∧ even(x)]
+{y = 0} if even(x) then y := 42 {y = 42 ∧ even(x)}
+{y = 0 ∧ even(x)} if even(x) then y := 42 {y = 42}
+[y = 0 ∧ even(x)] if even(x) then y := 42 [y = 42]
+
+31
+
+===== slide 32 =====
+Derived rule for if
+if b then c1 else c2 ≜ (b?; c1) + ( ¬b?; c2)
+[if]
+
+[P ∧ b] c1 [Q1]
+
+[P ∧ ¬b] c2 [Q2]
+
+[P] if b then c1 else c2 [Q1 ∨ Q2]
+Just use [assume], [seq], [choice]
+
+32
+
+===== slide 33 =====
+HL
+vs
+IL
+A duality
+For correctness
+reasoning
+
+For incorrectness
+reasoning
+
+You get to forget
+information as you go
+along a path, but you
+must remember all the
+paths.
+
+You must remember
+information as you go
+along a path, but you
+get to forget some of
+the paths
+33
+
+===== slide 34 =====
+Loop: bounded unrolling
+⋆
+
+⋆
+
+[P] c [P]
+Any is P a valid underapproximation
+
+[iter0]
+We can unroll to
+analyse any finite
+number of iterations
+
+[P] c ; c [Q]
+[unroll]
+⋆
+[P] c [Q]
+
+sound under-approximation!
+scalable bug detection
+⋆
+
+[x = 0] (x := x + 1) [x = 0]
+⋆
+[x = 0] (x := x + 1) [x = 1]
+⋆
+[x = 0] (x := x + 1) [x = 2]
+34
+
+(x := x + 1)⋆ ; x := x + 1
+⋆
+
+(x := x + 1) ; x := x + 1 ; x := x + 1
+
+===== slide 35 =====
+Loop: bounded unrolling (cont.d)
+How do we unroll a finite number of times?
+
+Key Idea: loop unrolling proves a loop triple by evaluating a finite number of iterations, without
+requiring invariants. It allows us to discover some post-conditions for a loop
+Termination: reachability does not imply that a loop must terminate on all executions: only that
+enough paths terminate to cover all the states in the result assertion
+Soundness: it is enough to show the result is reachable via some execution path, rather than
+reasoning about all possible loop behaviors
+35
+
+===== slide 36 =====
+Backwards variant (weak)
+∀n ∈ N. [Pn] c [Pn+1]
+[iter]
+⋆
+[P0] c [Pk]
+
+[iter] has mostly a theoretical value.
+In practice unrolling is most used
+
+loop invariants are inherently over-approximations
+sub-variants: to reason about loop under-approximation
+⋆
+
+42
+
+[x = 0] (x := x + 1) [x = 2 ]
+⋆
+
+42
+
+(x := x + 1) ; if (x = 2 ) then error( )
+36
+
+===== slide 37 =====
+Backwards variant (weak)
+∀n ∈ N. [Pn ≡ (x = n)] x := x + 1 [Pn+1 ≡ (x = n + 1)]
+⋆
+42
+[P0 ≡ (x = 0)] (x := x + 1) [P242 ≡ (x = 2 )]
+
+⋆
+
+42
+
+[x = 0] (x := x + 1) [x = 2 ] // Pn ≜ (x = n)
+37
+
+[iter]
+
+===== slide 38 =====
+Backwards variant
+∀n ∈ N. [Pn] c [Pn+1]
+[iter]
+⋆
+[P0] c [ ∃k . Pk]
+
+⋆
+
+k
+
+[x = 1] (x := 2 × x) [ ∃k . x = 2 ]
+38
+
+∃k . Pk ≡
+
+∞
+
+⋁
+
+Pk
+
+k=0
+
+[iter] has mostly a theoretical value.
+In practice unrolling is most used
+
+===== slide 39 =====
+Backwards variant
+n
+
+n+1
+
+∀n ∈ N. [Pn ≡ (x = 2 )] x := 2 × x [Pn+1 ≡ (x = 2
+0
+
+⋆
+
+)]
+
+k
+
+[P0 ≡ (x = 2 )] (x := 2 × x) [ ∃k . x = 2 ]
+
+⋆
+
+k
+
+n
+
+[x = 1] (x := 2 × x) [ ∃k . x = 2 ] // Pn ≜ (x = 2 )
+39
+
+[iter]
+
+===== slide 40 =====
+Finite unrolling of while loops
+⋆
+
+while b do c ≜ (b?; c) ; ¬b?
+
+∀n ∈ N. [Pn ∧ b] c [Pn+1]
+∀n ∈ N. [Pn] b?; c [Pn+1]
+⋆
+
+[P0] (b?; c) [ ∃k . Pk]
+[P0] while b do c [ ∃k . Pk ∧ ¬b]
+[P0 ∧ b] c [P1]
+[P0] while b do c [P0 ∧ ¬b] [P0] while b do c [(P0 ∨ P1) ∧ ¬b]
+40
+
+===== slide 41 =====
+Principle of agreement
+Theorem.
+If [P′] c [Q′]
+
+Proof.
+
+Q′
+⊆ [[c]]P′ // by IL
+⊆ [[c]]P // P′ ⇒ P
+⊆Q
+// by HL
+
+∧ P′ ⇒ P
+∧ {P} c {Q}
+then Q′ ⇒ Q
+
+41
+
+===== slide 42 =====
+Pictorially
+
+42
+
+===== slide 43 =====
+Principle of denial
+Theorem.
+If [P′] c [Q′]
+
+Cor. (by contraposition)
+If
+[P′] c [Q′]
+
+∧ P′ ⇒ P
+∧ ¬(Q′ ⇒ Q)
+then ¬({P} c {Q})
+
+∧ P′ ⇒ P
+∧ {P} c {Q}
+then Q′ ⇒ Q
+
+43
+
+===== slide 44 =====
+Pictorially
+
+44
+
+===== slide 45 =====
+Examples
+[true]
+if x ≥ 0 then
+[x ≥ 0]
+skip
+[x ≥ 0]
+else
+[x < 0]
+x := − x
+[ ∃x′ . x′ < 0 ∧ x = − x′] ≡ [x > 0]
+[(x ≥ 0) ∨ (x > 0)] ≡ [x ≥ 0]
+45
+
+===== slide 46 =====
+Examples
+[z = 11]
+if even(x) then
+[z = 11 ∧ even(x)]
+if odd(y) then
+[z = 11 ∧ even(x) ∧ odd(y)]
+z := 42
+[z = 42 ∧ even(x) ∧ odd(y)]
+[z = 42 ∧ even(x) ∧ odd(y)]
+The post-assertion corresponds to only one path through the program:
+we can focus on it and ignore the paths corresponding to the else branches
+46
+
+===== slide 47 =====
+Exercise
+[true]
+n := nondet();
+x := 0;
+while (n > 0) do
+x := x + n;
+n := nondet();
+[?]
+Complete the triple and prove it
+
+47

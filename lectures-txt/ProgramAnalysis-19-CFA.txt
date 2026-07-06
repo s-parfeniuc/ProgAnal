@@ -1,0 +1,1651 @@
+# ProgramAnalysis-19-CFA
+# auto-extracted from ProgramAnalysis-19-CFA.pdf (48 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #19
+Control Flow Analysis
+
+===== slide 2 =====
+Existence
+
+101
+
+===== slide 3 =====
+Existence of solutions
+• So far we have only considered a procedure for validating whether or not
+a proposed solution (C,̂ ρ)̂ is acceptable
+• Now it is natural to ask the following questions:
+• Does each expression e admit a Control Flow Analysis, i.e., does there
+exist (C,̂ ρ)̂ such that (C,̂ ρ)̂ ⊧ e? Yes
+• There may be di erent possible analyses for the same expression e
+• Does each expression e have a "least" CFA? Yes
+
+ff
+
+102
+
+===== slide 4 =====
+Comparing analyses
+Fewer possible ows
+
+more precise analysis
+
+Which partial order to compare di erent CFAs?
+The set of proposed solutions can be partially ordered by setting
+
+(Ĉ1, ρ1̂ ) ⊑ (Ĉ2, ρ2̂ ) i
+
+pointwise inclusion
+
+∀l ∈ Lab : Ĉ1(l) ⊆ Ĉ2(l)
+
+{∀x ∈ Var : ρ ̂ (x) ⊆ ρ ̂ (x)
+
+1
+
+2
+
+smaller = more precise
+
+This su ces for making the set of proposed solutions into a complete lattice
+
+ff
+
+ff
+
+fl
+
+ffi
+
+103
+
+===== slide 5 =====
+Comparing analyses
+1 2
+
+Back to our example e ≜ ((fn x => x )
+
+(fn y => y3)4)5
+
+(C′̂e, ρ′ê ) ⊑ (C′̂e, ρ′ê )
+
+￼
+
+￼
+
+￼
+
+￼
+
+104
+
+===== slide 6 =====
+Moore family
+
+model intersection
+property
+
+A Moore family is a subset Y of a complete lattice L = (L, ⊑ ) that is closed
+under greatest lower bounds: (⊓Y′) ∈ Y for all Y′ ⊆ Y
+• It follows that a Moore family always contains a least element ⊓ Y, and a
+greatest element ⊓ ∅, which equals the greatest element ⊤ from L
+• A Moore family is never empty
+{1,2} ∩ {2,3} = {2} ∈ S ...
+
+The subsets:
+
+⊓ ∅ = {1,2,3} ∈ S
+
+∅ ∩ {1,2,3} = ∅ ∈ S and
+⊓ ∅ = {1,2,3} ∈ S
+
+• {{2}, {1,2}, {2,3}, {1,2,3}} and {∅,{1,2,3}} are both
+
+Moore families, while
+• {{1}, {2}} and {∅, {1}, {2}, {1,2}} are not
+{1} ∩ {2} = ∅ ∉ S
+
+￼
+
+￼
+
+The complete lattice (℘({1,2,3}), ⊆ )
+
+105
+
+⊓ ∅ = {1,2,3} ∉ S
+
+===== slide 7 =====
+Existence of least CFA
+The set of acceptable analyses is a complete lattice closed under
+intersection and it forms a Moore family
+In particular, the set of acceptable analyses has a least element
+Theorem
+For all ie ∈ IExp the set {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie} is a Moore
+family
+Proof idea
+
+By coinduction on ie: we assume that ∀i ∈ I : (Ĉi, ρî ) ⊧ ie andtewe
+prove
+ction
+e
+s
+r
+y in
+b
+d
+̂
+e
+that ⊓i (Ci, ρî ) ⊧ ie
+tain
+b
+o
+s
+i
+FA
+C
+t
+s
+a
+The le
+106
+
+===== slide 8 =====
+Existence
+Theorem
+For all ie ∈ IExp the set {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie} is a Moore
+family
+taking the intersection over an
+empty set yields a valid analysis
+
+Corollaries:
+• all intermediate expressions admit a CFA: let Y′ = ∅, then
+(⊓Y′) ∈ {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie}. So there is at least an analysis of ie
+
+• all intermediate expressions have a least CFA: let Y′ = {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie},
+then (⊓Y′) ∈ {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie}. So it will also be an analysis of ie. Clearly
+(⊓Y′) ⊑ (C,̂ ρ)̂ for all other analyses (C,̂ ρ)̂ of ie so it is the least analysis
+result.
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+107
+
+===== slide 9 =====
+Towards the least solution
+Back to our example e ≜ ((fn x => x1)2 (fn y => y3)4)5
+
+The last two are different
+solutions w.r.t. the previously
+introduced ones
+
+• (C′̂e, ρ′ê ) and (C′̂e′, ρ′ê ′) are acceptable, but neither is the least solution
+
+• Their pointwise “intersection” (C′̂e ⊓ C′̂e′, ρ′ê ⊓ ρ′ê ′) = (Ĉe, ρê ) is still a solution
+• It is smaller, hence more precise, and is the least acceptable solution
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+108
+
+===== slide 10 =====
+Coinduction vs Induction
+If acceptability were defined inductively with an acceptability relation ⊧′ then
+there exists an expression e* such that acceptable analyses are not closed
+under intersection
+Idea:
+• If there are circular dependencies, it cannot resolve anything and
+may therefore return an empty solution
+• Inductive definitions are too strict: they exclude valid overapproximations
+
+fi
+
+fi
+
+￼
+
+109
+
+===== slide 11 =====
+Coinduction vs Induction
+If acceptability were defined inductively with an acceptability relation ⊧′ then
+there exists an expression e* such that acceptable analyses are not closed
+under intersection
+Proposition
+There exists e* ∈ Exp such that the set {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧′ e*} is
+not a Moore family
+Proof idea: Use a very simple but “tricky” program and examine its
+CFA solutions:
+• with the greatest fixed point → everything is ne
+• with the least fixed point → we get a “bad” set (∅)
+We conclude it is not a Moore family
+
+fi
+
+fi
+
+￼
+fi
+
+￼
+
+110
+
+===== slide 12 =====
+How to compute the least solution?
+Least solutions (w.r.t. ⊑) exist, but how can we compute them?
+Naive approach:
+1.enumerate all candidate solutions
+2.determine whether they are indeed solutions,
+3.if so, take the greatest lower bound w.r.t. the others found so far
+
+111
+
+===== slide 13 =====
+How to compute the least solution?
+Least solutions (w.r.t. ⊑) exist, but how can we compute them?
+Alternative:
+1.derive a nite set of constraints from the program, such as the ones of
+the form lhs ⊆ rhs,
+2.take the least solution to this system of constraints (using fixpoint
+computation)
+
+First, we will introduce a more computationally oriented specification: ⊧s
+Syntax directed specification
+
+fi
+
+fi
+
+112
+
+===== slide 14 =====
+Syntax directed CFA
+
+113
+
+===== slide 15 =====
+Syntax directed specification
+Look for a more computationally oriented specification
+Goal: analyze each function body at most once rather than each time the
+function could be applied
+Idea: one way to obtain this is to analyse each function body exactly once, at
+its definition
+This is done in the so-called syntax directed O-CFA analysis:
+• acceptability relation: ⊧s
+• judgments: (C,̂ ρ)̂ ⊧s e*
+Since semantic correctness was dealt
+with for the previous CFA there is no longer
+any need to consider intermediate
+expressions
+
+fi
+
+114
+
+===== slide 16 =====
+Syntax directed specification
+If we want to analyze a given expression e*, we reformulate the specification
+of (C,̂ ρ)̂ ⊧ e* into the more computationally oriented specification (C,̂ ρ)̂ ⊧s e*
+such that:
+(C,̂ ρ)̂ ⊧s e* ⇒ (C,̂ ρ)̂ ⊧ e* (if restricted to program terms)
+
+i.e., ⊧s is a safe approximation of ⊧: all solutions accepted by ⊧s are also valid
+for ⊧
+
+We need to focus on solutions satisfying some additional properties (e.g.,
+that only program fragments of e* appear in the range of Ĉ and ρ)̂
+
+115
+
+===== slide 17 =====
+Clause for functions
+[ fn] (C,̂ ρ)̂ ⊧s (
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+(C,̂ ρ)̂ ⊧s e0
+
+x ⇒ e0)l
+
+{
+
+NEW: Function body e0 is now analyzed at definition time, even if the
+function is never applied
+
+Example
+e ≜ (fn x => x1)2
+̂ ⊇ {fn x => x1} and ρ(x)
+̂
+̂ ⊆ C(1)
+C(2)
+
+f
+
+f
+
+i
+
+n
+
+f
+
+116
+
+===== slide 18 =====
+[ fn] (C,̂ ρ)̂ ⊧s (
+
+x ⇒ e0)l
+
+{
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+
+(C,̂ ρ)̂ ⊧s e0
+
+Example
+e ≜ (fn x => ((fn y => y2)3 x4)5)6
+
+These additional
+constraints
+are not required in ⊨,
+where only reachable
+behaviors matter
+
+̂ ∧
+(C,̂ ρ)̂ ⊧s e {fn x => ((fn y => y2)3 x4)5} ⊆ C(2)
+(C,̂ ρ)̂ ⊧s ((fn y => y2)3 x4)5 (C,̂ ρ)̂ ⊧s (fn y => y2)3 ∧ (C,̂ ρ)̂ ⊧s x4 ∧
+̂ ∧ (C,̂ ρ)̂ ⊧s y2
+(C,̂ ρ)̂ ⊧s (fn y => y2)3 {fn y => y2} ⊆ C(3)
+̂
+̂
+̂ ⊆ C(4)
+̂ ⊆ C(2)
+(C,̂ ρ)̂ ⊧s x4 ρ(x)
+(C,̂ ρ)̂ ⊧s y2 ρ(y)
+̂ :C(4)
+̂ ⊆ ρ(̂ ) ∧ C(2)
+̂ ⊆ C(5)
+̂
+{fn y => y2} ∈ C(3)
+f
+
+f
+
+i
+
+y
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+117
+f
+
+i
+
+i
+
+i
+
+i
+
+Clause for functions (cont.)
+
+===== slide 19 =====
+Clause for recursive functions
+[ fun] (C,̂ ρ)̂ ⊧s (
+
+x ⇒ e0)l
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+
+{
+
+(C,̂ ρ)̂ ⊧s e0
+{
+x ⇒ e0} ⊆ ρ(̂ f )
+
+NEW:
+• Function body e0 is now analysed at definition time, even if the function is
+never applied
+• checks on the recursive binding for [fun] is included: self-binding is
+enforced immediately
+See Example 2 next
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+118
+
+===== slide 20 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧s (t1l1t2l2)l
+NEW: The body constraints
+have already been generated
+by [fn]
+
+(C,̂ ρ)̂ ⊧s t1l1 ∧ (C,̂ ρ)̂ ⊧s t2l2
+l0
+̂ 1) :
+x ⇒ t0 ) ∈ C(l
+
+( ∀(
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+
+̂ 1) :
+( ∀(
+x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+
+All other rules are unchanged: just replace ⊧ with ⊧s
+See Example 2 next
+f
+
+f
+
+i
+
+f
+
+n
+
+n
+
+u
+
+f
+
+f
+
+119
+
+===== slide 21 =====
+Syntax directed CFA
+
+120
+
+===== slide 22 =====
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5in (g6 (fn z => z7)8)9)10
+
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+from new [fun]
+
+̂ ) ⊧s 5 ∧ (Ĉlp, ρlp
+̂ ) ⊧s g6 (fn z => z7)8
+(Ĉlp, ρlp
+
+̂ ) ⊧s
+(Ĉlp, ρlp
+
+̂ (g) ∧ Ĉlp(9) ⊆ Ĉlp(10)
+∧ Ĉlp(5) ⊆ ρlp
+1
+234
+̂
+̂
+
+̂ ) ⊧s 5
+(Ĉlp, ρlp
+
+̂ ( )
+(Clp, ρlp) ⊧s (f (fn y => y ) ) ∧ { } ⊆ Ĉlp(5) ∧ { } ⊆ ρlp
+1
+
+234
+
+1
+
+̂ ) ⊧s (f (fn y => y ) )
+(Ĉlp, ρlp
+3
+)
+y
+
+̂ ) ⊧s (
+(Ĉlp, ρlp
+
+{
+
+y
+
+Immediate
+
+̂ ) ⊧s f ∧ (Ĉlp, ρlp
+̂ ) ⊧s (
+(Ĉlp, ρlp
+lp
+
+lp
+
+lp
+
+s
+
+f
+
+x
+
+f
+
+f
+
+f
+
+i
+
+d
+
+i
+
+p
+
+o
+
+d
+
+i
+
+o
+
+l
+
+f
+
+y
+
+d
+
+i
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+f
+
+3
+)
+y
+
+̂ (x) ∧ Ĉlp(4) ⊆ Ĉlp(4)
+∧ Ĉlp(3) ⊆ ρlp
+Immediate
+} ⊆ Ĉ (3) ∧ (Ĉ , ρ ̂ ) ⊧ 2
+121
+
+f
+
+i
+
+i
+
+Back to Example 2
+
+===== slide 23 =====
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5in (g6 (fn z => z7)8)9)10
+
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+̂ ) ⊧s
+(Ĉlp, ρlp
+using [app] and
+̂ ={}
+that C(6)
+
+from new [app]
+
+̂ ) ⊧s 5 ∧ (Ĉlp, ρlp
+̂ ) ⊧s g6 (fn z => z7)8
+(Ĉlp, ρlp
+
+̂ (g) ∧ Ĉlp(9) ⊆ Ĉlp(10)
+∧ Ĉlp(5) ⊆ ρlp
+
+̂ ) ⊧s g6 (fn z => z7)8
+(Ĉlp, ρlp
+̂ ) ⊧s ( z)
+(Ĉlp, ρlp
+
+8
+
+immediate
+
+̂ )⊧
+(Ĉlp, ρlp
+
+6
+
+̂ ) ⊧s ( z)8
+∧ (Ĉlp, ρlp
+
+̂ ( ) ∧ Ĉlp(4) ⊆ Ĉlp(9)
+∧ Ĉlp(8) ⊆ ρlp
+
+̂ ) ⊧s
+{ z} ⊆ Ĉlp(8) ∧ (Ĉlp, ρlp
+
+7
+
+f
+
+d
+
+i
+
+f
+
+f
+
+i
+
+x
+
+p
+
+o
+
+d
+
+i
+
+o
+
+l
+
+z
+
+g
+
+d
+
+f
+
+i
+
+f
+
+f
+
+f
+
+i
+
+122
+f
+
+i
+
+Back to Example 2
+
+Immediate
+
+===== slide 24 =====
+Back to Example 2
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5
+in (g6 (fn z => z7)8)9)10
+
+̂ ) is an acceptable guess for ⊧s
+We have proved that (Ĉlp, ρlp
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+No circular dependency => no need of coinduction
+
+123
+
+===== slide 25 =====
+Observation
+
+We can take ⊧s as the largest relation satisfying the specification
+However, given the syntax directed nature of the specification (the relation is
+fully determined by the structure of expressions), there is in fact only one
+relation that satisfies the specification
+unique
+
+Hence it would be technically correct, but intuitively misleading, to claim that
+we take the least relation that satisfies the specification, because it suggests
+a choice among many relations
+Before: many acceptable relations → take the least
+Now: only one relation → no minimisation needed
+Whether or not ⊧s is defined inductively or conductively, the same relation is
+defined. This is typical of syntax-directed definitions
+
+fi
+
+fi
+
+fi
+
+fi
+
+fi
+
+124
+
+===== slide 26 =====
+Exercise
+Let ⊧′s and ⊧′s′ be two relations satisfying the syntax-directed CFA clauses.
+Show, by structural induction on e that
+
+(C,̂ ρ)̂ ⊧′s e
+
+(C,̂ ρ)̂ ⊧′s′ e
+
+[Case c l]: trivial
+̂ and (C,̂ ρ)̂ ⊧′s′ x l
+̂
+̂ ⊆ C(l)
+̂ ⊆ C(l)
+ρ(x)
+ρ(x)
+[Case x l]: (C,̂ ρ)̂ ⊧′s x l
+Both relations satisfy the same clause on (C,̂ ρ)̂ , so they are equivalent.
+̂ ∧ (C,̂ ρ)̂ ⊧′s e0,
+{ x ⇒ e0} ⊆ C(l)
+[Case ( x ⇒ t0l0)l]: (C,̂ ρ)̂ ⊧′s ( x ⇒ t0l0)l
+
+̂ ∧ (C,̂ ρ)̂ ⊧′′s e0
+{ x ⇒ e0} ⊆ C(l)
+and (C,̂ ρ)̂ ⊧′s′ ( x ⇒ t0l0)l
+In each case, both ⊨s' and ⊨s'' satisfy the same de ning clause. Hence their
+equivalence reduces to the equivalence of the premises, which follows by the
+induction hypothesis ((C,̂ ρ)̂ ⊧′s t0l0
+(C,̂ ρ)̂ ⊧′s′ t0l0).
+The remaining cases are analogous.
+n
+
+n
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+i
+
+f
+
+f
+
+f
+
+f
+
+i
+
+i
+
+f
+
+f
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+f
+
+i
+
+f
+
+i
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+125
+
+===== slide 27 =====
+If ⊧′ and ⊧′′ are two relations satisfying the non syntax-directed CFA clauses.
+Then, we cannot establish that
+3
+
+(C,̂ ρ)̂ ⊧′ e
+
+1 2 3
+
+a ≜ (0 0 ) : and suppose to have that
+̂ ,
+• (fn x => a4) ∈ C(1)
+̂ = C(2)
+̂ = ρ(x) = ∅
+• C(2)
+
+(C,̂ ρ)̂ ⊧′′ e
+
+s
+duce
+o
+r
+t
+n
+i
+Ĉ(1) y
+n
+i
+n
+o
+c
+uncti ependen tructure
+The f
+ad
+tic s
+c
+a
+t
+n
+y
+the s
+e
+d
+i
+s
+out
+
+(C,̂ ρ)̂ ⊧′ a3
+
+̂ ⊆ ρ(x) ∧ C(4)
+̂ ⊆ C(3)
+̂
+(C,̂ ρ)̂ ⊧′ 01 ∧ (C,̂ ρ)̂ ⊧′ 02 ∧ (C,̂ ρ)̂ ⊧′ a4 ∧ C(2)
+(C,̂ ρ)̂ ⊧′ a4
+The only critical point is that (C,̂ ρ)̂ ⊧′ a3
+This equivalence holds true whether or not you include `a` in the relation, i.e.,
+(C,̂ ρ)̂ ⊧′ a3 either is true or is false.
+Therefore, we can have two di erent relations that satisfy the same clauses:
+one that includes and one that does not.
+
+ff
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+i
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+f
+
+126
+f
+
+i
+
+i
+
+Observation on the exercise
+
+===== slide 28 =====
+Preservation of solutions
+The specification of the analysis uses potentially infinite value spaces
+although this is not really necessary
+We can easily restrict ourselves to entities occurring in the original expression
+and this forms the basis for relating the results of the analysis of syntax
+directed CFA to those of the previous CFA
+We obtainfinite sets
+Lab* ⊆ Lab: nite set of labels occurring in e*,
+Var* ⊆ Var: nite set of variables occurring in e*
+Term* ⊆ Term: nite set of subterms occurring in e*
+
+fi
+
+fi
+
+fi
+
+fi
+
+fi
+
+127
+
+===== slide 29 =====
+Preservation of solutions
+the largest possible solution
+within the bounds of the
+expression
+
+̂ )
+We introduce the solution (Ĉ⊤, ρ⊤
+Ĉ⊤(l) =
+
+∅
+{Term*
+
+∅
+ρ ̂ (x) =
+{Term*
+
+l ∉ Lab*
+l ∈ Lab*
+
+⊤
+
+x ∉ Var*
+x ∈ Var*
+
+(C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ): intuitively, (C,̂ ρ)̂ is concerned only with subterms
+occurring in the expression e*
+
+We can directly reformulate the CFA in terms of restricted sets
+(C,̂ ρ)̂ ∈ Cache*̂ × Env* ̂
+
+f
+
+f
+
+f
+
+i
+
+f
+
+i
+
+i
+
+i
+
+Cache*̂ : Lab* → Val* ̂
+Env* ̂ : Var* → Val* ̂
+Val* ̂ = ℘(Term
+*)
+128
+
+===== slide 30 =====
+Why syntax-directed CFA is correct
+check when needed
+
+Two views of the analysis
+• Original CFA ⊧: checks correctness during the simulation of the evaluation,
+i.e., when analysing function application
+• Syntax-directed CFA ⊧s: analyzes all subterms upfront, so when we reach a
+call site, everything has already been analysed
+As a consequence:
+
+check in advance: nothing
+missing at call time
+
+(C,̂ ρ)̂ ⊧s e* ⇒ (C,̂ ρ)̂ ⊧ e* (if restricted to program terms)
+
+129
+
+===== slide 31 =====
+Preservation of solutions
+
+• We can prove that all the solutions to ⊧s e* that are "less than"(Ĉ⊤, ρ⊤̂ ) are
+also solutions to ⊧ e*
+• Syntax-directed CFA is a sound approximation of the original CFA when
+restricted to program terms
+boundedness condition
+Proposition
+⊤
+̂
+,
+ρ
+If (C,̂ ρ)̂ ⊧s e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ)̂ ⊧ e*
+Idea: syntax-directed CFA already enforces what the original CFA requires
+Proof idea:
+• Restrict to program terms and use coinduction
+• Show that every syntax-directed clause implies the original one
+• Therefore, the solution also holds for the original CFA
+130
+
+===== slide 32 =====
+Preservation of solutions
+Proposition
+If (C,̂ ρ)̂ ⊧s e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ e*
+Proof sketch:
+1.Restrict to program terms Exp*, the set of all sub-expressions occurring in e*
+2.By syntax-directedness: (C,̂ ρ)̂ ⊧s e* ⇒ ∀e ∈ Exp* : (C,̂ ρ)̂ ⊧s e
+3.By coinduction, show that every syntax-directed clause (its rhs) implies the
+original one. Intuitively:
+• [con], [var], [if], [let], [op]: immediate, since identical.
+• [fn],[fun]: syntax-directed rules are stronger than the original ones.
+• [app]: ⊧s already enforces all constraints required by ⊧ (function bodies are
+already analyzed by (2)).
+So, ⊧s captures all semantically required ows on reachable terms
+131
+
+===== slide 33 =====
+Does the converse hold?
+?
+
+(C,̂ ρ)̂ ⊧s e* ⇐ (C,̂ ρ)̂ ⊧ e* (if restricted to program terms)
+❌ No
+
+f never applied
+program evaluates to 0
+
+loop ≜ let f = fn x => (x x) (* problematic body *)
+in 0
+• Original CFA: checks only when needed
+• Syntax-directed CFA: checks all bodies
+• Unreachable code is ignored by ⊧, but not by ⊧s
+• ⊧s ⊆ ⊧: Syntax-directed CFA is more restrictive
+
+132
+
+===== slide 34 =====
+Existence
+Theorem
+
+{(C,̂ ρ)̂ ∈ (Cache*̂ × Env* ̂) | (C,̂ ρ)̂ ⊧s e} is a Moore family
+Corollaries:
+• Each expression e* admits a CFA that is "less than”(Ĉ⊤, ρ⊤̂ )
+• Each expression e* has a “least” CFA that is "less than”(Ĉ⊤, ρ⊤̂ )
+This means that the properties obtained for the original analysis holds for the
+syntax-directed one
+
+133
+
+===== slide 35 =====
+Theorem
+Proof:
+
+Existence
+
+{(C,̂ ρ)̂ ∈ (Cache*̂ × Env* ̂) | (C,̂ ρ)̂ ⊧s e} is a Moore family
+
+(Ĉ⊤* , ρ⊤*̂ ) is the greatest element of Cache*̂ × Env* ̂. It is immediate to show that:
+⊤
+(a) (Ĉ⊤
+* , ρ*̂ ) ⊧s e
+(b) (Ĉ1, ρ1̂ ) ⊧s e and (Ĉ2, ρ2̂ ) ⊧s e then ((Ĉ1, ρ1̂ ) ∩ (Ĉ2, ρ2̂ )) ⊧s e
+for all subexpressions e of e*, by means of structural induction on e. Hence:
+(a) and (b) also for e = e*.
+Next consider some
+
+Y ⊆ {(C,̂ ρ)̂ ∈ (Cache*̂ × Env* ̂) | (C,̂ ρ)̂ ⊧s e}
+
+and note that one can write
+Y = {(Ĉi, ρî ) | i ∈ {1,...,n}} for some n ≥ 0 since (Cache*̂ × Env* ̂) is nite. So
+
+⊓ Y ∈ {(Ĉi, ρî ) | i ∈ {1,...,n}}
+
+follows from (a) and (b), because
+
+⊓ Y = (Ĉ⊤* , ρ⊤*̂ ) ⊓ (Ĉ1, ρ1̂ ) ⊓ . . . ⊓ (Ĉn, ρn̂ )
+134
+
+===== slide 36 =====
+Exercise 1
+Modify the original Control Flow Analysis to take account of the left to right
+evaluation order imposed by a call-by-value semantics:
+• in the clause [app] there is no need to analyse the operand if the operator
+cannot produced any closures
+
+135
+
+===== slide 37 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+l0
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+136
+
+===== slide 38 =====
+New clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧
+
+( ∃(
+...
+
+guard operand analysis
+
+l0
+l2
+̂
+̂
+x ⇒ t0 ) ∈ C(l1) ⇒ (C, ρ)̂ ⊧ t2 ) ∧
+
+̂ 1) ∩ Val ̂) ≠ ∅ ⇒ (C,̂ ρ)̂ ⊧ t l2) ∧
+((C(l
+2
+
+If the only abstract values are only abstractions, we can use also
+
+Example: Try to nd a program where the modi ed analysis accepts analysis
+results rejected by the original analysis
+
+e ≜ 4 (fn y => y): the empty analysis is acceptable for the modi ed analysis
+but not for the original one
+
+f
+
+f
+
+i
+fi
+
+n
+
+f
+
+137
+
+===== slide 39 =====
+Reachability analysis
+• The syntax directed analysis analyzes each subexpression of e* “exactly
+once”, rather than "at most once" as really called for
+• This may introduce constraints from code that is never executed
+• How to amend this?
+Goal:
+• only expressions that are reachable will actually be analysed, and
+• the same expression is analysed “at most once”
+Idea:
+1. modify the analysis to track the reachability of subexpressions explicitly
+2. modify it such that subexpressions are analysed “at most once”
+138
+
+===== slide 40 =====
+Reachability analysis
+
+How?
+By introducing a new abstract reachability component
+
+R̂ ∈ Reach : Lab → ℘({on})
+
+and modifying the syntax directed analysis
+
+(C,̂ ρ,̂ R)̂ ⊧′s e
+
+̂
+{on} ⊆ R(l)
+means: the
+expression at label l is
+reachable
+
+̂
+= ∅: the program point l is not reachable (tl must be analysed)
+• R(l)
+̂ 0): the program point l is reachable
+• {on} ⊆ R(l
+•(
+
+̂ 0) i the function is indeed applied somewhere
+x ⇒ t0l0)l has {on} ⊆ R(l
+
+• A function body is analyzed only if it is reachable: the "recursive call"
+̂ 0)
+(C,̂ ρ,̂ R)̂ ⊧′s t0l0 is performed if and only if {on} ⊆ R(l
+• Hence, function bodies are analyzed “at most once”
+
+ff
+
+￼
+
+n
+
+f
+
+￼
+
+139
+
+===== slide 41 =====
+Clause for functions
+[ fn] (C,̂ ρ,̂ R)̂ ⊧′s (
+
+x ⇒ e0)l
+
+̂
+{ x ⇒ e0} ⊆ C(l))
+∧
+̂
+({on} ⊆ R(l)
+⇒ ∧ (C,̂ ρ,̂ R)̂ ⊧′s e0)
+
+NOW: Function body e0 is analysed at definition time, but only if the
+function is applied somewhere
+
+￼
+
+f
+
+i
+
+n
+
+f
+
+￼
+
+n
+
+f
+
+140
+
+===== slide 42 =====
+Clause for variables
+[var] (C,̂ ρ,̂ R)̂ ⊧′s x l
+
+̂
+({on} ⊆ R̂ ⇒ ρ(x) ⊆ C(l))
+
+NOW: x is analyzed only if reachable
+
+f
+
+f
+
+i
+
+￼
+
+141
+
+===== slide 43 =====
+Clause for function application
+[app] (C,̂ ρ,̂ R)̂ ⊧′s (t1l1t2l2)l
+NEW: If the function possibly
+occurs in an application, then
+this means it is reachable
+
+(C,̂ ρ,̂ R)̂ ⊧′s t1l1 ∧ (C,̂ ρ,̂ R)̂ ⊧′s t2l2
+l0
+̂ 1) :
+x ⇒ t0 ) ∈ C(l
+
+( ∀(
+̂
+̂ 0)) ∧
+({on} ⊆ R(l)
+⇒ {on} ⊆ R(l
+̂ 2) ⊆ ρ(x))
+̂
+̂
+({on} ⊆ R(l)
+⇒ C(l
+∧
+̂ 0) ⊆ C(l)))
+̂
+̂
+({on} ⊆ R(l)
+⇒ C(l
+∧ ...
+
+All other rules are unchanged: just replace ⊧s with ⊧′s
+
+￼
+
+f
+
+f
+
+i
+
+￼
+
+n
+
+f
+
+142
+
+===== slide 44 =====
+Example
+
+e* ≜ (fn x =>((fn y => y1)2x3)4)5
+
+̂ *) = R(5)
+̂ =∅
+We start knowing that R(l
+(C,̂ ρ,̂ R)̂ ⊧′s e*
+
+̂ , but we
+As a consequence, {fn x =>((fn y => y1)2x3)4} ⊆ C(5)
+̂ =∅
+cannot analyse the body with label 4, since R(5)
+
+￼
+
+143
+
+===== slide 45 =====
+Example
+
+e* ≜ ((fn x =>((fn y => y1)2x3)4)57)6
+
+(C,̂ ρ,̂ R)̂ ⊧′s e*
+
+̂
+As a consequence, {fn x =>((fn y => y1)2x3)4} ⊆ C(5)
+This triggers the propagation in the [app] clause that enforces
+̂ , so allowing to analyse the body of the function
+{on} ⊆ R(4)
+
+￼
+
+144
+
+===== slide 46 =====
+Reachability
+
+Proposition
+̂ *) and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ t l*
+If (C,̂ ρ,̂ R)̂ ⊧′s t*l* and {on} ⊆ R(l
+* *
+*
+Proof sketch:
+1.Restrict to program terms, Exp*, the set of all reachable subexpressions occurring in e*
+
+̂ *) ⇒ (C,̂ ρ)̂ ⊧s e)
+2.By syntax-directedness: (C,̂ ρ,̂ R)̂ ⊧′s t*l* ⇒ ∀e ∈ Exp* : ({on} ⊆ R(l
+
+3.By coinduction, show that every syntax-directed clause (its rhs) implies the original one.
+Intuitively:
+• [con], [var], [if], [let], [op]: immediate, since identical.
+• [fn],[fun]: syntax-directed rules with the additional constraint on R̂ are equivalent to the
+original ones, on reachable terms.
+• [app]: ⊧s enforces all constraints required by ⊧ on reachable terms, and propagates
+reachability information R̂.
+So, ⊧′s captures all semantically required ows on reachable terms, provided that R̂
+correctly over-approximates reachability
+
+fl
+
+￼
+
+￼
+
+￼
+
+145
+
+===== slide 47 =====
+Reachability
+Proposition
+̂ *) and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ t l*
+If (C,̂ ρ,̂ R)̂ ⊧′s t*l* and {on} ⊆ R(l
+* *
+*
+Does the converse hold?
+1. (C,̂ ρ)̂ ⊧ e* then (C,̂ ρ,̂ R)̂ ⊧′s e* for some R̂
+
+⊤
+̂
+̂
+̂
+,
+ρ
+2. (C,̂ ρ)̂ ⊧ e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ,̂ R) ⊧′s e* for some R
+
+1. does not hold:
+
+• the original CFA can introduce and treat consistently “spurious”
+abstract values, without loosing acceptability, since it provides an overapproximation
+• the reachability CFA, instead, even forcing to on the “spurious” value,
+
+cannot analyze the abstraction (and its body), since it do not occur in e*
+
+⊤
+̂
+̂
+̂
+,
+ρ
+2.(C,̂ ρ)̂ ⊧ e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ,̂ R) ⊧′s e* for some R
+￼
+
+￼
+
+￼
+
+￼
+
+146
+
+===== slide 48 =====
+Reachability
+Proposition
+̂ *) and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ t l*
+If (C,̂ ρ,̂ R)̂ ⊧′s t*l* and {on} ⊆ R(l
+* *
+*
+Does the converse hold?
+1. (C,̂ ρ)̂ ⊧ e* then (C,̂ ρ,̂ R)̂ ⊧′s e* for some R̂
+
+⊤
+̂
+̂
+̂
+,
+ρ
+2. (C,̂ ρ)̂ ⊧ e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ,̂ R) ⊧′s e* for some R
+⊤
+,
+ρ
+2. Since (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then no “spurious” value can be added. In this
+
+case the bodies analyzed in the two analyses are the same, provided a
+suitable R̂ is provided
+
+￼
+
+￼
+
+￼
+
+147

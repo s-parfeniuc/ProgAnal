@@ -1,0 +1,1527 @@
+# ProgramAnalysis-18-CFA
+# auto-extracted from ProgramAnalysis-18-CFA.pdf (32 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #18
+Control Flow Analysis
+
+===== slide 2 =====
+Exercises
+
+67
+
+===== slide 3 =====
+Exercises
+Consider and add labels to the following expressions
+Guess analysis results and verify them
+1
+
+234
+
+56
+
+e ≜ ((fn x => (x + 1 ) ) (3) )
+
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+e ≜ let f = fn x => x 1
+
+in let g = fn y => y+ 2
+in let h = fn z => z + 3
+in (f g) + (f h)
+
+68
+
+===== slide 4 =====
+Exercise 1
+Consider and add labels to the following expression
+Guess an analysis result and verify it
+
+e ≜ ((fn x => (x1 + 122)3 )4 (3)55)6
+̂
+C(1)
+̂
+C(2)
+̂
+C(3)
+̂
+C(4)
+
+∅ (3)
+∅ (1)
+∅ (4)
+{fn x => (x
+
+̂
+C(5)
+∅ (3)
+̂
+C(6)
+∅ (4)
+ρ(̂ ) ∅ (3)
+
+x
+
+69
+
+1
+
++ 12)3}
+
+===== slide 5 =====
+Consider and add labels to the following expression
+Guess an analysis result and verify it
+
+e ≜ ((fn x => (x1 + 122)3 )4 (3)55)6
+
+(C,̂ ρ)̂ ⊧ e
+(C,̂ ρ)̂ ⊧ (fn x => (x1 + 12)3)4
+̂
+∧ (C,̂ ρ)̂ ⊧ (3)5
+∅ ⊆ C(5)
+
+̂
+(C,̂ ρ)̂ ⊧ {fn x => (x1 + 12)3} ⊆ C(4)
+
+1
+23
+̂
+⇒ (C,̂ ρ)̂ ⊧ (x1 + 12)3 ∧
+{fn x => (x + 1 ) } ⊆ C(4)
+
+̂ ⊆ ρ(̂ ) ∧ C(3)
+̂ ⊆ C(6)
+̂
+C(5)
+(C,̂ ρ)̂ ⊧ (x1 + 12)3
+∧ (C,̂ ρ)̂ ⊧ 12
+
+(C,̂ ρ)̂ ⊧ x1
+̂
+∅ ⊆ C(2)
+
+̂
+ρ(̂ ) ⊆ C(1)
+
+x
+
+x
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+f
+
+f
+
+f
+
+f
+
+70
+f
+
+i
+
+i
+
+i
+
+i
+
+i
+
+Exercise 1
+
+===== slide 6 =====
+Exercise 1
+Consider and add labels to the following expression
+Guess an analysis result and verify it
+
+e ≜ ((fn x => (x1 + 122)3 )4 (3)55)6
+1
+23
+̂
+{fn x => (x + 1 ) } ⊆ C(4)
+
+̂
+∅ ⊆ C(5)
+̂ ⊆ ρ(̂ )
+C(5)
+̂ ⊆ C(6)
+̂
+C(3)
+̂
+ρ(̂ ) ⊆ C(1)
+̂
+∅ ⊆ C(2)
+
+̂
+C(1)
+∅ (3)
+̂
+C(2)
+∅ (1)
+̂
+C(3)
+∅ (4)
+1
+23
+̂
+C(4)
+{fn x => (x + 1 ) }
+̂
+C(5)
+∅ (3)
+̂
+C(6)
+∅ (4)
+
+✓
+✓
+✓
+✓
+✓
+✓
+
+ρ(̂ )
+
+x
+
+x
+
+x
+
+71
+
+∅ (3)
+
+===== slide 7 =====
+Exercise 2
+Consider and add labels to the following expression: guess an analysis
+result and verify it
+
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+
+72
+
+===== slide 8 =====
+Exercise 2
+
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+̂ = {fn a => a9}
+C(1)
+̂ = ∅ (76)
+C(2)
+̂ = ∅ (76)
+C(3)
+̂ = {fn a => a9}
+C(4)
+̂ = ∅ (77)
+C(5)
+̂ = ∅ (77)
+C(6)
+̂ = ∅ (76+77)
+C(7)
+
+ρ(̂ ) = {fn a => a9}
+ρ(̂ ) = ∅ (76, 77)
+
+̂ = {fn f => ((f1 762)3 + (f4 775)6)2}
+C(8)
+̂ = ∅ (76, 77)
+C(9)
+̂
+C(10)
+= {fn a => a9}
+̂
+C(11)
+=∅
+
+a
+
+f
+
+̂
+C(12)
+= {fn f => ((f1 762)3 + (f4 775)6)2}
+
+73
+
+===== slide 9 =====
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+1
+23
+4
+567
+̂
+(C,̂ ρ)̂ ⊧ e (fn f => ((f1 762)3+ (f4 775)6)7)8
+{fn f => ((f 76 ) + (f 77 ) ) } ∈ C(8)
+̂
+∧ (C,̂ ρ)̂ ⊧ (fn a => a9)10 {fn a => a9} ∈ C(10)
+∧
+
+∧ (C,̂ ρ)̂ ⊧ ((f1 762)3+ (f4 775)6)7
+
+(C,̂ ρ)̂ ⊧ (f1 762)3 ∧ (C,̂ ρ)̂ ⊧ (f4 775)6
+
+(C,̂ ρ)̂ ⊧ (f1 762)3
+
+̂ ⊆ ρ(a)
+̂ ⊆ C(3)
+̂
+̂ ∧ C(9)
+(C,̂ ρ)̂ ⊧ f1 ∧ (C,̂ ρ)̂ ⊧ 762 ∧ (C,̂ ρ)̂ ⊧ a9 ∧ C(2)
+
+(C,̂ ρ)̂ ⊧ (f4 775)6
+
+̂ ⊆ ρ(a)
+̂ ⊆ C(6)
+̂
+̂ ∧ C(9)
+(C,̂ ρ)̂ ⊧ f4 ∧ (C,̂ ρ)̂ ⊧ 775 ∧ (C,̂ ρ)̂ ⊧ a9 ∧ C(5)
+
+f
+
+f
+
+f
+
+̂ ∧
+ρ(̂ ) ⊆ C(4)
+i
+
+(C,̂ ρ)̂ ⊧ f4
+f
+
+̂ ∧
+ρ(̂ ) ⊆ C(1)
+
+f
+
+(C,̂ ρ)̂ ⊧ f1
+
+a
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+̂
+̂ ⊆ C(12)
+̂
+∧ C(10)
+⊆ ρ(̂ ) ∧ C(8)
+
+f
+
+i
+
+i
+
+i
+
+i
+
+i
+
+i
+
+i
+
+i
+
+Exercise 2
+
+(C,̂ ρ)̂ ⊧ a9
+
+̂
+ρ(̂ ) ⊆ C(9)
+74
+
+===== slide 10 =====
+Exercise 2
+
+((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+1
+
+23
+
+4
+
+562
+
+̂
+{fn f => ((f 76 ) + (f 77 ) ) } ∈ C(8)
+9
+̂
+{fn a => a } ∈ C(10)
+̂
+C(10)
+⊆ ρ(̂ )
+̂ ⊆ C(12)
+̂
+C(8)
+̂ ⊆ ρ(a)
+̂
+C(2)
+̂ ⊆ C(3)
+̂
+C(9)
+̂ ⊆ C(6)
+̂
+C(9)
+̂
+ρ(̂ ) ⊆ C(1)
+̂
+ρ(̂ ) ⊆ C(4)
+̂
+ρ(̂ ) ⊆ C(9)
+
+̂ = {fn a => a9}
+C(1)
+̂ = ∅ (76)
+C(2)
+̂ = ∅ (76)
+C(3)
+
+̂ = {fn f => ((f1 762)3 + (f4 775)6)2}
+C(8)
+̂ = ∅ (76, 77)
+C(9)
+̂
+C(10)
+= {fn a => a9}
+̂
+C(11)
+=∅
+
+̂
+C(12)
+= {fn f => ((f1 762)3 + (f4 775)6)2}
+f
+
+a
+
+f
+
+f
+a
+
+ρ(̂ ) = ∅ (76, 77)
+
+̂ = {fn a => a9}
+C(4)
+̂ = ∅ (77)
+C(5)
+̂ = ∅ (77)
+C(6)
+̂ = ∅ (76+77)
+C(7)
+
+75
+
+f
+
+ρ(̂ ) = {fn a => a9}
+
+===== slide 11 =====
+Exercise 3
+Consider and add labels to the
+following expression
+Guess an analysis result and
+verify it
+
+let f = fn x => x 1
+in let g = fn y => y+ 2
+in let h = fn z => z + 3
+in (f g) + (f h)
+1 2 34
+
+idw ≜ fn w => wl
+
+e ≜ (let f = (fn x => (x 1 ) )
+in (let g = (fn y => (y5+ 26)7)8
+in (let h = (fn z => (z9 + 310)11)12
+in ((f13 g14)15 + (f16h17)18)19)20)21)22
+
+76
+
+===== slide 12 =====
+Theoretical properties
+
+77
+
+===== slide 13 =====
+Semantic correctness
+Goal: show that acceptable CFA results are semantically correct
+The analysis information is a safe description of what will happen during the evaluation
+of the program, i.e., a sound over-approximation of the runtime behaviour
+To reason on correctness, we define a Small Step Structural Operational Semantics
+for FUN, where:
+• We use intermediate expressions ie to handle the binding of local variables
+• We choose an approach based on explicit environments (matching the CFA abstraction)
+rather than substitutions
+Subject reduction result
+If the abstract (ρ)̂ and concrete environments (ρ) agree (ρ R ρ):̂
+(C,̂ ρ)̂ ⊧ ie and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie′
+
+to preserve the identity of
+functions (and hence
+abstract values) during
+evaluation
+
+fi
+
+￼
+
+￼
+
+78
+
+===== slide 14 =====
+Con gurations
+v ∈ Val: values
+ρ ∈ Env: environments (mapping free variables to their values)
+
+v ::= c |
+t ρ
+ie ∈ IExp: intermediate expressions
+Functions evaluate to it ∈ ITerm: intermediate terms
+ρ ::= [] | ρ[x ↦ v]
+closures capturing
+l
+their environment
+ie ::= it
+t ::= c | x | x ⇒ e0 |
+x ⇒ e0
+ie0
+e1
+e2|
+x = ie1 e2 | ie1 ie2
+| ie1 ie2 |
+ρ ie // bind the environment (encoding of frames)
+|
+|
+t ρ // closure
+Transitions: ρ ⊢ ie → ie′
+e
+
+s
+
+l
+
+n
+
+e
+
+n
+
+n
+
+i
+
+i
+
+i
+
+f
+
+e
+
+e
+
+fi
+
+n
+
+d
+
+s
+
+s
+
+n
+
+e
+
+n
+
+o
+
+t
+
+o
+
+p
+
+i
+
+l
+
+l
+
+n
+
+u
+
+h
+
+f
+
+e
+
+￼
+
+79
+
+n
+
+c
+
+f
+
+f
+
+i
+
+t
+
+l
+
+i
+
+o
+
+b
+
+c
+
+Structural Operational Semantic
+
+===== slide 15 =====
+Rule for variables
+[var] ρ ⊢ x l → v l
+
+x ∈ Dom(ρ)
+
+ρ(x) = v
+
+The value of a variable is obtained from the environment
+
+Example
+x1 → 7 if ρ( ) = 7
+x
+
+f
+
+f
+
+i
+
+80
+
+===== slide 16 =====
+[let2] ρ ⊢ (
+
+x = v1l1
+
+e2)l →
+(ρ0[x ↦ v1]
+ρ0 = ρ | FV(e2)
+
+e2)l
+
+Example
+e ≜ (let f = (fn x => x1)2 in (f3 34)5
+
+ρ = [g ↦ (fn y => y1)2] and ρ0 = ρ | { } = []
+n
+
+i
+
+t
+
+e
+
+l
+f
+
+e
+
+r
+
+e
+
+81
+
+h
+
+w
+
+Rule for the let binding
+
+===== slide 17 =====
+[ fn] ρ ⊢ (
+
+x ⇒ e0)l → (
+( x ⇒ e0)
+ρ0 = ρ | FV( x ⇒ e0)
+
+ρ)l →
+
+This axiom constructs the appropriate closure
+It restricts the environment ρ to the free variables of the abstraction
+Note that the label l is preserved in the closure
+Example
+e ≜ (fn x => x1 y2)3
+
+e
+
+s
+
+o
+
+l
+
+c
+
+n
+
+82
+f
+
+n
+
+f
+
+e
+
+r
+
+e
+
+ρ0 = ρ | {y} since FV(fn x => x1 y2) = y
+h
+
+w
+
+Rule for functions
+
+===== slide 18 =====
+Rule for function application
+[appfn] ρ ⊢ ((
+(
+
+( x ⇒ e1) ρ1)
+ρ1[x ↦ v2] e1)l
+
+l2 l
+v2 ) →
+
+l1
+
+This axiom describes the binding of the actual parameter to the formal
+parameter
+
+⇒ x1 + y2 )3 in [y ↦ 7])4 35)6 →
+
+x1 + y2)6
+
+n
+
+f
+x
+
+n
+
+i
+
+e
+n
+
+o
+
+s
+
+f
+
+e
+
+c
+s
+
+o
+
+l
+
+x
+
+c
+fi
+
+y
+
+we use the definition
+environment, not the call one
+
+83
+
+d
+d
+
+n
+
+i
+
+n
+
+i
+
+n
+
+b
+
+i
+
+b
+
+[y ↦ 5] ⊢ ((
+(
+(
+[ ↦ 7, ↦ 3]
+
+l
+
+Example
+
+===== slide 19 =====
+Structural Operational Semantic I
+
+84
+
+===== slide 20 =====
+Structural Operational Semantic II
+
+85
+
+===== slide 21 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+[] ⊢ ((fn x => x1)2 (fn y => y3)4)5
+→ ((close(fn x => x1) in [])2 (fn y => y3)4)5
+→ ((close(fn x => x1) in [])2 (close (fn y => y3) in []4)5
+→ (bind [x ↦ (close (fn y => y3) in [])] in x1)5
+→ (bind [x ↦ (close (fn y => y3) in [])] in (close (fn y => y3)4 in [])1)5
+→ (close (fn y => y3) in [])5
+
+86
+
+===== slide 22 =====
+New CFA clauses
+[bind] (C,̂ ρ)̂ ⊧ (
+[close] (C,̂ ρ)̂ ⊧ (
+
+(C,̂ ρ)̂ ⊧ it0l0 ∧
+̂ 0) ⊆ C(l)
+̂ ∧ ρ R ρ̂
+C(l
+̂ ∧ ρ R ρ̂
+{t0} ⊆ C(l)
+
+it0l0)l
+
+ρ
+t0
+
+ρ)l
+
+For the other clauses just replace e with ie
+f
+
+f
+
+i
+
+i
+
+n
+
+i
+
+n
+
+i
+
+e
+
+s
+
+d
+
+o
+
+n
+
+l
+
+i
+
+c
+
+b
+
+87
+
+===== slide 23 =====
+Relation between the environments
+• The concrete domain must be included in the abstract one (is an overapproximation)
+tx ρx then
+• For all variables x ∈ dom(ρ), if ρ(x) =
+
+̂ : the function is predicted
+• tx ∈ ρ(x)
+• ρx R ρ:̂ the captured environment ρx is also correct
+
+• This second condition is recursive: ρx may contain closures, whose
+environments must also be checked
+The abstract environment over-approximates every concrete closure,
+including all environments they recursively capture
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+88
+
+===== slide 24 =====
+Relation between the values
+v V (ρ,̂ v)̂
+
+∀t ∀ρ : (v =
+
+• The values must agree as well
+• For all t, and for all ρ in (v =
+• tx ∈ v̂ : the value is predicted
+
+t
+
+t
+
+ρ) ⇒ (t ∈ v̂ ∧ ρ R ρ)̂
+
+ρ)
+
+• ρx R ρ:̂ the captured environment ρx is also correct.
+• This check is recursive: environments may contain closures
+
+A concrete value is a closure, so we must approximate both the function
+and all the environments it captures
+
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+n
+
+i
+
+e
+f
+
+s
+
+f
+
+i
+
+o
+
+l
+
+c
+
+89
+
+===== slide 25 =====
+Subject reduction
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Idea: if there is a possible evaluation of the program such that the function at
+a call point evaluates to some abstraction, then this abstraction has to be in
+the set of possible abstractions computed by the analysis
+All acceptable analysis results remain acceptable under evaluation
+Proof idea
+We assume that ρ R ρ ̂ and ρ ⊢ ie → ie′ and prove (C,̂ ρ)̂ ⊧ ie′ by induction on the
+structure of the inference tree for ρ ⊢ ie → ie′
+For each rule, we show CFA is preserved
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+90
+
+===== slide 26 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Proof
+We assume that ρ R ρ ̂ and ρ ⊢ ie → ie′ and prove (C,̂ ρ)̂ ⊧ ie′ by induction
+on the structure of the inference tree for ρ ⊢ ie → ie′
+The case [var]. Here ρ ⊢ ie → ie′ is ρ ⊢ x l → v l because x ∈
+t0
+If v = c there is nothing to prove, so suppose that v =
+
+̂
+From ρ R ρ ̂ we get v V ( ρ,̂ ρ(x))
+and hence
+
+ρ0.
+
+(ρ) ∧ v = ρ(x)
+
+̂
+t0 ∈ ρ(x)
+ρ0 R ρ ̂
+̂
+̂ ⊆ C(l)
+[var] (C,̂ ρ)̂ ⊧ x l
+ρ(x)
+From (C,̂ ρ)̂ ⊧ ie we get
+̂ , and hence t0 ∈ C(l)
+̂ .
+̂ ⊆ C(l)
+ρ(x)
+̂ and ρ0 R ρ ̂ we have established (C,̂ ρ)̂ ⊧ ie′.
+the value is already
+Since t0 ∈ C(l)
+ρ) ⇒ (t ∈ v̂ ∧ ρ R ρ)̂
+91
+
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+f
+
+f
+
+c
+
+f
+
+f
+
+i
+
+i
+
+n
+
+￼
+
+￼
+
+￼
+
+￼
+
+t
+i
+
+d
+
+￼
+
+￼
+
+￼
+
+n
+
+a
+
+e
+
+s
+
+m
+
+∀t ∀ρ : (v =
+o
+
+o
+
+l
+
+d
+
+c
+
+v V (ρ,̂ v)̂
+
+predicted by the
+analysis
+
+===== slide 27 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Proof
+The case [fn]. Here ρ ⊢ ie → ie′ is ρ ⊢ ( x ⇒ e0)l → (
+( x ⇒ e0) ρ0)l
+where ρ0 = ρ | FV( x ⇒ e0)
+̂
+̂ . [ fn] (C,̂ ρ)̂ ⊧ ( x ⇒ e0)l { x ⇒ e0} ⊆ C(l)
+From (C,̂ ρ)̂ ⊧ ie we get { x ⇒ e0} ⊆ C(l)
+From ρ R ρ ̂ we get we immediately get ρ0 R ρ ̂ and then we can establish (C,̂ ρ)̂ ⊧ ie′.
+̂ ∧ ρ R ρ̂
+[close] (C,̂ ρ)̂ ⊧ (
+t0 ρ)l
+{t0} ⊆ C(l)
+the abstraction is already
+recorded in Ĉ(l)
+
+n
+
+i
+
+n
+
+f
+n
+
+f
+
+f
+
+i
+
+f
+
+e
+
+s
+
+o
+
+f
+
+l
+
+f
+
+i
+
+c
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+￼
+
+￼
+
+n
+
+n
+
+f
+
+f
+
+￼
+
+￼
+
+n
+
+f
+
+n
+
+f
+
+92
+
+===== slide 28 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Proof
+The case [app1]. Here ρ ⊢ ie → ie′ is ρ ⊢ (ie1ie2)l → (ie′1ie2)l because ρ ⊢ ie1 → ie′1
+From the induction hypothesis applied to (C,̂ ρ)̂ ⊧ ie1, ρ R ρ ̂ and ρ ⊢ ie1 → ie′1,
+we get (C,̂ ρ)̂ ⊧ ie′.
+This su ces to establish (C,̂ ρ)̂ ⊧ ie′.
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+ffi
+
+￼
+
+93
+
+===== slide 29 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+Proof
+The case [appfn].
+
+( x ⇒ t0l0) ρ1)l1 v2l2 → (
+ρ1[x ↦ v2] t0l0)l
+( x ⇒ t0l0) ρ1)l1
+From (C,̂ ρ)̂ ⊧ ie we have (C,̂ ρ)̂ ⊧ (
+l
+̂ 1) and ρ R ρ.̂
+which yields { x ⇒ t 0} ⊆ C(l
+0
+l
+̂ ∧ ρ R ρ̂
+[close] (C,̂ ρ)̂ ⊧ (
+t0 ρ)l
+{t0} ⊆ C(l)
+Further, we have (C,̂ ρ)̂ ⊧ v 2
+2
+̂ 0) ⊆ C(l)
+̂ ∧ ρ R ρ̂
+[bind] (C,̂ ρ)̂ ⊧ (
+ρ it0l )l
+(C,̂ ρ)̂ ⊧ it0l ∧ C(l
+[case v2 = c]: immediate.
+t2 ρ2]: it follows immediately from (C,̂ ρ)̂ ⊧ v2l2.
+[case v2 =
+Finally, the rst universally quanti ed formula of the definition of (C,̂ ρ)̂ ⊧ ie gives
+̂ 2) ⊆ C(l)
+̂ and (ρ1[x ↦ v2]) R ρ ̂ leading to establish (C,̂ ρ)̂ ⊧ ie′.
+(C,̂ ρ)̂ ⊧ t0l0, C(l
+Here ρ ⊢ ie → ie′ is ρ ⊢ (
+
+0
+
+0
+
+fi
+
+n
+
+i
+
+b
+
+i
+f
+
+f
+f
+
+f
+
+i
+
+n
+
+i
+n
+
+i
+
+n
+
+i
+
+i
+
+n
+
+e
+
+s
+
+o
+
+f
+d
+
+l
+
+n
+
+n
+
+i
+
+b
+
+c
+
+i
+
+e
+
+n
+
+￼
+
+￼
+
+f
+
+s
+
+￼
+
+o
+
+￼
+
+l
+
+fi
+
+c
+
+e
+
+e
+
+s
+
+s
+
+o
+
+o
+
+l
+
+l
+
+c
+
+c
+
+n
+
+f
+
+n
+
+we simulate all possible function calls
+
+94
+
+===== slide 30 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+Fact
+
+̂ 1) ⊆ C(l
+̂ 2) then (C,̂ ρ)̂ ⊧ it l2
+(C,̂ ρ)̂ ⊧ it l1 and C(l
+Proof
+The case [bind2]. Here ρ ⊢ ie → ie′ is ρ ⊢ (
+
+ρ1 v1l1)l → v1l
+l
+̂ 1) ⊆ C(l)
+̂
+From (C,̂ ρ)̂ ⊧ ie we have (C,̂ ρ)̂ ⊧ v 1 and C(l
+1
+The desired (C,̂ ρ)̂ ⊧ v1l follows from Fact.
+This completes the proof.
+[bind] (C,̂ ρ)̂ ⊧ (
+
+ρ
+
+̂ 0) ⊆ C(l)
+̂ ∧ ρ R ρ̂
+(C,̂ ρ)̂ ⊧ it0l0 ∧ C(l
+
+it0l0)l
+
+CFA predictions are stable under evaluation
+
+f
+
+f
+
+i
+
+n
+
+i
+
+d
+
+n
+
+n
+
+i
+
+i
+
+￼
+
+￼
+b
+
+￼
+
+d
+
+n
+
+i
+
+b
+
+95
+
+===== slide 31 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+*
+
+(Close(fn y => y3) in [])5
+
+(C,̂ ρ)̂ ⊧ ((fn x => x1)2 (fn y => y3)4)5
+By Theorem 3.1
+
+5
+3
+̂
+(Close(fn
+y
+=>
+y
+)
+in
+[])
+(C, ρ)̂ ⊧
+
+Exercise: Verify it
+96
+
+===== slide 32 =====
+(C,̂ ρ)̂ ⊧ (Close(fn y => y3) in [])5
+̂ ∧ [] R ρ ̂
+{(fn y => y3)} ⊆ C(5)
+✓
+
+trivially true
+
+f
+
+97
+f
+
+i
+
+Back to Example 1

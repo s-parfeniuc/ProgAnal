@@ -1,0 +1,1979 @@
+# ProgramAnalysis-23-CFA-for-Pi_Part2
+# auto-extracted from ProgramAnalysis-23-CFA-for-Pi_Part2.pdf (75 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+0-CFA for π-calculus
+
+15
+
+===== slide 2 =====
+CFA predicts communications
+
+16
+
+===== slide 3 =====
+CFA predicts communications
+
+17
+
+===== slide 4 =====
+CFA predicts communications
+
+18
+
+===== slide 5 =====
+Abstract domains: formally
+How is abstract behaviour described?
+As a pair of abstract domains given as functions (ρ, κ)
+
+• Abstract values abstracts sets of constants
+• An abstract environment ρ associates a variable to the set of constants
+values it might be bound to
+• An abstract channel environment κ maps a (channel) constant to the set
+of constants that may be communicated over it
+• ρ and κ and contain global information that captures information about
+the behaviour of the process P* under analysis
+
+Val = ℘(Const)
+ρ : Var → ℘(Const)
+κ : Var → ℘(Const)
+19
+
+===== slide 6 =====
+Abstract domains (cont.)
+• These domains can be turned into complete lattices by extending the
+subset ordering ⊆ on ℘(Const) in a pointwise manner
+• We extend the abstract environment ρ to constants by setting
+
+ρ(n) = {n}
+
+20
+
+===== slide 7 =====
+Example 1
+(ā⟨b⟩ . P′ + ā⟨d⟩ . P′′) | a(w) . c̄⟨w⟩ . Q′| R
+
+P′| c̄⟨b⟩ . Q′| R
+
+P′′| c̄⟨d⟩ . Q′| R
+
+The analysis predicts:
+• what can be exchanged on channels a and c
+• What can be bound to the variable w
+In particular the analysis predicts both possible executions, e.g.,
+
+κ(a) ⊇ {b,d}
+ρ(w) ⊇ {b,d}
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+21
+
+===== slide 8 =====
+The specification of a solution
+Given a guess (ρ, κ), we validate whether it is an acceptable CFA
+A guess is acceptable if it safely over-approximates the runtime behavior
+Validation
+check clauses on logical judgements
+• for processes
+• for actions
+
+(ρ,̂ κ)̂ ⊧P e
+(ρ,̂ κ)̂ ⊧A π
+
+Again we have exactly one clause for each of the syntactic forms of actions
+
+fi
+
+22
+
+===== slide 9 =====
+Clauses for actions: out
+[out] (ρ, κ) ⊧A ū⟨v⟩
+
+?
+
+Before introducing the general case with prefix ū⟨v⟩, we introduce the
+simpler subcases, in which at least one between u or v is a constant:
+• Case ū⟨v⟩ ≡ n̄⟨m⟩
+• Case ū⟨v⟩ ≡ n̄⟨v⟩
+
+• Case ū⟨v⟩ ≡ ū⟨m⟩
+
+f
+
+f
+
+i
+
+23
+
+===== slide 10 =====
+Clauses for actions: out
+[Case ū⟨v⟩ ≡ n̄⟨m⟩]
+
+• the rule must mimic that m might be communicated over the channel
+• How?
+• By recording this in κ
+
+[out] (ρ, κ) ⊧A n̄⟨m⟩
+
+m ⊆ κ(n)
+
+In general u as well as v could contain variables so the righthand side of
+the clause has to be generalized
+
+f
+
+f
+
+i
+
+24
+
+===== slide 11 =====
+Clauses for actions: out
+[Case ū⟨v⟩ ≡ n̄⟨v⟩]
+
+• the rule must mimic that whatever may be bound to v might be
+communicated over the channel
+• How?
+• By looking inside ρ(v), and
+• By checking that all the contents in ρ(v) are recorded in κ
+
+[out] (ρ, κ) ⊧A n̄⟨v⟩
+
+ρ(v) ⊆ κ(n)
+
+f
+
+f
+
+i
+
+25
+
+===== slide 12 =====
+Clauses for actions: out
+[Case ū⟨v⟩ ≡ ū⟨m⟩]
+
+• the rule must mimics that m may be communicated over any channel
+that can be bound to u
+• How?
+• By looking inside ρ(u), and
+• By checking that for all n ∈ ρ(u) m is recorded in κ(n)
+
+[out] (ρ, κ) ⊧A ū⟨m⟩
+
+∀n ∈ ρ(u) : m ⊆ κ(n)
+
+f
+
+f
+
+i
+
+26
+
+===== slide 13 =====
+Clauses for actions: out
+
+∀n ∈ ρ(u) : ρ(v) ⊆ κ(n)
+
+f
+
+f
+
+27
+i
+
+[out] (ρ, κ) ⊧A ū⟨v⟩
+
+===== slide 14 =====
+Clauses for actions: in
+[in] (ρ, κ) ⊧A u(x)
+
+?
+
+Before introducing the general case with prefix u(x), we introduce the
+simpler subcase where u is a constant:
+• Case u(x) ≡ n(x)
+
+f
+
+f
+
+i
+
+28
+
+===== slide 15 =====
+Clauses for actions: in
+[Case u(x) ≡ n(x)]
+
+Any possible
+constant may be
+input over n here
+
+• the rule must mimics that x might be bound to whatever may be
+communicated over the channel n somewhere in the process
+• How?
+• By looking inside κ(n), and
+• Checking whether the contents in κ(n) are included in ρ(x)
+
+[in] (ρ, κ) ⊧A n(x)
+
+κ(n) ⊆ ρ(x)
+
+u could contain variables so the rhs of the clause has to be generalized
+
+f
+
+f
+
+i
+
+29
+
+===== slide 16 =====
+Clauses for actions: in
+
+∀n ∈ ρ(u) : κ(n) ⊆ ρ(x)
+
+f
+
+f
+
+30
+i
+
+[in] (ρ, κ) ⊧A u(x)
+
+===== slide 17 =====
+Clauses for actions: tau
+
+[tau] (ρ, κ) ⊧A τ
+
+e
+
+u
+
+r
+
+t
+
+f
+
+f
+
+i
+
+31
+
+===== slide 18 =====
+Clauses for processes: nil
+
+[nil] (ρ, κ) ⊧P 0
+
+e
+
+u
+
+r
+
+t
+
+f
+
+f
+
+i
+
+32
+
+===== slide 19 =====
+Clauses for processes: par
+Recursive calls
+
+[par] (ρ, κ) ⊧P P1 | P2
+
+(ρ, κ) ⊧P P1 ∧ (ρ, κ) ⊧P P2
+
+f
+
+f
+
+i
+
+33
+
+===== slide 20 =====
+Clauses for processes: sum
+Recursive calls
+
+∀i ∈ I : ((ρ, κ) ⊧A π1 ∧ (ρ, κ) ⊧P Pi)
+
+f
+
+f
+
+34
+i
+
+[sum] (ρ, κ) ⊧P Σi∈I πi . Pi
+
+===== slide 21 =====
+Clauses for processes: match
+The analysis is oblivious to the matching
+
+[match] (ρ, κ) ⊧P [x = y]P
+
+(ρ, κ) ⊧P P
+
+f
+
+f
+
+i
+
+35
+
+===== slide 22 =====
+Clauses for processes: res
+The analysis is oblivious to the scoping of constants
+
+[res] (ρ, κ) ⊧P (νn)P
+
+(ρ, κ) ⊧P P
+
+f
+
+f
+
+i
+
+36
+
+===== slide 23 =====
+Clauses for processes: rep
+The analysis is oblivious to the replication operator
+
+[rep] (ρ, κ) ⊧P !P
+
+(ρ, κ) ⊧P P
+
+f
+
+f
+
+i
+
+37
+
+===== slide 24 =====
+CFA Clauses for π-calculus
+[res] (ρ, κ) ⊧P (νn)P
+(ρ, κ) ⊧P P
+[par] (ρ, κ) ⊧P P1 | P2
+(ρ, κ) ⊧P P1 ∧ (ρ, κ) ⊧P P2
+[sum] (ρ, κ) ⊧P Σi∈I πi . Pi
+∀i ∈ I : ((ρ, κ) ⊧A π1 ∧ (ρ, κ) ⊧P Pi)
+
+[rep] (ρ, κ) ⊧P !P
+
+(ρ, κ) ⊧P P
+
+[match] (ρ, κ) ⊧P [x = y]P
+[nil] (ρ, κ) ⊧P 0
+
+[out] (ρ, κ) ⊧A ū⟨v⟩
+[in] (ρ, κ) ⊧A u(x)
+
+(ρ, κ) ⊧P P
+
+∀n ∈ ρ(u) : ρ(v) ⊆ κ(n)
+∀n ∈ ρ(u) : κ(n) ⊆ ρ(x)
+
+[tau] (ρ, κ) ⊧A τ
+f
+
+f
+
+i
+
+f
+
+f
+
+i
+
+f
+
+e
+
+f
+
+f
+
+e
+
+i
+
+f
+
+f
+
+u
+
+i
+
+u
+
+f
+
+r
+
+r
+
+i
+
+f
+
+t
+
+f
+
+t
+
+f
+
+f
+
+i
+
+i
+
+f
+
+f
+
+f
+
+f
+
+i
+
+i
+
+38
+
+===== slide 25 =====
+Back to Example 1
+(ā⟨b⟩ . P′ + ā⟨d⟩ . P′′) | a(w) . c̄⟨w⟩ . Q′| R
+
+a
+b
+c
+d
+w
+
+ρ
+
+{a}
+{b}
+{c}
+{d}
+{b, d}
+
+κ
+
+a
+b
+c
+d
+
+{b, d}
+∅
+{b, d}
+∅
+
+￼
+
+￼
+
+￼
+
+39
+
+===== slide 26 =====
+(ρ, κ) ⊧ (ā⟨b⟩ . P′ + ā⟨d⟩ . P′′) | a(w) . c̄⟨w⟩ . Q′| R
+(ρ, κ) ⊧ (ā⟨b⟩ . P′ + ā⟨d⟩ . P′′)
+(ρ, κ) ⊧ a(w) . c̄⟨w⟩ . Q′
+(ρ, κ) ⊧ (ā⟨b⟩ . P′ + ā⟨d⟩ . P′′)
+
+(ρ, κ) ⊧ ā⟨b⟩ . P′
+
+(ρ, κ) ⊧ R
+
+(ρ, κ) ⊧ ā⟨d⟩ . P′′
+
+(ρ, κ) ⊧ ā⟨b⟩ . P′ (ρ, κ) ⊧ ā⟨b⟩ ∧ (ρ, κ) ⊧ P′
+(ρ, κ) ⊧ ā⟨b⟩
+κ(a) ⊆ {b}
+(ρ, κ) ⊧ ā⟨d⟩ . P′′ (ρ, κ) ⊧ ā⟨d⟩
+(ρ, κ) ⊧ P′′
+(ρ, κ) ⊧ ā⟨d⟩
+κ(a) ⊆ {d}
+
+ρ
+
+a
+b
+c
+d
+w
+
+(ρ, κ) ⊧ a(w) . c̄⟨w⟩ . Q′
+(ρ, κ) ⊧ a(w)
+(ρ, κ) ⊧ c̄⟨w⟩ . Q′
+(ρ, κ) ⊧ a(w)
+κ(a) ⊆ ρ(w)
+
+{a}
+{b}
+{c}
+{d}
+{b, d}
+
+a
+b
+c
+d
+
+κ
+
+{b, d}
+∅
+{b, d}
+∅
+
+...
+
+￼
+
+￼
+
+d
+
+f
+
+n
+
+f
+
+a
+
+i
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+i
+
+￼
+
+￼
+
+d
+
+f
+
+f
+
+n
+
+f
+
+f
+
+i
+
+￼
+
+￼
+
+￼
+
+a
+
+i
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+d
+
+d
+
+f
+
+f
+
+f
+
+n
+
+n
+
+f
+
+f
+
+f
+
+i
+
+a
+
+i
+
+a
+
+i
+
+d
+
+40
+n
+
+a
+
+Back to Example 1
+
+===== slide 27 =====
+Exercise on the match clause
+Any idea of taking care of matching?
+
+[match] (ρ, κ) ⊧P [x = y]P
+
+(ρ(x) ∩ ρ(y) ≠ ∅ ⇒ (ρ, κ) ⊧P P)
+
+The check proceeds only if the match can be successful,
+otherwise there is no point in analysing a sub-process that is not
+reachable
+Example
+• a(x) . c(y) . [x = y] . P′| ā⟨d⟩ . Q′| ā⟨b⟩ . Q′′| c̄⟨b⟩ . R′
+
+ρ(x) = {b, d}, ρ(y) = {b}
+ρ(x) ∩ ρ(y) = {b}
+• a(x) . c(y) . [x = y] . P′| ā⟨d⟩ . Q′| ā⟨b⟩ . Q′′| c̄⟨f⟩ . R′
+ρ(x) = {b, d}, ρ(y) = {f}
+ρ(x) ∩ ρ(y) = ∅
+
+￼
+
+￼
+
+d
+
+d
+
+n
+
+n
+
+a
+
+a
+
+￼
+
+￼
+
+f
+
+f
+
+i
+
+41
+
+===== slide 28 =====
+Theoretical properties
+
+42
+
+===== slide 29 =====
+Semantic correctness
+The analysis information is a safe description of what will happen during the
+evaluation of the program, i.e., a sound over-approximation of the runtime
+behaviour
+We can establish a subject reduction result stating that if we have an analysis
+result for P, and P evolves into some process Q, then the very same analysis
+result is also valid for Q
+
+43
+
+===== slide 30 =====
+The nature of imprecision
+This Control Flow Analysis is Context-Insensitive and is called 0-CFA
+
+P1 ≜ a(x) | ā⟨b⟩
+
+P1 ≜ a(x) + ā⟨b⟩
+
+P1 ≜ a(x) . ā⟨b⟩
+
+• Note that the variable y in P1 can be bound to b, while in P2 and in P3 it
+cannot
+• Instead, in the CFA estimate, we have that ρ(x) ⊇ {b} in all the three cases
+
+44
+
+===== slide 31 =====
+Preserving the identity of names
+Because of α-renaming, we risk not to preserve the identity of names
+occurring in the process under analysis during the evaluation
+We could use labels as done in the previous CFA or
+introduce equivalence classes of names
+• ⌊n⌋is the equivalence class corresponding to n; it is also called the
+canonical name of n
+• ⌊x⌋ = x
+
+We use a disciplined α-renaming
+• names can only be substituted with names in the same equivalence class
+
+45
+
+===== slide 32 =====
+We start from the process of interest P* and we lift ⌊ ⌋ to obtain ⌊P*⌋
+Lemma
+If P ≡ Q then (ρ, κ) ⊧P ⌊P⌋
+
+(ρ, κ) ⊧P ⌊Q⌋
+
+Substitution lemma
+(ρ, κ) ⊧P ⌊P⌋ then (ρ, κ) ⊧P ⌊P[m/x]⌋, provided that ⌊m⌋ ⊆ ρ(x)
+Subject reduction result
+(ρ, κ) ⊧P ⌊P⌋ and P → Q then (ρ, κ) ⊧P ⌊Q⌋
+
+f
+
+46
+f
+
+i
+
+Semantic correctness
+
+===== slide 33 =====
+Existence
+The set of proposed solutions can be partially ordered:
+(ρ, κ) ⊆ (ρ′, κ′) i ordered pointwise
+Moore family
+The set {(ρ, κ) ⊧P P} is a Moore family for all processes P
+Therefore there always exists a least (best) solution (ρ, κ)
+obtained as ⊓ {(ρ, κ) ⊧P P}
+
+ff
+
+￼
+
+￼
+
+47
+
+===== slide 34 =====
+Implementation
+There is a constructive procedure for obtaining the least solution of
+low polynomial complexity
+Also in this CFA the acceptability judgement associates each process with a
+set of logical constraints that must be solved
+One obvious approach is to develop a special purpose constraint solver
+handling exactly the combination of set inclusions and rst order logic that
+we have used; essentially this is the approach taken for the previous CFA
+An alternative, and more general approach, is to transform the constraints
+into an appropriate fragment of rst order logic and then use an o -theshelf
+solver
+
+fi
+
+48
+
+===== slide 35 =====
+Variation
+
+49
+
+===== slide 36 =====
+Polyadic π-calculus: syntax
+π ::= u⟨v⟩⃗ // send v on u
+| u(x)⃗ // receive on u and store in v
+| τ // internal action
+
+Polyadic send and receive
+
+P ::= 0 // inactive process
+| π . P // action prefix
+| [x = y]P // matching (like, if x = y then P)
+| (νn)P // restriction (like n only known in P)
+| Σi∈I πi . Pi // non deterministic choice
+| P1 | P2 // parallel composition
+| !P // replication (like P | P | P | P | . . . )
+
+fi
+
+50
+
+===== slide 37 =====
+Reduction semantics
+[Com] (n⟨ m⟩⃗ . P + P′) | (n(x)⃗ . Q + Q′) → P | Q[ m /⃗ x]⃗ if | m ⃗ | = | x ⃗ |
+now arity matters
+
+[Tau] (τ . P + Q) → P
+P → P′
+[Res]
+(νn)P → (νn)P′
+
+P → P′
+P | Q → P′| Q
+
+[Par]
+
+[Eq] P ≡ Q Q → Q′ Q′ ≡ P′
+P → P′
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+51
+
+===== slide 38 =====
+Abstract domains
+• An abstract environment ρ associates a variable to the set of constants
+values it might be bound to
+• An abstract channel environment κ maps a (channel) constant to the set
+of sequences of constants that may be communicated over it
+• An error component ψ records the set of (channel) constants where there
+may be an arity mismatch in a communication
+• ρ and κ and contain global information that captures information about
+the behaviour of the process P* under analysis, while ψ captures local
+information
+
+Val = ℘(Const)
+ρ : Var → ℘(Const)
+κ : Var → ℘(Const)
+ψ : ℘(Const)
+52
+
+===== slide 39 =====
+The specification of a solution
+Given a guess (ρ, κ, ψ), we validate whether it is an acceptable CFA
+A guess is acceptable if it safely over-approximates the runtime behavior
+Validation
+check clauses on logical judgements
+• for processes
+• for actions
+
+(ρ,̂ κ)̂ ⊧P e : ψ
+
+(ρ,̂ κ)̂ ⊧A π : ψ
+
+Again we have exactly one clause for each of the syntactic forms of actions
+
+fi
+
+53
+
+===== slide 40 =====
+Clauses for actions: out
+
+[out] (ρ, κ) ⊧A ū⟨v⟩⃗ : ψ
+
+∀n ∈ ρ(u) : ρ(v)⃗ ⊆ κ(n)
+
+f
+
+f
+
+i
+
+54
+
+===== slide 41 =====
+Clauses for actions: in
+∀n ∈ ρ(u) : κ(n) ∩ Const ⊆ ρ(x)⃗ ∧
+|x|⃗
+κ(n)∖Const ≠ ∅ ⇒ n ∈ ψ
+
+f
+
+f
+
+55
+i
+
+[in] (ρ, κ) ⊧A u(x) : ψ
+
+|x|⃗
+
+===== slide 42 =====
+Clauses for processes: par
+(ρ, κ) ⊧P P1 : ψ1 ∧ (ρ, κ) ⊧P P2 : ψ2
+
+∧ ψ1 ∪ ψ2 ⊆ ψ
+
+f
+
+f
+
+56
+i
+
+[par] (ρ, κ) ⊧P P1 | P2 : ψ
+
+===== slide 43 =====
+Clauses for processes: sum
+
+∀i ∈ I : ((ρ, κ) ⊧A π1 : ψ′1 ∧ ψ′1 ⊆ ψ ∧
+(ρ, κ) ⊧P Pi : ψ1 ∧ ψ1 ⊆ ψ)
+
+f
+
+57
+i
+
+[sum] (ρ, κ) ⊧P Σi∈I πi . Pi : ψ
+
+===== slide 44 =====
+Example 2
+c̄⟨n⟩ . c̄⟨n⟩ | c(x) . x̄⟨m⟩ | c(x, y) . x(y)
+
+c̄⟨n⟩ | n̄⟨m⟩ | c(x, y) . x(y)
+The process stucks when
+trying to communicate over c
+
+58
+
+===== slide 45 =====
+Example 2
+c̄⟨n⟩ . c̄⟨n⟩ | c(x) . x̄⟨m⟩ | c(x, y) . x(y)
+ρ
+x
+y
+
+κ
+
+{n}
+{m}
+
+c
+n
+m
+
+{n}
+{m}
+∅
+
+ψ = {c} ≠ ∅
+
+The analysis re ects that the process will indeed become stuck when trying
+to communicate over c
+
+fl
+
+59
+
+===== slide 46 =====
+Applications
+
+60
+
+===== slide 47 =====
+We shall now give a few applications of the preceding analysis and present
+the associated adequacy results
+Our approach is:
+• rst we define a notion of the dynamic property based on the semantics,
+• then we define a notion of the corresponding static property based on the
+analysis and
+• nally we prove an adequacy result expressing that the static property
+implies the dynamic one
+
+fi
+
+61
+
+fi
+
+fi
+
+fi
+
+Applications of the CFA
+
+===== slide 48 =====
+Contexts
+A context C is formally given by
+
+C ::= (νn)C | C | P | [ . ]
+
+A context essentially is a process with a hole [ . ] where another process can
+be inserted
+• we write C[P] for the process obtained by inserting P in the hole of C
+
+62
+
+===== slide 49 =====
+Well-behavedness
+Well-behavedness guarantees that communicating actions have matching
+arities
+• The process P* is dynamically well-behaved if whenever P evolves into a
+process that is structurally congruent to one of the form
+C[(n⟨ m ⟩⃗ . R + R′) | (n(x)⃗ . Q + Q′)] for some context C then | m ⃗ | = | x ⃗ |
+context
+
+• The process P* is statically well-behaved if there exist ρ and κ such that
+
+(ρ, κ) ⊧P P* : ∅
+
+meaning there is a valid analysis result for P* where the error component ψ
+is empty
+
+￼
+
+￼
+
+63
+
+===== slide 50 =====
+Well-behavedness (cont.)
+Theorem (Adequacy for well-behaved processes)
+If the process P* is statically well-behaved then it is also dynamically wellbehaved
+the analysis guarantees that no
+runtime communication mismatch can
+occur
+
+64
+
+===== slide 51 =====
+Well-sortedness
+Idea: Channels are not all interchangeable: each channel carries values of a
+specific shape
+In π-calculus, any name can be: sent, received, used as a channel, or
+communicated over any other channel
+Extremely expressive, but also too permissive, e.g., we could allow both
+
+a⟨b⟩ and a⟨b, c⟩
+
+on the same channel a
+To discipline communication we can use sorts
+A sort specifies
+• the arity of the communicated tuples, and
+• the sorts of their components (i.e., what kind of tuples can be
+communicated on a channel)
+
+fi
+
+fi
+
+65
+
+===== slide 52 =====
+Well-sortedness: example
+If the sort of a is (S1, S2) then
+• a is a binary channel,
+
+• the rst communicated name must have sort S1 and
+• the second communicated name must have sort S2
+For instance
+
+a⟨b, c⟩
+
+is well-sorted i
+
+σ(b) = S1 and σ(c) = S2
+
+f
+
+fi
+
+66
+
+===== slide 53 =====
+Well-sortedness (cont.)
+We have a set of sorts and require that each constant n has a sort
+
+Σ(n) ∈ Sort
+
+• A sorting is defined as a function
+
+Σ : Sort → Sort*
+
+that for each sort specifies a sequence of sorts describing not only the arity
+of the constants with that sort but also the sorts of the constants that may
+be communicated over it
+• The sorts are preserved by disciplined α-renaming so if ⌊n⌋ = ⌊m⌋ also
+
+σ(n) = σ(m)
+• We extend σ in a component-wise manner to work on tuples as well as sets
+of tuples (sorting can the be checked componentwise)
+
+fi
+
+fi
+
+67
+
+===== slide 54 =====
+Well-sortedness
+• The process P* is dynamically well-sorted if whenever P evolves into a
+process that is structurally congruent to one of the form
+C[(n⟨ m ⟩⃗ . R + R′) | (n(x)⃗ . Q + Q′)] for some context C then | m ⃗ | = | x ⃗ | as
+well as Σ(σ(m)) = σ( m )⃗
+• The process P* is statically well-sorted if there exist ρ and κ such that
+
+(ρ, κ) ⊧P P* : ∅
+
+and furthermore, for all constants n,
+
+abstract values are
+tuples of names
+
+σ(κ(n)) ⊆ {Σ(σ(n))}
+⃗
+
+everything CFA predicts for channel n
+has the correct shape prescribed by Σ
+
+￼
+
+￼
+
+68
+
+===== slide 55 =====
+Well-sortedness (cont.)
+Theorem (Adequacy for well-sorted processes)
+If the process P* is statically well-sorted then it is also dynamically wellsorted
+
+again, the analysis guarantees that no
+runtime arity mismatch can occur
+
+69
+
+===== slide 56 =====
+Security properties
+
+70
+
+===== slide 57 =====
+We classify names as
+and
+and use the analysis to impose a
+con dentiality policy on the processes, ensuring that they do not send
+constants on
+channels
+
+,
+}
+We introduce a mapping Σ : Const → {
+We assume that if ⌊n⌋ = ⌊m⌋ then Σ(n) = Σ(m)
+We extend Σ in a component-wise manner to work on tuples
+Property: a secret channel cannot be sent on a public channel
+BODEI, C., DEGANO, P., NIELSON, F., AND NIELSON, H. R.
+• 1998. Control ow analysis for the π-calculus. In Proceedings of the International Conference on Concurrency Theory (CONCUR).
+Lecture Notes in Computer Science, vol. 1466, Springer, 84–98.
+• 1999. Static analysis of processes for no read-up and no write-down. In Proceedings of the International Conference on Foundations of
+Software Science and Computation Structures (FOSSACS). Lecture Notes in Computer Science, vol. 1578, Springer, 120–134.
+• 2001a. Static analysis for the π-calculus with applications to security. Inform. Comput. 168, 1, 68–92.
+
+fl
+
+c
+
+i
+
+l
+
+b
+
+u
+
+p
+
+t
+
+e
+
+r
+
+c
+
+e
+
+s
+
+t
+
+t
+
+c
+
+c
+
+i
+
+i
+
+e
+
+e
+
+l
+
+l
+
+r
+
+r
+
+fi
+
+b
+
+b
+
+c
+
+c
+
+u
+
+u
+
+e
+
+71
+e
+
+s
+
+p
+
+s
+
+p
+
+Secrecy-preserving processes
+
+===== slide 58 =====
+Secrecy-preserving processes
+Dynamic property
+The process P* is dynamically secrecy-preserving if
+whenever P* evolves into a process that is structurally congruent to one of
+the form C[(n⟨ m ⟩⃗ . P + P′) | (n(x)⃗ . Q + Q′)], then | m ⃗ | = | x ⃗ | as well as
+
+⇒ Σ( m )⃗ =
+
+Σ(n) =
+
+Static property
+The process P* is statically secrecy-preserving if
+• there exists ρ and κ such that (ρ, κ) ⊧P P* and
+• κ is such that
+
+Σ(n) =
+
+⇒ ∀ m ⃗ ∈ κ(n) : Σ( m )⃗ =
+
+￼
+
+c
+
+i
+
+l
+
+b
+
+u
+
+p
+
+￼
+
+c
+
+c
+
+i
+
+i
+
+l
+
+l
+
+b
+
+b
+
+u
+
+u
+
+p
+
+p
+
+72
+
+===== slide 59 =====
+Secrecy-preserving processes
+Theorem (Adequacy for secrecy-preserving processes)
+If the process P* is statically secrecy-preserving
+then it is also dynamically secrecy-preserving
+The analysis guarantees that no secret information can ow through public
+channels
+
+73
+
+===== slide 60 =====
+We assign security levels to the channels and use the analysis to impose a
+con dentiality policy on the processes, ensuring that they do not send
+constants with a high security level on channels with a lower security level
+⊑
+For simplicity we only impose two levels,
+and
+(
+), and we
+want to ensure that only low information is communicated on low channels
+
+,
+} that to each constant
+We introduce a mapping Λ : Const → {
+associates a security level
+security lattice
+We extend Λ in a component-wise manner to work on tuples
+We assume that if ⌊n⌋ = ⌊m⌋ then Λ(n) = Λ(m)
+Property: the level of the msg cannot be higher than the level of the channel
+BODEI, C., DEGANO, P., NIELSON, F., AND NIELSON, H. R.
+• 1998. Control ow analysis for the π-calculus. In Proceedings of the International Conference on Concurrency Theory (CONCUR).
+Lecture Notes in Computer Science, vol. 1466, Springer, 84–98.
+• 1999. Static analysis of processes for no read-up and no write-down. In Proceedings of the International Conference on Foundations of
+Software Science and Computation Structures (FOSSACS). Lecture Notes in Computer Science, vol. 1578, Springer, 120–134.
+• 2001a. Static analysis for the π-calculus with applications to security. Inform. Comput. 168, 1, 68–92.
+h
+
+g
+
+i
+
+h
+
+w
+
+o
+
+l
+
+h
+
+g
+
+i
+
+fl
+
+h
+fi
+
+h
+
+w
+
+g
+
+w
+
+i
+
+o
+
+74
+o
+
+l
+
+h
+
+l
+
+Non-leaking processes
+
+===== slide 61 =====
+Non-leaking processes
+Dynamic property
+The process P* is dynamically non-leaking if
+whenever P* evolves into a process that is structurally congruent to one of
+the form C[(n⟨ m ⟩⃗ . P + P′) | (n(x)⃗ . Q + Q′)] then | m ⃗ | = | x ⃗ | as well as
+
+Λ( m )⃗ ⊑ Λ(n)| m|⃗
+
+Static property
+The process P* is statically non-leaking if
+• there exists ρ and κ such that (ρ, κ) ⊧P P* and
+• κ is such that ∀ m ⃗ ∈ κ(n) : Λ( m )⃗ ⊑ Λ(n)| m|⃗ for all constants n
+the abstract cache κ becomes a
+lightweight information- ow analysis
+
+￼
+fl
+
+fl
+
+￼
+
+Every value predicted by the CFA for channel n
+must be allowed by the security policy
+So the CFA cache becomes an approximation of
+possible information ows
+75
+
+===== slide 62 =====
+Non-leaking processes
+Theorem (Adequacy for non-leaking processes)
+If the process P* is statically non-leaking
+then it is also dynamically non-leaking
+The analysis guarantees absence of runtime leaks
+
+76
+
+===== slide 63 =====
+We classify names as
+and
+The analysis propagates values together their taint state and operations may
+transform taint information
+The previous con dentiality properties were channel-oriented
+i.e., focussed on what may ow through a channel
+Taint analysis is instead data-oriented, i.e., focussed on how information
+propagates through computations
+Operations may propagate or transform taint information:
+• combining values (e.g., to form a tuple of values) may propagate taint
+(simple aggregation of values can be “infected” by the presence of tainted
+values)
+• “sanitisation” functions, special functions able to untainted the values
+
+fl
+
+fi
+
+d
+
+e
+
+t
+
+d
+
+n
+
+e
+
+i
+
+t
+
+a
+
+n
+
+t
+
+i
+
+n
+
+77
+a
+
+t
+
+u
+
+Taint analysis
+
+===== slide 64 =====
+Taint analysis
+We introduce a mapping Θ : Const → {
+,
+}
+We assume that if ⌊n⌋ = ⌊m⌋ then Θ(n) = Θ(m)
+We extend Θ in a component-wise manner to work on tuples
+A sink is a program point or channel where tainted data must not arrive,
+e.g., a channel where con dential or untrusted data must not ow
+Property: a tainted value should never reach a sensitive sink
+
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+fi
+
+t
+
+n
+
+u
+
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+78
+
+===== slide 65 =====
+Taint safety
+
+Dynamic property
+The process P* is dynamically taint-safe if
+whenever P* evolves into a process that is structurally congruent to one of
+the form C[(n⟨ m ⟩⃗ . P + P′) | (n(x)⃗ . Q + Q′)] and n is a sensitive sink channel
+then | m ⃗ | = | x ⃗ | as well as
+
+Θ( m )⃗ = {
+
+}
+
+Static property
+The process P* is statically taint-safe if
+• there exists ρ and κ such that (ρ, κ) ⊧P P* and for every sensitive sink
+channel n
+• κ is such that
+
+∀ m ⃗ ∈ κ(n) : Θ( m )⃗ = {
+
+for all constants n
+
+}
+
+￼
+
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+n
+
+u
+
+d
+
+e
+
+￼
+
+t
+
+n
+
+i
+
+a
+
+t
+
+n
+
+u
+
+79
+
+===== slide 66 =====
+Taint-safe processes
+Theorem (Adequacy for taint-safe processes)
+If the process P* is statically taint-safe
+then it is also dynamically taint-safe
+The analysis guarantees that tainted information cannot reach sensitive sinks
+
+80
+
+===== slide 67 =====
+Taint safety: example
+A tainted value should never reach a sensitive sink
+
+P ≡ input(x) . clean⟨sanitize(x)⟩ ∣ clean(y) . sql⟨y⟩
+with:
+•input = untrusted source,
+•sql = sensitive sink,
+•sanitize = sanitisation function
+
+Assume
+
+Θ(input) =
+Θ(sanitize(v)) =
+
+for every value v
+In this example, no tainted value reaches the sink sql, due to sanitize
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+n
+
+d
+
+u
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+81
+
+===== slide 68 =====
+Taint safety: example
+A tainted value should never reach a sensitive sink
+
+P ≡ input(x) . clean⟨sanitize(x)⟩ ∣ clean(y) . sql⟨y⟩
+Θ(input) =
+Θ(sanitize(v)) =
+
+for every value v
+
+The CFA predicts:
+
+κ(clean) = {
+κ(sql) = {
+
+}
+
+}
+
+So the static property ∀ m ⃗ ∈ κ(n) : Θ( m )⃗ = {
+
+} holds
+
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+d
+
+n
+
+e
+
+u
+
+t
+
+n
+
+i
+
+d
+
+a
+
+t
+
+e
+
+t
+
+n
+
+d
+
+n
+
+d
+
+u
+
+i
+
+e
+
+e
+
+t
+
+a
+
+t
+
+t
+
+n
+
+i
+
+n
+
+n
+
+i
+
+a
+
+a
+
+u
+
+t
+
+t
+
+n
+
+u
+
+82
+
+===== slide 69 =====
+Taint safety: example
+Without sanitisation:
+
+P′ ≡ input(x) . sql⟨x⟩
+The CFA predicts:
+
+κ(sql) = {
+
+}
+
+So the static property ∀ m ⃗ ∈ κ(n) : Θ( m )⃗ = {
+and the process is not statically taint-safe.
+
+} does not holds
+
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+n
+
+u
+
+d
+
+e
+
+t
+
+n
+
+i
+
+a
+
+t
+
+￼
+
+83
+
+===== slide 70 =====
+Taint analysis
+
+Unlike secrecy: taint is usually not a lattice over channels, but over data
+dependencies
+Taint follows values, not channels
+
+84
+
+===== slide 71 =====
+CFA pattern
+We have seen many examples of CFA: we can now identify a common
+pattern
+• Choose those values of interest for the language and define the shape of
+solutions
+• Prove that all estimates are semantically correct
+• Prove that least estimate exists
+• Derive a constructive procedure that builds estimates
+• Select a specific dynamic property and define a static check on solutions
+This may require to re ne estimates
+
+fi
+
+fi
+
+85
+
+===== slide 72 =====
+CFA vs Type Systems
+• Type Systems are prescriptive, i.e. they infer types and impose the wellformedness conditions at the same time
+• Control Flow Analysis is mainly descriptive, i.e. it merely infers the
+information and then leaves it to a separate step to actually impose
+demands on when programs are well-formed
+• For each property, it is often the case that: a new ad hoc type system is
+necessary, while only a new test on the same CFA analysis is needed
+
+86
+
+===== slide 73 =====
+Control Flow Analysis for the π-calculus
+Control Flow Analysis provides a static approximation of:
+• possible communications,
+• exchanged tuples,
+• dynamic process interactions.
+Starting from communication ows, we re ned the analysis to enforce
+di erent properties
+• The same CFA framework can therefore be enriched to verify di erent
+classes of communication and security properties
+• Static approximations of communication ows become static guarantees
+about runtime behaviour
+
+fl
+
+ff
+
+87
+
+===== slide 74 =====
+Control Flow Analysis computes a sound approximation of:
+• how values ow,
+• where functions may be applied,
+• how processes may interact
+All the analyses studied rely on:
+• abstraction
+• over-approximation
+• fixpoint computation
+• semantic soundness
+Control Flow Analysis is not only about predicting control ow:
+it provides a general framework for reasoning statically about dynamic
+behaviour
+88
+
+fl
+
+fi
+
+Conclusion: chasing the ow
+
+===== slide 75 =====
+

@@ -1,0 +1,1985 @@
+# ProgramAnalysis-02-Denotational-v2
+# auto-extracted from ProgramAnalysis-02-Denotational-v2.pdf (64 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #2
+Denotational Semantics
+
+===== slide 2 =====
+Preliminaries
+
+2
+
+===== slide 3 =====
+A program
+
+Its meaning
+
+[[ ]]
+
+syntax
+(how the program is written)
+
+semantics
+(its computed function)
+
+[[
+[[
+
+o
+
+e
+
+r
+
+o
+
+t
+
+r
+
+r
+
+e
+
+t
+
+t
+
+r
+
+t
+
+r
+
+a
+
+a
+
+t
+
+t
+
+r
+
+u
+
+a
+
+a
+
+u
+
+u
+
+V
+
+u
+
+o
+
+c
+
+u
+
+u
+
+I
+
+f
+
+q
+
+q
+
+V
+
+[[
+[[
+o
+
+c
+
+I
+
+f
+
+q
+
+q
+
+Semantics = assigning meaning to syntax
+
+3
+
+]] =
+]] =
+]] =
+]] =
+
+4
+
+===== slide 4 =====
+What we say, what we mean
+A boss to the employee
+You showed great originality in your work
+
+[[You showed great originality in your work]]
+
+=
+1. You improved the project with innovative ideas
+2.
+You worked independently and con dently
+3.
+You got everything wrong
+
+fi
+
+4
+
+===== slide 5 =====
+What we say, what we mean
+Politician to opponent
+I appreciate your consistency in maintaining your position
+
+[[I appreciate your consistency in maintaining your position]]
+1.
+2.
+3.
+
+=
+You are reliable and coherent in your ideas
+You never change your mind even when proved wrong
+You are loyal to your voters
+
+5
+
+===== slide 6 =====
+What we say, what we mean
+Landlord to lodger
+I trust your well-known punctuality
+
+[[I trust your well-known punctuality]]
+
+=
+1. I know you are always on time
+2. I admire your disciplined lifestyle
+3. Don't be late with your payment
+
+6
+
+===== slide 7 =====
+What we say, what we mean
+Between lovers
+Ok, let's do whatever you think is best
+
+[[Ok, let's do whatever you think is best]]
+1.
+2.
+3.
+4.
+
+=
+You'd better choose the option I like
+I completely trust your judgment
+I genuinely don’t mind either option
+I have no preference at all
+7
+
+===== slide 8 =====
+What we say, what we mean
+Public speech
+I won’t take long
+
+[[I won’t take long]]
+
+=
+1.
+This will only take a few minutes
+2.
+I respect your time
+3. I will summarize my points quickly
+4. There are a lot of things I want to say
+8
+
+===== slide 9 =====
+Rigorous approach vs jumbled words
+
+iπ
+
+e +1=0
+
+9
+
+===== slide 10 =====
+Some important sets
+set of
+natural numbers
+
+Z
+state
+
+set of
+boolean values
+
+N
+
+set of
+variables
+
+σ:X→Z
+set of all
+states
+
+Σ ≜ {σ : X → Z}
+B
+
+set of
+integers
+
+10
+
+set of
+integers
+
+===== slide 11 =====
+σ = [ ↦ 2] the variable has value 2,
+
+all other variables have value 0
+
+σ = [ ↦ 2, ↦ 3] the variable has value 2,
+
+the variable has value 3,
+all other variables have value 0
+
+σ = [ ↦ 3, ↦ 2] same as above
+y
+
+x
+
+x
+
+x
+
+x
+
+y
+
+σ = [ ↦ 2, ↦ 3] not a valid state!
+x
+
+x
+
+xy
+
+Notation: concrete states
+
+11
+
+===== slide 12 =====
+<latexit sha1_base64="cnqjrp4AzwqILtGkyGWxTo19yHk=">AAACx3icbVFNj9MwEHXCVwlf7XLkYtEFLZeSAAIuK63gArdForsr1VHlOJPUWn8E2+k2CjnwM7nyS3DaHOguc3p6M35v/CarBLcujn8H4a3bd+7eG92PHjx89PjJeHJwZnVtGMyZFtpcZNSC4ArmjjsBF5UBKjMB59nl575/vgZjuVbfXVNBKmmpeMEZdZ5ajn8Sy0tJF+p1kx5tXpEcCvhBBBSOtBHJoOSqpcbQpmuF6CKFX2IiM71piS0wL/Dh5rg57AiJdjpeYm9CuxWYK26hiwiofJCKiOHlys2W42k8i7eFb4JkAFM01OlyErwluWa1BOWYoNYukrhyqZd1nInepLZQUXZJS1h4qKgEm7bbmDr8orbUaVyBwVzgLQn/vmiptLaRmZ+U1K3s9V5P/q+3qF3xMW25qmoHivVGjgvYGllmuM8fcM4NOEf7zQFzhRk11DkwHFPGPFn7g+wZWiepaUzuP6XgimkpqQ9wd6CuJf0WBkRLspqL3CNM1j4Gw6kqvTfR3hW3x13XRT7m5HqoN8HZm1nyfhZ/ezc9+TQEPkLP0HN0hBL0AZ2gL+gUzRFDf4JRMAkOwq+hDtfhZjcaBsObp2ivwl9/AUKI3rk=</latexit>
+
+σ[2/ ] the variable has value 2,
+any other variable y has value σ(y)
+σ[2/ ][3/ ] the variable has value 2,
+σ[3/ , 2/ ] same as above
+y
+
+x
+
+x
+
+x
+
+x
+
+y
+
+σ[2/ ][3/ ] the variable has value 3,
+any other variable y has value σ(y)
+12
+
+M
+
+[n/y](x) =
+
+the variable has value 3,
+any other variable z has value σ(z)
+
+x
+
+x
+
+xy
+
+x
+
+Notation: state update ⇢
+
+n
+(x)
+
+if x = y
+otherwise
+
+===== slide 13 =====
+What is the meaning of
+an arithmetic expression?
+2
+
+2x + 3y + 5xz
+[[2x + 3y + 5xz]] : Σ → Z
+2
+
+=
+1. a numerical value
+2.
+a truth value
+3.
+a state
+4.
+a function
+13
+
+===== slide 14 =====
+What is the meaning of
+a boolean expression?
+2
+
+2x + 3y + 5xz ≤ 25 ∧ x = y
+[[2x + 3y + 5xz ≤ 25 ∧ x = y]] : Σ →
+2
+
+B
+
+1.
+2.
+3.
+4.
+
+=
+a numerical value
+a truth value
+a state
+a function
+14
+
+===== slide 15 =====
+[[
+
+(x > 0)
+
+x := x − y
+
+(x > 0)
+
+x := x − y]] : Σ → Σ⊥
+
+o
+
+=
+a numerical value
+a truth value
+a state
+a function
+
+o
+
+d
+
+d
+
+e
+
+e
+
+l
+
+l
+
+i
+
+i
+
+h
+
+1.
+2.
+3.
+4.
+h
+
+w
+
+w
+
+What is the meaning of
+a command?
+
+15
+
+===== slide 16 =====
+Given the input state we want to define the reachable output states
+Input store
+
+A program
+
+Output store
+
+σ
+σ
+
+[[ ]]σ = ⊥
+
+Non terminating execution
+
+c
+
+[[ ]] : Σ → Σ⊥
+
+c
+
+Denotational semantics
+
+[[ ]]σ
+
+c
+
+16
+fi
+
+c
+
+Semantics of deterministic programs
+
+Σ⊥ = Σ ⊎ { ⊥ }
+
+===== slide 17 =====
+Some programs may exhibit nondeterministic behaviour
+(lack of information, approximation, programming constructs c1 + c2)
+
+A program
+
+σ
+
+[[ ]] : Σ → Σ⊥
+
+to
+
+[[ ]] : Σ → ℘(Σ)
+
+c
+
+from
+
+c
+
+c
+
+Nondeterministic programs
+
+17
+
+===== slide 18 =====
+Given the input state we want to define the reachable output states
+Input store
+
+A program
+
+Output stores
+
+σ
+
+[[ ]]σ ∈ ℘(Σ)
+
+σ
+
+[[ ]]σ = ∅
+
+c
+
+[[ ]] : ℘(Σ) → ℘(Σ)
+
+c
+
+Collecting semantics
+
+c
+
+18
+fi
+
+c
+
+Collecting semantics
+
+Non terminating execution
+
+===== slide 19 =====
+Input stores
+
+A program
+
+P
+
+Output stores
+
+We write [[ ]]σ
+as a shorthand for [[ ]]{σ}
+
+[[ ]]P =
+
+⋃
+
+[[ ]]σ
+
+σ∈P
+
+c
+
+c
+
+[[ ]] : ℘(Σ) → ℘(Σ) Consider all trajectories simultaneously
+
+c
+
+c
+
+Collecting semantics
+
+c
+
+c
+
+Collecting semantics
+
+19
+
+===== slide 20 =====
+A program
+
+P
+
+?
+[[ ]]P ⊆ Q
+either does not terminate
+•
+∀σ ∈ P . [[c]]σ • or terminates in Q
+
+Q
+
+No undesirable state is reached!
+
+c
+
+c
+
+Partial correctness
+
+20
+
+===== slide 21 =====
+Dijkstra’s weakest liberal precondition
+Given a program c and a correctness specification Q
+what is the largest set of "safe" input states that we can start from?
+
+wlp(c, Q) = {σ ∣ [[c]]{σ} ⊆ Q}
+wlp(c, Q) is the set of all and only partially correct states
+P ⊆ wlp(c, Q)
+if and only if
+
+c
+
+[[ ]]P ⊆ Q
+
+fi
+
+ij
+
+21
+
+===== slide 22 =====
+Dijkstra’s weakest liberal precondition
+Given a program c and a correctness specification Q
+what is the largest set of "safe" input states that we can start from?
+
+wlp(c, Q) = {σ ∣ [[c]]{σ} ⊆ Q}
+wlp(c, Q) is the set of all and only partially correct states
+P ⊆ wlp(c, Q)
+if and only if
+
+c
+
+[[ ]]P ⊆ Q
+
+fi
+
+ij
+
+22
+
+===== slide 23 =====
+Dijkstra’s weakest liberal precondition
+Given a program c and a correctness specification Q
+what is the largest set of "safe" input states that we can start from?
+
+wlp(c, Q) = {σ ∣ [[c]]{σ} ⊆ Q}
+wlp(c, Q) is the set of all and only partially correct states
+P ⊆ wlp(c, Q)
+if and only if
+
+c
+
+[[ ]]P ⊆ Q
+
+[[c]](wlp(c, Q)) ? Q
+⊆
+wlp(c, [[c]]P) ? P
+⊇
+fi
+
+ij
+
+23
+
+===== slide 24 =====
+A program
+
+P
+
+?
+P ⊆ wlp(c, Q)
+[[ ]]P ⊆ Q
+Q
+
+Dijkstra’s weakest liberal precondition
+
+wlp(c, Q) = {σ ∣ [[c]]{σ} ⊆ Q}
+
+c
+
+c
+
+Partial correctness: backward
+
+24
+
+===== slide 25 =====
+Predicates vs sets
+( = 1)
+
+{σ ∣ σ( ) = 1}
+
+( ≤ )
+
+{σ ∣ σ( ) ≤ σ( )}
+
+e
+
+u
+
+y
+
+r
+
+{σ ⊧ P} = {σ ∣ [[P]]σ =
+
+t
+
+x
+
+x
+
+y
+
+x
+
+x
+
+P
+
+25
+
+}
+
+===== slide 26 =====
+Example
+c ≜
+
+% let us focus on positive numbers
+% non-trivial divisors of x
+s := nondet[2..x/2];
+=
+∅
+[[c]](
+=
+1)
+if (x%s=0)
+skip
+[[c]]( = 35) = ( = 35 ∧
+else
+while true do skip
+[[c]]( = 12) = ( = 12 ∧
+
+∈ {5,7})
+∈ {2,3,4,6})
+
+s
+
+s
+
+s
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+wlp(c, ( ∈ {2,3})) = ( ∈ {1,4,6,9})
+∪ ( prime)
+26
+
+===== slide 27 =====
+Exactness vs approximation
+c ≜
+
+% let us focus on positive numbers
+% non-trivial divisors of x
+s := nondet[1..];
+[[c]](
+=
+1)
+=
+(
+=
+1
+∧
+∃n
+.
+while s>1 do {
+n
+x := 2*x;
+[[c]]( = 1) ⊆ ( ∃n . = 2 )
+s := s-1
+[[c]]( = 1) ⊆ ( ≥ 1)
+}
+
+[[c]]( = 1) ⊆ ( ≥ 1 ∧
+
+≥ 1)
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+s
+
+x
+
+s
+
+over-approximations
+27
+
+n
+
+=2)
+
+===== slide 28 =====
+Exactness vs approximation
+c ≜
+
+% let us focus on positive numbers
+% non-trivial divisors of x
+s := nondet[1..];
+n
+[[c]](
+=
+1)
+=
+(
+=
+1
+∧
+∃n
+.
+=
+2
+)
+while s>1 do {
+x := 2*x;
+[[c]]( = 1) ⊇ ( = 1 ∧ ∈ {2,4,8,16})
+s := s-1
+n
+[[c]]( = 1) ⊇ ( = 1 ∧ ∃n . = 8 )
+}
+
+[[c]]( = 1) ⊇ ( = 1 ∧
+
+= 256)
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+s
+
+s
+
+s
+
+s
+
+under-approximations
+28
+
+===== slide 29 =====
+Approximations?
+c ≜
+
+% let us focus on positive numbers
+% non-trivial divisors of x
+s := nondet[1..];
+n
+[[c]](
+=
+1)
+=
+(
+=
+1
+∧
+∃n
+.
+=
+2
+)
+while s>1 do {
+⊆
+x := 2*x;
+[[c]]( = 1) =⊇ ? ( ∈ {2,4,8,16})
+s := s-1
+[[c]]( = 1) ⊆ ? ( ≤ )
+}
+
+x
+
+y
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+x
+
+s
+
+x
+
+s
+
+s
+
+[[c]]( = 1) ⊇ ? ( = 0 ∧
+
+29
+
+=2 ∧
+
+= )
+
+===== slide 30 =====
+Given a program
+
+and an input store σ does [[ ]]σ = ∅ ?
+
+σ
+Non
+termination
+
+- Find an over-approximation Q of [[ ]]σ such that Q ⊆ ∅
+- Find an under-approximation Q of [[ ]]σ such that Q ⊃ ∅
+c
+
+c
+
+c
+
+Termination
+c
+
+c
+
+Non-termination analysis
+
+30
+
+===== slide 31 =====
+Mathematics
+
+31
+
+===== slide 32 =====
+Disclaimer
+
+This part of the presentation was
+mostly prepared late at night
+While every e ort has been made
+to ensure accuracy, minor errors
+or oversights may be present
+It is your task to catch them
+
+ff
+
+32
+
+===== slide 33 =====
+Concrete domain
+set of
+variables
+
+state
+
+set of all
+states
+
+σ:X→Z
+
+set of
+integers
+
+Σ ≜ {σ : X → Z}
+concrete
+domain
+
+℘(Σ) ≜ {P ∣ P ⊆ Σ}
+state
+property
+33
+
+===== slide 34 =====
+Notation
+state
+notation
+
+[x ↦ 1,y ↦ 2]
+
+the state where x holds 1, y holds 2 and any other variable holds 0
+
+σ[n/x]
+
+sometimes
+written
+
+state
+update
+
+σ[x ↦ n]
+
+the state where x holds n and any other variable y holds σ(y)
+conjunction
+
+(x = 1,y = 2)
+
+property
+notation
+
+the set of all states where x holds 1 and y holds 2
+34
+
+===== slide 35 =====
+Regular commands
+regular
+command
+
+e ::= skip | x := a | b? | ...
+
+atomic
+command
+
+c ::= e
+| c1; c2
+| c1 + c2
+⋆
+| c
+
+arithmetic
+expression
+choice
+
+a ::= n | x | a1 + a2 | ...
+boolean
+expression
+
+Kleene
+star
+
+b ::= a1 ≤ a2 | b1 ∧ b2 | ...
+35
+
+===== slide 36 =====
+Arithmetic expressions
+
+arithmetic
+expression
+
+a ::= n | x | a1 + a2 | ...
+
+36
+
+===== slide 37 =====
+Arithmetic expressions
+[[ ⋅ ]] :
+
+→Σ→Z
+
+[[a]]σ
+
+evaluates the arithmetic expression a in the current state σ
+
+[[ ]]σ ≜ n
+[[ ]]σ ≜ σ( )
+[[a0 a1]]σ ≜ [[a0]]σ op [[a1]]σ
+mathematical
+operation
+
+p
+
+x
+
+e
+
+A
+
+p
+
+o
+
+x
+
+x
+
+n
+
+syntactic
+operator
+37
+
+===== slide 38 =====
+Example
+[[2x + 3y + 5xz]] : Σ → Z
+2
+
+2
+
+[[2x + 3y + 5xz]] [x ↦ 1,y ↦ 2,z ↦ 1] = 13
+2
+
+[[2x + 3y + 5xz]] [x ↦ 1,z ↦ 1] = 7
+2
+
+[[2x + 3y + 5xz]] [x ↦ 1] = 2
+38
+
+===== slide 39 =====
+Boolean expressions
+
+boolean
+expression
+
+b ::= a1 ≤ a2 | b1 ∧ b2 | ...
+
+39
+
+===== slide 40 =====
+Boolean expressions
+[[ ⋅ ]] :
+
+→ ℘(Σ) → ℘(Σ)
+
+collecting
+version
+
+[[b]]P (intuitively b ∧ P)
+
+is the set of all and only states in P that satisfy the condition b
+
+p
+
+x
+
+e
+
+e
+
+B
+
+p
+
+p
+
+e
+
+s
+
+m
+
+o
+
+u
+
+l
+
+t
+
+c
+
+b
+
+r
+
+a
+
+o
+
+t
+
+f
+
+n
+
+[[
+]]P ≜ P
+[[
+]]P ≜ ∅
+[[a0
+a1]]P ≜ { σ ∈ P ∣ [[a0]]σ cmp [[a1]]σ }
+[[b0
+b1]]P ≜ [[b0]]P bop [[b1]]P
+[[
+b]]P ≜ P∖([[b]]P)
+40
+
+!
+!
+
+¬!
+
+Lemma
+
+[[b]]P ⊆ P
+
+===== slide 41 =====
+Example
+[[2x + 3y + 5xz ≤ 25 ∧ x = y]] : ℘(Σ) → ℘(Σ)
+2
+
+2
+
+[[2x + 3y + 5xz ≤ 25 ∧ x = y]](x = 1) = (x = y = 1,z ≤ 4)
+2
+
+[[2x + 3y + 5xz ≤ 25 ∧ x = y]](y = 2) = (x = y = 2,z ≤ 1)
+2
+
+[[2x + 3y + 5xz ≤ 25 ∧ x = y]](x, z ≥ 3) = false
+41
+
+===== slide 42 =====
+assertion
+
+P ::=
+
+a1 < a2 | a1 = a2 | ...
+¬P | P1 ∧ P2 | ∃x . P | ...
+|
+
+|
+
+|
+
+σ ⊧ P or also σ ∈ P
+
+the state σ satisfies the property P
+
+P ⇒ Q or also
+
+P⊆Q
+
+or also
+
+e
+
+fi
+
+fi
+
+42
+fi
+
+e
+
+s
+
+l
+
+u
+
+a
+
+any state that satisfies P satisfies Q
+
+r
+
+t
+
+f
+
+Assertion language
+
+P≤Q
+
+Boolean and
+classical
+assertions
+
+===== slide 43 =====
+Regular commands
+regular
+command
+
+e ::= skip | x := a | b? | ...
+
+atomic
+command
+
+c ::= e
+| c1; c2
+| c1 + c2
+⋆
+| c
+
+choice
+
+Kleene
+star
+
+43
+
+===== slide 44 =====
+Kleene star, informally
+⋆
+
+c = skip
++c
++ c;c
++ c;c;c
+
++ ...
+n
++ c;...;c (n times, also written c )
++ ...
+44
+
+===== slide 45 =====
+Collecting semantics
+concrete
+semantics
+
+[[c]]P
+
+[[c]] : ℘(Σ) → ℘(Σ)
+
+is the set of all and only states reachable from some state in P after executing c
+
+[[c]]σ as a shorthand for [[c]]{σ}
+additivity: [[c]](P1 ∪ P2) = ([[c]]P1) ∪ ([[c]]P2)
+
+45
+
+===== slide 46 =====
+Atomic commands
+[[ ⋅ ]] :
+[[
+
+→ ℘(Σ) → ℘(Σ)
+
+]]P ≜ P
+
+[[x := a]]P ≜ { σ[n/x] ∣ σ ∈ P , n = [[a]]σ }
+
+m
+
+o
+
+C
+
+p
+
+p
+
+i
+
+i
+
+k
+
+k
+
+s
+
+s
+
+[[b?]]P ≜ [[b]]P
+
+46
+
+===== slide 47 =====
+Regular commands
+[[ ⋅ ]] :
+
+→ ℘(Σ) → ℘(Σ)
+
+[[c
+[[c01;; cc12]]P
+]]P ≜
+≜ [[c2]]([[c1]]P)
+[[r
+[[c11 ++ rc22]]P
+]]P ≜≜ [[c1]]P ∪ [[c2]]P
+⋆⋆
+[[r ]]P ≜
+
+∞
+
+0
+
+f (d) = d
+
+k
+
+[[c ]]P ≜ ⋃ [[c]] P
+
+f
+
+m
+
+o
+
+k=0
+
+C
+
+f:D→D
+
+47
+
+n+1
+
+n
+
+(d) = f( f (d))
+
+===== slide 48 =====
+How to compute loops?
+⋆
+
+[[c ]]P ≜
+
+∞
+
+⋃
+
+0
+
+k
+
+[[c]] P = [[c]] P ∪
+
+k=0
+
+=P∪
+⋆
+
+∞
+
+⋃
+
+∞
+
+⋃
+
+[[c]]
+
+k+1
+
+P = P ∪ [[c]]
+
+fi
+
+∞
+
+⋃
+
+k
+
+[[c]] P
+
+k=0
+
+Let's use Kleene's fixpoint theorem!
+(from MPP, 1st semester)
+
+We look for the smallest set of states that
+• contains P and
+• is "closed" under [[c]]
+48
+fi
+
+[[c]] P
+
+k=1
+
+k=0
+
+= P ∪ [[c]]([[c ]]P)
+= x λX . (P ∪ [[c]]X)
+
+k
+
+===== slide 49 =====
+Encoding conditionals
+if b then c1 else c2 ≜ (b?; c1) + ( ¬b?; c2)
+
+[[ b
+
+c1
+
+c2]]P ≜ [[c1]]([[b]]P) ∪ [[c2]]([[ ¬b]]P)
+
+e
+
+s
+
+l
+
+e
+
+p
+
+i
+
+e
+
+k
+
+s
+
+s
+
+l
+
+e
+
+n
+
+e
+
+h
+
+t
+
+n
+
+e
+
+[[ x ≥ 0
+x := − x]](x ∈ {−1,1})
+≜ [[
+]](x = 1) ∪ [[x := − x]](x = − 1)
+≜ (x = 1)
+p
+
+i
+
+h
+
+t
+
+k
+
+s
+
+f
+
+f
+
+i
+
+i
+
+e.g.
+
+49
+
+===== slide 50 =====
+Encoding while commands
+⋆
+
+while b do c ≜ (b?; c) ; ¬b?
+
+[[
+
+b
+
+c]]P ≜ [[ ¬b]]
+
+∞
+
+⋃
+
+o
+
+d
+
+e
+
+l
+
+i
+
+h
+
+w
+
+k=0
+
+50
+
+k
+
+([[c]] ∘ [[b]]) P
+
+===== slide 51 =====
+Example
+[[
+
+b
+
+c]]P ≜ [[ ¬b]]
+
+w≜
+
+y≤r
+r := r − y;
+q := q + 1
+
+P0 = {σ}
+P1 = {σ} ∪ f(P0) = {σ, [x ↦ 5,y ↦ 2,r ↦ 3,q ↦ 1]}
+P2 = {σ} ∪ f(P1) =
+{σ, [x ↦ 5,y ↦ 2,r ↦ 3,q ↦ 1], [x ↦ 5,y ↦ 2,r ↦ 1,q ↦ 2]}
+P3 = {σ} ∪ f(P2) = P2 we can stop!
+o
+
+d
+
+o
+
+d
+e
+
+l
+
+i
+
+e
+
+h
+
+l
+
+i
+w
+
+([[c]] ∘ [[b]]) P
+
+f ≜ [[r := r − y; q := q + 1]] ∘ [[y ≤ r]]
+P0 = {σ}
+Pk+1 ≜ {σ} ∪ f(Pk)
+
+σ ≜ [x ↦ 5,
+y ↦ 2,
+r ↦ 5]
+h
+
+⋃
+
+k
+
+k=0
+
+e.g.
+
+w
+
+∞
+
+[[w]]{σ} = [[y > r]]P3 = {[x ↦ 5,y ↦ 2,r ↦ 1,q ↦ 2]}
+51
+
+===== slide 52 =====
+Relational semantics
+
+52
+
+===== slide 53 =====
+Collecting semantics
+[[c]] : ℘(Σ) → ℘(Σ)
+[[c]] can be equivalently seen as the relation [[c]] ⊆ Σ × Σ
+[[c]] = {(σ, δ) ∣ σ ∈ Σ, δ ∈ [[c]]σ}
+
+53
+
+===== slide 54 =====
+Regular commands
+
+[[
+
+]] ≜ { (σ, σ) ∣ σ ∈ Σ }
+
+[[x := a]] ≜ { (σ, σ[[[a]]σ/x]) ∣ σ ∈ Σ }
+[[b?]] ≜ { (σ, σ) ∣ σ ⊧ b }
+[[c1; c2]] ≜ [[c2]] ∘ [[c1]]
+≜ { (σ, δ) ∣ ∃γ ∈ Σ, (σ, γ) ∈ [[c1]] , (γ, δ) ∈ [[c2]] }
+[[c1 + c2]] ≜ [[c1]] ∪ [[c2]]
+⋆
+
+p
+
+i
+
+k
+
+s
+
+[[c ]] ≜
+
+∞
+
+⋃
+k=0
+
+[[c]]
+
+k
+54
+
+===== slide 55 =====
+Backward semantics
+[[c]] ≜ { (δ, σ) ∣ (σ, δ) ∈ [[c]] } it is the opposite relation of [[c]]
+Therefore:
+
+[[c]]σ = { δ ∣ (σ, δ) ∈ [[c]] } and [[c]] δ = { σ ∣ (σ, δ) ∈ [[c]] }
+i.e.
+
+p
+
+o
+
+p
+
+p
+
+o
+
+o
+
+δ ∈ [[c]]σ if and only if σ ∈ [[c]] δ
+55
+
+===== slide 56 =====
+Forward vs backward
+
+c
+
+Input store
+
+A program
+
+56
+
+Output stores
+
+===== slide 57 =====
+Forward vs backward
+
+c
+
+Input store
+
+A program
+
+57
+
+Output stores
+
+===== slide 58 =====
+Regular commands, backward
+[[
+
+]] ≜ { (σ, σ) ∣ σ ∈ Σ }
+
+[[x := a]] ≜ { (σ[[[a]]σ/x], σ) ∣ σ ∈ Σ }
+[[b?]] ≜ { (σ, σ) ∣ σ ⊧ b }
+[[c1; c2]] ≜ [[c1]] ∘ [[c2]]
+[[c1 + c2]] ≜ [[c1]] ∪ [[c2]]
+⋆
+
+p
+
+p
+
+o
+
+p
+
+p
+
+o
+
+p
+
+o
+
+o
+
+p
+
+p
+
+o
+
+o
+
+p
+
+p
+
+⋃
+
+k
+
+([[c]] )
+
+k=0
+
+p
+
+p
+
+p
+
+o
+
+o
+
+o
+
+o
+
+i
+
+k
+
+s
+
+o
+
+[[c ]] ≜
+
+∞
+
+58
+
+===== slide 59 =====
+Hoare’s weakest possible precondition
+Given a program c and a correctness specification Q
+what is the largest set of input states that have a "successful" computation?
+
+wpp(c, Q) = {σ ∣ [[c]]σ ∩ Q ≠ ∅}
+
+59
+fi
+
+p
+
+o
+
+c
+
+[[ ]] Q = wpp(c, Q)
+
+===== slide 60 =====
+wpp vs wlp
+Given a program c and a correctness specification Q
+what is the largest set of input states that have a "successful" computation?
+
+wpp(c, Q) = {σ ∣ [[c]]σ ∩ Q ≠ ∅}
+wlp(c, Q) = {σ ∣ [[c]]{σ} ⊆ Q}
+Given a program c and a correctness specification Q
+what is the largest set of input states whose computations are all "successful"?
+
+fi
+
+fi
+
+60
+
+===== slide 61 =====
+Questions
+
+61
+
+===== slide 62 =====
+Question 1
+Let c ≜ (z := x) + (z := y)
+and let P ≜ (x = y = 0)
+• What is [[c]]P ?
+• Give an example of over-approximation
+• Give an example of under-approximation
+• What is wlp(c, (z = 0)) ?
+• What is wpp(c, (z = 0)) ?
+
+62
+
+(x = y = z = 0)
+(x = y = 0)
+(x = 0 ∨ y = 0)
+
+===== slide 63 =====
+63
+
+p
+
+i
+
+k
+
+s
+
+o
+
+d
+
+e
+
+u
+
+r
+
+t
+
+e
+
+l
+
+i
+
+h
+
+w
+
+e
+
+s
+
+l
+
+e
+
+n
+
+e
+
+h
+
+t
+
+x := y
+(
+Let c ≜ x < y
+and let Q ≜ (x = y = 0)
+• What is wlp(c, Q) ?
+(x ≥ y ∨ y = 0)
+(x < y ∧ y = 0)
+• What is wpp(c, Q) ?
+
+f
+
+i
+
+Question 2
+)
+
+===== slide 64 =====
+Question 3
+
+[[ ]] Q = wpp(c, Q)
+
+[[c]](wpp(c, Q)) ? Q
+none!
+some states in Q can be unreachable
+
+wpp(c, [[c]]P) ? P
+
+none!
+some states in P can non-terminate
+
+p
+
+o
+
+c
+
+64

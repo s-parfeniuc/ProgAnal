@@ -1,0 +1,4849 @@
+# ProgramAnalysis-13-Galois-v2
+# auto-extracted from ProgramAnalysis-13-Galois-v2.pdf (121 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #13
+Galois insertions
+
+===== slide 2 =====
+Abstract Interpretation
+
+2
+
+===== slide 3 =====
+Abstract Interpretation
+It is a technique to formally reason on approximations
+It allows to derive e ective methods to compute approximations
+Generally used to compute overapproximations
+Seldom used to compute underapproximations
+“Can Abstract Interpretation play a guiding and explanatory role
+for a wide range of static and dynamic
+under-approximate tools for bug catching,
+similar to what it already does for over-approximate analyses?”
+ff
+
+3
+
+===== slide 4 =====
+Example: out of bounds
+function arrayOutOfBounds(int n, int x[10]) {
+a = 0
+
+Let us assume n ≥ 0
+
+if n >= 10 then
+n = n - 5
+else
+a = ++n
+
+a = max(0,a – n)
+return x[a] }
+
+Is it a safe access? (0 ≤ a ≤ 9 ?)
+
+4
+
+===== slide 5 =====
+Using exact semantics
+function arrayOutOfBounds(int n, int x[10]) {
+(0,_)(1,_)(2,_)(3,_)(4,_)(5,_)(6,_)(7,_)(8,_)(9,_)(10,_)...
+a = 0
+(0,0)(1,0)(2,0)(3,0)(4,0)(5,0)(6,0)(7,0)(8,0)(9,0)(10,0)...
+if n >= 10 then
+(10,0)(11,0)(12,0)(13,0)(14,0)(15,0)(16,0)(17,0)(18,0)(19,0)...
+n = n - 5
+(5,0)(6,0)(7,0)(8,0)(9,0)(10,0)(11,0)(12,0)(13,0)(14,0)...
+else
+We can’t track infinite set of pairs!
+
+a = ++n
+
+WeWE
+let's use intervals!
+
+a = max(0,a – n)
+
+fi
+
+return x[a] }
+
+5
+
+memory = (value of n,value of a)
+
+===== slide 6 =====
+Abstract Interpretation: the idea
+Goal: Compute the set S of possible values at each line of code
+But... this is not feasible in general
+We compute an (over)approximation S
+
+#
+
+⊇S
+#
+
+The theory of abstract interpretation allows to compute S as a
+set of abstract values obtained by applying abstract operations
+in a fixed abstract domain
+
+fi
+
+6
+
+===== slide 7 =====
+Example: interval abstraction
+function arrayOutOfBounds(int n, int x[10]) {
+[0,∞][-∞,∞]
+abstract memory = interval of n interval of a
+a = 0
+[0,∞][0,0]
+if n >= 10 then
+[10,∞][0,0]
+n = n - 5
+[5,∞][0,0]
+else
+Merging branches looses precision:
+[0,9][0,0]
+[1,∞] = [5,∞] ∪ [1,10]
+a = ++n
+[0,10] = [0,0] ∪ [1,10]
+[1,10][1,10]
+[1,∞][0,10]
+a = max(0,a – n)
+safe! 0 ≤ a ≤ 9 !
+[1,∞][0,9]
+return x[a] }
+7
+
+===== slide 8 =====
+CHAPTER 2. ELEMENTS O
+
+Ingredients of Abstract Interpretation
+• A concrete domain C
+• An abstract domain A
+
+γ
+
+γ(a)
+
+a
+
+≤
+c
+
+⊑
+α(c)
+
+α
+
+C
+
+A
+
+concrete one
+• A concretization function γ that relates the abstract domain to the(a)
+domain2.8:
+to the
+abstract
+one
+• An abstraction function α that connects the concrete Figure
+A Galois connection (a) an
+
+• Together they form a Galois Connection
+
+The fundamental property of Galois connectio
+form, a strong connection between the concrete an
+theory
+(C anda A
+are
+ordered)
+and
+• In this lecture we first revisit elements of order
+theorem
+provides
+less
+compact,
+but
+equivalent vie
+
+formalize the concept of Galois Connection and Galois Insertion
+
+Theorem 2.3 (Alternate characterization of Galois
+“
+≠
+≠
+≠
+8 nection (C, Æ) Ω
+≠≠–≠æ (A, ı) if and only if the functio
+
+===== slide 9 =====
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+Chapter 2:
+Elements of Abstract Interpretation
+
+HAL Id: hal-01657536
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+9
+
+===== slide 10 =====
+Order theory:
+a quick recap and something new
+
+10
+
+===== slide 11 =====
+11
+
+===== slide 12 =====
+The main structure we require on mathematical objects describin
+computations is a partial order:
+
+Posets
+
+Definition 2.1 (Partial order, Poset).
+A partial order ı on a set X is a relation ı œ X ◊ X that is:
+1. reflexive: ’x œ X: x ı x;
+
+2. anti-symmetric: ’x, y œ X: (x ı y) · (y ı x) =∆ x = y;
+
+3. and transitive: ’x, y, z œ X: (x ı y) · (y ı z) =∆ x ı z.
+
+We denote as (X, ı) the set X equipped with the partial order
+partially ordered set, or a poset.
+12
+
+===== slide 13 =====
+Compared to the usual, so-called total orders, such as number comparison Æ, a partial
+order is not total: there can exist unordered pairs of elements — x, y such that neither
+x ı y nor y ı x holds.
+
+Poset: examples
+
+Example 2.1 (Poset examples).
+1. Any completely
+totally ordered set is also a poset; for instance: (Z, Æ).
+2. The parts of any set X ordered by inclusion, (P(X), TM), is a poset. The order is not
+total consider for instance that neither { 1 } TM { 2 } nor { 2 } TM { 1 } holds.
+complete;
+2
+Õ
+Õ
+3. (Z , ı), the set of pairs of integers ordered as: (a, b) ı (a , b )
+
+Õ
+Õ
+a Ø a ·b Æ b
+
+≈∆
+is a poset. When interpreting the first element of each pair as the lower bound of
+an interval and the second element as its upper bound, this order is equivalent to
+interval inclusion.
+⌥
+a′
+b′
+
+￼
+
+￼
+
+Partial orders are extremely important in several areas
+of
+Theoretical
+Computer
+Scia
+b
+nce. For instance, they play a crucial role in the field of denotational semantics, introduced
+by Scott and Strachey [1971], to ensure that the
+13 definitions assigning a mathematical mean-
+
+===== slide 14 =====
+2. The parts of any set X ordered by inclusion, (P(X), TM), is a poset. The order is not
+complete;
+consider
+for ANALYSIS:
+instance that
+neither { PRESENTATION
+1 } TM { 2 } nor { 2 } TM { 1 } holds.
+1.1. A FIRST
+STATIC
+INFORMAL
+
+Approximation
+
+2
+Õ
+Õ
+3. (Z , ı), the set of pairs of integers ordered as: (a, b) ı (a , b )
+
+Õ
+Õ
+a Ø a ·b Æ b
+
+≈∆
+is a poset. When interpreting the first element of each pair as the lower bound of
+affinesecond
+inequalitieselement as its upper bound, this order is equivalent to
+an interval and the
+intervals
+interval inclusion.
+⌥
+
+Partial orders are extremely important in several areas of Theoretical
+Computer
+Scisigns
+concrete executions
+ence. For instance, they play a crucial role in the field of denotational semantics, introduced
+by Scott and Strachey [1971], to ensure that the definitions assigning a mathematical meaning to programs are well-founded. In Abstract Interpretation, we will use partial orders to
+Figure 1.5: A set of points abstracted using affine inequalities (dark polyhedron), intervals
+model (lighter
+no less rectangle)
+than fourand
+different
+concepts:
+signs (light quarter-plane).
+1. Partial orders convey the idea of approximation (Fig. 1.5). Some analysis results
+may be coarser than some other results. The order is indeed partial as, sometimes,
+loop body for a new iteration. The corresponding invariant is called a loop invariant, and
+analysis results are incomparable. Consider, for instance, a variable that actually
+provides a convenient summary of the behavior of the loop. A classic execution would
+ranges
+in
+[1,
+9]
+and
+two
+sound
+interval
+analyses
+that
+output
+respectively
+[0,
+9]
+and
+have, for A at location 2, the sequence of values: 0, 1, 2, . . . , 100. The output of the anal[1,
+10].
+ysis must, however, provide a single interval14for location 2 that takes into account all the
+
+===== slide 15 =====
+an interval and the second element as its upper bound, this order is equivalent to
+CHAPTER 1. INTRODUCTION
+interval inclusion.
+⌥
+
+Validation
+Partial orders are extremely important in several areas of Theoretical Computer Sci-
+
+ence. For instance, they play a crucial role in the field of denotational semantics, introduced
+by Scott and Strachey [1971], to ensure that the definitions assigning a mathematical meaning to programs are well-founded. In Abstract Interpretation, we will use partial orders to
+model no less than four different concepts:
+S
+
+S
+
+S
+
+A
+
+P
+
+A
+
+P
+
+P
+
+A
+
+precise analysis
+false alarm
+unsound analysis
+1. Partial orders convey
+the
+idea
+of
+approximation
+(Fig.
+1.5).
+Some
+analysis
+results
+A TM S =∆ P TM S
+A ”TM S but P TM S
+A TM S but P ”TM S
+
+may be coarser than (a)
+some other results.(b)The order is indeed
+partial
+as,
+sometimes,
+(c)
+analysis results are incomparable. Consider, for instance, a variable that actually
+Figure
+1.6:
+Proving
+that
+a
+program
+P
+satisfies
+a
+safety
+specification
+S,
+i.e.,
+that
+P
+TM
+S,
+ranges in [1, 9] and two sound interval analyses that output respectively [0, 9] and
+using an abstraction A of P : (a) succeeds, (b) fails with a false alarm, and (c) is not a
+[1, 10].
+possible configuration for a sound analysis.
+
+2. Partial orders convey the idea of validating a specification (Fig. 1.6). For instance,
+1.1.5seeSoundness
+we can
+a program P satisfying a specification S as the set inclusion P TM S,
+meaning
+allsense,
+program
+behaviors
+arewhatever
+included
+the authorized
+of behaviors.
+In the that
+general
+soundness
+states that
+the in
+properties
+inferred byset
+an analysis,
+they can be trusted to hold on actual program
+executions. It is a very desirable property
+15
+
+===== slide 16 =====
+ence. For instance, they play a crucial role in the field of CHAPTER
+denotational
+semantics, introduced
+1. INTRODUCTION
+by Scott and Strachey [1971], to ensure that the definitions assigning a mathematical meaning to programs are well-founded. In Abstract Interpretation, we will use partial orders to
+model no less than four different concepts:
+
+Soundness
+
+S
+
+S
+
+S
+
+A
+
+1. Partial orders convey the idea of approximation (Fig. 1.5). Some analysis results
+may be coarser than some other results. The order is indeed partial as, sometimes,
+analysis results are incomparable. Consider, for instance, a variable that actually
+precise
+analysis
+false
+alarm
+unsound
+analysis
+ranges in [1, 9] and two sound interval analyses that output respectively [0, 9] and
+A TM S =∆ P TM S
+A ”TM S but P TM S
+A TM S but P ”TM S
+[1, 10].
+P
+
+A
+
+(a)
+
+P
+
+P
+
+A
+
+(b)
+
+(c)
+
+2. Partial
+orders
+the aidea
+of validating
+specification
+(Fig.
+1.6).
+Figure
+1.6: convey
+Proving that
+program
+P satisfies aasafety
+specification
+S, i.e.,
+thatFor
+P TMinstance,
+S,
+usingsee
+an abstraction
+of Psatisfying
+: (a) succeeds,
+(b) fails with aSfalse
+alarm,
+(c) is notPa TM S,
+we can
+a programA P
+a specification
+as the
+setand
+inclusion
+possible
+configuration
+for a behaviors
+sound analysis.
+meaning
+that
+all program
+are included in the authorized set of behaviors.
+3. Partial
+orders
+convey
+the
+idea
+of
+soundness
+(Fig.
+1.6).
+An
+analysis
+is
+sound
+when
+it
+1.1.5 Soundness
+provably outputs a result that is coarser than the actual behavior.
+In the general sense, soundness states that whatever the properties inferred by an analysis,
+they can be trusted to hold on actual program
+executions. It is a very desirable property
+16
+
+4. Partial orders convey the idea of iteration (Fig. 1.4.(b)). When analyzing loops, a
+
+===== slide 17 =====
+model no less than four different concepts:
+
+Advancing towards invariant
+
+1. Partial orders convey the idea of approximation (Fig. 1.5). Some analysis results
+may be coarser than some other results. The order is indeed partial as, sometimes,
+A = 0; B = 0;
+analysis results are
+incomparable.
+Consider,
+for
+instance,
+a
+variable
+that
+actually
+1:
+H A œ [0, 0], B œ [0, 0] I
+iteration
+A
+B
+while sound interval analyses that output respectively [0, 9] and
+ranges in [1, 9] and two
+1 [0, 0]
+[0, 0]
+2:
+H A œ [0, 100], B œ [0, +Œ] I
+2 [0, 1]
+[0, 1]
+[1, 10].
+(A < 100) {
+2.
+
+3.
+
+3 [0, 2]
+[0, 2]
+3:
+H A œ [0, 99], B œ [0, +Œ] I
+... ...
+A = A + 1;
+100 [0, 99]
+[0, 99]
+Partial orders convey
+the
+idea
+of
+validating
+a
+specification
+(Fig. 1.6). For instance,
+4:
+H A œ [1, 100], B œ [0, +Œ] I
+101 [0, 100] [0, 100]
+B = satisfying
+B + 1;
+we can see a program P
+a specification
+S100]as [0,
+the
+102 [0,
+101]set inclusion P TM S,
+5:
+H A œ [1, 100], B œ [1, +Œ] I
+103
+[0,
+100]
+[0,
+102]
+meaning that all program
+behaviors are included in the authorized set of behaviors.
+}
+6:
+H A œ [100, 100], B œ [0, +Œ] I
+(a)
+(b)
+Partial orders convey the idea of soundness (Fig. 1.6). An analysis is sound when it
+
+1.4:aInterval
+simple loopthan
+(a) andthe
+the actual
+detailed iteration
+for location
+provably Figure
+outputs
+resultanalysis
+that ofisa coarser
+behavior.
+2 (b).
+
+4. Partial orders convey the idea of iteration (Fig. 1.4.(b)). When analyzing loops, a
+sequence of increasing semantic elements is computed, and the fact that they are
+ordered will be important to ensure that
+8 the computation is advancing towards a
+well-defined loop invariant.
+17
+
+===== slide 18 =====
+sequence of increasing semantic elements is computed, and the fact that they are
+ordered will be important to ensure that the computation is advancing towards a
+well-defined loop invariant.
+
+2.1.2
+
+⊔ is lub (join)
+
+Lower and Upper Bounds
+
+Given two elements a and b in a poset X, we call upper bound of a and b any element
+CHAPTER
+2.
+ELEMENTS
+OF
+ABSTRACT
+INTERPRETATION
+c œ X such that a ı c and b ı c, i.e., c is greater than both a and b. Likewise, a lower
+bound c of a and b satisfies c ı a and c ı b. Moreover, c is the least upper bound, also
+called lub or join, if it is the smallest element greater than both a and b. Such a least
+upper bound does not necessarily exist but, when it does, it is unique. It is written as
+a Û b. Likewise, the unique greatest lower bound
+of a and b, also called glb or meet, if it
+19
+exists, is the greatest element smaller than a and b, and it is denoted as a Ù b.
+As Û and Ù are associative operators, we will employ also the notations Û A and Ù A
+to compute lubs an glbs on arbitrary (possibly infinite) sets A of elements. Finally, we
+denote respectively as ‹ (called bottom) and € (called top) the least element and the
+greatest element in the poset, if they exist.
+
+Example 2.2. In the powerset poset (P(X),18TM) of any (possibly infinite) set X, the lub Û
+
+===== slide 19 =====
+sequence of increasing semantic elements is computed, and the fact that they are
+ordered will be important to ensure that the computation is advancing towards a
+well-defined loop invariant.
+
+2.1.2
+
+⊓ is glb (meet)
+
+Lower and Upper Bounds
+
+Given two elements a and b in a poset X, we call upper bound of a and b any element
+CHAPTER
+2.
+ELEMENTS
+OF
+ABSTRACT
+INTERPRETATION
+c œ X such that a ı c and b ı c, i.e., c is greater than both a and b. Likewise, a lower
+bound c of a and b satisfies c ı a and c ı b. Moreover, c is the least upper bound, also
+called lub or join, if it is the smallest element greater than both a and b. Such a least
+upper bound does not necessarily exist but, when it does, it is unique. It is written as
+a Û b. Likewise, the unique greatest lower bound
+of a and b, also called glb or meet, if it
+19
+exists, is the greatest element smaller than a and b, and it is denoted as a Ù b.
+As Û and Ù are associative operators, we will employ also the notations Û A and Ù A
+to compute lubs an glbs on arbitrary (possibly infinite) sets A of elements. Finally, we
+denote respectively as ‹ (called bottom) and € (called top) the least element and the
+greatest element in the poset, if they exist.
+
+Example 2.2. In the powerset poset (P(X),19TM) of any (possibly infinite) set X, the lub Û
+
+===== slide 20 =====
+sequence of increasing semantic elements is computed, and the fact that they are
+ordered will be important to ensure that the computation is advancing towards a
+well-defined loop invariant.
+
+Arbitrary lub / glb, bottom, top
+
+2.1.2
+
+Lower and Upper Bounds
+
+Given two elements a and b in a poset X, we call upper bound of a and b any element
+CHAPTER
+2.
+ELEMENTS
+OF
+ABSTRACT
+INTERPRETATION
+c œ X such that a ı c and b ı c, i.e., c is greater than both a and b. Likewise, a lower
+bound c of a and b satisfies c ı a and c ı b. Moreover, c is the least upper bound, also
+called lub or join, if it is the smallest element greater than both a and b. Such a least
+upper bound does not necessarily exist but, when it does, it is unique. It is written as
+a Û b. Likewise, the unique greatest lower bound
+of a and b, also called glb or meet, if it
+19
+exists, is the greatest element smaller than a and b, and it is denoted as a Ù b.
+As Û and Ù are associative operators, we will employ also the notations Û A and Ù A
+to compute lubs an glbs on arbitrary (possibly infinite) sets A of elements. Finally, we
+denote respectively as ‹ (called bottom) and € (called top) the least element and the
+greatest element in the poset, if they exist.
+
+Example 2.2. In the powerset poset (P(X),20TM) of any (possibly infinite) set X, the lub Û
+
+===== slide 21 =====
+sequence of increasing semantic elements is computed, and the fact that they are
+ordered will be important to ensure that the computation is advancing towards a
+well-defined loop invariant.
+
+Arbitrary lub / glb, bottom, top
+
+2.1.2
+
+Lower and Upper Bounds
+
+Given two elements a and b in a poset X, we call upper bound of a and b any element
+CHAPTER
+2.
+ELEMENTS
+OF
+ABSTRACT
+INTERPRETATION
+c œ X such that a ı c and b ı c, i.e., c is greater than both a and b. Likewise, a lower
+bound c of a and b satisfies c ı a and c ı b. Moreover, c is the least upper bound, also
+called lub or join, if it is the smallest element greater than both a and b. Such a least
+upper bound does not necessarily exist but, when it does, it is unique. It is written as
+a Û b. Likewise, the unique greatest lower bound
+of a and b, also called glb or meet, if it
+19
+exists, is the greatest element smaller than a and b, and it is denoted as a Ù b.
+As Û and Ù are associative operators, we will employ also the notations Û A and Ù A
+to compute lubs an glbs on arbitrary (possibly infinite) sets A of elements. Finally, we
+denote respectively as ‹ (called bottom) and € (called top) the least element and the
+greatest element in the poset, if they exist.
+
+Example 2.2. In the powerset poset (P(X),21TM) of any (possibly infinite) set X, the lub Û
+
+===== slide 22 =====
+lub and glb
+N×N
+
+upper bounds of X
+X
+
+lub(X)
+
+glb(X)
+
+not comparable
+lower bounds of X
+
+(x1, y1) ≤N×N (x2, y2) ⟺ x1 ≤N x2 ∧ y1 ≤N y2
+pointwise ordering
+22
+
+===== slide 23 =====
+to compute lubs an glbs on arbitrary (possibly infinite) sets A of elements. Finally, we
+denote respectively as ‹ (called bottom) and € (called top) the least element and the
+greatest element in the poset, if they exist.
+
+lub and glb: examples
+
+Example 2.2. In the powerset poset (P(X), TM) of any (possibly infinite) set X, the lub Û
+is simply the set union fi, and the glb Ù is simply the set intersection fl. Both always exist
+for all arguments — hence, we actually have a complete lattice structure, as described in
+Sect. 2.1.5. We also have ‹ = ÿ and € = X.
+⌥
+Example 2.3. Not all posets have upper bounds or lubs. Consider, for instance, the poset
+({a, b}, =), where the partial order is the equality. Then, there is no upper bound for a and
+b, and so, there is no lub. Likewise, we can construct posets where a pair of elements have
+several upper bounds but no least upper bound, and posets where finite sets of elements
+have lubs but infinite sets of elements do not.
+⌥
+Remark 2.1. We will also use the notation min A and max A to denote, respectively,
+the minimum and the maximum element in a set A TM X. Note the difference between
+23
+min A (resp. max A) and Ù A (resp. Û A): the former imposes that the element smaller
+
+===== slide 24 =====
+to compute lubs an glbs on arbitrary (possibly infinite) sets A of elements. Finally, we
+denote respectively as ‹ (called bottom) and € (called top) the least element and the
+greatest element in the poset, if they exist.
+
+lub and glb: examples
+
+Example 2.2. In the powerset poset (P(X), TM) of any (possibly infinite) set X, the lub Û
+is simply the set union fi, and the glb Ù is simply the set intersection fl. Both always exist
+for all arguments — hence, we actually have a complete lattice structure, as described in
+Sect. 2.1.5. We also have ‹ = ÿ and € = X.
+⌥
+Example 2.3. Not all posets have upper bounds or lubs. Consider, for instance, the poset
+({a, b}, =), where the partial order is the equality. Then, there is no upper bound for a and
+b, and so, there is no lub. Likewise, we can construct posets where a pair of elements have
+several upper bounds but no least upper bound, and posets where finite sets of elements
+have lubs but infinite sets of elements do not.
+⌥
+Remark 2.1. We will also use the notation min A and max A to denote, respectively,
+the minimum and the maximum element in a set A TM X. Note the difference between
+24
+min A (resp. max A) and Ù A (resp. Û A): the former imposes that the element smaller
+
+===== slide 25 =====
+Example
+( ℘({x, y, z}) , ⊑ )
+Y ⊆ ℘({x, y, z})
+lub(Y) =
+
+⋃
+
+Y
+
+glb(Y) =
+
+⋂
+
+Y
+
+25
+
+===== slide 26 =====
+Example
+⊤
+
+-4
+
+-3
+
+(Z ∪ { ⊥ , ⊤ }, ≤)
+
+-2
+
+-1
+
+0
+
+⊥
+
+n∈Z⇒ ⊥≤n≤⊤
+26
+
+1
+
+2
+
+3
+
+4
+
+===== slide 27 =====
+Example 2.3. Not all posets have upper bounds or lubs. Consider, for instance, the poset
+({a, b}, =), where the partial order is the equality. Then, there is no upper bound for a and
+b, and so, there is no lub. Likewise, we can construct posets where a pair of elements have
+several upper bounds but no least upper bound, and posets where finite sets of elements
+have lubs but infinite sets of elements do not.
+⌥
+
+min and max vs. glb and lub
+
+Remark 2.1. We will also use the notation min A and max A to denote, respectively,
+the minimum and the maximum element in a set A TM X. Note the difference between
+min A (resp. max A) and Ù A (resp. Û A): the former imposes that the element smaller
+(resp. larger) than all the elements in A is in A, while the later may denote an element
+in X outside A. For instance, in the classic order (R, Æ), 0 Û 1 = max {0, 1} = 1 œ {0, 1},
+while Û { x œ R | x < 1 } = 1 œ
+/ { x œ R | x < 1 }. Naturally, min A and max A are not
+always defined for every set A in every poset, even less so than Ù A and Û A.
+⌃
+
+2.1.3
+
+Hasse Diagrams
+
+A poset is often presented graphically by placing greater elements higher, and materializing
+the order with lines. Such a visual representation
+is called a Hasse diagram. It also makes
+27
+
+===== slide 28 =====
+naturally the limit. For variable B, the iteration keeps increasing, so that a natural limit
+is actually [0, +Œ]. In both cases, our notion of limit coincides with that of lub. Note,
+however, that we do not require lubs for arbitrary families of elements, but only for those
+that come from iteration sequences. This motivates the following definitions:
+
+Chains (again, but not the same)
+
+Definition 2.2 (Chain). A chain C TM X in a poset (X, ı) is a subset C of X that is
+totally ordered: ’c, d œ C: (c ı d) ‚ (d ı c).
+⌅
+Definition 2.3 (CPO). A complete partial order, or CPO, is a poset such that every
+A poset (X, ⊑ ) does not have infinite chains if every chain is nite
+chain has a lub.
+⌅
+Note
+that(X,
+ÿ is⊑a)chain,
+so, our
+definition
+that Û ÿ exists.
+our definition
+n ∈ Nrequires
+A
+poset
+has nite
+height
+if the cardinality
+of theStretching
+longest chain
+is n + 1
+a little, we state that Û ÿ = ‹. Indeed, the more elements we join, the larger the result is,
+so, when joining no element at all, we obtain the least element of all. As a consequence,
+A denumerable sequence {xi}i∈N of elements in (X, ⊑ ) is an ascending chain if
+all our CPO are so-called pointed, i.e., they feature a least element ‹.
+Example 2.5 (Chains, CPO). n ≤ m ⇒ xn ⊑ xm
+1. In Fig. 2.1.(a), {a, c, f, g} forms a chain.
+fi
+
+fi
+
+fi
+
+28
+
+===== slide 29 =====
+Convergence and ACC
+A denumerable sequence {xi}i∈N ( nitely) converges if
+
+∃n0. ∀n ≥ n0. xn = xn0
+A poset (X, ⊑ ) satisfies the Ascending Chain Condition (ACC) when
+each ascending chain converges (i.e., there are no infinite ascending chains)
+ACC abstract domains guarantee that the analysis always terminates!
+
+fi
+
+fi
+
+fi
+
+29
+
+===== slide 30 =====
+The total poset
+of even numbers
+is not ACC
+
+This infinite complete lattice
+is ACC but does not have
+nite height
+
+This CPO
+is not ACC
+⊤
+
+12
+
+6
+
+10
+
+5
+
+8
+
+4
+
+6
+4
+
+3
+2
+
+2
+
+1
+
+0
+
+0
+
+⋯ ⋮
+
+30
+fi
+
+fi
+
+Example
+
+===== slide 31 =====
+CPOs (again, but not the same)
+
+Definition 2.2 (Chain). A chain C TM X in a poset (X, ı) is a subset C of X that is
+totally ordered: ’c, d œ C: (c ı d) ‚ (d ı c).
+⌅
+Definition 2.3 (CPO). A complete partial order, or CPO, is a poset such that every
+chain has a lub.
+⌅
+Note that ÿ is a chain, so, our definition requires that Û ÿ exists. Stretching our definition
+a little, we state that Û ÿ = ‹. Indeed, the more elements we join, the larger the result is,
+so, when joining no element at all, we obtain the least element of all. As a consequence,
+all our CPO are so-called pointed, i.e., they feature a least element ‹.
+Pointed CPOs are what we called CPOs with bottom
+Example 2.5 (Chains, CPO).
+
+1. In Fig. 2.1.(a), {a, c, f, g} forms a chain.
+2. Figure 2.1.(a) is a CPO. In fact, every finite poset is a CPO. Indeed every finite
+chain always has a lub.
+31
+3. Figure 2.1.(b) is not a CPO because infinite
+subsets of N do not have a lub in N.
+
+===== slide 32 =====
+ur CPO are so-called pointed, i.e., they feature a least element ‹.
+
+mple 2.5 (Chains, CPO).
+In Fig. 2.1.(a), {a, c, f, g} forms a chain.
+
+Example
+
+2.1.
+ORDER
+THEORY
+Figure 2.1.(a) is a CPO. In fact, every
+finite
+poset is
+a CPO. Indeed every finite
+chain always has a lub.
+Figure 2.1.(b) is not a CPO because infinite subsets of N do not have a lub in N.
+Figure 2.1.(c) is a CPO as every infinite subset of N fi {Œ} has a lub: Œ.
+For any (even infinite) set X, its powerset poset (P(X), TM) is a CPO.
+
+g
+
+mark 2.2. Our definition of CPO deviates slightly from the usual definition
+from
+e
+f
+ain theory [Scott and Strachey, 1971], which uses directed subsets instead of chains.
+le we believe that the two definitions are equivalent (assuming Zorn’s lemma),
+we
+chose
+c
+d
+⊑ explicit.
+se Def. 2.3 as it makes the connection with limits of iterations more
+⌃
+
+5
+
+b
+
+Lattices
+
+∞
+∞
+
+⌥
+3
+
+3
+
+2
+
+2
+
+1
+
+1
+
+0
+0
+ts provide the bare minimum algebraic structure, but many ordered sets haveaa richer
+(a) Lattices
+(b)
+(c)
+cture, than we can exploit. Such structures include, in particular, lattices.
+posets where the lub and glb always exist, either only for pairs of elements (and,
+Figure
+2.1:
+Hasse
+diagrams
+for:
+(a)
+a
+finite
+poset,
+(b)
+the
+natural
+integers
+(N,
+Æ),
+and
+xtension, for finite sets of elements), or for arbitrary (possibly infinite) families of
+(c)
+the
+natural
+integers
+enriched
+with
+infinity
+(N
+fi
+{Œ},
+Æ).
+ents, in which case the lattice is said to be complete:
+
+32
+
+===== slide 33 =====
+Complete lattices
+
+2.1. ORDER THEORY
+
+Definition 2.4 (Lattice). A lattice (X, ı, Û, Ù) is a poset such that ’a, b œ X: a Û b and
+a Ù b exist.
+⌅
+Definition 2.5 (Complete lattice). A complete lattice (X, ı, Û, Ù, ‹, €) is a poset such
+that:
+1. ’A TM X: Û A exists;
+2. ’A TM X: Ù A exists;
+
+3. X has a least element ‹;
+
+implies 3 and 4:
+
+⊥ = lub(∅)
+
+and
+
+⊤ = lub(X)
+
+implies 3 and 4:
+
+⊥ = glb(X)
+
+and
+
+⊤ = glb(∅)
+
+(unnecessary requirement)
+
+4. X has a greatest element €. (unnecessary requirement)
+
+⌅
+
+Naturally, a complete lattice is both a lattice and a CPO. Less obviously, to get a complete
+lattice, either Def. 2.5.1 or Def. 2.5.2 is sufficient, as each one implies the other. Indeed,
+assuming that ’A TM X: Û A exists, then ’B33TM X: Ù B = Û { x œ X | ’a œ B: x ı a } also
+
+===== slide 34 =====
+The lattice N
+(N, ≤)
+total order
+lub = max
+glb = min
+it is a lattice, but not a complete lattice
+
+6
+5
+4
+3
+2
+1
+0
+
+it is not a CPO
+34
+
+===== slide 35 =====
+The complete lattice N
+(N ∪ { ⊤ }, ≤)
+
+⊤
+
+total order
+lub = sup
+glb = min
+it is a complete lattice
+
+6
+5
+4
+3
+2
+1
+0
+
+it is a CPO
+35
+
+⊤
+
+===== slide 36 =====
+Moreover, both imply Def. 2.5.3–4. Indeed, we have: ‹ = Û ÿ = Ù X and € = Ù ÿ = Û X.
+More information on lattices can be found in [Birkhoff, 1967].
+
+The complete lattice ℘(X)
+
+Example 2.6 (Lattices, Complete lattices).
+1. For any set X, the powerset:
+
+(P(X), TM, fi, fl, ÿ, X)
+
+(2.1)
+
+P(Z)
+
+is a complete lattice, as we can compute the intersection and union of arbitrary
+many (including infinitely many) sets. The Hasse diagram for P(Z) is presented in
+Fig. 2.2.
+2. We construct an integer interval lattice as follows:
+
+...
+... {-1,0,1,9} ...
+
+({ [a, b] | a, b œ Z, a Æ b } fi { ‹ }, TM, Û, fl)
+
+(2.2)
+
+To simplify, we assimilate here a pair of bounds (a, b) with the set [a, b] of integers... {-1,0,1} ... {0,1,9} ...
+comprised between a and b, taking care that a Æ b. We add a special,
+unique, smallest
+⊑
+element ‹ to represent ÿ. We thus use the classic set operators: TM as partial order
+and fl as glb, as intervals are closed under intersection. However, they are not ...
+closed
+{-1,0} {0,1} ... {1,9} ...
+def
+under set union, hence, we define the lub as [a, b] Û [aÕ , bÕ ] = [min(a, aÕ ), max(b, bÕ )],
+while ’x: x Û ‹ = ‹ Û x = x. Indeed, [a, b] Û [aÕ , bÕ ] computes the smallest interval
+containing intervals [a, b] and [aÕ , bÕ ].
+
+... {-1}
+3. The integer interval lattice (2.2) from the previous point is not complete as the
+infinite family of intervals { [0, i] | i Ø 0 } has no lub. We complete the interval
+lattice into a complete lattice by allowing positive and negative infinities as bounds:
+
+{0}
+
+{1}
+
+...
+
+{9}
+
+...
+
+∅
+
+({ [a, b] | a œ Z fi { ≠Œ }, b œ Z fi { +Œ }, a Æ b } fi { ‹ },
+(2.3)the powerset poset of integers (P(Z), TM).
+Figure
+2.2:
+Hasse
+diagram
+for
+TM, Û, fl, ‹, [≠Œ, +Œ])
+23
+
+36
+
+===== slide 37 =====
+is a complete lattice, as we can compute the intersection and union of arbitrary
+many (including infinitely many) sets. The Hasse diagram for P(Z) is presented in
+Fig. 2.2.
+
+The interval lattice
+
+2. We construct an integer interval lattice as follows:
+({ [a, b] | a, b œ Z, a Æ b } fi { ‹ }, TM, Û, fl)
+
+(2.2)
+
+To simplify, we assimilate here a pair of bounds (a, b) with the set [a, b] of integers
+comprised between a and b, taking care that a Æ b. We add a special, unique, smallest
+element ‹ to represent ÿ. We thus use the classic set operators: TM as partial order
+and fl as glb, as intervals are closed under intersection. However, they are not closed
+def
+Õ
+Õ
+Õ
+Õ
+under set union, hence, we define the lub as [a, b] Û [a , b ] = [min(a, a ), max(b, b )],
+Õ
+Õ
+while ’x: x Û ‹ = ‹ Û x = x. Indeed, [a, b] Û [a , b ] computes the smallest interval
+Õ
+Õ
+containing intervals [a, b] and [a , b ].
+3. The
+integer
+interval
+lattice
+(2.2)
+from
+the
+previous
+point
+is
+not
+complete
+as
+the
+Is it complete?
+Not all lubs exist!
+infinite family of intervals { [0, i] | i Ø 0 } has no lub. We complete the interval
+lattice into a complete lattice by allowing37 positive and negative infinities as bounds:
+
+===== slide 38 =====
+comprised between a and b, taking care that a Æ b. We add a special, unique, smallest
+element ‹ to represent ÿ. We thus use the classic set operators: TM as partial order
+and fl as glb, as intervals are closed under intersection. However, theyCHAPTER
+are not closed 2.
+def
+Õ
+Õ
+under set union, hence, we define the lub as [a, b] Û [a , b ] = [min(a, aÕ ), max(b, bÕ )],
+while ’x: x Û ‹ = ‹ Û x = x. Indeed, [a, b] Û [aÕ , bÕ ] computes the smallest interval
+containing intervals [a, b] and [aÕ , bÕ ].
+
+The interval complete lattice
+
+3. The integer interval lattice (2.2) from the previous point is not complete as the
+infinite family of intervals { [0, i] | i Ø 0 } has no lub. We complete the interval
+lattice into a complete lattice by allowing positive and negative infinities as bounds:
+Figure 2.3: Hasse
+interval
+lattice,
+with
+({ [a,diagram
+b] | a œ Zfor
+fi {the
+≠Œ
+}, b œ Z
+fi { +Œ
+}, abounds
+Æ b } fiextended
+{ ‹ }, to Œ.
+(2.3)
+TM, Û, fl, ‹, [≠Œ, +Œ])
+def
+
+Lubs are computed as: ÛiœI [ai , bi ] = [miniœI ai , maxiœI bi ]. Moreover, the lattice now
+23
+has a greatest element: [≠Œ, +Œ]. The complete lattice of intervals is illustrated in
+Fig. 2.3.
+
+4. The divisibility lattice is defined as (Nú , |, lcm, gcd), where x|y means that x divides
+y, or equivalently that y is a multiple of x, i.e., ÷k œ Nú : xk = y. Then, the lub and
+glb are respectively the least common multiple, lcm, and the greatest common divisor,
+gcd. This lattice is illustrated in Fig. 2.4. It is the basis of a congruence ⊑
+analysis
+that we will study in Sect. 4.8 to infer properties such as the fact that a variable is
+a multiple of some constant. Note that this lattice is not complete as chains such
+as {2, 4, 8, 16, . . .} have no lub. Moreover, although an arbitrary non-empty, possibly
+infinite integer set A TM Nú has a glb, there is no greatest element, i.e., no glb for the
+empty set.
+⌥
+
+1.6
+
+ELEMENTS OF ABSTRACT INTERPRETATIO
+
+[-∞,+∞]
+
+...
+
+...
+
+... [-∞,1] ... [-∞,9] ... [-1,+∞]
+
+[0,+∞]
+
+...
+
+...
+
+...
+
+...
+
+...
+
+...
+
+[-1,0]
+
+... [-1,-1]
+
+...
+
+[-1,9]
+
+[-1,1]
+
+... [0,9]
+
+[0,1]
+
+[0,0]
+
+...
+
+... [1,9]
+
+[1,1]
+
+...
+
+...
+
+...
+
+[9,9]
+
+...
+
+Distributivity
+⊥
+
+lattice (A, ı, Û, Ù) is said to be distributive if Û distributes over Ù, and Ù distributes over
+i.e., ’a, b, c œ A: aÛ(bÙc) = (aÛb)Ù(aÛc) and aÙ(bÛc) = (aÙb)Û(aÙc). Actually, very
+Figure
+2.3:
+Hasse
+diagram
+for
+the
+interval
+lattice,
+with
+bounds
+extended
+to
+Œ.
+w lattices we will encounter are distributive, and these generally correspond to concrete
+38
+orlds rather than abstract worlds:
+
+===== slide 39 =====
+Summary
+A poset (X, ⊑ ) is a CPO if every (possibly empty) chain has a lub (must have ⊥)
+A poset (X, ⊑ ) is a lattice if every pair of elements has both lub and glb
+A poset (X, ⊑ ) is a complete lattice if every (possibly empty) subset has both lub and glb
+
+⊥ = lub(∅) = glb(X)
+
+and
+
+⊤ = lub(X) = glb(∅)
+
+lub and glb are commutative and associative
+Each nite lattice is a complete lattice
+Each complete lattice is a CPO (and a lattice)
+
+fi
+
+39
+
+===== slide 40 =====
+Exercises
+
+40
+
+===== slide 41 =====
+Exercise
+Classify these 3-elements posets
+
+lattice?
+complete
+lattice?
+41
+
+===== slide 42 =====
+Exercise
+Classify these 3-elements posets
+
+lattice?
+complete
+lattice?
+42
+
+===== slide 43 =====
+Exercise
+g
+
+c
+
+d
+
+e
+
+poset?
+CPO?
+a
+
+b
+
+lattice?
+complete
+lattice?
+43
+
+f
+
+===== slide 44 =====
+Exercise
+g
+
+Y
+c
+
+d
+
+e
+
+poset?
+CPO?
+a
+
+b
+
+lattice?
+complete
+lattice?
+44
+
+f
+
+===== slide 45 =====
+Definition 2.4 (Lattice). A lattice (X, ı, Û, Ù) is a poset such that ’a, b œ X: a Û b and
+a Ù b exist.
+⌅
+
+Exercise
+
+Definition 2.5 (Complete lattice). A complete lattice (X, ı, Û, Ù, ‹, €) is a poset such
+that:
+1. ’A TM X: Û A exists;
+2. ’A TM X: Ù A exists;
+
+prove that: 1 holds i 2 holds
+
+3. X has a least element ‹;
+
+4. X has a greatest element €.
+
+⌅
+
+Naturally, a complete lattice is both a lattice and a CPO. Less obviously, to get a complete
+lattice, either Def. 2.5.1 or Def. 2.5.2 is sufficient, as each one implies the other. Indeed,
+assuming that ’A TM X: Û A exists, then ’B TM X: Ù B = Û { x œ X | ’a œ B: x ı a } also
+exists: we can reduce a glb to a lub, which always exists (the converse naturally holds).
+Moreover, both imply Def. 2.5.3–4. Indeed, we have: ‹ = Û ÿ = Ù X and € = Ù ÿ = Û X.
+More information on lattices can be found in [Birkhoff, 1967].
+Example 2.6 (Lattices, Complete lattices).
+ff
+
+1. For any set X, the powerset:
+
+45
+
+===== slide 46 =====
+Definition 2.4 (Lattice). A lattice (X, ı, Û, Ù) is a poset such that ’a, b œ X: a Û b and
+a Ù b exist.
+⌅
+
+Exercise
+
+Definition 2.5 (Complete lattice). A complete lattice (X, ı, Û, Ù, ‹, €) is a poset such
+that:
+1. ’A TM X: Û A exists;
+2. ’A TM X: Ù A exists;
+
+prove that: 1 holds i 2 holds
+
+3. X has a least element ‹;
+
+Assume 1 holds. Take generic A ⊆ X. We prove ⊓ A exists.
+4. X has a greatest element €.
+
+⌅
+
+Let L = {a lcomplete
+the aset
+of lower
+boundsto
+ofget
+∈ X ∣ ∀a
+∈A
+l ⊑ aalattice
+} be and
+A.a complete
+Naturally,
+lattice
+is .both
+CPO.
+Less obviously,
+lattice, either Def. 2.5.1 or Def. 2.5.2 is sufficient, as each one implies the other. Indeed,
+assuming that ’A TM X: Û A exists, then ’B TM X: Ù B = Û { x œ X | ’a œ B: x ı a } also
+Then g = ⊔ L exists and g is greater than or equal to any lower bound in L.
+exists: we can reduce a glb to a lub, which always exists (the converse naturally holds).
+g isimply
+Moreover,both
+itselfDef.
+a lower
+bound
+of A
+Moreover,
+2.5.3–4.
+Indeed,
+we, have: ‹ = Û ÿ = Ù X and € = Ù ÿ = Û X.
+More
+information
+on A
+lattices
+be found
+in for
+[Birkhoff,
+1967]. in L and g is the least.
+because
+any a ∈
+is an can
+upper
+bound
+all elements
+Example 2.6 (Lattices, Complete lattices).
+
+Therefore g = ⊓ A
+ff
+
+1. For any set X, the powerset:
+
+46
+
+===== slide 47 =====
+Definition 2.4 (Lattice). A lattice (X, ı, Û, Ù) is a poset such that ’a, b œ X: a Û b and
+a Ù b exist.
+⌅
+
+Exercise
+
+Definition 2.5 (Complete lattice). A complete lattice (X, ı, Û, Ù, ‹, €) is a poset such
+that:
+1. ’A TM X: Û A exists;
+2. ’A TM X: Ù A exists;
+
+prove that: 1 holds i 2 holds
+
+3. X has a least element ‹;
+
+Assume 2 holds. Take generic A ⊆ X. We prove ⊔ A exists.
+4. X has a greatest element €.
+
+⌅
+
+Let U = {a complete
+.a⊑
+set ofLess
+upper
+bounds
+of A
+u ∈ X ∣ lattice
+∀a ∈isAboth
+u } beandthea CPO.
+Naturally,
+a lattice
+obviously,
+to get
+a .complete
+lattice, either Def. 2.5.1 or Def. 2.5.2 is sufficient, as each one implies the other. Indeed,
+assuming that ’A TM X: Û A exists, then ’B TM X: Ù B = Û { x œ X | ’a œ B: x ı a } also
+Then l = ⊓ U exists and l is smaller than or equal to any lower bound in U.
+exists: we can reduce a glb to a lub, which always exists (the converse naturally holds).
+l is imply
+A,have: ‹ = Û ÿ = Ù X and € = Ù ÿ = Û X.
+Moreover,both
+itself Def.
+an upper
+bound
+ofwe
+Moreover,
+2.5.3–4.
+Indeed,
+More
+information
+on A
+lattices
+can bebound
+found in
+1967].in U and l is the greatest.
+because
+any a ∈
+is a lower
+for[Birkhoff,
+all elements
+Example 2.6 (Lattices, Complete lattices).
+
+Therefore l = ⊔ A
+ff
+
+1. For any set X, the powerset:
+
+47
+
+===== slide 48 =====
+has a greatest element: [≠Œ, +Œ]. The complete lattice of intervals is illustrated in
+Fig. 2.3.
+
+The divisibility lattice
+
+ú
+4. The divisibility lattice is defined as (N , |, lcm, gcd), where x|y means that x divides
+ú
+y, or equivalently that y is a multiple of x, i.e., ÷k œ N : xk = y. Then, the lub and
+
+glb
+are
+respectively
+the
+least
+common
+multiple,
+lcm,
+and
+the
+greatest
+common
+divisor,
+2.1. ORDER THEORY
+gcd. This lattice is illustrated in Fig. 2.4. It is the basis of a congruence analysis
+that we will study in Sect. 4.8 to infer properties such as the fact that a variable is
+of some constant. Note that this lattice is not complete as chains such
+Isa itmultiple
+complete?
+as {2, 4, 8, 16, . . .} have no lub. Moreover,
+although
+an
+arbitrary
+non-empty,
+possibly
+36
+ú
+infinite integer set A TM N has a glb, there is no greatest element, i.e., no glb for the
+12
+8
+18
+27
+empty set.
+⌥
+⊑
+
+2.1.6
+
+Distributivity
+
+6
+
+4
+2
+
+9
+3
+
+5
+
+A lattice (A, ı, Û, Ù) is said to be distributive if Û1 distributes over Ù, and Ù distributes over
+Û, i.e., ’a, b, c œ A: aÛ(bÙc) = (aÛb)Ù(aÛc) and aÙ(bÛc)
+=
+(aÙb)Û(aÙc).
+Actually,
+very
+ú
+Figure 2.4: Hasse diagram for the divisor lattice (N , |, lcm, gcd) where x|y if x divides y
+ew lattices we will encounter are distributive,48and these generally correspond to concrete
+y.
+
+===== slide 49 =====
+has a greatest element: [≠Œ, +Œ]. The complete lattice of intervals is illustrated in
+Fig. 2.3.
+
+The divisibility lattice
+
+ú
+4. The divisibility lattice is defined as (N , |, lcm, gcd), where x|y means that x divides
+ú
+y, or equivalently that y is a multiple of x, i.e., ÷k œ N : xk = y. Then, the lub and
+
+glb
+are
+respectively
+the
+least
+common
+multiple,
+lcm,
+and
+the
+greatest
+common
+divisor,
+2.1. ORDER THEORY
+gcd. This lattice is illustrated in Fig. 2.4. It is the basis of a congruence analysis
+that we will study in Sect. 4.8 to infer properties such as the fact that a variable is
+of some constant. Note that this lattice is not complete as chains such
+Isa itmultiple
+complete?
+as {2, 4, 8, 16, . . .} have no lub. Moreover,
+although
+an
+arbitrary
+non-empty,
+possibly
+36
+ú
+infinite
+integerexist!
+set A TM N has a glb, there is no greatest element, i.e., no glb for the
+Not
+all lubs
+12
+8
+18
+27
+empty set.
+⌥
+
+lub {1,2,4,8,...} ?
+
+2.1.6
+Distributivity
+glb(∅) does not exist!
+
+⊑
+
+6
+
+4
+2
+
+9
+3
+
+5
+
+A lattice (A, ı, Û, Ù) is said to be distributive if Û1 distributes over Ù, and Ù distributes over
+Û, i.e., ’a, b, c œ A: aÛ(bÙc) = (aÛb)Ù(aÛc) and aÙ(bÛc)
+=
+(aÙb)Û(aÙc).
+Actually,
+very
+ú
+Figure 2.4: Hasse diagram for the divisor lattice (N , |, lcm, gcd) where x|y if x divides y
+ew lattices we will encounter are distributive,49and these generally correspond to concrete
+y.
+
+===== slide 50 =====
+Abstraction and concretization
+
+50
+
+===== slide 51 =====
+51
+
+===== slide 52 =====
+ous
+if
+for
+every
+chain
+C
+TM
+A
+,
+{
+f
+(c)
+|
+c
+œ
+C
+}
+is
+also
+a
+chain
+and
+the
+limits
+coincide:
+1
+2. FIXPOINTS
+f (Û1 C) = Û2 { f (c) | c œ C }.
+
+Monotonicity
+
+3. Join morphism: a function f : (A1 , ı1 , Û1 ) æ (A2 , ı2 , Û2 ) between two lattices is
+1. Monotonicity: a function f : (A1 , ı1 ) æ (A2 , ı2 ) between two posets is monotonic
+a join morphism, or Û≠morphism, if ’a, b œ A1 : f (a Û1 b) = f (a) Û2 f (b); it is a
+if ’x,complete
+y œ A1 : xÛ≠morphism
+ı1 y =∆ fif(x)
+ı
+f
+(y).
+2
+A1 and A2 are complete lattices and the property extends
+to arbitrary lubs, i.e., ’X TM A1 : f (Û1 X) = Û2 { f (x) | x œ X }.
+
+2. Continuity: a function f : (A1 , ı1 , Û1 ) æ (A2 , ı2 , Û2 ) between two CPO is continuous4.ifExtensivity:
+for every chain
+C TM A1f, {: (A,
+f (c)ı)| cæœ (A,
+C }ı)
+is also
+a chain ifand
+an operator
+is extensive
+’a the
+œ A:limits
+a ı fcoincide:
+(a), and
+f (Û1 C)
+= Û2 {iff ’a
+(c) œ| cA:œfC
+reductive
+(a)}.ı a.
+⌅
+definitions
+can be justified
+In
+terms
+of
+information
+theory,
+where
+the
+3. JoinThese
+morphism:
+a function
+f : (Ainformally.
+,
+ı
+,
+Û
+)
+æ
+(A
+,
+ı
+,
+Û
+)
+between
+two
+lattices
+is
+1
+1
+1
+2
+2
+2
+partial
+order
+measures
+a
+quantity
+of
+information,
+monotonicity
+means
+that,
+given
+more
+a join morphism, or Û≠morphism, if ’a, b œ A1 : f (a Û1 b) = f (a) Û2 f (b); it is a
+information
+as
+input,
+a
+function
+must
+output
+more
+information.
+In
+terms
+of
+program
+complete Û≠morphism if A1 and A2 are complete lattices and the property extends
+semantics, the more input we feed a program, the more behaviors it will exhibit.
+to arbitrary lubs, i.e., ’X TM A1 : f (Û1 X) = Û2 { f (x) | x œ X }.
+Continuity implies monotonicity: when x ı y, simply consider the chain {x, y} to get
+that f (x) Û f (y) = f (x Û y) = f (y), i.e., f (x) ı f (y). Continuity goes one step further
+4. and
+Extensivity:
+an operator
+: (A, ı)limits,
+æ (A,
+ı)
+is
+extensive
+if
+’a
+œ
+A:
+a
+ı
+f
+(a),
+and
+requires that
+functions fpreserve
+i.e.,
+there
+is
+“no
+surprise”
+at
+the
+limit,
+and
+the
+52
+
+===== slide 53 =====
+1. Monotonicity: a function f : (A1 , ı1 ) æ (A2 , ı2 ) between two posets is monotonic
+to
+arbitrary
+lubs,
+i.e.,
+’X
+TM
+A
+:
+f
+(Û
+X)
+=
+Û
+{
+f
+(x)
+|
+x
+œ
+X
+}.
+1
+1
+2
+if ’x, y œ A1 : x ı1 y =∆ f (x) ı2 f (y).
+
+Continuity
+4. Extensivity: an operator f : (A, ı) æ (A, ı) is extensive if ’a œ A: a ı f (a), and
+
+2. Continuity: a function f : (A1 , ı1 , Û1 ) æ (A2 , ı2 , Û2 ) between two CPO is continureductive if ’a œ A: f (a) ı a.
+⌅
+ous if for every chain C TM A1 , { f (c) | c œ C } is also a chain and the limits coincide:
+f (Û1 C) = Û2 { f (c) | c œ C }.
+
+These definitions can be justified informally. In terms of information theory, where the
+partial order measures a quantity of information, monotonicity means that, given more
+3. information
+Join morphism:
+a function
+f : (A
+(Ainformation.
+twooflattices
+is
+as input,
+a function
+must
+more
+In terms
+program
+1 , ıoutput
+1 , Û1 ) æ
+2 , ı2 , Û2 ) between
+a join morphism,
+Û≠morphism,
+if ’a, bthe
+œA
+Û1 b) =itfwill
+(a) exhibit.
+Û2 f (b); it is a
+semantics,
+the moreor
+input
+we feed a program,
+more
+behaviors
+1 : f (a
+Continuity
+implies monotonicity:
+ı y, simply
+consider
+{x, y}extends
+to get
+complete
+Û≠morphism
+if A1 and Awhen
+lattices
+andthe
+thechain
+property
+2 arex complete
+that
+f (x) Û flubs,
+(y) =i.e.,
+f (x ’X
+Û y)TM=Af1(y),
+f (x)
+to arbitrary
+: f (Ûi.e.,
+= Ûı2 {f f(y).
+(x)Continuity
+| x œ X }. goes one step further
+1 X)
+and requires that functions preserve limits, i.e., there is “no surprise” at the limit, and the
+result of f (Û A) can be intuited by observing the sequence { f (a) | a œ A }. For instance, an
+4. operator
+Extensivity:
+an
+operator
+f
+:
+(A,
+ı)
+æ
+(A,
+ı)
+is
+extensive
+if
+’a
+œ
+A:
+a
+ı
+f
+(a),
+and
+f over (Nfi{Œ}, Æ) such that f (x) = 0 if x ”= Œ but f (Œ) = 1 is not continuous,
+reductive
+if
+’a
+œ
+A:
+f
+(a)
+ı
+a.
+⌅
+as f (Œ) cannot be intuited from the set of all finite images { f (x) | x œ N } = {0}.
+Scott and Strachey [1971] postulate that computable functions are continuous, which is
+These
+definitions given
+can be
+In terms
+information theory, where the
+understandable
+thejustified
+inherentinformally.
+finite capabilities
+of of
+computers.
+Join measures
+morphismsaand
+complete
+join morphisms
+distribute
+f
+over
+joins
+in
+lattices
+and
+artial order
+quantity
+of information,
+monotonicity
+means
+that,
+given
+more
+53
+
+===== slide 54 =====
+understandable
+given the if
+inherent
+capabilities
+computers.
+complete Û≠morphism
+A1 andfinite
+A2 are
+completeof lattices
+and the property extends
+Join morphisms
+and’X
+complete
+to arbitrary
+lubs, i.e.,
+TM A1 : join
+f (Û1morphisms
+X) = Û2 {distribute
+f (x) | x œfXover
+}. joins in lattices and
+complete lattices. Naturally, they imply monotonicity, and a complete Û≠morphism is
+moreover continuous. In terms of program semantics, a Û≠morphism indicates that the
+4. set
+Extensivity:
+an
+operator
+f
+:
+(A,
+ı)
+æ
+(A,
+ı)
+is
+extensive
+if
+’a
+œ
+A:
+a
+ı
+f
+(a),
+and
+of possible behaviors of a program on a set of inputs can be derived by observing its
+reductive
+if
+’a
+œ
+A:
+f
+(a)
+ı
+a.
+⌅
+behaviors on each input separately, and joining them. This is also a natural property we
+expect program semantics to have and, although we will not need this property in our
+These
+definitions
+be it
+justified
+informally.
+In defining
+terms ofthe
+information
+theory,
+where the
+fifixpoint
+theoremscan
+here,
+will play
+a role when
+semantics of
+our language
+in
+next measures
+chapter. a quantity of information, monotonicity means that, given more
+artialtheorder
+Extensivity
+is essentially
+combined
+with monotonicity
+to bootstrap
+itformation
+as input,
+a functionuseful
+must when
+output
+more information.
+In terms
+of program
+eration:
+from we
+an feed
+arbitrary
+x, we have
+x ı fbehaviors
+(x) by extensivity;
+then, applying
+mantics,
+thestarting
+more input
+a program,
+the more
+it will exhibit.
+2
+i
+monotonicity,
+f
+(x)
+ı
+f
+(x),
+etc.,
+so
+that
+the
+sequence
+{
+f
+(x)
+|
+i
+œ
+N
+}
+is
+increasing.
+Continuity implies monotonicity: when x ı y, simply consider the chain {x, y} to get
+In
+Abstract
+Interpretation,
+these
+properties
+often
+hold
+for
+concrete
+operators,
+but
+at f (x) Û f (y) = f (x Û y) = f (y), i.e., f (x) ı f (y). Continuity goes one step further
+are often lost in the abstract world for the sake of generality — the same way abstract
+nd requires that functions preserve limits, i.e., there is “no surprise” at the limit, and the
+worlds feature less algebraic properties than concrete ones, abstract operators feature less
+sult of f (Û A) can be intuited by observing the sequence { f (a) | a œ A }. For instance, an
+algebraic properties than concrete ones.
+
+Extensivity and reductivity
+
+perator f over (Nfi{Œ}, Æ) such that f (x) = 0 if x ”= Œ but f (Œ) = 1 is not continuous,
+f (Œ) cannot be intuited from the set of 29
+all finite images { f (x) | x œ N } = {0}.
+cott and Strachey [1971] postulate that computable functions are continuous, which is
+54
+nderstandable given the inherent finite capabilities of computers.
+
+===== slide 55 =====
+Concrete domain
+The set of values S that we would like to compute belongs to the concrete domain C
+
+(℘(Z), ⊆ )
+
+{ . . . , − 1,0,1,2,....}
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+...
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+{0}
+{}
+55
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+===== slide 56 =====
+Abstract Domain
+(A, ⊑ ) expresses some properties of the concrete values
+
+A = Sign
+⊤
+
+For example:
+being positive or negative
+<0
+
+The order ⊑ on the abstract domain re ects the precision
+
+fl
+
+56
+
+>0
+
+⊥
+
+===== slide 57 =====
+Ingredients of Abstract Interpretation
+• A concrete domain C
+• An abstract domain A
+• A concretization function γ : A → C
+
+that relates the abstract domain to the concrete one
+
+• An abstraction function α : C → A
+
+that connects the concrete domain to the abstract one
+
+57
+
+===== slide 58 =====
+Sound approximation
+C
+
+A
+Sign
+
+{ . . . , − 1,0,1,2,....}
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+...
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+Any set that contains negative integers only
+
+58
+
+===== slide 59 =====
+Sound approximation
+C
+
+A
+Sign
+
+{ . . . , − 1,0,1,2,....}
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+...
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+Any set that contains positive integers only
+
+59
+
+===== slide 60 =====
+Sound approximation
+C
+
+A
+Sign
+
+{ . . . , − 1,0,1,2,....}
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+...
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+Only the empty set
+
+60
+
+===== slide 61 =====
+Sound approximation
+A
+
+C
+Sign
+
+{ . . . , − 1,0,1,2,....}
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+...
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+{0}
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+Any set
+
+61
+
+===== slide 62 =====
+key results ensuring the soundness of abstract computations with respect to concrete ones.
+We will first discuss the abstraction of elements, then of operators, and finally of fifixpoints.
+
+Concretization
+
+2.3.1
+
+Concretization
+
+The minimum structure we require in the concrete and the abstract worlds is a partial
+order that models an amount of information — larger elements expose more program
+behaviors. Thus, the concrete world is a poset (C, Æ), for instance integer powersets (2.1),
+and the abstract world is another poset (A, ı), for instance intervals (2.3). The minimum
+CHAPTER
+2.
+ELEMENTS
+OF
+ABSTRACT
+INTERPRETATION
+connection we request between these worlds is a concretization function, traditionally
+denoted as “:
+Definition 2.10 (Concretization). A concretization function “ œ (A, ı) æ (C, Æ) is a
+31
+monotonic function assigning a concrete meaning,
+in C, to each abstract element in A.
+⌅
+The monotonicity simply states that coarser abstract elements represent coarser concrete
+elements.
+62
+
+===== slide 63 =====
+Concretization function
+De nition
+Concretization function γ : A → C is a monotone function
+that maps abstract a into the greatest concrete c that it approximates
+
+C
+
+{ . . . , − 1,0,1,2,....}
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+{0}
+{}
+
+fi
+
+A
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+γ
+
+⊤
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+<0
+
+63
+
+>0
+
+⊥
+
+===== slide 64 =====
+ample 2.9 (Concretization).
+
+Example
+
+CHAPTER 2. ELEMENTS OF ABSTRACT INTE
+
+. The interval abstraction (2.3) already considers that an interval is a set of integers.
+The concretization from intervals to sets (2.1) is thus the identity.
+[-∞,+∞]
+
+P(Z)
+. Consider an alternate
+abstract domain of intervals where an interval is represented
+...
+...
+...
+...
+...
+... bounds, or ‹:
+by either a pair of
+
+γ
+{ (a, b) | a œ Z fi { ≠Œ }, b œ Z fi { +Œ }, a Æ b } fi { ‹ }
+
+... [-∞,1] ... [-∞,9] ... [-1,+∞]
+
+... {-1,0,1,9} ...
+
+...
+
+... {-1,0,1} ... {0,1,9} ...
+
+Then, the concretization is given by:
+
+[-1,9]
+
+[0,+∞]
+
+...
+
+(2.4)
+
+...
+
+⊑
+
+...
+
+...
+
+{0,1} ... {1,9}
+
+{-1,0}
+
+{-1}
+
+{0}
+
+∅
+
+...
+
+...
+
+{1} ... “((a,
+{9} ... b))
+“(‹)
+
+[-1,1]
+
+... [0,9]
+
+...
+
+⊑
+def
+
+=
+def
+=
+
+{ x œ Z | a Æ x Æ b...} [-1,0] [0,1] ... [1,9] ...
+ÿ
+... [-1,-1] [0,0] [1,1] ... [9,9] ...
+
+Hasse diagram for the powerset poset of integers (P(Z), TM).
+
+64
+
+⊥
+
+⌥
+
+===== slide 65 =====
+1. The interval abstraction (2.3) already considers
+that
+an
+interval
+is
+a
+set
+of
+integers.
+def
+“((a, b))
+= (2.1)
+{ x œisZthus
+| a Æthe
+x Æidentity.
+b}
+The concretization from intervals
+to sets
+
+Example
+“(‹)
+= ÿ
+def
+
+2. Consider an alternate abstract domain of intervals where an interval is represented
+⌥
+by either a pair of bounds, or ‹:
+
+It is convenient, on paper, to confuse an interval as a set of integers (Ex. 2.9.1) and
+{
+(a,
+b)
+|
+a
+œ
+Z
+fi
+{
+≠Œ
+},
+b
+œ
+Z
+fi
+{
++Œ
+},
+a
+Æ
+b
+}
+fi
+{
+‹
+}
+(2.4)
+an interval as a pair of bounds (Ex. 2.9.2). However, the later is far more effective when
+it comes to machine representation and manipulation. Thus, it is important not to see
+Then,
+the concretization
+the abstract
+world only asisagiven
+subsetby:
+of the concrete world: the abstract world also adds
+a notion of representation, which is key to effectiveness. Hence, we separate the concrete
+def
+world from the abstract“((a,
+world,
+function “ to
+b))always
+= mediate
+{ x œ Zthrough
+| a Æ x aÆ concretization
+b}
+def
+compare concrete and abstract
+elements,
+and
+avoid
+confusing
+a
+œ
+A
+with
+“(a)
+œ
+C.
+“(‹)
+= ÿ
+
+Note (Interval notation). Now that the distinction between the abstract world and the
+⌥
+concrete world is clear, in the rest of the tutorial, when discussing intervals, we will write
+[a, b] to actually denote the pair of bounds (a, b) that internally represents an interval, and
+It is
+convenient,
+on
+paper,
+to
+confuse
+an
+interval
+as
+a
+set
+of
+integers
+(Ex.
+2.9.1)
+and
+write explicitly “([a, b]) when discussing about the set of integers in this interval.
+⌃
+
+65
+interval as a pair of bounds (Ex. 2.9.2). However,
+the later is far more effective when
+
+===== slide 66 =====
+Example
+
+“((a, b))
+“(‹)
+
+def
+
+=
+def
+=
+
+{x œ Z | a Æ x Æ b}
+ÿ
+
+Concrete world
+
+Abstract world
+
+⌥
+
+{ 11, 12, 13,
+15,to confuse an interval as a set of integers (Ex. 2.9.1) and
+It is convenient,
+on 14,
+paper,
+16,a 17,
+20, (Ex. 2.9.2). However, the later is far more effective when
+an interval as
+pair18,
+of 19,
+bounds
+22, 23,
+24, 25,
+it comes to 21,
+machine
+representation
+and manipulation. Thus, it [11,40]
+is important not to see
+27, only
+28, 29,
+the abstract26,
+world
+as 30,
+a subset of the concrete world: the abstract world also adds
+32, 33, 34, which
+35, is key to effectiveness. Hence, we separate
+a notion of 31,
+representation,
+just the
+a pairconcrete
+of
+numbers
+36,
+37,
+38,
+39,
+40
+}
+world from the abstract world, always mediate through a concretization function “ to
+a set with 30
+compare
+numbers concrete and abstract elements, and avoid confusing a œ A with “(a) œ C.
+
+γ
+
+Note (Interval notation). Now that the distinction between the abstract world and the
+concrete world is clear, in the rest of the tutorial, when discussing intervals, we will write
+[a, b] to actually denote the pair of bounds (a, b) that internally represents an interval, and
+write explicitly “([a, b]) when discussing about the set of integers in this interval.
+⌃
+66
+
+===== slide 67 =====
+compare concrete and abstract elements, and avoid confusing a œ A with “(a) œ C.
+
+Multiple
+representatives?
+Note (Interval notation). Now that the distinction between the abstract world and the
+
+concrete world is clear, in the rest of the tutorial, when discussing intervals, we will write
+[a, b] to actually denote the pair of bounds (a, b) that internally represents an interval, and
+write explicitly “([a, b]) when discussing about the set of integers in this interval.
+⌃
+Note that “ does not need to be onto — i.e., injective. It is possible to imagine an
+abstract world where several abstract elements represent the same concrete element. Consider, for instance, a variant of (2.4), { (a, b) | a œ Zfi{ ≠Œ }, b œ Zfi{ +Œ } }, where we do
+not enforce a Æ b, and thus, any pair such that a > b is a representation for the empty set.
+This is mainly useful, as we will see later, in the case of domains where computing unique,
+normal forms for an abstract element is not possible or would be too time-consuming.
+32
+
+67
+
+===== slide 68 =====
+Given a concrete and an abstract domain, a sound abstraction is simply an abstract
+element that over-approximates a concrete one, up to the interpretation given by the
+concretization:
+
+Sound and exact abstractions
+
+Definition 2.11 (Soundness, Exactness).
+a œ A is a sound abstraction of c œ C if and only if c Æ “(a).
+It is moreover exact if c = “(a). (also called expressible)
+
+⌅
+
+The case where the equality holds corresponds to a rare case where the concrete element
+can be exactly be represented in the abstract (such as, for instance, a contiguous set of
+integers, which can be represented exactly as an interval).
+We can now formalize the intuition given in Sect. 1.2 for safety verification problems.
+Given a specification S, then if:
+ ̆
+ ̆
+• the specification S can be exactly represented in the abstract as S , i.e., S = “(S ),
+
+and
+
+ ̆
+• the result P of a static analysis is a sound abstraction of the concrete semantics P ,
+ ̆
+i.e., P TM “(P ), and
+
+68
+
+===== slide 69 =====
+The case where the equality holds corresponds to a rare case where the concrete element
+can be exactly be represented in the abstract (such as, for instance, a contiguous set of
+integers, which can be represented exactly as an interval).
+We can now formalize the intuition given in Sect. 1.2 for safety verification problems.
+Given a specification S, then if:
+
+Safety verification problems
+
+ ̆
+ ̆
+• the specification S can be exactly represented in the abstract as S , i.e., S = “(S ),
+
+and
+
+ ̆
+• the result P of a static analysis is a sound abstraction of the concrete semantics P ,
+ ̆
+i.e., P TM “(P ), and
+
+ ̆
+• P
+
+ ̆
+S , i.e., the analyzer proves in the abstract that the program satisfies its
+
+ı
+specification,
+
+then, the program indeed satisfies its specification in the concrete, i.e., P TM S. Note
+ ̆
+ ̆
+ ̆
+that, not only the computation of P , but also the check P ı S , are done entirely in
+the abstract world. Hence, effective abstract algorithms lead to sound and effective static
+analyses.
+fi
+
+69
+
+===== slide 70 =====
+Sound abstraction
+A
+
+C
+
+{ . . . , − 1,0,1,2,....}
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+Sign
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+70
+
+===== slide 71 =====
+Sound abstraction
+A
+
+C
+
+{ . . . , − 1,0,1,2,....}
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+Sign
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+71
+
+===== slide 72 =====
+Sound abstraction
+A
+
+C
+
+{ . . . , − 1,0,1,2,....}
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+Sign
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+72
+
+===== slide 73 =====
+Sound abstraction
+A
+
+C
+
+{ . . . , − 1,0,1,2,....}
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+Sign
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+73
+
+===== slide 74 =====
+Sound abstraction
+A
+
+C
+
+{ . . . , − 1,0,1,2,....}
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+Sign
+
+{0}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+<0
+
+>0
+
+⊥
+
+{}
+74
+
+===== slide 75 =====
+(a)
+
+(b)
+
+(c)
+
+Abstraction
+While a monotonic concretization “ is sufficient to reason about soundness, more structure,
+2.3.3
+
+Galois connection
+
+ms for: (a) a finite poset, (b) the natural integers (N, Æ), and
+riched with infinity (N fi {Œ}, Æ).
+
+if available, can help us design sound and accurate analyses. In the standard Abstract
+Interpretation framework [Cousot and Cousot, 1977], we assume additionally the existence
+of a monotonic abstraction function – : C æ A that associates
+abstractOFelement
+toINTERP
+a
+CHAPTER an
+2. ELEMENTS
+ABSTRACT
+concrete one such that (–, “) forms a Galois connection:
+
+α
+
+[-∞,+∞]
+
+DefinitionP(Z)
+2.12 (Galois connection). Given two posets (C, Æ) and (A, ı), the pair (– :
+...
+...
+...
+...
+...
+C æ A, “ : A
+... æ C) is a Galois connection if:
+which intervals o er a sound abstraction for: ... [-∞,1] ... [-∞,9] ... [-1,+∞]
+
+[0,+∞]
+
+...
+
+’a œ A, c œ C, c Æ “(a) ≈∆ –(c) ı a
+(2.5)
+...
+...
+the
+nite
+set
+{0,5,9}
+?
+...
+...
+...
+“
+≠
+≠
+≠
+which is denoted as (C, Æ) Ω
+...
+...
+...
+≠≠–≠æ (A, ı).
+⊑
+...
+...
+...
+the set of all
+powers
+2?
+– and “ are said to be adjoint functions,
+where
+theofabstraction
+– is the upper adjoint and
+...
+...
+...
+the concretization “ is the lower adjoint.
+⌅
+... {-1,0,1,9} ...
+
+[-1,9]
+
+{-1,0,1}
+
+{0,1,9}
+
+[-1,1]
+
+{-1,0}
+
+{0,1}
+
+{1,9}
+
+[-1,0]
+
+...
+
+{-1}
+
+{0}
+
+{1}
+
+...
+
+{9}
+
+...
+
+the set of all even numbers ?
+
+33
+
+∅
+ff
+
+75
+
+fi
+
+[0,9]
+
+... [-1,-1]
+
+[0,1]
+
+[0,0]
+
+⊥
+
+[1,1]
+
+[1,9]
+
+...
+
+[9,9]
+
+...
+
+===== slide 76 =====
+Abstraction function
+De nition
+Abstraction function α : C → A is a monotone function
+that maps c concrete into the most precise abstract element that
+approximates it.
+α
+C
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+{0}
+{}
+
+fi
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+A
+
+{ . . . , − 1,0,1,2,....}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+<0
+
+...
+
+76
+
+>0
+
+⊥
+
+===== slide 77 =====
+Abstraction function
+
+Remark
+To design an abstraction function α : C → A the abstract domain
+must be closed under meet.
+In this abstract domain the most precise element that approximates {0} does not exist
+
+C
+
+...
+
+...
+
+{−2, − 1}
+
+. . . {−2}
+
+{−1}
+
+⊤
+
+{0,1,2,...}
+
+{ . . . , − 2, − 1}
+
+...
+
+A
+
+{ . . . , − 1,0,1,2,....}
+
+{0}
+{}
+
+{1,2,...}
+
+{0,1}
+
+{1,2}
+
+{1}
+
+{2} . . .
+
+...
+
+≤0
+
+≥0
+
+⊥
+77
+
+===== slide 78 =====
+Galois connection and
+Galois insertion
+
+78
+
+===== slide 79 =====
+Galois connection
+
+CHAPTER 2. ELEMENTS OF ABSTRACT INTE
+
+γ
+
+γ(a)
+
+a
+
+≤
+c
+
+⊑
+α(c)
+
+α
+
+C
+
+A
+
+79
+
+===== slide 80 =====
+Y
+_
+‹
+if
+X
+=
+ÿ
+of a monotonic abstraction function
+–
+:
+C
+æ
+A
+that
+associates
+an
+abstract
+element
+to
+a
+_
+_
+_
+_
+_
+concrete one such that (–, “) forms
+a
+Galois
+connection:
+0
+if
+X
+=
+{0}
+_
+]
+
+Galois connections
+–(X) =
+
+(Ø 0) otherwise if X TM N
+_
+Definition 2.12 (Galois connection).
+Given
+two
+posets
+(C,
+Æ)
+and
+(A,
+ı),
+the
+pair
+(–
+:
+_
+_
+_
+(Æ
+0)
+otherwise
+if
+X
+TM
+≠N
+_
+C æ A, “ : A æ C) is a Galois_
+connection
+if:
+_
+[
+€
+otherwise
+
+’a œ A, c œ C, c Æ “(a) ≈∆ –(c) ı a
+“
+
+(2.5)
+Figure 2.9: Sign
+does.
+
+⌥
+
+≠
+≠
+≠
+which is denoted as (C, Æ) Ω
+≠≠–≠æ (A, ı).
+2.3.4
+– and “Galois
+are saidEmbeddings
+to be adjoint functions, where the abstraction – is the upper adjoint and
+1. – is surjecti
+the
+concretization
+“
+is
+the
+lower
+adjoint.
+⌅
+We saw, for instance in Ex. 2.10, that “ ¶ – is extensive and generally not the identity, as
+
+abstracting looses precision. Concretizing, however, does not loose precision, so we would
+2.
+“
+is
+injective
+33
+expect – ¶ “ to be the identity. When this is the case, we have a Galois embedding:
+“
+
+≠
+≠
+≠
+– ¶ “ = id.
+Definition 2.13. A Galois connection (C, Æ) Ω
+if any
+≠≠–≠æ (A, ı) is a Galois embedding 3.
+of the following, equivalent properties hold:
+We denote a Galo
+Galois embeddings are
+also
+called
+Galois
+insertions
+36
+Properties 1 and
+80
+
+===== slide 81 =====
+Must
+learn
+is connection). Given two posets (C, Æ) a
+1.
+–
+is
+surjective:
+’a
+anerally
+Galoisnot
+connection
+if:
+the identity, as
+ose precision, so we would
+2.
+“
+is
+injective:
+’a,
+a
+’a œ A, c œ C, c Æ “(a) ≈∆ –(c) ı a
+a Galois embedding:
+“
+
+Ω
+≠
+≠
+≠
+(A,
+ı).
+3.
+–
+¶
+“
+=
+id.
+aÆ)
+Galois
+embedding
+if
+any
+≠≠–≠æ
+Galois insertions
+adjoint functions, where the abstraction – i
+the lower adjoint. We denote a Galois emb
+81
+
+===== slide 82 =====
+GC but not GI
+γ is not injective ( γ(+) = γ(p) )
+
+α is not surjective ( p ∉ α(℘(Z)) )
+
+γ(⊥) = ∅
+γ(0) = {0}
+γ(−) = set of negative integers
+γ(+) = γ(p) = set of positive integers
+γ(⊤) = Z
+
+⊤
+p
+
+−
+
+0
+
++
+
+⊥
+
+α({1,3,5}) = +
+
+Abstract value p is "useless", because + o ers a better abstraction
+ff
+
+82
+
+===== slide 83 =====
+GIs from GCs
+How to “repair” a GC into a GI by eliminating the “useless” abstract values?
+red
+
+We take the image of C as a “reduced” abstract domain A = α(C) and restrict the
+red
+original abstraction and concretization maps to operate on A :
+red
+
+:C→A
+
+red
+
+red
+
+α
+γ
+
+red
+
+:A →C
+
+with
+with
+
+red
+
+α (c) = α(c)
+red
+
+γ (a) = γ(c)
+
+We get a GI that has the same “expressive power” of the original GC
+
+83
+
+===== slide 84 =====
+Galois connection
+γ
+γ(α(C))
+
+γ
+
+γ(a)
+
+≤
+c
+
+a
+γ(α(c))
+
+⟺
+
+⊑
+
+α(c)
+
+γ
+
+≤
+
+α
+c
+
+α(c)
+
+α
+
+C
+
+A
+
+C
+
+α
+
+(a)
+
+α
+
+A
+
+(b)
+
+Figure 2.8: A Galois connection (a) and a Galois embedding (b).
+84
+
+===== slide 85 =====
+2.3. APPROXIMATIONS
+
+Example
+
+Example 2.10 (Galois connection). Following up on Ex. 2.9.2, we define the Galois connection between the concrete domain P(Z) and the abstract domain of intervals represented
+as pairs of bounds (2.4):
+{ (a, b) | a œ Z fi { ≠Œ }, b œ Z fi { +Œ }, a Æ b } fi { ‹ }
+as follows:
+
+def
+
+“((a, b))
+“(‹)
+def
+
+–(X) =
+
+I
+
+=
+def
+=
+
+{x œ Z | a Æ x Æ b}
+ÿ
+
+‹
+[min X, max X]
+
+if X = ÿ
+otherwise
+
+We note, for instance, that –({0, 2}) = [0, 2] and that “([0, 2]) = {0, 1, 2}. Hence, “ ¶ – is
+is
+it alsoand
+a Galois
+insertion?
+extensive
+not the identity,
+i.e., our abstraction generally looses precision.
+⌥
+d
+
+i
+
+α
+∘
+γ
+=
+i.e.,Indoes
+hold?
+addition to Thm. 2.3, Galois connections enjoy many useful properties:
+85
+
+===== slide 86 =====
+depicted in Fig. 2.8.(b).
+
+Examples
+
+Example 2.13 (Galois embedding).
+
+1. The interval Galois connection from Ex. 2.10 is actually an embedding.
+2. Consider the following, alternate interval abstraction:
+
+a≤b
+⊥
+{ [a, b] | a œ Z fi { +Œ, ≠Œ }, b œ Z fi { +Œ, ≠Œ } }
+[100,0] ⊑ [9,6] ⊑ [5,10]
+def
+with order [a, b] ı [c, d] ≈∆ (a Ø c) · (b Æ d) and natural concretization:
+def
+“([a, b]) = { x œ Z | a Æ x Æ b }. Then, we have “([a, b]) = ÿ for any pair [a, b] such
+that a > b: the concrete element ÿ has several representations in the abstract.
+def
+
+We can construct an abstraction function – as follows: –(S) = [min S, max S],
+so that (–, “) is a Galois connection. However, it is not a Galois embedding. The
+abstraction – differs from that of the interval abstraction from Ex. 2.10 only for
+the empty set, where –(ÿ) = [+Œ, ≠Œ]. Note that, in order for the set of intervals
+{ [a, b] | a > b } representing the empty set to have a least element, we had to allow +Œ as lower bound and ≠Œ as upper bound; with only a slight extension of
+notations, we state that min ÿ = +Œ and max ÿ = ≠Œ.
+⌥
+86
+
+===== slide 87 =====
+Absence of best abstraction
+
+CHAPTER 2. ELEMENTS OF ABSTRACT INTERPRETATION
+
+For instance, in the interval domain, the abstraction –(X) of a set of integers X computes
+[min X, max X], which is indeed the tightest interval that contains all the values from X.
+Example 2.11 (Absence of a Galois connection). Not all abstract domains enjoy a Galois
+connection. Consider the affine inequalities domain, that we mentioned in Sect. 1.1.2 and
+will present in details in Sect. 5.3. Intuitively, it abstracts a set of points as a convex
+polyhedron, and a best abstraction would be the smallest polyhedron enclosing these points.
+Some shapes, such as discs, do not have a smallest enclosing polyhedron, hence, no –
+function, and so, no Galois connection can exist. We can still reason about soundness
+through “, though, and choose a, possibly arbitrary, way to soundly abstract a disc.
+⌥
+Finally, an important consequence of Thm. 2.4.6 is that the set of concrete properties
+that can be exactly represented in the abstract must be closed by concrete meet.
+Example 2.12 (Closure by conjunction and Galois
+connections).
+We
+consider,
+as
+concrete
+87
+
+===== slide 88 =====
+Exercises
+They are all mandatory!
+
+88
+
+===== slide 89 =====
+Interpretation framework [Cousot and Cousot, 1977], we assume additionally the existence
+of a monotonic abstraction function – : C æ A that associates an abstract element to a
+concrete one such that (–, “) forms a Galois connection:
+
+Alternative definition of GC
+
+Definition 2.12 (Galois(a)connection). Given two posets (C,(b)
+Æ) and (A, ı), the pair (– :
+C æ A, “ : A æ C) is a Galois connection if:
+Figure 2.8: A Galois connection (a) and a Galois embedding (b).
+’a œ A, c œ C, c Æ “(a) ≈∆ –(c) ı a
+
+(2.5)
+
+The fundamental property
+“ of Galois connections (2.5) provides, in a very compact
+Ω
+≠
+≠
+≠
+which
+is
+denoted
+as
+(C,
+Æ)
+(A,
+ı).
+≠
+≠
+≠
+æ
+form, a strong connection between
+the concrete and the abstract world. The following
+–
+–
+and
+“
+are
+said
+to
+be
+adjoint
+functions,
+where
+the
+abstraction
+–
+is
+the
+upper
+adjoint
+and
+theorem provides a less compact, but equivalent view:
+the concretization “ is the lower adjoint.
+⌅
+Theorem 2.3 (Alternate characterization of Galois connections). We have a Galois con“
+33
+≠
+≠
+≠
+nection (C, Æ) Ω
+(A,
+ı)
+if
+and
+only
+if
+the
+function pair (–, “) satisfies all the following
+≠≠–≠æ
+properties:
+1. “ is monotonic;
+2. – is monotonic;
+3. “ ¶ – is extensive, i.e., ’c œ C: c ı “(–(c));
+4. – ¶ “ is reductive, i.e., ’a œ A: –(“(a)) Æ a.
+fi
+
+89
+
+⌅
+
+===== slide 90 =====
+Ex. 1: Extensivity
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map γ ∘ α is extensive (i.e., that c ≤ (γ ∘ α)(c) = γ(α(c)) for all c ∈ C ) .
+α(c) is a sound approx. of c
+
+90
+
+===== slide 91 =====
+Ex. 1: Extensivity
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map γ ∘ α is extensive (i.e., that c ≤ (γ ∘ α)(c) = γ(α(c)) for all c ∈ C ) .
+α(c) is a sound approx. of c
+Proof. Let a = α(c) .
+Since α(c) ⊑ α(c) = a by definition of GC, it follows that
+
+α(c) ⊑ a ⟺ c ≤ γ(a) = γ(α(c))
+
+fi
+
+91
+
+===== slide 92 =====
+4. – ¶ “ is reductive, i.e., ’a œ A: –(“(a)) Æ a.
+
+Some comments
+
+⌅
+
+Apart from the monotonicity of “, which we already stated, and that of –, which is also
+intuitive as we want more precise concrete elements to be abstracted more precisely, the
+extensivity of “ ¶ – is particularly interesting. It states that, going through the abstract
+world A and back gives a result that is either equal or less precise than staying in the
+concrete. The result is strictly less precise
+when the2.original
+concrete
+has noINTERP
+exact
+CHAPTER
+ELEMENTS
+OFelement
+ABSTRACT
+representation in the abstract, so that we lose information during the conversion between
+the concrete and the abstract world. This is depicted in Fig. 2.8.(a).
+The reductivity of – ¶ “ shows that, coming from the abstract and going back to the
+γ
+abstract through the concrete, we
+may
+end
+up with
+a smaller abstract element. In fact,
+a
+γ(a)
+this happens only when a concrete element has several different abstract representations,
+≤
+⊑
+in which case – will naturally choose the⟺
+smallest one for the abstract order ı. This has
+c
+α(c)
+generally no consequence on the precision
+of
+an
+abstract
+computation
+—
+these
+elements
+α
+all have the same concretization — provided that the operators are carefully designed to
+A
+C
+be independent from the choice of an abstract representation among several equivalent
+(a)
+(b)
+ones. In many, but not all, cases, there is only a single abstract representation at most for
+each concrete property anyway.
+This
+case
+will
+be
+discussed
+in
+more
+details
+in
+Sect.
+2.3.4.
+Figure 2.8: A Galois connection (a) and a Galois embedding (b
+92
+
+===== slide 93 =====
+Ex. 2: Reductivity
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map α ∘ γ is reductive (i.e., that α(γ(a)) = (α ∘ γ)(a) ⊑ a for all a ∈ A ) .
+a is a sound approx. of γ(a)
+
+93
+
+===== slide 94 =====
+Ex. 2: Reductivity
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map α ∘ γ is reductive (i.e., that α(γ(a)) = (α ∘ γ)(a) ⊑ a for all a ∈ A ) .
+a is a sound approx. of γ(a)
+Proof. Let c = γ(a) .
+Since c = γ(a) ≤ γ(a) by definition of GC, it follows that
+
+c ≤ γ(a) ⟺ α(c) = α(γ(a)) ⊑ a
+
+fi
+
+94
+
+===== slide 95 =====
+extensivity of “ ¶ – is particularly interesting. It states that, going through the abstract
+world A and back gives a result that is either equal or less precise than staying in the
+concrete. The result is strictly less precise when the original concrete element has no exact
+representation in the abstract, so that we lose information during the conversion between
+the concrete and the abstract world. This is depicted in Fig. 2.8.(a).
+The reductivity of – ¶ “ shows that, coming from the abstract and going back to the
+abstract through the concrete, we may end up with a smaller abstract element. In fact,
+this happens only when a concrete element has several different abstract representations,
+in which case – will naturally choose the smallest one for the abstract order ı. This has
+generally no consequence on the precision of an abstract computation — these elements
+all have the same concretization — provided that the operators are carefully designed to
+be independent from the choice of an abstract representation among several equivalent
+ones. In many, but not all, cases, there is only a single abstract representation at most for
+each concrete property anyway. This case will be discussed in more details in Sect. 2.3.4.
+
+Some comments
+
+34
+95
+
+===== slide 96 =====
+Ex. 3: Monotonicity
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+both maps γ and α are monotone .
+
+96
+
+===== slide 97 =====
+Ex. 3: Monotonicity
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+both maps γ and α are monotone .
+Proof. Let c ≤ c1, we want to prove that α(c) ⊑ α(c1) .
+Let a = α(c1). Since γ ∘ α is extensive (see Ex. 1) c ≤ c1 ≤ γ(α(c1)) = γ(a) .
+By definition of GC, it follows that c ≤ γ(a) ⟺ α(c) ⊑ a = α(c1)
+Let a1 ⊑ a, we want to prove that γ(a1) ≤ γ(a) .
+Let c = γ(a1). Since α ∘ γ is reductive (see Ex. 2) α(c) = α(γ(a1)) ⊑ a1 ⊑ a .
+By definition of GC, it follows that α(c) ⊑ a ⟺ c = γ(a1) ≤ γ(a)
+fi
+
+fi
+
+97
+
+===== slide 98 =====
+Ex.4: Equivalent definition
+Given two posets (C, ≤ ) and (A, ⊑ ) and two monotone maps γ : A → C and
+α : C → A such that γ ∘ α is extensive and α ∘ γ is reductive prove that:
+the maps α and γ form a Galois connection
+(i.e., that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A ).
+
+fi
+
+98
+
+===== slide 99 =====
+Ex.4: Equivalent definition
+Given two posets (C, ≤ ) and (A, ⊑ ) and two monotone maps γ : A → C and
+α : C → A such that γ ∘ α is extensive and α ∘ γ is reductive prove that:
+the maps α and γ form a Galois connection
+(i.e., that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A ).
+Proof. Let c ≤ γ(a), we want to prove that α(c) ⊑ a .
+Since α is monotone and α ∘ γ is reductive α(c) ⊑ α(γ(a)) ⊑ a
+Vice versa, let α(c) ⊑ a, we want to prove that c ≤ γ(a) .
+Since γ is monotone and γ ∘ α is extensive c ≤ γ(α(c)) ≤ γ(a)
+
+fi
+
+99
+
+===== slide 100 =====
+2.3. APPROXIMATIONS
+
+Some comments
+
+Example 2.10 (Galois connection). Following up on Ex. 2.9.2, we define the Galois connection between the concrete domain P(Z) and the abstract domain of intervals represented
+as pairs of bounds (2.4):
+{ (a, b) | a œ Z fi { ≠Œ }, b œ Z fi { +Œ }, a Æ b } fi { ‹ }
+as follows:
+
+def
+
+“((a, b))
+“(‹)
+def
+
+–(X) =
+
+I
+
+=
+def
+=
+
+{x œ Z | a Æ x Æ b}
+ÿ
+
+‹
+[min X, max X]
+
+if X = ÿ
+otherwise
+
+We note, for instance, that –({0, 2}) = [0, 2] and that “([0, 2]) = {0, 1, 2}. Hence, “ ¶ – is
+extensive and not the identity, i.e., our abstraction generally looses precision.
+⌥
+100
+
+===== slide 101 =====
+We note, for instance, that –({0, 2}) = [0, 2] and that “([0, 2]) = {0, 1, 2}. Hence, “ ¶ – is
+extensive and not the identity, i.e., our abstraction generally looses precision.
+⌥
+
+Properties of GC
+
+In addition to Thm. 2.3, Galois connections enjoy many useful properties:
+“
+
+≠
+≠
+≠
+Theorem 2.4 (Galois connection properties). Given a Galois connection (C, Æ) Ω
+≠≠–≠æ (A,
+ı), we have:
+1. “ ¶ – ¶ “ = “ and – ¶ “ ¶ – = –;
+
+round trips
+
+2. – ¶ “ and “ ¶ – are idempotent;
+
+idempotency
+
+4. ’a œ A: “(a) = ‚ { c | –(c) ı a };
+
+α induces γ
+
+3. ’c œ C: –(c) = Ù { a | c Æ “(a) };
+
+γ induces α
+
+5. – maps concrete lubs to abstract lubs:
+’X TM C: if ‚ X exists, then –(‚ X) = Û { –(x) | x œ X };
+6. “ maps abstract glbs to concrete glbs:
+’X TM A: if Ù X exists, then “(Ù X) = · { “(x) | x œ X }.
+101
+
+α preserves lubs
+γ preserves glbs
+
+⌅
+
+===== slide 102 =====
+Ex.5: Round-trips
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+both equalities γ ∘ α ∘ γ = γ and α ∘ γ ∘ α = α hold.
+
+102
+
+===== slide 103 =====
+Ex.5: Round-trips
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+both equalities γ ∘ α ∘ γ = γ and α ∘ γ ∘ α = α hold.
+Proof. Since α ∘ γ is reductive (see Ex. 2) α(γ( a )) ⊑ a .
+γ( α(γ(a)) ) ≤ γ( a ) .
+Since γ is monotone (see Ex. 3), it follows that
+Since γ ∘ α is extensive (see Ex. 1), we conclude γ(a) ≤ γ(α( γ(a) )) .
+Since γ ∘ α is extensive (see Ex. 1) c ≤ γ(α( c )) .
+Since α is monotone (see Ex. 3), it follows that α( c ) ≤ α( γ(α(c)) ) .
+α(γ( α(c) )) ≤ α(c) .
+Since α ∘ γ is reductive (see Ex. 2), we conclude
+103
+
+===== slide 104 =====
+Ex.6: Idempotency
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the maps γ ∘ α and α ∘ γ are both idempotent.
+
+104
+
+===== slide 105 =====
+Ex.6: Idempotency
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the maps γ ∘ α and α ∘ γ are both idempotent.
+Proof.
+From Ex. 5 (γ ∘ α ∘ γ = γ, round-trips): γ(α( γ(α( c )) )) = γ( α(c) ) .
+From Ex. 5 (α ∘ γ ∘ α = α, round-trips): α(γ( α(γ( a )) )) = α( γ(a) ) .
+
+105
+
+===== slide 106 =====
+Ex.7: γ induces α
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map α : C → A is such that α(c) = ⊓ { a ∣ c ≤ γ(a) } for all c ∈ C.
+
+106
+
+===== slide 107 =====
+Ex.7: γ induces α
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map α : C → A is such that α(c) = ⊓ { a ∣ c ≤ γ(a) } for all c ∈ C.
+Proof. Let Sc = { a ∣ c ≤ γ(a) }. We prove that α(c) is the glb of Sc :
+
+α(c) is a lower bound of Sc: Let a ∈ Sc. By GC, we have c ≤ γ(a) ⟺ α(c) ⊑ a .
+For any lower bound l ∈ A of Sc, l ⊑ α(c) : Suppose l ⊑ a for any a ∈ Sc .
+We just show that α(c) belongs to Sc to conclude that l ⊑ α(c) .
+
+In fact, since α(c) ⊑ α(c), by GC (with a = α(c)) we get α(c) ⊑ α(c) ⟺ c ≤ γ(α(c))
+and thus α(c) ∈ Sc .
+107
+
+===== slide 108 =====
+Ex.8: α induces γ
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map γ : A → C is such that γ(a) = ∨ { c ∣ α(c) ⊑ a } for all a ∈ A.
+
+108
+
+===== slide 109 =====
+Ex.8: α induces γ
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+the map γ : A → C is such that γ(a) = ∨ { c ∣ α(c) ⊑ a } for all a ∈ A.
+Proof. Let Sa = { c ∣ α(c) ⊑ a }. We prove that γ(a) is the lub of Sa :
+
+γ(a) is an upper bound of Sa: Let c ∈ Sa. By GC, we have α(c) ⊑ a ⟺ c ≤ γ(a) .
+For any upper bound u ∈ C of Sa, γ(a) ≤ u : Suppose c ≤ u for any c ∈ Sa .
+We just show that γ(a) belongs to Sa to conclude that γ(a) ≤ u .
+
+In fact, since γ(a) ≤ γ(a), by GC (with c = γ(a)) we get γ(a) ≤ γ(a) ⟺ α(γ(a)) ⊑ a
+and thus γ(a) ∈ Sa .
+109
+
+===== slide 110 =====
+3. ’c œ C: –(c) = Ù { a | c Æ “(a) };
+
+Some comments
+
+4. ’a œ A: “(a) = ‚ { c | –(c) ı a };
+
+5. – maps concrete lubs to abstract lubs:
+’X TM C: if ‚ X exists, then –(‚ X) = Û { –(x) | x œ X };
+6. “ maps abstract glbs to concrete glbs:
+’X TM A: if Ù X exists, then “(Ù X) = · { “(x) | x œ X }.
+
+⌅
+
+Theorem 2.4.2 states that, although passing through the abstract once may lose precision,
+as “ ¶ – is extensive (Thm. 2.3.3), further round-trips through the abstract world do not
+2
+lose any more precision, as (“ ¶ –) = “ ¶ –. Theorem 2.4.3–4 states that, in a Galois
+connection, one adjoint can be derived from the other one.
+Additionally, Thm. 2.4.3 states a very important property relating Galois connections,
+soundness, and optimality. Recall that c Æ “(a) means, by Def. 2.11, that a is a sound
+abstraction of c. Then, given c œ C, first recall that c Æ “(–(c)), which means that –(c)
+is a sound abstraction of c. Moreover, –(c) = Ù { a | c Æ “(a) } means literally that –(c) is
+the best (i.e., smallest) sound abstraction of c:
+110
+
+“
+
+===== slide 111 =====
+Theorem 2.4.2 states that, although passing through the abstract once may lose precision,
+as “ ¶ – is extensive (Thm. 2.3.3), further round-trips through the abstract world do not
+2
+lose any more precision, as (“ ¶ –) = “ ¶ –. Theorem 2.4.3–4 states that, in a Galois
+connection, one adjoint can be derived from the other one.
+Additionally, Thm. 2.4.3 states a very important property relating Galois connections,
+soundness, and optimality. Recall that c Æ “(a) means, by Def. 2.11, that a is a sound
+abstraction of c. Then, given c œ C, first recall that c Æ “(–(c)), which means that –(c)
+is a sound abstraction of c. Moreover, –(c) = Ù { a | c Æ “(a) } means literally that –(c) is
+the best (i.e., smallest) sound abstraction of c:
+
+Some comments
+
+“
+
+≠
+≠
+≠
+Corollary 2.5 (Best abstraction). If we have a Galois connection (C, Æ) Ω
+≠≠–≠æ (A, ı),
+then ’c œ C: –(c) is the best abstraction of c, i.e., the smallest abstract element which is
+CHAPTER
+2. ELEMENTS OF ABSTRACT INTERPRETATION
+a sound abstraction of
+c.
+⌅
+35
+For instance, in the interval domain, the abstraction –(X) of a set of integers X computes
+[min X, max X], which is indeed the tightest interval that contains all the values from X.
+Example 2.11 (Absence of a Galois connection). Not all abstract domains enjoy a Galois
+111
+connection. Consider the affine inequalities domain, that we mentioned in Sect. 1.1.2 and
+
+===== slide 112 =====
+Ex.9: α preserves lubs
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+α(∨D) = ⊔ { α(c) ∣ c ∈ D } whenever the concrete lub ∨ D exists for D ⊆ C .
+
+112
+
+===== slide 113 =====
+Ex.9: α preserves lubs
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+α(∨D) = ⊔ { α(c) ∣ c ∈ D } whenever the concrete lub ∨ D exists for D ⊆ C .
+Proof. Let d = ∨ D. We prove that α(d) is the lub of α(D) = { α(c) ∣ c ∈ D } .
+α(d) is an upper bound of α(D): Let x ∈ α(D). Then x = α(c) for some c ∈ D .
+Obviously c ≤ ∨ D = d and since α is monotone (see Ex. 3): x = α(c) ⊑ α(d) .
+For any upper bound u ∈ A of α(D), α(d) ⊑ u : Suppose α(c) ⊑ u for all c ∈ D .
+By GC (with a = u) we get α(c) ⊑ u ⟺ c ≤ γ(u) for all c ∈ D .
+Then, by definition of lub and GC : d = ∨ D ≤ γ(u) ⟺ α(d) ⊑ u .
+fi
+
+113
+
+===== slide 114 =====
+Ex.10: γ preserves glbs
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+γ(⊓B) = ∧ { γ(a) ∣ a ∈ B } whenever the abstract glb ⊓ B exists for B ⊆ A .
+
+114
+
+===== slide 115 =====
+Ex.10: γ preserves glbs
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that:
+γ(⊓B) = ∧ { γ(a) ∣ a ∈ B } whenever the abstract glb ⊓ B exists for B ⊆ A .
+Proof. Let b = ⊓ B. We prove that γ(b) is the glb of γ(B) = { γ(a) ∣ a ∈ B } .
+γ(b) is a lower bound of γ(B): Let x ∈ γ(B). Then x = γ(a) for some a ∈ B .
+Obviously b = ⊓ B ⊑ a and since γ is monotone (see Ex. 3): γ(b) ≤ γ(a) = x .
+For any lower bound l ∈ C of γ(B), l ≤ γ(b) : Suppose l ≤ γ(a) for all a ∈ B .
+By GC (with c = l) we get l ≤ γ(a) ⟺ α(l) ⊑ a for all a ∈ B .
+Then, by definition of lub and GC : α(l) ⊑ ⊓ B = b ⟺ l ≤ γ(b) .
+fi
+
+115
+
+===== slide 116 =====
+polyhedron, and a best abstraction would be the smallest polyhedron enclosing these points.
+Some shapes, such as discs, do not have a smallest enclosing polyhedron, hence, no –
+function, and so, no Galois connection can exist. We can still reason about soundness
+through “, though, and choose a, possibly arbitrary, way to soundly abstract a disc.
+⌥
+
+Closure under meet
+2.3. APPROXIMATIONS
+
+Finally, an important consequence of Thm. 2.4.6 is that the set of concrete properties
+that can be exactly represented in the abstract must be closed by concrete meet.
+
+Example 2.12 (Closure by conjunction and Galois connections). We consider, as concrete
+world, the poset (P(Z), TM) of sets of integers, and the sign abstraction already discussed
+informally in Fig. 1.2.
+Figure 2.9 proposes formally two variants. A naive version, (a), has only four elements:
+positive (Ø 0), negative (Æ 0), ‹, and €, with the natural concretization: “((Ø 0)) = N,
+“((Æ 0)) = ≠N, “(‹) = ÿ, and “(€) = Z. We note that the set of representable properties
+is not closed under intersection; indeed, “((Ø 0)) fl “((Æ 0)) = {0}, but {0} is not exactly
+representable in the abstract. In fact, {0} has two incomparable abstractions: (Ø 0) and
+(a)
+(b)
+(Æ 0), but no best abstraction. Hence, no Galois connection can exist for this lattice.
+Observe also that, in the abstract, we have (Ø 0) Ù (Æ 0) = ‹, which is not a sound
+not a GC
+forms a GC
+Figure 2.9: Sign abstraction lattices: (a) does not enjoy a Galois
+abstraction of “((Ø 0)) fl “((Æ 0)) = {0}.
+On the other hand, if we complete the lattice with a dedicated
+0 abstract element with
+Fig. 2.9
+does.
+the natural interpretation “(0) = {0}, then we obtain the lattice in Fig. 2.9.(b), which
+enjoys a Galois connection. We simply define:
+
+–(X) =
+
+Y
+_
+‹
+_
+_
+_
+_
+_
+_
+]0
+
+(Ø 0)
+_
+_
+_
+_
+(Æ 0)
+_
+_
+_
+[
+€
+
+if X = ÿ
+if X = {0}
+otherwise if X TM N
+otherwise if X TM ≠N
+otherwise
+
+1. – is surjective: ’a œ A: ÷c œ C: –(c) = a;
+2. “ is injective: ’a, aÕ œ A: “(a) = “(aÕ ) =∆ a = aÕ ;
+3. – ¶ “ = id.
+116
+
+“
+
+===== slide 117 =====
+We saw, for instance in Ex. 2.10, that “ ¶ – is extensive and generally not the identity, as
+(a)
+(b)
+abstracting looses precision. Concretizing, however, does not loose precision, so we would
+expect
+¶ “ toSign
+be the
+identity. lattices:
+When this
+the not
+case,enjoy
+we have
+a Galois
+embedding:
+Figure– 2.9:
+abstraction
+(a) isdoes
+a Galois
+connection,
+while (b)
+“
+does.
+≠
+≠
+≠
+Definition 2.13. A Galois connection (C, Æ) Ω
+≠≠–≠æ (A, ı) is a Galois embedding if any
+of the following, equivalent properties hold:
+
+Alternative definition of GI
+
+1. – is surjective: ’a œ A: ÷c œ C: –(c) = a;
+36
+Õ
+Õ
+2. “ is injective: ’a, a œ A: “(a) = “(a )
+
+=∆
+
+Õ
+a=a;
+
+3. – ¶ “ = id.
+“
+
+≠
+≠
+≠
+≠
+We denote a Galois embedding as (C, Æ) Ω
+(A,
+ı).
+≠≠≠æ
+≠æ
+–
+
+⌅
+
+Properties 1 and 2 state that every abstract element is useful: there is no redundancy
+as every abstract element abstracts a different concrete element. Property 3 allows us to
+view the abstract domain A as isomorphic to a subset of the concrete domain C. This is
+depicted in Fig. 2.8.(b).
+fi
+
+117
+
+===== slide 118 =====
+Ex.11: surjectivity and GI
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that :
+the maps α ∘ γ = id i α is surjective ( ∀a ∈ A . ∃c ∈ C . a = α(c) ).
+
+ff
+
+118
+
+===== slide 119 =====
+Ex.11: surjectivity and GI
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that :
+the maps α ∘ γ = id i α is surjective ( ∀a ∈ A . ∃c ∈ C . a = α(c) ).
+Proof. Suppose α ∘ γ = id: Then for any a ∈ A there exists c = γ(a) with a = α(c) .
+In fact: α( γ(a) ) = a .
+Suppose α is surjective: for any a ∈ A there exists c ∈ C with a = α(c) .
+Therefore, by round-trips (Ex. 5): α(γ( a )) = α(γ( α(c) )) = α( c ) = a .
+
+ff
+
+119
+
+===== slide 120 =====
+Ex.12: injectivity and GI
+
+￼
+
+120
+ff
+
+￼
+
+￼
+
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that :
+the maps α ∘ γ = id i γ is injective ( ∀a, a′ ∈ A . γ(a) = γ(a′) ⇒ a = a′ ).
+
+===== slide 121 =====
+Ex.12: injectivity and GI
+Given two posets (C, ≤ ) and (A, ⊑ ) and two maps γ : A → C and α : C → A
+such that c ≤ γ(a) ⟺ α(c) ⊑ a, for all c ∈ C and a ∈ A, prove that :
+the maps α ∘ γ = id i γ is injective ( ∀a, a′ ∈ A . γ(a) = γ(a′) ⇒ a = a′ ).
+Proof. Suppose α ∘ γ = id and take a, a′ ∈ A such that γ(a) = γ(a′) .
+Then: a = α( γ(a) ) = α( γ(a′) ) = a′ .
+
+￼
+
+￼
+
+121
+ff
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+Suppose γ is injective :
+By round-trips (Ex. 5): γ( a ) = γ(α(γ( a ))) .
+Since γ is injective and γ( a ) = γ( α(γ(a)) ) then a = α(γ(a)) .

@@ -1,0 +1,502 @@
+# ProgramAnalysis-22-CFA_Part1
+# auto-extracted from ProgramAnalysis-22-CFA_Part1.pdf (16 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #22
+Control Flow Analysis
+
+===== slide 2 =====
+Cartesian Product Algorithm
+(CPA)
+
+266
+
+===== slide 3 =====
+FUN: syntax
+term
+
+t ::= ...
+e ::= t l
+
+|...
+
+n
+
+n
+
+• well-formedness condition: all function abstractions are closed, i.e.,
+FV( x1, . . . , xm ⇒ e0) = ∅
+• we do not treat recursive functions
+f
+f
+
+x1, . . . , xm ⇒ eb // function definition
+(with m arguments)
+| e0(e1, . . . , em) // function application
+(with m arguments)
+|
+
+267
+
+===== slide 4 =====
+The Cartesian Product Algorithm: adding context
+We extend the analysis to take context into account
+In this variant, contexts are tuples of argument values
+
+v̂ ∈ Val ̂ = ℘(Term)
+ρ ̂ ∈ Cenv ̂ = (Var × Δ) → Val ̂
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+δ ∈ Δ = Termm
+
+The resulting analysis is a re nement of 0-CFA that partitions the ow of
+values to expressions and variables according to the actual argument
+types in their dynamic calling context
+
+fi
+
+268
+
+===== slide 5 =====
+Rephrasing the O-CFA analysis: [fn]
+[ fn] (C,̂ ρ)̂ ⊧ (
+
+x1, ⋯, xm ⇒ eb)l
+
+Example
+e ≜ (fn x y => (x1 + y2)3
+̂ ⊇ {(fn x y => x1 + y2)} ...
+C(3)
+n
+
+f
+
+269
+
+{
+
+̂
+x1, ⋯, xm ⇒ eb} ⊆ C(l)
+
+===== slide 6 =====
+fl
+
+Rephrasing the O-CFA analysis: [app]
+[app] (C,̂ ρ)̂ ⊧ (t0l0(t1l1, ⋯, tmlm))l (C,̂ ρ)̂ ⊧ t0l0 ∧
+lm
+l1
+̂
+̂
+̂
+̂
+(
+C,
+ρ)
+⊧
+t
+∧
+⋯
+∧
+(
+C,
+ρ)
+⊧
+t
+m
+each argument
+ows to its
+corresponding
+parameter
+
+1
+
+lb
+̂ 0) :
+x1, ⋯, xm ⇒ tb ) ∈ C(l
+
+( ∀(
+̂ 1) × ⋯ × C(l
+̂ m) ⊆ ρ(x
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+C(l
+
+̂ i) is empty
+In the case where no C(l
+(C,̂ ρ)̂ ⊧ tblb ∧
+̂ 1) ⊆ ρ(x
+̂ m) ⊆ ρ(x
+̂ 1) ∧ ⋯ ∧ C(l
+̂ m)
+C(l
+̂ b) ⊆ C(l))
+̂
+C(l
+∧ ...
+
+Example
+̂ ⊇ {(fn x => x1 + y2)} then
+e ≜ (f3(44,65))6 supposing that C(3)
+̂ ⊆ ρ(1)
+̂ ⊆ ρ(2)
+̂ and C(5)
+̂
+C(4)
+n
+
+f
+
+270
+
+===== slide 7 =====
+Adding context: [var], [fn]
+tuple of argument values
+
+[var] (C,̂ ρ)̂ ⊧δCPA x l
+x1, ⋯, xm ⇒ eb)l
+
+{
+
+̂ δ)
+x1, ⋯, xm ⇒ eb} ⊆ C(l,
+
+n
+
+f
+
+f
+
+i
+
+271
+f
+
+[ fn] (C,̂ ρ)̂ ⊧δCPA (
+
+̂ δ)
+̂ δ) ⊆ C(l,
+ρ(x,
+
+===== slide 8 =====
+Adding context: [app]
+[app] (C,̂ ρ)̂ ⊧δCPA (t0l0(t1l1, ⋯, tmlm))l (C,̂ ρ)̂ ⊧δCPA t0l0 ∧ we distinguish calls
+by what they receive
+l
+l
+δ
+δ
+m
+1
+(C,̂ ρ)̂ ⊧CPA t1 ∧ ⋯ ∧ (C,̂ ρ)̂ ⊧CPA tm ∧
+̂ 0, δ) :
+( ∀( x1, ⋯, xm ⇒ tblb) ∈ C(l
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) :
+∀δb ∈ C(l
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+{δb} ⊆ ρ(x
+b
+(C,̂ ρ)̂ ⊧δCPA
+tblb ∧
+we analyse the body
+separately for each δb
+̂ b, δb) ⊆ C(l,
+̂ δ)) ∧ . . .
+C(l
+no data merging
+The Cartesian Product Algorithm derives its name from the cartesian
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) over which δb ranges
+product C(l
+n
+
+f
+
+272
+
+===== slide 9 =====
+Observation
+• The function body is analysed separately for each possible tuple of
+arguments
+• No merging across di erent tuples
+• This creates redundancy: it leads to many re-analyses of the same body:
+we need memoisation so that the bodies are only analysed once
+lb
+δ
+̂
+̂
+We
+memoise
+analyses
+of
+each
+(
+C,
+ρ)
+⊧
+t
+•
+CPA b as templates (with entries
+like tblb associated with x ↦ f, y ↦ a) and maintain them in a global pool
+• when a template is created it is only added to the pool if it is not already
+present (template reuse)
+
+ff
+
+273
+
+===== slide 10 =====
+Implementation
+
+• The analysis can be implemented in a straightforward manner because
+the product grows monotonically:
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) will increase each time one of the C(l
+̂ i, δ)
+• C(l
+increases (assuming that none is empty)
+
+274
+
+===== slide 11 =====
+If we remove the well-formedness condition, i.e., function abstractions are
+not closed, i.e., FV( x1, . . . , xm ⇒ e0) ≠ ∅, we need to extend the analysis,
+• treating functions as closure abstractions:, and
+• using new clauses
+where
+
+(C,̂ ρ)̂ ⊧ce
+δ e
+
+m
+
+• δ ∈ Δ = Term
+• ce ∈ CEnv = Var → Δ
+
+275
+n
+
+f
+
+Exercise
+
+===== slide 12 =====
+[app] (C,̂ ρ)̂ ⊧δCPA (t0l0(t1l1, ⋯, tmlm))l
+l0
+lm
+l1
+δ
+δ
+δ
+̂
+̂
+̂
+(C, ρ)̂ ⊧CPA t0 ∧ (C, ρ)̂ ⊧CPA t1 ∧ ⋯ ∧ (C, ρ)̂ ⊧CPA tm
+̂ 0, δ) :
+( ∀( x1, ⋯, xm ⇒ tblb) ∈ C(l
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) :
+∀δb ∈ C(l
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+{δb} ⊆ ρ(x
+b
+(C,̂ ρ)̂ ⊧δCPA
+tblb ∧
+we analyse the body
+̂
+̂
+C(lb, δb) ⊆ C(l, δ)) ∧ . . .
+for each δb
+The Cartesian Product Algorithm derives its name from the cartesian
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) over which δb ranges
+product C(l
+n
+
+f
+
+f
+
+276
+f
+
+i
+
+Adding context: [app]
+
+===== slide 13 =====
+Clause for function application
+l1 l2 l
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+t
+)
+δ
+1 2
+
+body analysed in the updated
+context δ0 using the updated
+closure environment ce0
+
+l1
+̂ ρ)̂ ⊧ce t l2
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+l0
+̂ 1, δ) :
+( ∀( x ⇒ t0 , ce0) ∈ C(l
+0 l0
+(C,̂ ρ)̂ ⊧ce′
+t ∧
+δ0 0
+̂ 2, δ) ⊆ ρ(x,
+̂ 0, δ) ⊆ C(l,
+̂ δ))
+̂ δ) ∧ C(l
+C(l
+
+where δ0 = ⌈δ, l⌉k and
+
+∧ ...
+
+ce′0 = ce0[x ↦ δ0]
+
+x is now bound in the new
+calling context δ0 but using the
+
+fi
+
+f
+
+f
+
+277
+i
+
+￼
+
+n
+
+f
+
+￼
+
+definition environment ce0
+
+===== slide 14 =====
+Adding context: [app]
+l0 l1
+lm l
+ce l0
+̂
+̂
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+(t
+,
+⋯,
+t
+))
+(
+C,
+ρ)
+⊧
+m
+δ
+δ t0
+0 1
+l1
+̂ ρ)̂ ⊧ce tmlm
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+⋯
+∧
+(
+C,
+δ 1
+δ
+̂ 0, δ) :
+( ∀( x1, ⋯, xm ⇒ tblb, ce0) ∈ C(l
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) :
+∀δb ∈ C(l
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+{δb} ⊆ ρ(x
+0 lb
+(C,̂ ρ)̂ ⊧ce′
+t ∧
+δb b
+̂ b, δb) ⊆ C(l,
+̂ δ) ∧ . . .
+C(l
+
+where
+
+ce′0 = ce0[x1 ↦ δb ↓1 , . . . , xn ↦ δb ↓n ]
+with ↓i the projection on the i-th component
+￼
+
+n
+
+f
+
+￼
+
+278
+
+===== slide 15 =====
+The evolution of CFA for FUN
+
+0-CFA
+Context-insensitive and ow-insensitive ow analysis (merges all calls)
+Polynomial-time higher-order analysis
+Syntax-directed CFA
+Analyze each body once at definition site, but analyzes unreachable code
+Constraint-based formulation
+Context-sensitive CFA (k-CFA style)
+Track calling contexts and closure environments
+Distinguishes di erent calls
+Cartesian Product Algorithm
+Analyze bodies for each argument tuple
+Larger abstract state space
+
+fi
+
+fl
+
+ff
+
+For all CFAs, semantics are preserved, and a (least) solution exists.
+Moreover, an implementation can be provided
+279
+
+===== slide 16 =====
+CFA for FUN: conclusion
+Control- ow analysis for higher-order languages is a tradeo between:
+precision vs computational cost
+More context
+
+fewer spurious ows
+
+higher complexity
+
+The key challenge of CFA is balancing:
+• soundness
+• precision
+• scalability
+
+fl
+
+fl
+
+280

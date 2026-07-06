@@ -1,0 +1,371 @@
+# ProgramAnalysis-22-CFA_Part2
+# auto-extracted from ProgramAnalysis-22-CFA_Part2.pdf (16 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+0-CFA for process algebras
+
+1
+
+===== slide 2 =====
+Name mobility
+• You should have seen CCS
+• In CCS communication is statically defined: channels cannot be
+transmitted / received
+• What if channels are treated as ordinary values?
+• Can we extend CCS to communicate communication means?
+• Yes, this leads us to π-calculus
+
+2
+
+===== slide 3 =====
+π-calculus
+
+3
+
+===== slide 4 =====
+Name mobility
+
+m
+A
+• ab
+ab
+as •
+
+Legenda:
+m: message
+as: secure channel from A to S
+bs: secure channel from A to B
+ab: channel from A to B
+
+B
+as •
+
+S
+
+4
+
+• bs
+
+• bs
+
+===== slide 5 =====
+Name mobility
+(ν as)(ν bs)((ν ab) A | B | S)
+
+m
+A
+as •
+
+(ν as)(ν bs)((ν ab)(A | B) | S)
+
+ab •
+
+• ab
+as •
+
+S
+
+5
+
+• bs
+
+B
+• bs
+
+===== slide 6 =====
+Pre xes
+
+Processes
+
+π-calculus: syntax
+π ::= u⟨v⟩ // send v on u
+| u(x) // receive on u and store in v
+| τ // internal action
+often
+omitted
+
+sometimes
+written P \ n
+
+P ::= 0 // inactive process
+| π . P // action prefix
+| [x = y]P // matching (like, if x = y then P)
+| (νn)P // restriction (like n only known in P)
+| Σi∈I πi . Pi // non deterministic, guarded choice
+nullary sum: 0
+| P1 | P2 // parallel composition
+binary sum: π1 . P1 + π2 . P2
+| !P // replication (like P | P | P | P | . . . )
+
+fi
+
+fi
+
+6
+
+===== slide 7 =====
+π-calculus: the idea
+• Communication primitives: simple and powerful
+• Scoping Rules: explicitly control the access to channels and to data
+send z on x
+
+Communication (on channel x)
+
+x̄⟨z⟩ . P | x(y) . Q
+receive y from x
+
+P | Q[z/y]
+
+y has been substituted for z in the second process
+
+Extrusion of z
+
+(νz) (x̄⟨z⟩ . P) | x(y) . Q
+
+(νz) (P | Q[z/y])
+
+• y has been substituted for z in the second
+process
+• the scope of z has been extended to include
+both processes
+
+7
+
+===== slide 8 =====
+A central component of the π-calculus is that of names
+The only binders are input prefix and name restriction
+
+π ::=
+
+| u⟨v⟩
+| u(v)
+
+P ::= ...
+
+free names
+
+bound constant
+
+| (ν n)
+|...
+
+bound variable
+
+| τ
+|...
+
+disjoint union not present in
+the original π-calculus
+
+=
+
+⊎
+
+The notion of free and bound constants and variables are defined as expected:
+fc(P) and fv(P)
+
+fi
+
+t
+
+e
+
+s
+
+n
+
+m
+
+r
+
+a
+
+o
+
+8
+a
+
+N
+
+C
+
+V
+
+Free and bound names
+
+===== slide 9 =====
+π-calculus: syntax details
+• The notion of free and bound names (constants and variables) are defined
+as usual: we focus on fc(P) and fv(P)
+• The notion of capture avoiding substitution is defined as usual: P[y/x]
+• Processes are taken up-to alpha-renaming of bound names:
+• u(y) . P = u(z) . (P[z/y]) if z ∉ fv(P)
+• (νn) . P = (νn′) . (P[n′/n]) if n′ ∉ fc(P)
+
+• We focus on closed processes, i.e., process P such that fc(P) = fv(P) = ∅
+
+￼
+
+￼
+
+￼
+
+9
+
+===== slide 10 =====
+Examples
+(ν as)(ν bs)(A | S | B)
+
+A ≜ (ν ab)(as⟨ab⟩ . ab⟨m⟩ . A′)
+send m on ab
+send ab on as
+
+do something else
+
+create a new (private) channel ab
+
+S ≜ !as(x) . bs ⟨x⟩
+
+omit 0
+
+receive on as and forward to on bs
+
+10
+￼
+
+receive on y
+receive y on bs
+
+do something else
+
+￼
+
+B ≜ bs(y) . y(w) . B′
+
+===== slide 11 =====
+Example
+(ν as)(ν bs)((ν ab)(as⟨ab⟩ . ab⟨m⟩ . A′) | !as(x) . bs ⟨x⟩ | bs(y) . y(w) . B′)
+scope extrusion
+
+(ν as)(ν bs)((ν ab)(ab⟨m⟩ . A′| !bs ⟨ab⟩) | bs(y) . y(w) . B′) | S)
+scope extrusion
+
+(ν as)(ν bs)((ν ab)(ab⟨m⟩ . A′| 0 | ab(w) . B′) | S)
+(ν as)(ν bs)((ν ab)(A′| 0 | B′[m/w]) | S)
+￼
+
+￼
+
+￼
+
+11
+￼
+
+the scope
+of ab is
+extended
+to include
+both
+processes
+
+===== slide 12 =====
+π-calculus: reduction semantics
+We define the semantics by:
+• a structural congruence relation ≡, and
+• a reduction relation →
+
+P
+
+Q
+
+A process
+in its current
+state
+
+The process
+state after the
+interaction
+
+fi
+
+12
+
+===== slide 13 =====
+Structural congruence
+Abelian monoid laws for parallel
+
+Summands can be permuted in
+
+(P | Q) | R ≡ P | (Q | R)
+P|Q ≡ Q|P
+P|0 ≡ 0
+
+Σi∈I πi . Pi
+
+I∈I
+
+Scope laws
+
+Unfolding of replication
+
+Matching
+
+α-renaming
+P ≡α Q ⇒ P ≡ Q
+
+!P ≡ P | !P
+
+(νn)(νm)P ≡ (νm)(νn)P
+(νn)0 ≡ 0
+(νn)(P | Q) ≡ (νm)P | Q if n ∉ fc(Q)
+[x = x]P ≡ P
+13
+
+===== slide 14 =====
+Reduction semantics
+[Com] (n⟨m⟩ . P + P′) | (n(x) . Q + Q′) → P | Q[m/x]
+[Tau] (τ . P + Q) → P
+P → P′
+[Res]
+(νn)P → (νn)P′
+
+P → P′
+P | Q → P′| Q
+
+[Par]
+
+[Eq] P ≡ Q Q → Q′ Q′ ≡ P′
+P → P′
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+14
+
+===== slide 15 =====
+0-CFA for π-calculus
+
+15
+
+===== slide 16 =====
+CFA predicts communications
+
+16

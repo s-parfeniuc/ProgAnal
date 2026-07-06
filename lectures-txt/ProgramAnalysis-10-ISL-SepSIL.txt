@@ -1,0 +1,2507 @@
+# ProgramAnalysis-10-ISL-SepSIL
+# auto-extracted from ProgramAnalysis-10-ISL-SepSIL.pdf (93 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #10
+Incorrectness separation logic
+
+===== slide 2 =====
+SL: recap
+
+2
+
+===== slide 3 =====
+Example: concatenation
+{x ↦ v * list(v) * list(y)}
+t := x;
+n := [t];
+while n ≠ nil do (
+t := n;
+)
+
+n := [t];
+
+Precondition
+x and y are pointers to the heads of two (singly linked) lists.
+The list pointed to by x is non-empty and each list is finite and null-terminated.
+The two lists are disjoint (no node belongs to both lists).
+
+The code appends the list pointed to by y
+to the end of the non-empty list pointed to by x
+Postcondition
+A unique (singly linked) list pointed to by x.
+
+[t] := y;
+{list(x)}
+
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+list(a) ≜ ls(a, nil)
+3
+
+===== slide 4 =====
+Example: concatenation
+{x ↦ v * list(v) * list(y)}
+t := x;
+n := [t];
+while n ≠ nil do (
+t := n;
+)
+
+n := [t];
+
+[t] := y;
+{list(x)}
+
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+list(a) ≜ ls(a, nil)
+4
+
+===== slide 5 =====
+Example: concatenation
+{x ↦ v * list(v) * list(y)}
+t := x;
+n := [t];
+while n ≠ nil do (
+t := n;
+)
+
+n := [t];
+
+[t] := y;
+ls(a
+,
+a
+)
+≜
+(a
+=
+a
+∧
+emp)
+∨
+(a
+≠
+a
+∧
+∃l
+.
+a
+↦
+l
+*
+ls(l,
+a
+)
+)
+1
+2
+1
+2
+1
+2
+1
+2
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)}
+list(a) ≜ ls(a, nil)
+5
+
+===== slide 6 =====
+Example: concatenation
+
+{x ↦ v * list(v) * list(y)}
+{x ↦ v * list(v)}
+t := x;
+
+idle frame
+
+R1 ≡ list(y)
+
+frame
+
+n := [t];
+while n ≠ nil do (
+t := n;
+)
+
+n := [t];
+
+[t] := y;
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)}
+list(a) ≜ ls(a, nil)
+6
+
+===== slide 7 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+
+frame
+
+idle frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x; // Ordinary Floyd's axiom
+{x = t ∧ t ↦ v * list(v)} // ≡ { ∃t′ . t = x ∧ x ↦ v * list(v)}
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ {ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+{t ↦ w ∧ t = n} n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+7
+
+===== slide 8 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+
+frame
+
+idle frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+{x = t ∧ t ↦ v * list(v)}
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v} // small axiom
+{ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ {ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+{t ↦ w ∧ t = n} n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+8
+
+===== slide 9 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{x = t ∧ t ↦ v * list(v) ∧ n = v}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ {ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+{t ↦ w ∧ t = n} n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+9
+
+===== slide 10 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R1 ≡ list(y)
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{x = t ∧ t ↦ v * list(v) ∧ n = v}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ {ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+n := [t]; {t ↦ w ∧ n = w}
+)
+
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+10
+
+===== slide 11 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R1 ≡ list(y)
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{x = t ∧ t ↦ v * list(v) ∧ n = v} ⇒ {ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ {ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+n := [t]; {t ↦ w ∧ n = w}
+)
+
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+11
+
+===== slide 12 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R1 ≡ list(y)
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant?
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ {ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+n := [t]; {t ↦ w ∧ n = w}
+)
+
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+12
+
+===== slide 13 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant?
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+13
+
+===== slide 14 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+list(n) is non-empty!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+14
+
+===== slide 15 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n; // Ordinary Floyd's axiom
+{ ∃t′, w . ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n}
+n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+15
+
+===== slide 16 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃t′, w . ls(x, t′) * t′ ↦ t * t ↦ w * list(w) ∧ t = n} ⇒ { ∃w . ls(x, t) * t ↦ w * list(w)}
+n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+16
+
+===== slide 17 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+n := [t]; {t ↦ w ∧ n = w}
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+17
+
+===== slide 18 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+{t ↦ w} n := [t]; {t ↦ w ∧ n = w} // small axiom
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+18
+
+===== slide 19 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+idle frame
+{t ↦ w} n := [t]; {t ↦ w ∧ n = w}
+R3 ≡ ls(x, t) * list(w)
+{ls(x, t) * t ↦ n * list(n)} ) // { ∃w . ls(x, t) * t ↦ w * list(w) ∧ n = w}
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+19
+
+===== slide 20 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+exists
+frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+idle frame
+{t ↦ w} n := [t]; {t ↦ w ∧ n = w}
+R3 ≡ ls(x, t) * list(w)
+{ls(x, t) * t ↦ n * list(n)} ) // { ∃w . ls(x, t) * t ↦ w * list(w) ∧ n = w}
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+20
+
+===== slide 21 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+exists
+frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+idle frame
+{t ↦ w} n := [t]; {t ↦ w ∧ n = w}
+R3 ≡ ls(x, t) * list(w)
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil}
+{t ↦ _} [t] := y; {t ↦ y} // small axiom
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+21
+
+===== slide 22 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+exists
+frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+idle frame
+{t ↦ w} n := [t]; {t ↦ w ∧ n = w}
+R3 ≡ ls(x, t) * list(w)
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+22
+
+===== slide 23 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+idle frame
+
+exists
+frame
+
+frame
+
+frame
+
+frame
+
+{x ↦ v * list(v)}
+R
+≡
+list(y)
+1
+t := x;
+idle frame
+{x = t ∧ t ↦ v * list(v)}
+R
+≡
+x
+=
+t
+∧
+list(v)
+2
+{t ↦ v} n := [t]; {t ↦ v ∧ n = v}
+{ls(x, t) * t ↦ n * list(n)}
+invariant!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil} ≡ { ∃w . ls(x, t) * t ↦ n * n ↦ w * list(w)}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w)}
+idle frame
+{t ↦ w} n := [t]; {t ↦ w ∧ n = w}
+R3 ≡ ls(x, t) * list(w)
+{ls(x, t) * t ↦ n * list(n)} )
+idle frame
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+R4 ≡ ls(x, t)
+{t ↦ _} [t] := y; {t ↦ y}
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+{ls(x, t) * t ↦ y * list(y)} ⇒ {list(x)} list(a) ≜ ls(a, nil)
+23
+
+===== slide 24 =====
+Example:
+concatenation
+{x ↦ v * list(v) * list(y)}
+
+{x ↦ v * list(v)}
+t := x;
+{x = t ∧ t ↦ v * list(v)}
+n := [t];
+{ls(x, t) * t ↦ n * list(n)}
+invariant!
+while n ≠ nil do (
+{ls(x, t) * t ↦ n * list(n) ∧ n ≠ nil}
+t := n;
+{ ∃w . ls(x, t) * t ↦ w * list(w) ∧ t = n}
+n := [t];
+{ls(x, t) * t ↦ n * list(n)} )
+{ls(x, t) * t ↦ n * list(n) ∧ n = nil} ⇒ {ls(x, t) * t ↦ _}
+[t] := y;
+{ls(x, t) * t ↦ y}
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * ls(l, a2) )
+list(a) ≜ ls(a, nil)
+{list(x)}
+24
+
+===== slide 25 =====
+SL: correctness and
+(in)completeness
+
+25
+
+===== slide 26 =====
+Relational semantics
+[[skip]] ≜ {(σ, σ)}
+[[b?]] ≜ {(σ, σ) ∣ σ = ⟨s, h⟩ ∧ s ⊧ b}
+[[x := a]] ≜ {(⟨s, h⟩, ⟨s[x ↦ [[a]]s], h⟩)}
+[[x := [a]]] ≜ {(⟨s, h⟩, ⟨s[x ↦ v], h⟩) ∣ v = h([[a]]s) ∈ Z}
+[[[a1] := a2]] ≜ {(⟨s, h⟩, ⟨s, h[[[a1]]s ↦ [[a2]]s]⟩) ∣ h([[a1]]s) ∈ Z}
+[[x := alloc( )]] ≜ {(⟨s, h⟩, ⟨s[x ↦ n], h[n ↦ v]⟩) ∣ v ∈ Z ∧ (n ∉ dom(h) ∨ h(n) = ⊥ )}
+[[free(x)]] ≜ {(⟨s, h ∙ [s(x) ↦ v]⟩, ⟨s, h⟩) ∣ s(x) ∈ N ∧ v ∈ Z}
+[[x := cons(a0, . . . , ak)]] ≜ {(⟨s, h⟩, ⟨s[x ↦ n], h[n ↦ [[a0]]s, . . . , (n + k) ↦ [[ak]]s]⟩)
+∣ ( ∀i ∈ [n, n + k] . i ∉ dom(h) ∨ h(i) = ⊥ )}
+26
+
+===== slide 27 =====
+Correctness + Incompleteness
+Th. [correctness]
+If {P} c {Q} then [[c]]P ⊆ Q
+Proof. By induction on the derivation.
+Th. [incompleteness]
+There exist valid SL triples that are not provable
+Proof. Misses footprint theorem: coming next!
+27
+
+===== slide 28 =====
+Final considerations on SL
+SL addresses resource manipulation
+
+Simple Proofs
+for Simple
+separating conjunction for in-place reasoning
+Programs
+pre/post describe local surgeries
+
+28
+
+===== slide 29 =====
+Exercises
+
+29
+
+===== slide 30 =====
+Satisfaction 1
+Can you find some state that satisfies the following assertions?
+
+(x ≐ y) * x ↦ y
+a1 ≐ a2 ≜ (a1 = a2) ∧ emp
+
+(x = y) * x ↦ y
+(x = y) ∧ x ↦ y
+x↦x
+30
+
+===== slide 31 =====
+Satisfaction 1
+Can you find some state that satisfies the following assertions?
+
+(x ≐ y) * x ↦ y
+
+x y
+
+a1 ≐ a2 ≜ (a1 = a2) ∧ emp
+
+(x = y) * x ↦ y
+(x = y) ∧ x ↦ y
+
+x
+
+x↦x
+31
+
+===== slide 32 =====
+Satisfaction 2
+Show a state that satisfies the assertion (x ↦ y) * ¬(x ↦ y)
+
+32
+
+===== slide 33 =====
+Satisfaction 2
+Show a state that satisfies the assertion (x ↦ y) * ¬(x ↦ y)
+
+dom(h) = {11}
+s(x) = 11 h(11) = 42
+s(y) = 42
+x
+
+y
+
+42
+
+33
+
+===== slide 34 =====
+List segments
+Consider the imprecise list segment definition below
+
+ils(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ ( ∃v . a1 ↦ v * ils(v, a2))
+Prove that ils(a1, a2) ≢ ls(a1, a2), by finding a state that satisfies
+ils(42,42) but not ls(42,42)
+
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃v . a1 ↦ v * ls(v, a2))
+34
+
+===== slide 35 =====
+List segments
+Consider the imprecise list segment definition below
+
+ils(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ ( ∃v . a1 ↦ v * ils(v, a2))
+Prove that ils(a1, a2) ≢ ls(a1, a2), by finding a state that satisfies
+ils(42,42) but not ls(42,42)
+
+dom(h) = {42}
+s(x) = 42 h(42) = 42
+
+x
+
+⟨s, h⟩ ⊧/ ls(42,42)
+⟨s, h⟩ ⊧ ils(42,42)
+
+ls(a1, a2) ≜ (a1 = a2 ∧ emp) ∨ (a1 ≠ a2 ∧ ∃v . a1 ↦ v * ls(v, a2))
+35
+
+===== slide 36 =====
+Footprint property
+
+36
+
+===== slide 37 =====
+Footprint recipe
+Given a command c
+1. Derive the specification of c using local axioms
+{R * x ↦ _}
+{x ↦ _}
+[x] := 1;
+{x ↦ 1}
+y := [x]
+{x ↦ 1 ∧ y = 1}
+{R * x ↦ 1 ∧ y = 1}
+37
+
+===== slide 38 =====
+Footprint recipe
+Given a command c
+1. Derive the specification of c using local axioms
+2. Apply rule frame to complete the specification
+
+frame
+
+{R * x ↦ _}
+{x ↦ _}
+[x] := 1;
+{x ↦ 1}
+y := [x]
+{x ↦ 1 ∧ y = 1}
+{R * x ↦ 1 ∧ y = 1}
+38
+
+===== slide 39 =====
+Footprint fails in SL
+Counterexample:
+We would like to derive
+
+{y ↦ _} x := alloc( ) ; free(x) {y ↦ _ ∧ y ≠ x}
+{y ↦ _ * emp}
+{emp}
+x := alloc( );
+{ ∃v . v ↦ _ ∧ x = v}
+free(x)
+{ ∃v . x = v}
+{ ∃v . y ↦ _ ∧ x = v} // strongest derivable spec: incomplete spec
+39
+
+===== slide 40 =====
+Footprint fails in SL
+Counterexample:
+We would like to derive
+
+{y ↦ _} x := alloc( ) ; free(x) {y ↦ _ ∧ y ≠ x}
+{y ↦ _ * emp}
+{emp}
+lossy: x held a location!
+x := alloc( );
+{ ∃v . v ↦ _ ∧ x = v}
+free(x)
+{x ↦ _} free(x) {emp}
+{ ∃v . x = v}
+{ ∃v . y ↦ _ ∧ x = v} // strongest derivable spec: incomplete spec
+40
+
+===== slide 41 =====
+Information loss
+{x ↦ _} [x] := y {x ↦ y} // write
+{y ↦ v} x := [y] {x = v ∧ y ↦ v} // read
+{emp} x := alloc( ) {x ↦ _} // alloc
+{x ↦ _} free(x) {emp} // dispose
+but should never shrink!
+41
+
+resources can grow
+
+===== slide 42 =====
+Incorrectness Separation Logic
+(ISL)
+
+42
+
+===== slide 43 =====
+CAV 2020
+Local Reasoning About the Presence
+of Bugs: Incorrectness Separation Logic
+Azalea Raad1(B) , Josh Berdine2 , Hoang-Hai Dang1 , Derek Dreyer1 ,
+Peter O’Hearn2,3 , and Jules Villard2
+1
+
+Max Planck Institute for Software Systems (MPI-SWS),
+Kaiserslautern and Saarbrücken, Germany
+{azalea,haidang,dreyer}@mpi-sws.org
+2
+Facebook, London, UK
+{jjb,peteroh,jul}@fb.com
+3
+University College London, London, UK
+
+Abstract. There has been a large body of work on local reasoning for
+proving the absence of bugs, but none for proving their presence. We
+present a new formal framework for local reasoning about the presence of
+bugs, building on two complementary foundations: 1) separation logic and
+2) incorrectness logic. We explore the theory of this new incorrectness separation logic (ISL), and use it to derive a begin-anywhere, intra-procedural
+symbolic execution analysis that has no false positives by construction. In
+so doing, we take a step towards transferring modular, scalable techniques
+from the world of program verification to bug catching.
+
+“bugs are a fundamental enough
+phenomenon to warrant a fundamental
+compositional theory for reasoning
+positively about their existence”
+
+Keywords: Program logics · Separation logic · Bug catching
+
+1
+
+Introduction
+
+There has been significant research on sound, local reasoning about the state
+for proving the absence of bugs (e.g., [2,13,26,29,30,41]). Locality leads to techniques that are compositional both in code (concentrating on a program component) and in the resources accessed (spatial locality), without tracking the
+entire global state or the global program within which a component sits. Compositionality enables reasoning to scale to large teams and codebases: reasoning
+can be done even when a global program is not present (e.g., a library, or during
+program construction), without having to write the analogue of a test or verification harness, and the results of reasoning about components can be composed
+efficiently [11].
+Meanwhile, many of the practical applications of symbolic reasoning have
+aimed at proving the presence of bugs (i.e., bug catching), rather than proving
+their absence (i.e., correctness). Logical bug catching methods include symbolic
+model checking [7,12] and symbolic execution for testing [9]. These methods are
+usually formulated as global analyses; but, the rationale of local reasoning holds
+just as well for bug catching as it does for correctness: it has the potential to
+c The Author(s) 2020
+⃝
+S. K. Lahiri and C. Wang (Eds.): CAV 2020, LNCS 12225, pp. 225–252, 2020.
+https://doi.org/10.1007/978-3-030-53291-8_14
+
+43
+
+===== slide 44 =====
+ISL = IL + SL
+bug finding
+
+SL
+
+IL
+
+{P} c {Q}
+{P * R} c {Q * R}
+
+[P] c [ε : Q]
+
+ISL
+
+[P] c [ε : Q]
+[P * R] c [ε : Q * R]
+44
+
+local
+reasoning
+
+===== slide 45 =====
+Regular commands
+regular
+command
+
+e ::= skip
+atomic
+| b?
+command
+simplified
+(x≠y)
+| x := a
+c ::= e
+|
+//
+read
+x
+:=
+[y]
+choice
+| c1; c2
+| [x] := y // write
+| c1 + c2
+| x := alloc( )
+⋆
+| c
+free(x)
+|
+can fail
+Kleene
+star
+| error( )
+| ...
+
+45
+
+===== slide 46 =====
+Disclaim
+for the sake of presentation, some
+technical aspects are not fully detailed
+
+46
+
+===== slide 47 =====
+Local axioms: write
+SL
+
+{x ↦ _} [x] := y {x ↦ y}
+
+[x ↦ v] [x] := y [ok : x ↦ y]
+[x = nil] [x] := y [er : x = nil]
+
+must put a
+value
+
+null pointer
+dereference
+47
+
+===== slide 48 =====
+Remind: reversed consequence
+{HL}
+
+[IL]
+
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+
+P′ ⇒ P [P′] c [Q′] Q ⇒ Q′
+
+{P} c {Q}
+
+[P] c [Q]
+
+preconditions
+can be
+strengthened
+
+preconditions
+can be
+weakened
+
+[x ↦ v] [x] := y [x ↦ y]
+
+{x ↦ _} [x] := y {x ↦ y}
+
+local axioms
+must speak
+precisely
+
+local axioms
+can speak
+broadly
+48
+
+===== slide 49 =====
+Local axioms: read
+SL
+
+{y ↦ v} x := [y] {x = v ∧ y ↦ v}
+
+[y ↦ v] x := [y] [ok : x = v ∧ y ↦ v]
+[y = nil] x := [y] [er : y = nil]
+null pointer
+dereference
+49
+
+===== slide 50 =====
+Local axioms: allocation
+SL
+
+{emp} x := alloc( ) {x ↦ _}
+
+[x ≐ x′] x := alloc( ) [ok : x ↦ _]
+needed for
+footprint
+
+50
+
+===== slide 51 =====
+Local axioms: dispose (1st try)
+SL
+
+{x ↦ _} free(x) {emp}
+
+[x ↦ v] free(x) [ok : emp]
+[x = nil] free(x) [er : x = nil]
+
+must put a
+value
+
+null pointer
+dereference
+51
+
+===== slide 52 =====
+Unsound Frame rule!
+[P] c [ε : Q]
+[P * R] c [ε : Q * R]
+[free]
+
+[x ↦ v] free(x) [ok : emp]
+[frame]
+[x ↦ v * x ↦ v] free(x) [ok : emp * x ↦ v]
+[cons]
+[false] free(x) [ok : x ↦ v]
+the only sound
+under approximation
+can be false
+52
+
+this can be fixed by using a
+monotonic heap model
+(and we will recover
+completeness)
+
+===== slide 53 =====
+Solution
+assertion
+
+P ::= true | false | a1 < a2 | a1 = a2 | ...
+¬P | P1 ∧ P2 | ∃x . P | ...
+|
+| emp
+| a1 ↦ a2
+structural
+assertions
+| P1 * P2
+/
+| x ↦
+track deallocated
+locations
+
+53
+
+Boolean and
+classical
+assertions
+
+===== slide 54 =====
+Satisfaction: structural
+⟨s, h⟩ ⊧ a1 ↦ a2 iff dom(h) = {[[a1]]s} and h([[a1]]s) = [[a2]]s
+⟨s, h⟩ ⊧ emp
+
+iff h is the empty map [ ]
+
+⟨s, h⟩ ⊧ P1 * P2
+
+iff ∃h1, h2 . ⟨s, h1⟩ ⊧ P1 and ⟨s, h2⟩ ⊧ P2 and h = h1 ∙ h2
+
+⟨s, h⟩ ⊧ x ↦
+/
+
+iff dom(h) = {s(x)} and h(s(x)) = ⊥
+
+/ ≡ false ≡ x ↦
+/ *x ↦
+/
+Notably: x ↦ v * x ↦
+
+y↦v*x ↦
+/ ≡ y↦v*x ↦
+/ ∧x≠y
+54
+
+===== slide 55 =====
+Local axioms: dispose
+SL
+
+{x ↦ _} free(x) {emp}
+
+[x ↦ v] free(x) [ok : x ↦
+/ ]
+must put a
+value
+
+track deallocated
+locations
+
+[x = nil] free(x) [er : x = nil]
+
+this way resources
+cannot shrink
+
+null pointer
+dereference
+55
+
+===== slide 56 =====
+Example
+
+[free]
+
+[x ↦ v] free(x) [ok : x ↦
+/ ]
+[frame]
+[x ↦ v * x ↦ v] free(x) [ok : x ↦
+/ * x ↦ v]
+[cons]
+[false] free(x) [ok : false]
+sound
+under approximation!
+56
+
+===== slide 57 =====
+Footprint holds in ISL
+We would like to derive
+
+[y ↦ _] x := alloc( ) ; free(x) [ok : y ↦ _ ∧ x ↦
+/ ∧ y ≠ x]
+[y ↦ _ * emp]
+[emp]
+x := alloc( );
+[x ↦ v]
+free(x)
+[x ↦
+/ ]
+[ok :y ↦ _ * x ↦
+/ ∧ y ≠ x]
+
+57
+
+===== slide 58 =====
+Additional local axioms
+[x ↦
+/ ] [x] := y [er : x ↦
+/ ]
+use after free
+errors
+
+[y ↦
+/ ] x := [y] [er : y ↦
+/ ]
+[x ↦
+/ ] free(x) [er : x ↦
+/ ]
+
+double free
+error
+
+[y ↦
+/ ] x := alloc( ) [ok : x ↦ v ∧ x = y]
+58
+
+reuse of
+deallocated
+locations
+
+===== slide 59 =====
+Soundness and completeness
+
+59
+
+===== slide 60 =====
+Relational semantics
+[[skip]]ok ≜ {(σ, σ)}
+[[b?]]ok ≜ {(σ, σ) ∣ σ = ⟨s, h⟩ ∧ s ⊧ b}
+[[x := a]]ok ≜ {(⟨s, h⟩, ⟨s[x ↦ [[a]]s], h⟩)}
+[[error( )]]ok ≜ ∅
+
+[[skip]]er ≜ ∅
+[[b?]]er ≜ ∅
+[[x := a]]er ≜ ∅
+[[error( )]]er ≜ {(σ, σ)}
+
+[[x := [y]]]ok ≜ {(⟨s, h⟩, ⟨s[x ↦ v], h⟩) ∣ v = h(s(y)) ∈ Z}
+[[x := [y]]]er ≜ {(⟨s, h⟩, ⟨s, h⟩) ∣ s(y) = nil ∨ h(s(y)) = ⊥ }
+[[[x] := y]]ok ≜ {(⟨s, h⟩, ⟨s, h[s(x) ↦ s(y)]⟩) ∣ h(s(x)) ∈ Z}
+[[[x] := y]]er ≜ {(⟨s, h⟩, ⟨s, h⟩) ∣ s(x) = nil ∨ h(s(x)) = ⊥ }
+[[x := alloc( )]]ok ≜ {(⟨s, h⟩, ⟨s[x ↦ n], h[n ↦ v]⟩) ∣ v ∈ Z ∧ (n ∉ dom(h) ∨ h(n) = ⊥ )}
+[[x := alloc( )]]er ≜ ∅
+[[free(x)]]ok ≜ {(⟨s, h ∙ [s(x) ↦ v]⟩, ⟨s, h ∙ [s(x) ↦ ⊥ ]⟩) ∣ s(x) ∈ N ∧ v ∈ Z}
+[[free(x)]]er ≜ {(⟨s, h⟩, ⟨s, h⟩) ∣ s(x) = nil ∨ h(s(x)) = ⊥ }
+60
+
+===== slide 61 =====
+⊢ [p] Ci [ε : q]
+
+⊢ [p] C [ε : q]
+
+for some i ∈ {1, 2}
+
+⊢ [p] C1 + C2 [ε : q]
+
+234
+
+A. Raad et al.
+
+Skip
+⊢ [emp] skip [ok : emp]
+
+Assign
+!
+!
+"
+′"
+′
+⊢ x=x x := e ok : x=e[x /x]
+
+Assume
+⊢ [emp] assume(B) [ok : B]
+Seq1
+⊢ [p] C1 [er (l) : q]
+
+⊢ [p] C1 ; C2 [er (l) : q]
+
+Choice
+⊢ [p] Ci [ε : q]
+
+Error
+⊢ [emp] l: error [er (l) : emp]
+
+Seq2
+⊢ [p] C1 [ok : r]
+
+Exist
+⊢ [p] C [ε : q]
+
+for some i ∈ {1, 2}
+
+! ′" !
+′"
+⊢ p C ε :q
+⊢ [p] C [ε : q]
+
+Subst
+⊢ [p] C [ε : q]
+
+y ̸∈ fv(p, C, q)
+
+mod(C) ∩ fv(r) = ∅
+
+⊢ [p ∗ r] C [ε : q ∗ r]
+
+Free
+⊢ [x ,→ e] l: free(x) [ok : x →
+,̸ ]
+
+′
+
+Loop1
+⊢ [p] C⋆ [ok : p]
+
+x ̸∈ fv(C)
+
+Loop2
+⊢ [p] C⋆ ; C [ε : q]
+
+Disj
+⊢ [p1 ] C [ε : q1 ]
+
+⊢ [p2 ] C [ε : q2 ]
+
+⊢ [∃x. p] C [ε : ∃x. q]
+
+q⇒q
+
+⊢ [p[y/x]] C[y/x] [ε : q[y/x]]
+
+Frame
+⊢ [p] C [ε : q]
+
+⊢ [r] C2 [ε : q]
+
+⊢ [p] C1 ; C2 [ε : q]
+
+⊢ [p] C1 + C2 [ε : q]
+
+Cons
+p′ ⇒ p
+
+Havoc
+!
+′"
+⊢ x=x x := * [ok : x=v]
+
+⊢ [p] C⋆ [ε : q]
+
+⊢ [p1 ∨ p2 ] C [ε : q1 ∨ q2 ]
+
+Local
+
+⊢ [p] C [ε : q]
+
+⊢ [∃x. p] local x in C [ε : ∃x. q]
+Alloc1
+!
+′"
+, −]
+⊢ x=x x := alloc() [ok : x →
+
+! ′" !
+′"
+⊢ p C ε :q
+⊢ [p] C [ε : q]
+
+q ⇒ q′
+
+Subst
+⊢ [p] C [ε : q]
+
+y ̸∈ fv(p, C, q)
+
+Frame
+⊢ [p] C [ε : q]
+
+mod(C) ∩ fv(r) = ∅
+
+⊢ [p2 ] C [ε : q2 ]
+
+⊢ [p] C⋆ [ε : q]
+
+⊢ [p1 ∨ p2 ] C [ε : q1 ∨ q2 ]
+⊢ [p] C [ε : q]
+
+⊢ [∃x. p] local x in C [ε : ∃x. q]
+Alloc1
+!
+′"
+, −]
+⊢ x=x x := alloc() [ok : x →
+
+⊢ [p ∗ r] C [ε : q ∗ r]
+
+FreeEr
+⊢ [x →
+,̸ ] l: free(x) [er (l) : x →
+,̸ ]
+
+Disj
+⊢ [p1 ] C [ε : q1 ]
+Local
+
+⊢ [p[y/x]] C[y/x] [ε : q[y/x]]
+
+Free
+⊢ [x ,→ e] l: free(x) [ok : x →
+,̸ ]
+
+⊢ [p] C ; C [ε : q]
+
+⊢ [∃x. p] C [ε : ∃x. q]
+
+Actual ISL rules
+Cons
+p′ ⇒ p
+
+x ̸∈ fv(C)
+
+Alloc2
+"
+!
+′
+,̸
+x := alloc() [ok : x=y ∗ y →
+, −]
+⊢ x=x ∗ y →
+
+FreeNull
+⊢ [x=null] l: free(x) [er (l) : x=null]
+
+Load
+"
+!
+"
+!
+′
+′
+′
+⊢ x=x ∗ y ,→ e l: x := [y] ok : x=e[x /x] ∗ y ,→ e[x /x]
+LoadEr
+⊢ [y →
+,̸ ] l: x := [y] [er (l) : y →
+,̸ ]
+
+LoadNull
+⊢ [y=null] l: x := [y] [er (l) : y=null]
+
+Store
+⊢ [x ,→ e] l: [x] := y [ok : x ,→ y]
+
+StoreEr
+⊢ [x →
+,̸ ] l: [x] := y [er (l) : x →
+,̸ ]
+
+StoreNull
+⊢ [x=null] l: [x] := y [er (l) : x=null]
+
+Fig. 5. The ISL proof rules where x and x′ are distinct variables.
+
+Note that skip, assignments and assume statements always terminate sucAlloc2
+cessfully (with ok ). By contrast, l: error always terminates erroneously (with
+"
+!
+,̸
+x := alloc() [ok : x=y ∗ y →
+, −] 61 er (l)) and requires no resource. The ISL rules Seq1, Seq2, Choice, Loop1,
+⊢ x=x′ ∗ y →
+
+===== slide 62 =====
+Correctness + footprint
+Th. [correctness]
+If [P] c [ε : Q] then Q ⊆ [[c]]ε(P)
+Proof. By induction on the derivation.
+Th. [footprint]
+Any valid ISL triple [σP] c [ε : σQ] can be derived
+Proof. See CAV2020 paper for details.
+62
+
+===== slide 63 =====
+Final considerations on SL
+
+ISL = IL + SL
+for bug
+catching!
+
+ISL address compositional bug catching
+targets memory safety bugs (use-after-free)
+no-false-positives theorem: all bugs are true
+
+63
+
+===== slide 64 =====
+Exercises
+
+64
+
+===== slide 65 =====
+Soundness
+Is the axiom [x ↦ _] [x] := y [ok : x ↦ y] sound?
+
+65
+
+===== slide 66 =====
+Soundness
+Is the axiom [x ↦ _] [x] := y [ok : x ↦ y] sound?
+
+(x ↦ v) ⇒ (x ↦ _) [x ↦ v] [x] := y [ok : x ↦ y]
+[x ↦ _] [x] := y [ok : x ↦ y]
+
+66
+
+===== slide 67 =====
+Unsoundness
+Prove that rule [*conj] is unsound [P1] c [Q1]
+
+[P2] c [Q2]
+[*conj]
+[P1 * P2] c [Q1 * Q2]
+
+67
+
+===== slide 68 =====
+Unsoundness
+Prove that rule [*conj] is unsound [P1] c [Q1]
+
+[P2] c [Q2]
+[*conj]
+[P1 * P2] r [Q1 * Q2]
+
+It is enough to consider pure assertions! P * Q ≡ P ∧ Q
+Consider [x = 0] x := 1 [x = 1] and [x = 1] x := 1 [x = 1]
+By rule [*conj] we could derive [false] x := 1 [x = 1]
+which is not sound!
+68
+
+===== slide 69 =====
+Separation SIL
+
+69
+
+===== slide 70 =====
+OOPSLA 2025
+Revealing Sources of (Memory) Errors via Backward Analysis
+FLAVIO ASCARI, University of Pisa, Italy
+ROBERTO BRUNI, University of Pisa, Italy
+ROBERTA GORI, University of Pisa, Italy
+FRANCESCO LOGOZZO, Meta Platforms, USA
+Sound over-approximation methods are e�ective for proving the absence of errors, but inevitably produce
+false alarms that can hamper programmers. In contrast, under-approximation methods focus on bug detection
+and are free from false alarms. In this work, we present two novel proof systems designed to locate the source
+of errors via backward under-approximation, namely Su�cient Incorrectness Logic (SIL) and its specialization
+for handling memory errors, called Separation SIL. The SIL proof system is minimal, sound and complete
+for Lisbon triples, enabling a detailed comparison of triple-based program logics across various dimensions,
+including negation, approximation, execution order, and analysis objectives. More importantly, SIL lays the
+foundation for our main technical contribution, by distilling the inference rules of Separation SIL, a sound and
+(relatively) complete proof system for automated backward reasoning in programs involving pointers and
+dynamic memory allocation. The completeness result for Separation SIL relies on a careful crafting of both
+the assertion language and the rules for atomic commands.
+CCS Concepts: • Theory of computation ! Logic and veri�cation; Proof theory; Hoare logic; Separation
+logic; Programming logic.
+
+“Separation SIL can yield more succinct
+postconditions and provide stronger
+guarantees than ISL and can support
+effective backward reasoning”
+
+Additional Key Words and Phrases: Su�cient Incorrectness Logic, Incorrectness Logic, Outcome Logic
+ACM Reference Format:
+Flavio Ascari, Roberto Bruni, Roberta Gori, and Francesco Logozzo. 2025. Revealing Sources of (Memory)
+Errors via Backward Analysis. Proc. ACM Program. Lang. 9, OOPSLA1, Article 127 (April 2025), 28 pages.
+https://doi.org/10.1145/3720486
+
+1
+
+Introduction
+
+Formal methods aim to automate the improvement of software reliability and security. Notable success stories are, e.g., the Astrée static analyzer [Blanchet et al. 2003], the SLAM model checker [Ball
+and Rajamani 2001], the certi�ed C compiler CompCert [Leroy 2009], VCC for safety properties
+veri�cation [Cohen et al. 2009], and the Frama-C platform for the integration of many C code
+analyses [Baudin et al. 2021]. Despite that, e�ective program correctness methods struggle to reach
+mainstream adoption, mostly because they exploit over-approximation to handle decidability issues
+and false positives are seen as a distraction by expert programmers. Being free from false positives
+is possibly the reason why under-approximation approaches for bug-�nding, such as testing and
+bounded model checking, are preferred in industrial applications. Incorrectness Logic (IL) [O’Hearn
+2020] is a new program logic for bug-�nding: any error state found in the post can be produced by
+some input states that satisfy the pre. However, IL triples are not able to characterize precisely the
+input states that are responsible for a given error. This is possibly rooted in the forward �avor of the
+under-approximation, which follows the ordinary direction of code execution.
+Authors’ Contact Information: Flavio Ascari, University of Pisa, Pisa, Italy, �avio.ascari@phd.unipi.it; Roberto Bruni,
+University of Pisa, Pisa, Italy, bruni@di.unipi.it; Roberta Gori, University of Pisa, Pisa, Italy, roberta.gori@unipi.it; Francesco
+Logozzo, Meta Platforms, Seattle, USA, logozzo@meta.com.
+
+This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+© 2025 Copyright held by the owner/author(s).
+ACM 2475-1421/2025/4-ART127
+https://doi.org/10.1145/3720486
+Proc. ACM Program. Lang., Vol. 9, No. OOPSLA1, Article 127. Publication date: April 2025.
+
+70
+
+===== slide 71 =====
+SepSIL = SIL + SL
+SL
+
+SIL
+
+{P} c {Q}
+{P * R} c {Q * R}
+
+⟨P⟩ c ⟨Q⟩
+
+SepSIL
+
+⟨P⟩ c ⟨Q⟩
+⟨P * R⟩ c ⟨Q * R⟩
+71
+
+===== slide 72 =====
+Regular commands
+regular
+command
+
+atomic
+command
+
+c ::= e
+| c1; c2
+| c1 + c2
+⋆
+| c
+Kleene
+star
+
+e ::= skip
+| b?
+simplified
+(x≠y)
+|
+x
+:=
+a
+choice
+| x := [y] // read
+| [x] := y // write
+| x := alloc( )
+| free(x)
+72
+
+===== slide 73 =====
+assertion
+
+Assertion language
+
+P ::= true | false | a1 < a2 | a1 = a2 | ...
+¬P | P1 ∧ P2 | ∃x . P | ...
+|
+| emp
+| a1 ↦ a2
+structural
+assertions
+| P1 * P2
+| x ↦
+/
+track deallocated
+locations
+
+73
+
+Boolean and
+classical
+assertions
+
+===== slide 74 =====
+Local axioms: write
+{x ↦ _} [x] := y {x ↦ y}
+
+SL
+ISL
+
+[x ↦ v] [x] := y [ok : x ↦ y]
+
+SepSIL
+
+⟨x ↦ _⟩ [x] := y ⟨x ↦ y⟩
+
+weakest pre
+74
+
+===== slide 75 =====
+Local axioms: read
+
+SepSIL
+
+SL
+
+{y ↦ v} x := [y] {x = v ∧ y ↦ v}
+
+ISL
+
+[y ↦ v] x := [y] [ok : x = v ∧ y ↦ v]
+
+⟨y ↦ v ∧ (v = x′)⟩ x := [y] ⟨y ↦ v ∧ (x = x′)⟩
+applicable to any
+post
+
+Hoare style
+75
+
+===== slide 76 =====
+Local axioms: allocation
+{emp} x := alloc( ) {x ↦ _}
+
+SL
+ISL
+
+[emp] x := alloc( ) [ok : x ↦ _]
+
+SepSIL
+
+⟨emp⟩ x := alloc( ) ⟨x ↦ _⟩
+76
+
+===== slide 77 =====
+Local axioms: dispose
+SL
+
+{x ↦ _} free(x) {emp}
+
+ISL
+
+[x ↦ v] free(x) [ok : x ↦
+/ ]
+
+SepSIL
+
+⟨x ↦ _⟩ free(x) ⟨x ↦
+/ ⟩
+
+using cons can be
+strengthened to x ↦ v
+77
+
+===== slide 78 =====
+Different proofs of a real bug
+
+78
+
+===== slide 79 =====
+228
+
+Use-after-lifetime
+bug
+A. Raad et al.
+
+void deref_after_pb(std::vector<int> *v) {
+int *x = &v->at(1); from std::vector library, can deallocate and then reallocate v
+v->push_back(42);
+std::cout << *x << "\n"; }
+push_back.cpp:7: error: VECTOR_INVALIDATION. accessing memory that was
+potentially invalidated by ’std::vector::push_back()’ on line 6.
+5.
+int *x = &(v->at(1));
+if v is reallocated, x is invalidated
+6.
+v->push_back(42);
+7. >
+std::cout << *x << "\n"; }
+
+Fig. 1. The C++ use-after-lifetime bug (above); the Pulse error message (below).
+abstracted from real
+occurrences at Facebook
+
+needs to grow to accommodate new elements. If the internal array is reallocated
+79
+during the v->push back(42) call, a use-after-lifetime bug occurs on the next
+
+===== slide 80 =====
+Bug Specification of client(v). Using ISL, we can specify
+lifetime bug in client(v) as follows:
+
+From C++ to regular commands
+!
+
+′
+
+′
+
+′
+
+[v !→ a ∗ a Local
+!→ −]
+client(v)
+er (lrxof )Bugs
+: ∃a . v5 !→ a ∗ a !→ − ∗ a ̸!→
+Reasoning
+About the Presence
+
+"
+
+(
+
+push
+back(v) ,to illustrate the crucial
+We
+make
+several
+remarks
+features
+of
+ISL:
+// client,
+inlining proc call
+void push_back(int **v)
+{
+
+local z, y in
+z := *;
+(assume(z 6= 0); lrv : y := [v];
+lf : free(y);
+′
+y := malloc(); [v] := y)
++ (assume(z = 0); skip)
+
+x := [v];
+
+• As in standard SL, ∗ denotes the separatingy :=conjunction,
+rea
+[v];
+free(y);
+in the resu
+rately”. It implies, e.g., that v, a and a are distinct
+y := alloc( );
+•
+The
+exit
+condition
+er
+(l
+)
+denotes
+an
+erroneous
+termination:
+a
+[v]
+:=
+y
+rx
+}
++
+client(v) ,
+,
+where
+a
+is
+dangling
+(invalidated).
+is
+reached
+at
+line
+l
+rx
+local
+x
+in
+skip
+void client(v) {
+if (nondet()) {
+free(*v);
+*v = malloc(sizeof(int));
+}
+
+int* x = *v;
+push_back(v);
+*x = 42
+88; }
+
+x := [v];
+push back(v);
+lrx : [x] := 88
+42
+
+Fig. 2. The push back example in C (left); and in the ISL language (right).more succint
+post
+
+C version
+
+ISL version
+
+(
+
+// push_back
+
+)
+
+[x] := 42
+88
+
+SepSIL version
+
+as a is invalidated after the push back(v) call, the instruction following the call
+stronger guarantee:
+in client(v) dereferences
+invalidated
+memory
+at
+l
+,
+causing
+an
+error.
+rx
+⟨v
+↦
+a
+*
+a
+↦ _ * true⟩ rclient ⟨x ↦
+/ _ * true⟩
+any state in pre can
+Note that the result assertion
+PB-Ok is strictly under-approximate in that
+lead toinerror
+80
+it is smaller (stronger) than the exact “strongest post”. Given the assertion in
+
+===== slide 81 =====
+6
+
+A. Raad, J. Berdine, H.-H. Dang, D. Dreyer, P. O’Hearn, and J. Villard
+
+ISL derivation
+
+[v 7! a ⇤ a 7! ]
+local y, z in
+
+z := *; // Havoc
+[ok : z=1 ⇤ v 7! a ⇤ a 7! ]
+
+( assume(z 6= 0); // Assume
+
+[ok : z=1 ⇤ z6=0 ⇤ v 7! a ⇤ a 7! ]
+
+lrv : y := [v]; // Load
+
+[ok : z=1 ⇤ y=a ⇤ v 7! a ⇤ a 7! ]
+
+lf : free(y); // Free
+
+[ok : z=1 ⇤ y=a ⇤ v 7! a ⇤ a 67! ]
+
+y := malloc(); //Alloc1, Choice
+
+[ok : z=1 ⇤ v 7! a ⇤ a 67! ⇤ y 7! ]
+[v] := y; // Store
+
+[ok : z=1 ⇤ v 7! y ⇤ a 67! ⇤ y 7! ]
+) + (. . .) // Choice
+
+[v 7! a ⇤ a 7! ]
+local x in
+
+x := [v]; // Load
+[ok : x=a ⇤ v 7! a ⇤ a 7! ]
+
+push back(v); // PB-Ok
+0
+
+0
+
+[ok : 9a . x=a ⇤ v 7! a ⇤ a 7! ⇤a 67! ]// Cons
+0
+0
+0
+[ok : 9a . x=a ⇤ v 7! a ⇤ a 7! ⇤x 67! ]
+lrx : [x] := 88; // StoreEr
+0
+0
+0
+[er (lrx ) : 9a . x=a ⇤ v 7! a ⇤ a 7! ⇤ x 67! ]
+// Local
+0
+0
+0
+[er (lrx ) : 9a . v 7! a ⇤ a 7! ⇤ a 67! ]
+
+[ok : z=1 ⇤ v 7! y ⇤ a 67! ⇤ y 7! ]
+
+// Local
+0
+
+0
+
+0
+
+[ok : 9a . v 7! a ⇤ a 7!
+
+⇤ a 67! ]
+
+0
+
+81
+
+===== slide 82 =====
+SepSIL
+derivation
+⟨v ↦ a * a ↦ _ * true⟩ ⇒ ⟨v ↦ a * a ↦ _ * (a = a ∨ a ↦
+/ ) * true⟩
+
+x := [v]; // Load + Frame
+⟨v ↦ a * a ↦ _ * (x = a ∨ x ↦
+/ ) * true⟩ ⇒ ⟨(v ↦ a * a ↦ _ * (x = a ∨ x ↦
+/ ) * true) ∨ (x ↦
+/ * true)⟩
+(
+
+// push_back: Choice
+
+⟨v ↦ a * a ↦ _ * (x = a ∨ x ↦
+/ ) * true⟩
+y := [v]; // Load + Frame
+⟨v ↦ a * y ↦ _ * (x = y ∨ x ↦
+/ ) * true⟩ ⇒ ⟨v ↦ _ * y ↦ _ * (x = y ∨ x ↦
+/ ) * true⟩
+free(y); // Free + Frame
+⟨v ↦ _ * y ↦
+/ * (x = y ∨ x ↦
+/ ) * true⟩ ⇒ ⟨x ↦
+/ * v ↦ _ * emp * true⟩
+y := alloc( ); // Alloc + Frame
+⟨x ↦
+/ * v ↦ _ * y ↦ _ * true⟩ ⇒ ⟨x ↦
+/ * v ↦ _ * true⟩
+[v] := y // Write + Frame
+⟨x ↦
+/ * v ↦ y * true⟩ ⇒ ⟨x ↦
+/ * true⟩
++
+
+⟨x ↦
+/ * true⟩ skip ⟨x ↦
+/ * true⟩ // Skip + Frame
+)
+
+⟨x ↦
+/ * true⟩
+[x] := 88
+
+82
+
+===== slide 83 =====
+Correctness and completeness
+
+83
+
+===== slide 84 =====
+Relational semantics
+[[skip]] ≜ {(σ, σ)}
+[[b?]] ≜ {(σ, σ) ∣ σ = ⟨s, h⟩ ∧ s ⊧ b}
+[[x := a]] ≜ {(⟨s, h⟩, ⟨s[x ↦ [[a]]s], h⟩)}
+[[x := [y]]] ≜ {(⟨s, h⟩, ⟨s[x ↦ v], h⟩) ∣ v = h(s(y)) ∈ Z}
+[[[x] := y]] ≜ {(⟨s, h⟩, ⟨s, h[s(x) ↦ s(y)]⟩) ∣ h(s(x)) ∈ Z}
+[[x := alloc( )]] ≜ {(⟨s, h⟩, ⟨s[x ↦ n], h[n ↦ v]⟩) ∣ v ∈ Z ∧ (n ∉ dom(h) ∨ h(n) = ⊥ )}
+[[free(x)]] ≜ {(⟨s, h⟩, ⟨s, h[s(x) ↦ ⊥ ]⟩) ∣ h(s(x)) ∈ Z}
+84
+
+===== slide 85 =====
+Actual rules of SepSIL
+
+Revealing Sources of (Memory) Errors via Backward Analysis
+
+hhempii skip hhempii
+
+hhskipii
+
+hhempii x := alloc() hhG 7! Eii
+
+hh@ [0/G]ii x := a hh@ii
+
+hhalloc1ii
+
+hhV 67! ii x := alloc() hhG = V ^ G 7! Eii
+
+hhalloc2ii
+
+G 8 fv(0)
+hhloadii
+hh~ 7! 0 ⇤ @ [0/G]ii x := [y] hh~ 7! 0 ⇤ @ii
+hh?ii r hh@ii fv(C) \ mod(r) = ;
+hhframeii
+hh? ⇤ Cii r hh@ ⇤ Cii
+0
+? )?
+
+0
+0
+hh? ii r hh@ ii
+
+0
+@ )@
+
+hh@ ^ 1ii b? hh@ii
+
+127:17
+
+hhassignii
+
+hhassumeii
+
+hhG 7! ii free(x) hhG 67! ii
+hhG 7! ii [x] := y hhG 7! ~ii
+
+hhfreeii
+hhstoreii
+
+hh?ii r hh@ii G 8 fv(r)
+hhexistsii
+hh9G .?ii r hh9G .@ii
+85
+
+hh?ii r hhCii
+
+hhCii r hh@ii
+
+===== slide 86 =====
+Correctness + (relative) completeness
+Th. [correctness]
+op
+If ⟨P⟩ c ⟨Q⟩ then P ⊆ [[c]] Q
+Proof. By induction on the derivation.
+Th. [completeness]
+Any valid triple ⟨P⟩ c ⟨Q⟩ can be derived
+Proof. See OOPSLA2025 paper.
+86
+
+===== slide 87 =====
+Exercises
+
+87
+
+===== slide 88 =====
+Validity
+Which SepSIL triples are valid ?
+
+⟨emp⟩ free(x) ⟨x ↦
+/ ⟩
+⟨x ↦
+/ ⟩ free(x) ⟨x ↦
+/ ⟩
+⟨false⟩ free(x) ⟨emp⟩
+⟨x ↦ _⟩ free(x) ⟨emp⟩
+88
+
+===== slide 89 =====
+Checking
+6
+
+Validate previous ISL / SepSIL derivations
+A. Raad, J. Berdine, H.-H. Dang, D. Dreyer, P. O’Hearn, and J. Villard
+
+[v 7! a ⇤ a 7! ]
+local y, z in
+
+z := *; // Havoc
+[ok : z=1 ⇤ v 7! a ⇤ a 7! ]
+
+( assume(z 6= 0); // Assume
+
+[ok : z=1 ⇤ z6=0 ⇤ v 7! a ⇤ a 7! ]
+lrv : y := [v]; // Load
+
+[ok : z=1 ⇤ y=a ⇤ v 7! a ⇤ a 7! ]
+lf : free(y); // Free
+
+[ok : z=1 ⇤ y=a ⇤ v 7! a ⇤ a 67! ]
+
+y := malloc(); //Alloc1, Choice
+
+[ok : z=1 ⇤ v 7! a ⇤ a 67! ⇤ y 7! ]
+
+[v] := y; // Store
+
+[ok : z=1 ⇤ v 7! y ⇤ a 67! ⇤ y 7! ]
+
+) + (. . .) // Choice
+
+[v 7! a ⇤ a 7! ]
+local x in
+
+x := [v]; // Load
+[ok : x=a ⇤ v 7! a ⇤ a 7! ]
+push back(v); // PB-Ok
+
+[ok : 9a0. x=a ⇤ v 7! a0 ⇤ a0 7! ⇤a 67! ]// Cons
+[ok : 9a0. x=a ⇤ v 7! a0 ⇤ a0 7! ⇤x 67! ]
+lrx : [x] := 88; // StoreEr
+[er (lrx ) : 9a0 . x=a ⇤ v 7! a0 ⇤ a0 7! ⇤ x 67! ]
+// Local
+[er (lrx ) : 9a0 . v 7! a0 ⇤ a0 7! ⇤ a 67! ]
+
+[ok : z=1 ⇤ v 7! y ⇤ a 67! ⇤ y 7! ]
+
+// Local
+
+[ok : 9a0 . v 7! a0 ⇤ a0 7!
+
+⇤ a 67! ]
+
+Fig. 3. The proof sketches of PB-Ok (left) and PB-Client (right).
+
+Here, emp describes the empty heap and loc(x) states that x is an addressable
+location; e.g., x cannot be null. Note that this ISL triple is valid in that any
+state satisfying the result assertion can be obtained from one satisfying the
+presumption assertion, and thus we do have a true under-approximate triple.
+However, in SL one can arbitrarily extend the state using the frame rule:
+` [p] C [✏ : q]
+
+mod(C) \ fv(r) = ;
+
+89
+
+===== slide 90 =====
+"Compiling"
+Transform the following C-like code in the syntax of SepSIL
+
+i := 0 ; q := * p ; while (q ≠ nil) do { q := * q ; i := i + 1 }
+
+90
+
+===== slide 91 =====
+"Compiling"
+Transform the following C-like code in the syntax of SepSIL
+
+i := 0 ; q := * p ; while (q ≠ nil) do { q := * q ; i := i + 1 }
+i := 0 ;
+q := [p] ;
+⋆
+( (q ≠ nil?) ; q := [q] ; i := i + 1 ) ;
+(q = nil?)
+91
+
+===== slide 92 =====
+Reasoning
+Prove the SepSIL triple ⟨p ↦ nil * true⟩ c ⟨i = 0⟩ where
+
+c ≜ i := 0 ; q := * p ; while (q ≠ nil) do { q := * q ; i := i + 1 }
+⟨p ↦ nil * true⟩ ⇒ ⟨v = nil * p ↦ v⟩
+i := 0 ;
+⟨i = 0 ∧ v = nil * p ↦ v⟩
+q := [p] ;
+⟨i = 0 ∧ q = nil * p ↦ v⟩ ⇒
+⟨i = 0 ∧ q = nil⟩
+⋆
+( (q ≠ nil?) ; q := [q] ; i := i + 1 ) ;
+⟨i = 0 ∧ q = nil⟩
+(q = nil?)
+⟨i = 0⟩
+
+92
+
+===== slide 93 =====
+Reasoning
+Prove the SepSIL triple ⟨p ↦ nil * true⟩ c ⟨i = 0⟩ where
+
+c ≜ i := 0 ; q := * p ; while (q ≠ nil) do { q := * q ; i := i + 1 }
+⟨p ↦ nil * true⟩ ⇒ ⟨v = nil * p ↦ v⟩
+i := 0 ;
+⟨i = 0 ∧ v = nil * p ↦ v⟩
+q := [p] ;
+⟨i = 0 ∧ q = nil * p ↦ v⟩ ⇒
+⟨i = 0 ∧ q = nil⟩
+⋆
+( (q ≠ nil?) ; q := [q] ; i := i + 1 ) ;
+⟨i = 0 ∧ q = nil⟩
+(q = nil?)
+⟨i = 0⟩
+
+93

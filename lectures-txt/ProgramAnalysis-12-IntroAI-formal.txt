@@ -1,0 +1,4228 @@
+# ProgramAnalysis-12-IntroAI-formal
+# auto-extracted from ProgramAnalysis-12-IntroAI-formal.pdf (102 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #12
+Abstract Interpretation: maths
+
+===== slide 2 =====
+Static analysis
+(recap)
+
+2
+
+===== slide 3 =====
+All programs are interesting!
+Proof (sketch).
+Let
+be a programming language.
+Let us enumerate all syntactically valid programs in
+
+(e.g., in lexicographic order).
+
+Assume, for contradiction, that some programs are not interesting.
+Then, there exists a "smallest non-interesting program".
+Being the smallest such program makes it interesting, hence the contradiction.
+Corollary: No program is interesting
+
+PP
+
+Proof (sketch). If all programs are likely interesting, none of them really is such!
+3
+
+===== slide 4 =====
+What went wrong?
+The previous argument is obviously just a joke and our proof cheats
+"Interesting" is neither a formal nor a semantic property, it depends on the
+enumeration, it is self-referential, it is not a property of program behaviour
+So what kind of properties do we actually care about?
+Semantic properties depends on the input-output behaviour of the program
+A property is non-trivial if: it holds for some program and not for others
+Rice’s Theorem: Every non-trivial semantic property of programs is undecidable.
+4
+
+===== slide 5 =====
+Yes, No, Don't know
+Due to Rice's Theorem, all semantic properties P(c) of programs are undecidable,
+thus we cannot design fully precise static analysers able to automatically infer P(c)
+Nevertheless, we aim to ensure the correctness (soundness) of static analysis:
+
+• If the analysis outputs YES, then the P(c) is certainly verified
+• If the analysis does not output YES then it may happen that P(c) is not verified
+"not YES" means "Don't know"
+
+fi
+
+fi
+
+5
+
+===== slide 6 =====
+Example: Halting problem
+Let Hσ0 ≜ {c ∣ [[c]]σ0 ≠ Ø}
+
+i.e., it is the set of programs that terminate on the initial memory σ0 ≜ λx.0
+Halting problem (HP): Given c, does c ∈ Hσ0?
+For any (Turing equivalent) programming language, HP is undecidable:
+No analyser can always correctly answer in finite time if c ∈ Hσ0 or not
+it means "for any program c"
+6
+
+===== slide 7 =====
+Example: Halting problem
+all valid
+programs
+terminating
+programs
+
+Hσ0
+
+Sound analysis
+
+Sound analysis
+
+these programs
+possibly terminate
+
+these programs
+definitely terminate
+7
+
+===== slide 8 =====
+Example: Halting problem
+We thus have two types of termination analysis:
+• “Definite termination analysis”
+– YES
+the input program definitely terminates
+– NO
+the input program could not terminate
+• “Possible termination analysis”
+– YES
+the input program could terminate
+– NO
+the input program definitely does not terminate
+
+8
+
+===== slide 9 =====
+Example: Halting problem
+all valid
+programs
+terminating
+programs
+
+Hσ0
+
+Unsound analysis
+these programs
+??? terminate
+9
+
+===== slide 10 =====
+Unsound analyses
+Imagine a static program analysis that, in order to detect
+divisions by zero, syntactically finds the strings "/0"
+
+x = 100/0;
+
+⟸ true alarm
+
+print("25/09/2016");
+y=100/02;
+
+⟸ false alarm
+⟸ false alarm
+
+z=0;
+print(5/z);
+
+⟸ false negative
+
+Static program analyses with false negatives are called unsound
+10
+
+===== slide 11 =====
+Example: Precision
+all valid
+programs
+terminating
+programs
+
+Hσ0
+
+MORE
+PRECISE!
+
+Sound analysis
+these programs
+definitely terminate
+11
+
+Sound analysis
+these programs
+definitely terminate
+
+===== slide 12 =====
+Example: Precision
+all valid
+programs
+terminating
+programs
+
+Hσ0
+
+Sound analysis
+
+Sound analysis
+
+these programs
+definitely terminate
+
+these programs
+definitely terminate
+
+not comparable
+12
+
+===== slide 13 =====
+Example: Precision
+all valid
+programs
+terminating
+programs
+
+Hσ0
+
+Sound analysis
+these programs
+possibly terminate
+
+MORE
+PRECISE!
+
+13
+
+Sound analysis
+these programs
+possibly terminate
+
+===== slide 14 =====
+Example: Precision
+all valid
+programs
+terminating
+programs
+
+Hσ0
+
+Sound analysis
+
+Sound analysis
+
+these programs
+possibly terminate
+
+these programs
+possibly terminate
+
+not comparable
+14
+
+===== slide 15 =====
+Static analysis design
+To design a sound static analysis we need to:
+1. have a reference program semantics [[ ⋅ ]]
+
+#
+
+2. specify what and how the static analysis [[ ⋅ ]] computes
+#
+
+3. prove the correctness of [[ ⋅ ]] w.r.t. [[ ⋅ ]]
+
+4. (efficiently) implement a static analyzer for [[ ⋅ ]]
+
+15
+
+#
+
+===== slide 16 =====
+Sound abstractions
+
+16
+
+===== slide 17 =====
+Program points & Control ow graph
+{
+}
+m:= 1;
+while n>0 do {
+m:= m*n;
+n:= n-1
+}
+{m > 0}?
+
+(1) m:= 1;
+(2) while n>0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+m:= 1
+
+2=5
+
+n > 0
+
+3 m:=
+
+m*n
+
+4 n:=
+
+n-1
+
+6 end
+
+Control flow graph
+
+17
+fl
+
+e
+
+u
+
+r
+
+t
+
+With program points
+
+1
+
+===== slide 18 =====
+Abstract values
+We infer by static analysis that at program point (6) the value of m
+will be positive for any input value n.
+In order to achieve this, the analysis must propagate “sign
+information”, disregarding the actual values of variables.
+(Non-relational abstraction)
+Each program variable can take one of these “abstract values”:
+
+Z>0
+Z≤0
+Z
+
+1
+
+m:= 1
+
+2=5
+
+n > 0
+
+3 m:=
+
+m*n
+
+4 n:=
+
+n-1
+
+6 end
+
+its actual value is positive
+its actual value is not positive
+
+Control flow graph
+
+any value (don't know)
+Z
+Z≤0
+
+18
+
+Z>0
+
+===== slide 19 =====
+Example: Sign analysis
+Sign Invariants
+n Z
+m Z
+(2=5) n Z
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z
+m Z>0
+(6)
+n Z≤0
+m Z>0
+(1)
+
+m:= 1
+n > 0
+
+1
+
+m:= 1
+
+2=5
+
+n > 0
+
+m:= m*n
+
+3 m:=
+
+m*n
+
+n:= n-1
+
+4 n:=
+
+n-1
+
+6 end
+
+Control flow graph
+Z
+Z≤0
+
+19
+
+Z>0
+
+===== slide 20 =====
+Example: Sign analysis
+Sign Invariants
+n Z
+m Z
+(2=5) n Z
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z
+m Z>0
+(6)
+n Z≤0
+m Z>0
+(1)
+
+m:= 1
+
+(1) m:= 1;
+(2) while n>0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n > 0
+m:= m*n
+n:= n-1
+
+Computes k!
+(for k the initial value of n)
+
+Z
+Z≤0
+
+20
+
+Z>0
+
+===== slide 21 =====
+Example: Sign analysis
+Sign Invariants
+n Z
+m Z
+(2=5) n Z
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z
+m Z>0
+(6)
+n Z≤0
+m Z>0
+(1)
+
+m:= 100
+n > 0
+m:= m*n
+
+Same analysis
+
+n:= n-1
+
+Computes 100(k!)
+(for k the initial value of n)
+
+Z
+Z≤0
+
+21
+
+(1) m:= 100;
+(2) while n>0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+Z>0
+
+===== slide 22 =====
+Example: Sign analysis
+Sign Invariants
+n Z
+m Z
+(2=5) n Z
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z
+m Z>0
+(6)
+n Z
+m Z>0
+(1)
+
+m:= 1
+n > 1
+m:= m*n
+
+Best we can say
+(n ≤ 1 at the end)
+
+n:= n-1
+
+Computes k!
+(for k the initial value of n)
+
+Z
+Z≤0
+
+22
+
+(1) m:= 1;
+(2) while n>1 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+Z>0
+
+===== slide 23 =====
+Example: Sign analysis
+Sign Invariants
+n Z>0
+m Z
+(2=5) n Z>0 ∨ Z
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z
+m Z>0
+(6)
+n Z
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+n > 1
+m:= m*n
+n:= n-1
+
+Precision loss:
+(n = 1 at the end)
+Z instead of Z>0
+
+Computes k!
+(for k the initial value of n)
+
+Z
+Z≤0
+
+23
+
+(1) m:= 1;
+(2) while n>1 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+Z>0
+
+===== slide 24 =====
+Domain re nement
+To increase precision about the final result, we can refine the
+“sign information”.
+Each program variable can now take one of these “abstract
+values”:
+its actual value is not negative
+its actual value is positive
+its actual value is not positive
+any value (don't know)
+
+Z
+Z≤0
+
+m:= 1
+
+2=5
+
+n > 1
+
+3 m:=
+
+m*n
+
+4 n:=
+
+n-1
+
+6 end
+
+Control flow graph
+Z≥0
+
+24
+fi
+
+Z≥0
+Z>0
+Z≤0
+Z
+
+1
+
+Z>0
+
+===== slide 25 =====
+Example: Re ned sign analysis
+n Z>0
+m Z
+(2=5) n Z>0∨ Z≥0
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z≥0
+m Z>0
+(6)
+n Z≥0
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+n > 1
+
+Precision loss:
+(n = 1 at the end)
+Z≥0 instead of Z>0
+
+m:= m*n
+n:= n-1
+
+Z
+Z≤0
+
+Z≥0
+
+25
+fi
+
+Sign Invariants
+
+Z>0
+
+(1) m:= 1;
+(2) while n>1 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+Computes k!
+(for k the initial value of n)
+
+===== slide 26 =====
+Example: Re ned sign analysis
+n Z>0
+m Z
+(2=5) n Z>0∨ Z≥0
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z≥0
+m Z>0
+(6)
+n ??
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+n > 0
+
+Which result?
+(n = 0 at the end)
+Z≤0 or Z≥0 ?
+
+m:= m*n
+n:= n-1
+
+Z
+Z≤0
+
+Z≥0
+
+26
+fi
+
+Sign Invariants
+
+Z>0
+
+(1) m:= 1;
+(2) while n>0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+Computes k!
+(for k the initial value of n)
+
+===== slide 27 =====
+Domain re nement 2
+To increase precision about the final result, we can refine the
+“sign information”.
+Each program variable can now take one of these “abstract
+values”:
+its actual value is zero
+its actual value is not negative
+its actual value is positive
+its actual value is not positive
+
+Z
+
+any value (don't know)
+
+fi
+
+Z=0
+Z≥0
+Z>0
+Z≤0
+Z
+
+1
+
+m:= 1
+
+2=5
+
+n > 1
+
+3 m:=
+
+m*n
+
+4 n:=
+
+n-1
+
+6 end
+
+Control flow graph
+
+Z≤0
+
+Z≥0
+
+Z=027
+
+Z>0
+
+===== slide 28 =====
+Example: Re ned sign analysis 2
+n Z>0
+m Z
+(2=5) n Z>0∨ Z≥0
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z≥0
+m Z>0
+(6)
+n Z=0
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+n > 0
+
+Best precision
+
+m:= m*n
+n:= n-1
+
+Z
+
+fi
+
+Sign Invariants
+
+Z≤0
+
+Z≥0
+
+Z=028
+
+Z>0
+
+(1) m:= 1;
+(2) while n>0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+Computes k!
+(for k the initial value of n)
+
+===== slide 29 =====
+Which domain?
+Z
+Z≤0
+
+Z
+Z>0
+
+Z≤0
+
+Z
+Z≥0
+
+Z≤0
+
+Z≥0
+
+Z>0
+
+Z=0
+
+Z>0
+
+Must be closed by meet!
+Z
+Z≤0
+
+Z>0
+
+Z
+Z≤0
+
+Z≥0
+
+Z=0
+
+Z>0
+
+Ø
+Ø
+29
+
+===== slide 30 =====
+Which domain?
+Z
+Z≤0
+
+Z
+
+Z>0
+Ø
+
+moving to coarser domains
+(not necessarily less precise analysis!)
+
+Z≤0
+
+Z≥0
+
+Z=0
+
+Z>0
+Ø
+
+Z
+Z≤0
+
+Z≥0
+Z
+
+Z<0
+
+Z=0
+Ø
+
+moving to finer domains
+(not necessarily more precise analysis!)
+30
+
+Z>0
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+===== slide 31 =====
+Exercises
+
+31
+
+===== slide 32 =====
+Which result? 1
+Sign Invariants
+n Z>0
+m Z
+(2=5) n ??
+m ??
+(3)
+n ??
+m ??
+(4)
+n ??
+m ??
+(5=2) n ??
+m ??
+(6)
+n ??
+m ??
+(1)
+
+{n > 0}
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+n:= n-1
+
+Z
+Z≤0
+
+Z>0
+Ø
+32
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 33 =====
+Which result? 1
+Sign Invariants
+n Z>0
+m Z
+(2=5) n Z
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z
+m Z>0
+(6)
+n Z≤0
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+n:= n-1
+
+Z
+Z≤0
+
+Z>0
+Ø
+33
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 34 =====
+Which result? 2
+Sign Invariants
+n Z>0
+m Z
+(2=5) n ??
+m ??
+(3)
+n ??
+m ??
+(4)
+n ??
+m ??
+(5=2) n ??
+m ??
+(6)
+n ??
+m ??
+(1)
+
+{n > 0}
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+
+Z
+
+n:= n-1
+
+Z≤0
+
+Z≥0
+
+Z=0
+
+Z>0
+Ø
+34
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 35 =====
+Which result? 2
+Sign Invariants
+n Z>0
+m Z
+(2=5) n Z≥0
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z≥0
+m Z>0
+(6)
+n Z=0
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+
+Z
+
+n:= n-1
+
+Z≤0
+
+Z≥0
+
+Z=0
+
+Z>0
+Ø
+35
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 36 =====
+Which result? 3
+Sign Invariants
+n Z>0
+m Z
+(2=5) n ??
+m ??
+(3)
+n ??
+m ??
+(4)
+n ??
+m ??
+(5=2) n ??
+m ??
+(6)
+n ??
+m ??
+(1)
+
+{n > 0}
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+
+Z
+
+n:= n-1
+
+Z≤0
+Z<0
+
+Z≥0
+Z=0
+Ø
+36
+
+Z>0
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 37 =====
+Which result? 3
+Sign Invariants
+n Z>0
+m Z
+(2=5) n Z≥0
+m Z>0
+(3)
+n Z>0
+m Z>0
+(4)
+n Z>0
+m Z>0
+(5=2) n Z≥0
+m Z>0
+(6)
+n Z=0
+m Z>0
+(1)
+
+{n > 0}
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+
+Z
+
+n:= n-1
+
+Z≤0
+Z<0
+
+Z≥0
+Z=0
+Ø
+37
+
+Z>0
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 38 =====
+Which result? 4
+Sign Invariants
+n Z
+m Z
+(2=5) n ??
+m ??
+(3)
+n ??
+m ??
+(4)
+n ??
+m ??
+(5=2) n ??
+m ??
+(6)
+n ??
+m ??
+e
+
+u
+
+r
+
+t
+
+(1)
+
+{
+
+}
+
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+
+Z
+n:= n-1
+
+Z≤0
+Z<0
+
+Z≠0
+Z=0
+Ø
+38
+
+Z≥0
+Z>0
+
+Computes k!
+(for k the initial value of n)
+
+===== slide 39 =====
+Which result? 4
+Sign Invariants
+n Z
+m Z
+(2=5) n Z
+m Z≠0
+(3)
+n Z≠0
+m Z>0
+(4)
+n Z≠0
+m Z≠0
+(5=2) n Z
+m Z≠0
+(6)
+n Z=0
+m Z≠0
+e
+
+u
+
+r
+
+t
+
+(1)
+
+{
+
+}
+
+m:= 1
+
+(1) m:= 1;
+(2) while n!=0 do {
+(3)
+m:= m*n;
+(4)
+n:= n-1
+(5=2) }
+(6) // end
+
+n != 0
+m:= m*n
+
+Z
+n:= n-1
+
+Z≤0
+Z<0
+
+Z≠0
+Z=0
+Ø
+39
+
+Z≥0
+Z>0
+
+Computes k! or diverges
+(for k the initial value of n)
+
+===== slide 40 =====
+Abstract operations
+
+40
+
+===== slide 41 =====
+Transfer functions
+A transfer function defines how the abstract state of a program changes after the
+execution of an instruction
+
+A
+
+A
+
+if ai is a sound abstraction of vi for any i,
+then a =
+
+n
+
+(v1, . . . , vn)
+
+p
+
+Z
+
+41
+fi
+
+p
+
+#(a , . . . , a ) must be a sound
+1
+n
+
+abstraction of v =
+
+p
+
+e.g., addition,
+multiplication, etc.
+
+p
+
+o
+
+Z
+
+o
+o
+
+o
+
+n
+
+#(a , . . . , a )
+1
+n
+
+Soundness requirement:
+
+(v1, . . . , vn)
+
+===== slide 42 =====
+Examples
+#
+
+sound
+
+#
+
+sound
+
+#
+
+unsound
+
+#
+
+unsound
+
+#
+
+sound
+
+≢11 × ≢11 = ≢11
+Z
+
+divisible by 11
+
+≡11
+
+≢11 × ≢11 = Z
+≢11
+
+≢11 × Z = ≢11
+
+not divisible by 11
+
+∅
+
+≡11 × Z = ≢11
+≡11 × Z = ≡11
+
+42
+
+===== slide 43 =====
+Brahmagupta
+
+43 2016
+Abstract interpretation, Colloquium d’informatique de l’UPMC Sorbonne Universités, 29 Septembre
+
+38
+
+© P. Cousot
+
+===== slide 44 =====
+The rule of signs by Brahmagupta (628)
+Z>0 +# Z>0 = Z>0
+
+Z<0 +# Z<0 = Z<0
+
+Z
+Z<0 ×# Z>0 = Z<0
+
+Z<0
+
+Z=0
+∅
+
+wrong
+Abstract interpretation, Colloquium d’informatique de l’UPMC Sorbonne Universités, 29 Septembre 2016
+
+44
+
+Z=0 /# Z=0 = Z=0
+46
+
+© P. Cousot
+
+Z>0
+
+===== slide 45 =====
+Expressions
+Z
+
+e ::= n ∣ e1 × e2
+Z<0
+
+[[n]] = n ∈ Z
+[[e1 × e2]] = [[e1]] × [[e2]]
+
+A = {Z<0, Z=0, Z>0}
+
+Z=0
+
+Z>0
+
+∅
+
+# Z<0 Z=0 Z>0
+×
+
+Z<0 Z>0
+Z=0
+
+(commutative)
+
+A
+
+#
+
+2
+
+a1 × a2
+
+2
+
+v1 × v2
+
+A
+
+Z>0
+
+Z
+
+45
+
+Z
+
+σ(n) = Z<0 if n < 0
+σ(0) = Z=0
+σ(n) = Z>0 if n > 0
+#
+σ(e1 × e2) = σ(e1) × σ(e2)
+#
+
+a1 × a2 = ?
+
+===== slide 46 =====
+Z
+Z<0
+
+Z=0
+
+A remark about soundness
+Z>0
+
+∅
+# Z<0 Z=0 Z>0
+×
+
+Z<0 Z>0
+Z=0
+
+(commutative)
+
+# Z
+
+Z<0 ×
+
+<0
+
+−1
+−1
+−2
+−2
+×
+−3
+−3
+−4
+−4
+⋮
+⋮
+
+Z>0
+
+46
+
+Z>0
+1, 2, 3, 4, ⋯
+2, 4, 6, 8,
+3, 6, 9, 12, ⋯
+4, 8, 12, 16,
+⋮
+⋮
+⋱
+
+===== slide 47 =====
+Expressions
+Z
+
+e ::= n ∣ e1 × e2
+Z<0
+
+[[n]] = n ∈ Z
+[[e1 × e2]] = [[e1]] × [[e2]]
+
+A = {Z<0, Z=0, Z>0}
+
+Z=0
+
+Z>0
+
+∅
+
+# Z<0 Z=0 Z>0
+×
+
+Z<0 Z>0
+
+(commutative)
+
+Z=0 Z=0 Z=0
+
+A
+
+#
+
+2
+
+a1 × a2
+
+2
+
+v1 × v2
+
+A
+
+Z>0 Z<0 Z=0 Z>0
+
+Z
+
+47
+
+Z
+
+σ(n) = Z<0 if n < 0
+σ(0) = Z=0
+σ(n) = Z>0 if n > 0
+#
+σ(e1 × e2) = σ(e1) × σ(e2)
+#
+
+a1 × a2 = ?
+
+===== slide 48 =====
+Correctness
+Z
+
+e ::= n ∣ e1 × e2
+Z<0
+
+[[n]] = n ∈ Z
+[[e1 × e2]] = [[e1]] × [[e2]]
+
+A = {Z<0, Z=0, Z>0}
+
+Z=0
+
+Z>0
+
+?
+
+∅
+
+# Z<0 Z=0 Z>0
+×
+
+Z<0 Z>0
+
+(commutative)
+
+Z=0 Z=0 Z=0
+
+A
+
+2
+
+for any expression e:
+
+#
+
+a1 × a2
+
+A
+
+Z>0 Z<0 Z=0 Z>0
+
+σ(e) = Z<0 ⇒
+?
+σ(e) = Z=0 ⇒
+?
+σ(e) = Z>0 ⇒
+
+[[e]] < 0
+[[e]] = 0
+[[e]] > 0
+
+(proof by structural induction)
+2
+
+Z
+
+v1 × v2
+48
+
+Z
+
+===== slide 49 =====
+Completeness
+Z
+
+e ::= n ∣ e1 × e2
+Z<0
+
+[[n]] = n ∈ Z
+[[e1 × e2]] = [[e1]] × [[e2]]
+
+A = {Z<0, Z=0, Z>0}
+
+Z=0
+
+Z>0
+
+?
+
+∅
+
+# Z<0 Z=0 Z>0
+×
+
+Z<0 Z>0
+
+(commutative)
+
+Z=0 Z=0 Z=0
+
+A
+
+2
+
+for any expression e:
+
+#
+
+a1 × a2
+
+A
+
+Z>0 Z<0 Z=0 Z>0
+
+σ(e) = Z<0 ⇐
+?
+σ(e) = Z=0 ⇐
+?
+σ(e) = Z>0 ⇐
+
+[[e]] < 0
+[[e]] = 0
+[[e]] > 0
+
+(proof by structural induction)
+2
+
+Z
+
+v1 × v2
+49
+
+Z
+
+===== slide 50 =====
+Adding addition
+Z
+
+e ::= n ∣ e1 × e2 ∣ e1 + e2
+Z<0
+
+[[e1 + e2]] = [[e1]] + [[e2]]
+
+A = {Z<0, Z=0, Z>0}
+
+Z=0
+
+Z>0
+
+∅
+
+(commutative)
+
+Z=0 Z<0 Z=0
+
+A
+
+a1 + a2 = ?
+#
+
+2
+
+a1 + a2
+
+2
+
+v1 + v2
+
+A
+
+Z>0 ?? Z>0 Z>0
+
+Z
+
+50
+
+σ(e1 + e2) = σ(e1) + σ(e2)
+#
+
+# Z<0 Z=0 Z>0
++
+
+Z<0 Z<0
+
+#
+
+Z
+
+===== slide 51 =====
+Adding addition
+(exploit another abstract value)
+
+Z
+
+e ::= n ∣ e1 × e2 ∣ e1 + e2
+Z<0
+
+[[e1 + e2]] = [[e1]] + [[e2]]
+
+A = {Z<0, Z=0, Z>0, Z}
+
+Z=0
+
+Z>0
+
+∅
+# Z<0 Z=0 Z>0
++
+
+Z<0 Z<0
+
+Z=0 Z<0 Z=0
+
+A
+
+2
+
+a1 + a2 = ?
+#
+
+a1 + a2
+
+A
+
+Z
+
+Z
+
+Z
+
+# Z<0 Z=0 Z>0
+×
+
+Z<0 Z>0
+
+Z
+
+(commutative)
+
+Z=0 Z=0 Z=0
+
+Z>0 Z Z>0 Z>0
+Z
+
+σ(e1 + e2) = σ(e1) + σ(e2)
+#
+
+Z
+
+(commutative)
+
+#
+
+Z>0 Z<0 Z=0 Z>0
+
+Z
+
+2
+
+Z
+
+v1 + v2
+51
+
+Z
+
+Z
+
+Z
+
+Z=0 Z
+
+Z
+
+need to extend previous operations
+
+===== slide 52 =====
+Adding division
+Z
+
+e ::= . . . ∣ e1 /e2
+[[e1 /e2]] = [[e1]]/[[e2]] (if [[e2]] ≠ 0)
+
+Z<0
+
+A = {Z<0, Z=0, Z>0, Z}
+
+Z=0
+
+Z>0
+
+∅
+
+/
+
+#
+
+Z<0
+
+Z<0 Z=0 Z>0
+
+Z
+
+Z
+
+Z
+
+??
+
+Z
+
+Z=0 Z=0 ?? Z=0 Z=0
+Z>0
+
+Z
+
+??
+
+Z
+
+Z
+
+Z
+
+Z
+
+??
+
+Z
+
+Z
+
+A
+
+#
+
+2
+
+a1 / a2
+
+2
+
+v1 /v2
+
+Z
+
+52
+
+#
+
+σ(e1 /e2) = σ(e1) / σ(e2)
+#
+
+a1 / a2 = ?
+
+A
+
+Z
+
+===== slide 53 =====
+Adding division
+(exploit another abstract value)
+
+Z
+
+e ::= . . . ∣ e1 /e2
+[[e1 /e2]] = [[e1]]/[[e2]] (if [[e2]] ≠ 0)
+
+Z<0
+
+A = {∅, Z<0, Z=0, Z>0, Z}
+
+Z=0
+
+Z>0
+
+Ø
+#
+
+Z<0 Z=0 Z>0
+
+Z
+
+∅
+
+∅
+
+Z
+
+∅
+
+Z=0 Z=0
+
+∅ Z=0 Z=0
+
+∅
+
+Z>0 Z
+
+∅
+
+Z
+
+Z
+
+∅
+
+Z
+
+Z
+
+∅
+
+Z
+
+Z
+
+∅
+
+∅
+
+∅
+
+∅
+
+∅
+
+∅
+
+∅
+
+/
+
+Z<0
+
+Z
+
+Z
+
+A
+
+#
+
+2
+
+a1 / a2
+
+2
+
+v1 /v2
+
+Z
+
+53
+
+#
+
+σ(e1 /e2) = σ(e1) / σ(e2)
+#
+
+a1 / a2 = ?
+
+A
+
+Z
+
+===== slide 54 =====
+Concrete values are mapped to abstract ones
+Di erent concrete values can be mapped to the same abstract one
+To some extent, an abstract value represents all its underlying concrete values
+
+γ:A→
+
+[[ ⋅ ]]
+
+(Z) called concretization map
+
+γ(Z<0) = {n ∈ Z ∣ n < 0}
+γ(Z=0) = {0}
+γ(Z>0) = {n ∈ Z ∣ n > 0}
+
+σ
+
+Z
+∈
+
+A
+
+γ
+
+p
+
+x
+
+P
+
+γ(Z) = {n ∈ Z} note that it contains each of γ(Z<0), γ(Z=0) and γ(Z>0)
+note that it is contained in all the previous ones
+γ(∅) = ∅
+54
+ff
+
+E
+
+P
+
+Properties as abstractions
+
+(Z)
+
+===== slide 55 =====
+The abstract domain
+The abstract domain is a lattice whose partial order ⊑ defined the notion of
+approximation/precision
+Reminder: lattice means that each subset of the abstract domain has lub and glb
+The partial order must be coherent with the concretization map: γ : A →
+Z
+
+a1 ⊑ a2 ⟹ γ(a1) ⊆ γ(a2)
+Z<0
+
+Z=0
+
+Z>0
+
+P
+
+∅
+
+fi
+
+55
+
+(Z)
+
+===== slide 56 =====
+The abstraction map
+The abstraction map α :
+
+(Z) → A is the counterpart of the concretization map γ
+
+The function α : (Z) → A maps a set of concrete values S into the most precise
+abstract value that is a (sound) approximation of S
+In our example:
+
+if ∅ ⊂ S ⊆ {n ∈ Z ∣ n < 0}
+if ∅ ⊂ S ⊆ {n ∈ Z ∣ n > 0}
+
+P
+
+otherwise
+
+P
+
+α(∅) = ∅
+α({0}) = Z=0
+α(S) = Z<0
+α(S) = Z>0
+α(S) = Z
+
+Z
+
+56
+
+Z<0
+
+Z=0
+∅
+
+Z>0
+
+===== slide 57 =====
+lub and glb
+N×N
+
+upper bounds di X
+X
+
+lub(X)
+
+glb(X)
+
+lower bounds di X
+
+(x1, y1) ≤N×N (x2, y2) ⟺ x1 ≤N x2 ∧ y1 ≤N y2
+pointwise ordering
+57
+
+===== slide 58 =====
+General definition
+An abstract interpretation consists of:
+
+• A concrete domain: (usually) a complete lattice C
+• an abstract domain: (usually) a complete lattice A (smaller means "more precise")
+• A monotone abstraction map α : C → A
+• A monotone concretization map γ : A → C
+• The maps α : C → A and γ : A → C form a Galois insertion
+#
+
+• An abstract semantics [[ ⋅ ]] that is correct w.r.t. the concrete semantics [[ ⋅ ]]
+fi
+
+58
+
+===== slide 59 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+(Σ) for i ∈ {1,2,3,4,6}
+S1 = {(m, n) ∣ m, n ∈ Z}
+=⊤
+S2 = {(1,n) ∣ ∃m . (m, n) ∈ S1}
+= F2(S1)
+S3 = S2 ∪ S6
+S4 = {(m, n) ∈ S3 ∣ n > 0}
+= F4(S3)
+S5 = {(m ⋅ n, n) ∣ ∃m . (m, n) ∈ S4} = F5(S4)
+S6 = {(m, n − 1) ∣ ∃m . (m, n) ∈ S5} = F6(S5)
+S7 = {(m, n) ∈ S3 ∣ n ≤ 0}
+= F7(S3)
+each Fi : (Σ) → (Σ) is called a transfer function
+
+fi
+
+P
+
+P
+
+P
+
+Strongest invariant (not computable in general)
+smallest solution of a system of equations
+Kleene's59fifixpoint theorem again!
+
+===== slide 60 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = ∅
+S2 = ∅
+S3 = ∅
+S4 = ∅
+S5 = ∅
+S6 = ∅
+S7 = ∅
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+fi
+
+60
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 61 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ ∃m . (m, n) ∈ S1}
+S3 = S2 ∪ S6
+S4 = {(m, n) ∈ S3 ∣ n > 0}
+S5 = {(m ⋅ n, n) ∣ ∃m . (m, n) ∈ S4}
+S6 = {(m, n − 1) ∣ ∃m . (m, n) ∈ S5}
+S7 = {(m, n) ∈ S3 ∣ n ≤ 0}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+61
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 62 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ ∃m . (m, n) ∈ ∅}
+=∅
+S3 = ∅ ∪ ∅
+=∅
+S4 = {(m, n) ∈ ∅ ∣ n > 0}
+=∅
+S5 = {(m ⋅ n, n) ∣ ∃m . (m, n) ∈ ∅} = ∅
+S6 = {(m, n − 1) ∣ ∃m . (m, n) ∈ ∅} = ∅
+S7 = {(m, n) ∈ ∅ ∣ n ≤ 0}
+=∅
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+62
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 63 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = ∅
+S3 = ∅
+S4 = ∅
+S5 = ∅
+S6 = ∅
+S7 = ∅
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+fi
+
+63
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 64 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ ∃m . (m, n) ∈ S1}
+= {(1,n) ∣ n ∈ Z}
+S3 = ∅
+S4 = ∅
+S5 = ∅
+S6 = ∅
+S7 = ∅
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+64
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 65 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = S2 ∪ S6
+= {(1,n) ∣ n ∈ Z}
+S4 = ∅
+S5 = ∅
+S6 = ∅
+S7 = ∅
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+fi
+
+65
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 66 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = {(1,n) ∣ n ∈ Z}
+S4 = {(m, n) ∈ S3 ∣ n > 0}
+= {(1,n) ∣ n > 0}
+S5 = ∅
+S6 = ∅
+S7 = {(m, n) ∈ S3 ∣ n ≤ 0}
+= {(1,n) ∣ n ≤ 0}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+fi
+
+66
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 67 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = {(1,n) ∣ n ∈ Z}
+S4 = {(1,n) ∣ n > 0}
+S5 = {(m ⋅ n, n) ∣ ∃m . (m, n) ∈ S4}
+= {(n, n) ∣ n > 0}
+S6 = ∅
+S7 = {(1,n) ∣ n ≤ 0}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+67
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 68 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = {(1,n) ∣ n ∈ Z}
+S4 = {(1,n) ∣ n > 0}
+S5 = {(n, n) ∣ n > 0}
+S6 = {(m, n − 1) ∣ ∃m . (m, n) ∈ S5}
+= {(n, n − 1) ∣ n > 0}
+S7 = {(1,n) ∣ n ≤ 0}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+68
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 69 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = S2 ∪ S6
+= {(1,n) ∣ n ∈ Z} ∪ {(n, n − 1) ∣ n > 0}
+S4 = {(1,n) ∣ n > 0}
+S5 = {(n, n) ∣ n > 0}
+S6 = {(n, n − 1) ∣ n > 0}
+S7 = {(1,n) ∣ n ≤ 0}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+69
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 70 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = {(1,n) ∣ n ∈ Z} ∪ {(n, n − 1) ∣ n > 0}
+S4 = {(m, n) ∈ S3 ∣ n > 0}
+= {(1,n) ∣ n > 0} ∪ {(n, n − 1) ∣ n > 1}
+S5 = {(n, n) ∣ n > 0}
+S6 = {(n, n − 1) ∣ n > 0}
+S7 = {(m, n) ∈ S3 ∣ n ≤ 0}
+= {(1,n) ∣ n ≤ 0}∪ {(n, n − 1) ∣ n ≤ 1}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+70
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 71 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = {(1,n) ∣ n ∈ Z} ∪ {(n, n − 1) ∣ n > 0}
+S4 = {(1,n) ∣ n > 0} ∪ {(n, n − 1) ∣ n > 1}
+S5 = {(m ⋅ n, n) ∣ ∃m . (m, n) ∈ S4}
+= {(n, n) ∣ n > 0}∪{(n(n − 1), n − 1) ∣ n > 1}
+S6 = {(n, n − 1) ∣ n > 0}
+S7 = {(1,n) ∣ n ≤ 0}∪ {(n, n − 1) ∣ n ≤ 1}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+71
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 72 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = {(1,n) ∣ n ∈ Z} ∪ {(n, n − 1) ∣ n > 0}
+S4 = {(1,n) ∣ n > 0} ∪ {(n, n − 1) ∣ n > 1}
+S5 = {(n, n) ∣ n > 0}∪{(n(n − 1), n − 1) ∣ n > 1}
+S6 = {(m, n − 1) ∣ ∃m . (m, n) ∈ S5}
+= {(n, n − 1) ∣ n > 0}
+∪{(n(n − 1), n − 2) ∣ n > 1}
+S7 = {(1,n) ∣ n ≤ 0}∪ {(n, n − 1) ∣ n ≤ 1}
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+72
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 73 =====
+Analysis as fixpoint
+Concrete semantics Si ∈
+
+P
+
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+S1 = {(m, n) ∣ m, n ∈ Z}
+S2 = {(1,n) ∣ n ∈ Z}
+S3 = S2 ∪ S6
+= {(1,n) ∣ n ∈ Z} ∪ {(n, n − 1) ∣ n > 0}
+∪{(n(n − 1), n − 2) ∣ n > 1} ...
+S4 = {(1,n) ∣ n > 0} ∪ {(n, n − 1) ∣ n > 1}
+S5 = {(n, n) ∣ n > 0}∪{(n(n − 1), n − 1) ∣ n > 1}
+S6 = {(n, n − 1) ∣ n > 0}
+∪{(n(n − 1), n − 2) ∣ n > 1}
+S7 = {(1,n) ∣ n ≤ 0}∪ {(n, n − 1) ∣ n ≤ 1}
+73
+
+fi
+
+(Σ) for i ∈ {1,2,3,4,6}
+
+===== slide 74 =====
+Abstract interpretation
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = ⊤
+#
+# #
+S2 = F2 (S1 )
+#
+# # #
+S3 = S2 ∪ S6
+#
+# #
+S4 = F4 (S3 )
+#
+# #
+S5 = F5 (S4 )
+#
+# #
+S6 = F6 (S5 )
+#
+# #
+S7 = F7 (S3 )
+#
+each Fi is called abstract transfer function
+
+A is the set of properties of interest
+#
+Fi : A →74 A is a sound over-approximation of Fi
+
+===== slide 75 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = ∅
+#
+S2 = ∅
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+75
+
+===== slide 76 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = ∅
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+76
+
+===== slide 77 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = Z>0 × Z
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+77
+
+===== slide 78 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = Z>0 × Z
+#
+S3 = Z>0 × Z
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+78
+
+===== slide 79 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = Z>0 × Z
+#
+S3 = Z>0 × Z
+#
+S4 = Z>0 × Z>0
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = Z>0 × Z≥0
+
+79
+
+===== slide 80 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = Z>0 × Z
+#
+S3 = Z>0 × Z
+#
+S4 = Z>0 × Z>0
+#
+S5 = Z>0 × Z>0
+#
+S6 = ∅
+#
+S7 = Z>0 × Z≥0
+
+80
+
+===== slide 81 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = Z>0 × Z
+#
+S3 = Z>0 × Z
+#
+S4 = Z>0 × Z>0
+#
+S5 = Z>0 × Z>0
+#
+S6 = Z>0 × Z≥0
+#
+S7 = Z>0 × Z≥0
+
+81
+
+===== slide 82 =====
+Abstract interpretation
+#
+
+(1) m := Z>0;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+Z≤0
+
+Z≠0
+
+Z≥0
+
+Z<0
+
+Z=0
+
+Z>0
+
+Ø
+
+#
+Abstract semantics Si ∈ A for i ∈ {1,2,3,4,6}
+#
+S1 = Z × Z
+#
+S2 = Z>0 × Z
+#
+#
+S3 = (Z>0 × Z) ∪ (Z>0 × Z≥0) = (Z>0 × Z)
+#
+S4 = Z>0 × Z>0
+#
+S5 = Z>0 × Z>0
+#
+S6 = Z>0 × Z≥0
+#
+S7 = Z>0 × Z≥0
+(ABSTRACT) FIXPOINT REACHED!
+82
+
+===== slide 83 =====
+Exercises
+
+83
+
+===== slide 84 =====
+Abstract operations
+Given the "parity" domain A = {∅, ≡2, ≢2, Z}:
+
+Z
+
+• define the (most precise) sound abstraction of product
+
+even
+
+• define the (most precise) sound abstraction of sum
+
+×
+
+fi
+
+fi
+
+fi
+
+∅
+≡2
+
+∅ ≡2 ≢2 Z
+(commutative)
+
+#
+
++
+
+∅
+≡2
+
+∅ ≡2 ≢2 Z
+(commutative)
+
+/
+
+#
+
+∅
+≡2
+
+≢2
+
+≢2
+
+≢2
+
+Z
+
+Z
+
+Z
+
+84
+
+≢2
+
+odd
+
+∅
+
+• define the (most precise) sound abstraction of division
+#
+
+≡2
+
+∅ ≡2 ≢2 Z
+(commutative)
+
+===== slide 85 =====
+Abstract operations
+Given the "parity" domain A = {∅, ≡2, ≢2, Z}:
+
+Z
+
+• define the (most precise) sound abstraction of product
+
+even
+
+• define the (most precise) sound abstraction of sum
+
+≡2
+
+≢2
+∅
+
+• define the (most precise) sound abstraction of division
+#
+
+×
+
+∅ ≡2 ≢2 Z
+
+fi
+
+fi
+
+fi
+
+∅ ∅
+(commutative)
+≡2 ∅ ≡2
+≢2 ∅ ≡2 ≢2
+Z ∅ ≡2 Z Z
+
+#
+
++
+
+∅ ≡2 ≢2 Z
+
+∅ ∅
+(commutative)
+≡2 ∅ ≡2
+≢2 ∅ ≢2 ≡2
+Z
+
+∅
+
+Z
+
+85
+
+Z
+
+Z
+
+odd
+
+/
+
+#
+
+∅ ≡2 ≢2 Z
+
+∅ ∅
+≡2 ∅
+≢2 ∅
+Z ∅
+
+∅
+
+∅
+
+∅
+
+Z
+
+Z
+
+Z
+
+Z
+
+Z
+
+Z
+
+Z
+
+Z
+
+Z
+
+===== slide 86 =====
+Abstract interpretation 1
+(1) m:= 1;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+# #
+S2 = F2 (S1 )
+#
+# # #
+S3 = S2 ∪ S6
+#
+# #
+S4 = F4 (S3 )
+#
+# #
+S5 = F5 (S4 )
+#
+# #
+S6 = F6 (S5 )
+#
+# #
+S7 = F7 (S3 )
+
+odd
+86
+
+===== slide 87 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ∅
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+odd
+87
+
+===== slide 88 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+odd
+88
+
+===== slide 89 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+S3 = ≢2 × Z
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+odd
+89
+
+===== slide 90 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+S3 = ≢2 × Z
+#
+S4 = ≢2 × Z
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ≢2 × Z
+
+odd
+90
+
+===== slide 91 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+S3 = ≢2 × Z
+#
+S4 = ≢2 × Z
+#
+S5 = Z × Z
+#
+S6 = ∅
+#
+S7 = ≢2 × Z
+
+odd
+91
+
+===== slide 92 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+S3 = ≢2 × Z
+#
+S4 = ≢2 × Z
+#
+S5 = Z × Z
+#
+S6 = Z × Z
+#
+S7 = ≢2 × Z
+
+odd
+92
+
+===== slide 93 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+odd
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+#
+S3 = ≢2 × Z ∪ Z × Z
+
+=Z×Z
+#
+S4 = ≢2 × Z
+#
+S5 = Z × Z
+#
+S6 = Z × Z
+#
+S7 = ≢2 × Z
+93
+
+===== slide 94 =====
+Abstract interpretation 1
+#
+
+(1) m := ≢2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+odd
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≢2 × Z
+#
+S3 = Z × Z
+#
+S4 = Z × Z
+#
+S5 = Z × Z
+#
+S6 = Z × Z
+#
+S7 = Z × Z
+(ABSTRACT) FIXPOINT REACHED!
+94
+
+===== slide 95 =====
+Abstract interpretation 2
+(1) m:= 2;
+(2) while (3) n>0 do {
+(4)
+m:= m*n;
+(5)
+n:= n-1
+(6) }
+(7) // end
+
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+# #
+S2 = F2 (S1 )
+#
+# # #
+S3 = S2 ∪ S6
+#
+# #
+S4 = F4 (S3 )
+#
+# #
+S5 = F5 (S4 )
+#
+# #
+S6 = F6 (S5 )
+#
+# #
+S7 = F7 (S3 )
+
+odd
+95
+
+===== slide 96 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ∅
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+odd
+96
+
+===== slide 97 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≡2 × Z
+#
+S3 = ∅
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+odd
+97
+
+===== slide 98 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≡2 × Z
+#
+S3 = ≡2 × Z
+#
+S4 = ∅
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ∅
+
+odd
+98
+
+===== slide 99 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≡2 × Z
+#
+S3 = ≡2 × Z
+#
+S4 = ≡2 × Z
+#
+S5 = ∅
+#
+S6 = ∅
+#
+S7 = ≡2 × Z
+
+odd
+99
+
+===== slide 100 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≡2 × Z
+#
+S3 = ≡2 × Z
+#
+S4 = ≡2 × Z
+#
+S5 = ≡2 × Z
+#
+S6 = ∅
+#
+S7 = ≡2 × Z
+
+odd
+100
+
+===== slide 101 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≡2 × Z
+#
+S3 = ≡2 × Z
+#
+S4 = ≡2 × Z
+#
+S5 = ≡2 × Z
+#
+S6 = ≡2 × Z
+#
+S7 = ≡2 × Z
+
+odd
+101
+
+===== slide 102 =====
+Abstract interpretation 2
+#
+
+(1) m := ≡2;
+#
+(2) while (3) n >0 do {
+#
+#
+#
+#
+m := m × n ;
+(4)
+#
+#
+#
+n := n (( ⋅ ) − 1)
+(5)
+(6) }
+(7) // end
+Z
+
+even
+
+≡2
+
+≢2
+∅
+
+odd
+
+Evaluate the program in the abstract domain
+A = {∅, ≡2, ≢2, Z}:
+#
+S1 = Z × Z
+#
+S2 = ≡2 × Z
+#
+#
+S3 = ≡2 × Z ∪ ≡2 × Z = ≡2 × Z
+#
+S4 = ≡2 × Z
+#
+S5 = ≡2 × Z
+#
+S6 = ≡2 × Z
+#
+S7 = ≡2 × Z
+(ABSTRACT) FIXPOINT REACHED!
+102

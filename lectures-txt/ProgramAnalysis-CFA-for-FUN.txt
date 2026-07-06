@@ -1,0 +1,10240 @@
+# ProgramAnalysis-CFA-for-FUN
+# auto-extracted from ProgramAnalysis-CFA-for-FUN.pdf (280 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #17
+Control Flow Analysis
+
+===== slide 2 =====
+Program Analysis
+
+✓
+
+✓
+✓
+
+===== slide 3 =====
+Chasing the ow of values
+Flow information is essential for the specification of Data Flow Analyses (e.g.,
+Monotone Framework over Control Flow Graphs)
+Simple imperative languages: ow information can be extracted directly from
+the program text: procedure calls are performed by explicitly mentioning the
+name of a procedure
+But what if functions are values?
+Now we have a problem: we often do not know at compile time which function
+is called
+Control Flow Analysis (CFA) statically approximates which functions may be
+called at each call site
+
+fl
+
+fl
+
+3
+
+===== slide 4 =====
+Control Flow Analysis
+Control ow describes the rules underlying the evolution of the program
+• implicit in the program code and in the Abstract Syntax Tree (AST)
+• explicit in Control Flow Graph (CFG), which captures the order of
+execution and possible paths (assuming the targets of calls are known)
+The purpose of Control Flow Analysis (CFA) is to determine which
+blocks may lead to which other blocks
+But in modern languages, even building the CFG is not trivial
+
+fl
+
+4
+
+===== slide 5 =====
+AST and CFG
+CFG → captures the possible
+execution paths
+Start
+
+if x > 0 {
+then { y = 1; }
+else { y = -1; }
+}
+AST → captures the syntactic
+structure of the program
+IfStatement
+y=1
+
+x>0?
+y=-1
+
+Condition ThenBranch ElseBranch
+End
+x>0
+
+y=1
+
+y=-1
+How the program may execute
+
+What the program looks like
+
+To build the CFG, we must know how control may ow at runtime
+5
+
+===== slide 6 =====
+Analyzing CFGs
+So far looked in previous
+courses
+
+• intraprocedural analysis: → analyze a single function
+• interprocedural analysis: → analyze the whole program with
+function calls
+Until now, all targets were known statically
+
+6
+
+===== slide 7 =====
+Interprocedural analysis
+
+• Construct a CFG for each function
+• Glue them together via function calls and returns
+
+7
+
+===== slide 8 =====
+Interprocedural analysis
+Interprocedural analysis:
+tractable when the program has a simple structure
+→ calls have statically known targets
+
+8
+
+===== slide 9 =====
+Simple imperative language with
+higher-order functions
+Higher-order functions complicate CFG construction:
+• several functions may be invoked at a call site
+• this depends on the data ow
+• but data ow analysis rst requires a CFG
+
+fl
+
+fi
+
+fl
+
+9
+
+===== slide 10 =====
+Simple imperative language with
+higher-order functions (cont.)
+A control ow analysis
+approximates the call graph
+What is f?
+
+⟦f⟧ = {inc, dec, ide}
+
+Example by A. Møller & M. I. Schwartzbach
+
+fl
+
+10
+
+===== slide 11 =====
+Control- ow (CFG) + data “ owing” through it
+→ no longer works
+Why?
+• The boundary between control and data becomes unclear
+• Everything is both data and control
+Functions are higher-order: they can be at the same time:
+• code to be executed and
+• data, i.e., arguments or results of other function
+No clear separation between control- ow and data- ow
+When the program decides “at runtime” which function to call, the control
+ow is no longer explicit
+
+fl
+
+fl
+
+11
+
+fl
+
+fl
+
+Functional languages
+
+===== slide 12 =====
+Dynamic Dispatch Problem
+Consider the following program fragment
+
+let
+f = fn x => x 1;
+g = fn y => y + 2;
+h = fn z => z + 3
+in
+(f g) + (f h)
+
+variables can denote functions and
+which procedure/function gets invoked
+depends on runtime values
+
+• What does this program do?
+• For each function application,
+which functions may be applied?
+
+• x is a function variable
+• at runtime: x∈{g,h}
+So call x 1 may target g or h (from calls (f g)and (f h))
+Here it is clear which functions are actually called, but in general it is not
+12
+
+===== slide 13 =====
+Dynamic Dispatch Problem (cont.)
+Consider the following program fragment
+
+let
+f = fn x => x 1;
+g = fn y => y + 2;
+h = fn z => z + 3
+in
+(f g) + (f h)
+
+We cannot know the exact target of a call
+So we compute a safe approximation
+
+fl
+
+Solution: static analysis
+→ over-approximate the possible targets of each call
+Control Flow Analysis (CFA):
+→ For each function application (call site), compute a safe approximation
+How? By solving a system of constraints, where constraints describe how
+values ow between variables
+13
+
+===== slide 14 =====
+Control Flow Analysis
+
+14
+
+===== slide 15 =====
+Control Flow Analysis: historically
+• Reynolds: early analyses of LISP programs
+• Jones: rst to study lambda expressions → introduced control- ow analysis
+• Shivers: formalized CFA for Scheme → basis for constraint-based approaches
+•...
+• Today: constraint-based CFA for higher-order programs
+
+fi
+
+15
+15
+
+===== slide 16 =====
+The Constraint Based Approach
+We adopt the approach illustrated in Principles of Program Analysis by
+Flemming Nielson, Hanne Riis Nielson, Chris Hankin [Chapter 3]
+
+16
+
+===== slide 17 =====
+e
+
+s
+
+l
+
+e
+
+n
+
+i
+
+n
+
+e
+
+h
+
+t
+
+f
+
+p
+
+o
+
+n
+
+Each label l in Lab corresponds to a program point where CFA computes
+information
+17
+t
+
+n
+
+u
+
+f
+
+t ::= c // constant in Const
+expression
+| x // variable in Var
+(labelled term)
+in Exp
+x ⇒ e0 // function definition (abstraction)
+|
+x ⇒ e0 // recursive function definition
+|
+| e1 e2 // function application
+e ::= t l
+e0
+e1
+e2 // conditional
+|
+Label:
+needed for the CFA
+x = e1 e2 // local definition
+|
+identify program
+points (e.g., call sites)
+| e1
+e2 // binary operation (op in Op)
+e
+
+f
+
+f
+
+i
+
+l
+
+FUN: syntax
+
+term in Term
+
+===== slide 18 =====
+CFA of FUN
+valid
+The goal
+Associate for each variable x and each expression e, a safe over-approximation
+of the set of functions that they may evaluate to at runtime
+
+This determines the possible targets of function applications
+Example of function application
+( if e then ((*) 2) else ((+) 1) ) 10
+• e evaluates to either ((*) 2) or ((+) 1)
+• the call may target {(*),(+)}
+18
+
+===== slide 19 =====
+Example 1: labelling
+Consider the following expression and label it
+
+((fn x => x1)(fn y => y3))5
+((fn x => x1)22 (fn y => y3)4)5
+
+(fn x => x1 )2
+x
+
+(fn y => y33)4
+
+x1
+
+y
+
+19
+
+y3
+
+===== slide 20 =====
+x
+
+Example 1: what happens at runtime?
+Consider the following expression
+
+((fn x => x1)2 (fn y => y3)4)5
+Let us look at what happens at runtime: ((λx . x)(λy . y)) → x{(λy . y)/x} ≡ (λy . y)
+• is bound to (fn y => y3)
+• the subexpression at label 1 evaluates to that function
+• the overall expression at label 5 evaluates to that function
+
+CFA will compute a safe approximation of these results
+20
+
+in λ-calculus
+
+===== slide 21 =====
+Example 2
+local name of g
+
+Consider the following expression
+
+formal parameter of g
+
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5
+in (g6 (fn z => z7)8)9)10
+g is a recursive function applied to the identity function (fn z => z7) that
+• ignores its actual parameter and
+• calls itself recursively with the argument (fn y => y2)
+• so the program loops
+possible recursive ow of function values:
+CFA must approximate this recursive behavior
+
+fl
+
+21
+
+===== slide 22 =====
+The Control Flow Analysis
+
+22
+
+===== slide 23 =====
+CFA as a Constraint Based Analysis
+
+• A 0-CFA is a Constraint Based Analysis
+• it is defined via inference rules that generate constraints over the possible
+data ow values for each variable or labeled location; those
+• constraints are then solved
+
+fi
+
+fl
+
+23
+
+===== slide 24 =====
+CFA with Flow Logic
+Flow Logic is a declarative approach to program analysis that mainly
+separates the specification from the actual computation
+acceptability
+relation
+
+• specification: describes when the analysis results are acceptable
+• computation: solving the constraints derived by the specification
+constraint
+satisfaction
+problem
+
+fi
+
+fi
+
+24
+
+===== slide 25 =====
+CFA: overview
+We define our CFA in several steps:
+• Speci cation: define which sets of functions are acceptable (acceptability
+relation)
+• Syntax-directed rules: re ne the acceptability relation to be syntax
+directed
+• Constraint generation: turn the specification into a nite set of
+constraints
+• Constraint solving: compute the least solution of the constraints (the
+analysis result)
+
+fi
+
+fi
+
+fi
+
+fi
+
+25
+
+===== slide 26 =====
+Abstract domains: informally
+the simplest
+form of CFA
+
+The result of analyzing an expression e is a pair (C,̂ ρ)̂ :
+• Ĉ: l ↦ set of function abstractions the subexpression labelled l may
+evaluate to
+• ρ:̂ x ↦ set of function abstractions, x may be bound to
+These are abstract values
+
+Goal:
+l l
+For each (t 1t 2)l determine the possible functions for t1 from the set of
+1 2
+
+function abstractions t2 may evaluate to
+
+0-CFA means that no context information is considered, e.g., same
+function set at all call sites
+26
+
+===== slide 27 =====
+Over-approximation
+
+27
+
+===== slide 28 =====
+Abstract domains: formally
+The result of a CFA analysis is a pair (C,̂ ρ)̂ :
+
+Ĉ ∈ Cachê : Lab → Val ̂
+ρ ̂ ∈ Env ̂ : Var → Val ̂
+v̂ ∈ Val ̂ = ℘(Term)
+
+• An abstract value abstracts a set of functions:,
+i.e., terms in the form
+x ⇒ e0 or
+x ⇒ e0
+• An abstract cache Ĉ associates abstract values
+with each labelled program point
+• An abstract environment ρ ̂ associates abstract
+values with each variable
+
+We assume that all variables and labels are distinct
+f
+
+n
+
+n
+
+u
+
+f
+
+f
+
+28
+
+n
+
+f
+
+Only functions,
+no constants
+(no DFA component):
+pure CFA
+
+x ⇒ e0 abstracts the
+
+corresponding function
+in all contexts
+
+===== slide 29 =====
+Back to Example 1: make a guess
+Consider the following 0-CFA guess
+
+((fn x => x1)2 (fn y => y3)4)5
+
+Ĉe
+
+We want to know which
+functions may be bound to variables or
+labels (terms)
+
+ρê
+
+The variable yis never evaluated
+
+Does (Ĉe, ρê ) safely over-approximate the runtime behavior? Is it an
+acceptable guess?
+29
+
+===== slide 30 =====
+Back to Example 1
+Consider also the following 0-CFA guesses
+
+((fn x => x1)2 (fn y => y3)4)5
+
+false
+negative
+
+Are they acceptable? Conservative (over-approximating) guesses are
+acceptable, incomplete ones are not 30
+
+===== slide 31 =====
+The specification of a solution
+Given a guess (C,̂ ρ)̂ , we validate whether it is an acceptable CFA
+A guess is acceptable if it safely over-approximates the runtime behavior
+For instance, if at runtime
+̂
+• t l evaluates to a function, then this must be duly recorded in C(l)
+̂
+• x is bound to a function at runtime, this must also be duly recorded in ρ(x)
+It means that the guess (C,̂ ρ)̂ is
+acceptable for expression e
+
+(C,̂ ρ)̂ ⊧ e
+
+⊧: Cachê × Env ̂ × Exp → {
+relation
+
+,
+
+}
+
+fi
+
+e
+
+s
+
+l
+
+a
+
+f
+
+e
+
+u
+
+t
+
+31
+r
+
+Validation
+check clauses on judgements
+
+===== slide 32 =====
+Acceptability relation
+(C,̂ ρ)̂ ⊧ e
+To define acceptability, we specify correctness rules for each syntactic
+category in FUN
+Each rule enforces a correctness condition, i.e., it ensures that the guess
+includes all possible ows
+We do not compute the solution here: we propose one and validate it using
+these clauses
+
+fl
+
+fi
+
+32
+
+===== slide 33 =====
+Clause for constants
+[con] (C,̂ ρ)̂ ⊧ c l
+that can be reformulated as
+
+[con] (C,̂ ρ)̂ ⊧ c l
+
+̂
+∅ ⊆ C(l)
+
+̂ : constants do not evaluate to functions
+No demands on C(l)
+In pure 0-CFA, we do not track data values
+
+(no functions
+can ow here)
+
+Example
+
+fl
+
+7
+
+s
+
+y
+
+a
+
+w
+
+f
+
+l
+
+f
+
+a
+
+33
+i
+
+e≜ 1
+̂ =∅
+C(1)
+
+===== slide 34 =====
+Clause for variables
+[var] (C,̂ ρ)̂ ⊧ x l
+
+̂
+̂ ⊆ C(l)
+ρ(x)
+
+Everything the variable x can be evaluated to must be included in what is
+observed at program point l
+This propagates information from variables to program points: the ow
+goes from ρ ̂ to Ĉ (we get the value from the variable into the program)
+Example
+e ≜ x1
+
+̂ ⊇ ρ(̂ ) ⊇ {fn y => y3} [See example 1]
+C(1)
+x
+
+f
+
+f
+
+i
+
+34
+
+===== slide 35 =====
+[ fn] (C,̂ ρ)̂ ⊧ (
+
+x ⇒ e0)l
+
+{
+
+̂
+x ⇒ e0} ⊆ C(l)
+functions are
+abstract
+values
+
+̂
+x ⇒ e0 must be included in C(l)
+The functional term
+This means that it may occur as part of a closure at program point l during
+evaluation
+No checks on the body e0: the clause for application will handle the body
+Example
+e ≜ (fn x => x1)2
+̂ ⊇ {fn x => x1} ...
+C(2)
+
+f
+
+f
+
+f
+
+i
+
+n
+
+35
+f
+
+n
+
+f
+
+Clause for functions
+
+===== slide 36 =====
+[ fun] (C,̂ ρ)̂ ⊧ (
+
+x ⇒ e0)l
+
+̂
+x ⇒ e0} ⊆ C(l)
+
+{
+
+functions are
+abstract
+values
+
+̂
+x ⇒ e0 must be included in C(l)
+The functional term
+This means that it may occur as part of a closure at program point l during
+evaluation
+No checks on the body e0: the clause for application will handle the body
+Example
+e ≜ (fun f x => (f1 (fn y => y2)3)4)5
+̂ ⊇ {fun f x => (f1 (fn y => y2)3)4} ...
+C(5)
+
+i
+
+f
+
+n
+
+u
+
+f
+
+36
+
+n
+
+f
+
+Clause for recursive functions
+
+===== slide 37 =====
+[if ] (C,̂ ρ)̂ ⊧ ( t0l0
+
+t1l1
+
+t2l2)l
+
+(C,̂ ρ)̂ ⊧ t0l0
+̂ 1) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t1l1 ∧ C(l
+̂ 2) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t2l2 ∧ C(l
+
+e
+
+s
+
+l
+
+e
+
+n
+
+e
+
+h
+
+t
+
+f
+
+i
+
+f
+
+37
+f
+
+i
+
+Clause for conditional
+
+===== slide 38 =====
+Clause for conditional
+[if ] (C,̂ ρ)̂ ⊧ ( t0l0
+
+t1l1
+
+t2l2)l
+
+This clause
+• requires checking the sub-expressions:
+hence it uses “recursive calls” (C,̂ ρ)̂ ⊧ tili
+
+(C,̂ ρ)̂ ⊧ t0l0
+̂ 1) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t1l1 ∧ C(l
+̂ 2) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t2l2 ∧ C(l
+
+̂ i) to the
+• propagates the values produced by sub-expression C(l
+̂
+overall expression C(l)
+
+Condition is ignored:
+over-approximation
+
+This corresponds to merging the possible values from both branches
+Example
+e ≜ (if (x1> 02)3 then (fn y => y4)5 else (fn z => z6)7)8
+8
+
+7
+
+e
+
+s
+
+l
+
+e
+
+n
+
+e
+
+h
+
+t
+
+38
+f
+
+i
+
+̂ ⊆ C(8)
+̂ and C(̂ ) ⊆ C(̂ ) ...
+C(5)
+
+===== slide 39 =====
+Clause for binary operation
+l1
+̂
+̂
+[op] (C, ρ) ⊧ (t1
+
+l2 l
+t2 )
+
+l1
+l2
+̂
+̂
+̂
+̂
+(C, ρ) ⊧ t1 ∧ (C, ρ) ⊧ t2
+
+This clause simply
+• requires checking the sub-expressions: hence it uses “recursive calls”
+
+(C,̂ ρ)̂ ⊧ tili
+
+̂
+No demands on C(l)
+In pure 0-CFA, we do not track data values
+
+f
+
+f
+
+i
+
+p
+
+39
+o
+
+Example
+e ≜ (71 + 42)3
+̂ =∅...
+C(3)
+
+===== slide 40 =====
+Clause for the let binding
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+̂ 1) ⊆ ρ(x)
+̂ 2) ⊆ C(l)
+̂
+̂ ∧ C(l
+C(l
+
+t2l2)l
+
+n
+
+i
+
+t
+
+40
+e
+
+x = t1l1
+
+l
+
+[let] (C,̂ ρ)̂ ⊧ (
+
+===== slide 41 =====
+Clause for the let binding
+[let] (C,̂ ρ)̂ ⊧ (
+
+x = t1l1
+
+t2l2)l
+
+This clause
+• requires checking the sub-expressions:
+hence it uses “recursive calls” (C,̂ ρ)̂ ⊧ tili
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+̂ 1) ⊆ ρ(x)
+̂ 2) ⊆ C(l)
+̂
+̂ ∧ C(l
+C(l
+the value of x must be
+used when analysing t2
+
+Double ow: propagation of the values
+̂ 1) to ρ(x)
+̂
+[binding]
+• from C(l
+̂ 2) to C(l)
+̂
+[evaluation]
+• from C(l
+
+Example
+e ≜ (let f = (fn x => x1)2 in (f3 34)5)6
+
+̂ ⊆ ρ(̂ ) and C(5)
+̂ ⊆ C(6)
+̂ ...
+C(2)
+
+fl
+
+x
+
+n
+
+i
+
+t
+
+e
+
+l
+
+41
+
+===== slide 42 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+lls C(l
+̂
+̂
+̂
+a
+c
+̂
+)
+⊆
+ρ(x)
+∧
+C(l
+)
+⊆
+C(l))
+∧
+n
+o
+2
+0
+i
+t
+c
+n
+u
+f
+E
+e
+l
+l0
+S
+b
+i
+U
+̂
+s
+A
+s
+L
+o
+(
+∀(
+x
+⇒
+t
+)
+∈
+C(l
+):
+p
+C
+l
+1
+l
+Y
+a
+0
+E
+K
+tes
+a
+l
+l0
+u
+̂
+m
+i
+s
+̂
+(
+C,
+ρ)
+⊧
+t
+∧
+t
+I
+0
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+42
+
+===== slide 43 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+This clause requires checking
+the sub-expressions: hence it
+uses “recursive calls”
+
+(C,̂ ρ)̂ ⊧ tili
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+l0
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+43
+
+===== slide 44 =====
+Clause for function application
+for each function
+l2 be applied
+the can
+
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2
+l0
+̂ 1) :
+l
+( ∀( x ⇒ t0 ) ∈ C(l
+For each term ( x ⇒ t0 ) that
+may reach l1 it requires that
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+• the body can be analysed
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+• the actual parameter (with label
+l2) is linked to the formal
+l0
+̂ 1) :
+(
+∀(
+x
+⇒
+t
+)
+∈
+C(l
+the argument “ ows
+0
+What comes out the
+parameter x
+into” the variable l0
+evaluation of the body
+• the result of the function
+(C,̂ ρ)̂ ⊧ t0 ∧
+comes out also from the
+application
+evaluation (with label l0) is linked
+̂
+̂
+̂
+̂
+C(l
+)
+⊆
+ρ(x)
+∧
+C(l
+)
+⊆
+C(l))
+∧
+to the result of the application
+2
+0
+0
+
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+itself (with label l)
+
+fl
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+n
+
+f
+
+f
+
+44
+
+===== slide 45 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+̂ ρ)̂ ⊧ t l0 ∧
+(
+C,
+0
+x ⇒ t0l )
+For each term (
+̂
+̂
+̂
+̂
+C(l
+)
+⊆
+ρ(x)
+∧
+C(l
+)
+⊆
+C(l))
+∧
+that may reach l1 it requires that
+2
+0
+l0
+• ... same as before and
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+• the term must be included in
+l0
+̂
+̂
+(
+C,
+ρ)
+⊧
+t
+∧
+ρ(̂ f ) to re ect the recursive
+0
+nature of the construct
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+0
+
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+fl
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+f
+
+n
+
+u
+
+n
+
+u
+
+f
+
+f
+
+45
+
+===== slide 46 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+Application = simulate all
+possible calls
+
+̂ 1)
+For each function in C(l
+(the function position):
+l
+• analyze body (t0 0)
+̂ )
+• bind argument (via ρ(x)
+• propagate results
+̂
+Results are merged in C(l)
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+l0
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+46
+
+===== slide 47 =====
+Clause for function application (recap)
+
+Application clause
+• combines function and argument
+• drives propagation
+
+See the more complete Example 1 next
+47
+
+===== slide 48 =====
+(Ĉe, ρê ) is an acceptable guess for ((fn x => x1)2 (fn y => y3)4)5
+(Ĉe, ρê ) ⊧ ((fn x => x1)2 (fn y => y3)4)5
+(Ĉe, ρê ) ⊧ (fn x => x1)2
+{fn x => x1} ⊆ Ĉe(2)
+
+{
+
+{
+
+(Ĉe, ρê ) ⊧ (fn y => y3)4
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+{fn y => y3} ⊆ Ĉe(4)
+
+Since (fn x => x1) = Ĉe(2) so we must also check
+
+(Ĉe, ρê ) ⊧ x1
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+
+̂
+Ĉe(4) ⊆ ρ(x)
+
+Ĉe(1) ⊆ Ĉe(5)
+
+The analysis generates constraints
+f
+
+i
+
+i
+
+i
+
+i
+
+Back to Example 1
+
+48
+
+===== slide 49 =====
+Back to Example 1
+Is (Ĉe, ρê ) an acceptable guess for ((fn
+
+x => x1)2 (fn y => y3)4)5?
+
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+✓
+✓
+✓
+✓
+✓
+
+A simple check shows that (Ĉe, ρê ) ⊧ ((fn x => x1)2 (fn y => y3)4)5
+49
+
+===== slide 50 =====
+(C′̂e, ρ′ê ) is non acceptable for ((fn x => x1)2 (fn y => y3)4)5
+(C′̂e, ρ′ê ) ⊧ ((fn x => x1)2 (fn y => y3)4)5
+(C′̂e, ρ′ê ) ⊧ (fn x => x1)2
+{fn x => x1} ⊆ C′̂e(2)
+
+{
+
+{
+
+(C′̂e, ρ′ê ) ⊧ (fn y => y3)4
+(C′̂e, ρ′ê ) ⊧ x1
+
+C′̂e(4) ⊆ ρ′̂ (x) ✗
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+50
+
+f
+
+{fn y => y3} ⊆ C′̂e(4)
+
+Since (fn x => x1) = Ĉe(e) so we must also check
+
+ρ′̂ (x) ⊆ C′̂e(1)
+
+C′̂e(1) ⊆ C′̂e(5)
+A guess is acceptable only if all constraints hold
+f
+
+i
+
+i
+
+i
+
+i
+
+Back to Example 1
+
+missing possible
+value of x
+
+===== slide 51 =====
+Back to Example 1
+(Ĉe, ρê ) is an acceptable guess for ((fn x => x1)2 (fn y => y3)4)5
+Intuitively, we solve the constraints iteratively until reaching a x point
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3}. {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+51
+
+===== slide 52 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3}. {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+52
+
+===== slide 53 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3} {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+53
+
+===== slide 54 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3} ... {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+54
+
+===== slide 55 =====
+CFA
+
+55
+
+===== slide 56 =====
+Inclusions
+Note that the clauses contain a number of inclusions of the form
+
+lhs ⊆ rhs
+
+where:
+̂
+̂ {t} where t is a function abstraction
+| ρ(x),
+• lhs ::= C(l)
+̂
+̂
+| ρ(x)
+• rhs := C(l)
+These express how functions may ow through the program, e.g.,
+
+̂
+̂
+C(l)
+⊆ ρ(x)
+
+fl
+
+56
+
+===== slide 57 =====
+Observation 1
+[ fn] (and [ fun]) do not
+recursively analyze
+subexpressions
+
+∧
+
+[app] does the job (is responsible
+for analyzing function bodies)
+
+the analysis is
+driven by
+reachability
+
+In this way, we analyse the body of a function only if the function may be
+applied somewhere
+Unreachable functions are not analysed
+57
+
+===== slide 58 =====
+Observation 2
+∧
+
+t0l0 is not a subexpression
+
+The relation ⊨ is not syntax-directed (due to the application clause)
+So we cannot define ⊨ by structural induction on expressions
+Instead, define ⊨ coinductively
+
+fi
+
+fi
+
+58
+
+===== slide 59 =====
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5
+in (g6 (fn z => z7)8)9)10
+Here is an acceptable guess
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+̂ ( ) = { } re ects that
+• ρlp
+
+will be evaluated to a closure constructed from
+
+that abstraction
+
+̂ ( ) = { y,
+• ρlp
+
+z}re ects that
+
+will be bound to closures constructed from
+both abstractions in the course of evaluation
+
+• Ĉlp(10) = ∅ (no function value can be produced at this point) re ects that
+
+fl
+
+d
+
+fl
+
+i
+
+d
+
+f
+
+i
+
+g
+
+the evaluation of loop never terminates
+59
+x
+
+g
+
+x
+
+Back to Example 2
+
+===== slide 60 =====
+Back to Example 2
+
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5 in (g6 (fn z => z7)8)9)10
+
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+from [fun]
+
+̂ )⊧
+(Ĉlp, ρlp
+using [app] and
+̂ ={}
+that C(6)
+
+̂ ) ⊧ 5 ∧ (Ĉlp, ρlp
+̂ ) ⊧ g6 (fn z => z7)8
+(Ĉlp, ρlp
+̂ (g) ∧ Ĉlp(9) ⊆ Ĉlp(10) ✓
+∧ Ĉlp(5) ⊆ ρlp
+immediate
+̂ ) ⊧ g6 ∧ (Ĉlp, ρlp
+̂ ) ⊧ (fn z => z7)8 ∧ (Ĉlp, ρlp
+̂ ) ⊧ (f1(fn y => y2)3)4
+(Ĉlp, ρlp
+̂ ( ) ∧ Ĉlp(4) ⊆ Ĉlp(9) ∧ ∈ ρlp
+̂ ()
+∧ Ĉlp(8) ⊆ ρlp
+immediate
+
+✓
+
+Immediate
+
+3
+̂ ) ⊧ 1 ∧ (Ĉlp, ρlp
+̂ ) ⊧(fn y => y2)∧
+(Ĉlp, ρlp
+̂ ) ⊧ (f1(fn y => y2)3)4
+(Ĉlp, ρlp
+
+̂ (x) ∧ Ĉlp(4) ⊆ Ĉlp(4) ∧ ∈ ρlp
+̂ ()
+∧ Ĉlp(3) ⊆ ρlp
+
+✓
+
+Circular dependency => coinduction: assume it holds and verify it is preserved
+f
+f
+
+f
+
+f
+
+f
+
+i
+
+p
+
+o
+
+o
+
+l
+f
+
+f
+
+x
+
+60
+
+===== slide 61 =====
+Coinductive nature of the CFA
+loose: includes
+many solutions
+
+The specification (⊨) is coinductive
+
+• It defines all acceptable solutions
+• A solution is accepted by default: it is rejected only if it violates a
+constraint
+Semantically this is a greatest fixed point
+Computation
+Among all acceptable solutions, we are interested in the smallest
+We compute the least solution satisfying the specification
+Algorithmically, this is a least fixed point
+
+most precise safe
+approximation
+
+fi
+
+fi
+
+fi
+
+fi
+
+61
+
+===== slide 62 =====
+This is a 0-CFA analysis,
+characterised as:
+
+let x = 0 in
+let x = 1 in
+x
+
+Flow-sensitive → x = 1
+Flow-insensitive → x ∈ {0, 1}
+
+• ow-insensitive: it computes a single abstract value for each variable (or
+expression) that over-approximates all values it may take during execution,
+without distinguishing between di erent program points or execution
+orders
+• context-insensitive: the same function is analyzed in the same way at all
+call sites
+let f = fn x => x in
+let y = f 1 in
+let z = f 2 in
+...
+
+0-CFA analyzes f once
+merging all calls
+
+no information
+about calling
+context is used
+
+62
+
+ff
+
+fl
+
+The nature of this CFA
+
+===== slide 63 =====
+Questions
+
+63
+
+===== slide 64 =====
+Question 1
+11 22 3 4
+3
+(y
+) )x
+(fn=>x(x=>
+(x
+Let e ≜ ((fn y => y
+22)(fn
+∗ 534∗)53
+)6)7 )8)96
+Which are the labels?
+3
+
+3
+
+Which is the ow from
+1.the program point with label 5 to program point with label 7?
+2.the program point with label 8 to variable y?
+1.No ow: constants are not tracked in 0-CFA
+2.Flow from 8 to y: {fn x => (x3 ∗ 34)5} (via application)
+Only functions ow in 0-CFA, not data
+
+fl
+
+fl
+
+fl
+
+64
+
+===== slide 65 =====
+Question 2
+Let e ≜ (let f = (fn x => x1)2 in (f3 44)5)6
+Which is the ow
+• from the program point with label 2 to f?
+• from the program point with label 4 to x?
+• from the program point with label 5 to the program point with
+label 6?
+
+fl
+
+fl
+
+fl
+
+fl
+
+• Flow from 2 to f: {fn x => x1}
+• No ow: 4 is a constant and data are not tracked
+• No ow: since no value ows to x, nothing reaches label 6
+
+===== slide 66 =====
+Program Analysis 2025-26
+Lecture #18
+Control Flow Analysis
+
+===== slide 67 =====
+Exercises
+
+67
+
+===== slide 68 =====
+Exercises
+Consider and add labels to the following expressions
+Guess analysis results and verify them
+1
+
+234
+
+56
+
+e ≜ ((fn x => (x + 1 ) ) (3) )
+
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+e ≜ let f = fn x => x 1
+
+in let g = fn y => y+ 2
+in let h = fn z => z + 3
+in (f g) + (f h)
+
+68
+
+===== slide 69 =====
+Exercise 1
+Consider and add labels to the following expression
+Guess an analysis result and verify it
+
+e ≜ ((fn x => (x1 + 122)3 )4 (3)55)6
+̂
+C(1)
+̂
+C(2)
+̂
+C(3)
+̂
+C(4)
+̂
+C(5)
+̂
+C(6)
+ρ(̂ )
+
+∅ (3)
+∅ (1)
+∅ (4)
+{fn x => (x
+
+∅ (3)
+∅ (4)
+∅ (3)
+
+69
+
+x
+
+1
+
++ 12)3}
+
+===== slide 70 =====
+Consider and add labels to the following expression
+Guess an analysis result and verify it
+
+e ≜ ((fn x => (x1 + 122)3 )4 (3)55)6
+
+(C,̂ ρ)̂ ⊧ e
+(C,̂ ρ)̂ ⊧ (fn x => (x1 + 12)3)4
+̂
+∧ (C,̂ ρ)̂ ⊧ (3)5
+∅ ⊆ C(5)
+
+̂
+(C,̂ ρ)̂ ⊧ {fn x => (x1 + 12)3} ⊆ C(4)
+
+1
+23
+̂
+⇒ (C,̂ ρ)̂ ⊧ (x1 + 12)3 ∧
+{fn x => (x + 1 ) } ⊆ C(4)
+
+̂ ⊆ ρ(̂ ) ∧ C(3)
+̂ ⊆ C(6)
+̂
+C(5)
+(C,̂ ρ)̂ ⊧ (x1 + 12)3
+∧ (C,̂ ρ)̂ ⊧ 12
+
+(C,̂ ρ)̂ ⊧ x1
+̂
+∅ ⊆ C(2)
+
+̂
+ρ(̂ ) ⊆ C(1)
+
+x
+
+x
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+f
+
+f
+
+f
+
+f
+
+70
+f
+
+i
+
+i
+
+i
+
+i
+
+i
+
+Exercise 1
+
+===== slide 71 =====
+Exercise 1
+Consider and add labels to the following expression
+Guess an analysis result and verify it
+
+e ≜ ((fn x => (x1 + 122)3 )4 (3)55)6
+1
+23
+̂
+{fn x => (x + 1 ) } ⊆ C(4)
+
+̂
+∅ ⊆ C(5)
+̂ ⊆ ρ(̂ )
+C(5)
+̂ ⊆ C(6)
+̂
+C(3)
+̂
+ρ(̂ ) ⊆ C(1)
+̂
+∅ ⊆ C(2)
+
+̂
+C(1)
+̂
+C(2)
+̂
+C(3)
+̂
+C(4)
+
+✓
+✓
+✓
+✓
+✓
+✓
+
+̂
+C(5)
+̂
+C(6)
+ρ(̂ )
+
+x
+
+x
+
+x
+
+71
+
+∅ (3)
+∅ (1)
+∅ (4)
+{fn x => (x
+
+1
+
+∅ (3)
+∅ (4)
+∅ (3)
+
++ 12)3}
+
+===== slide 72 =====
+Exercise 2
+Consider and add labels to the following expression: guess an analysis
+result and verify it
+
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+
+72
+
+===== slide 73 =====
+Exercise 2
+
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+̂ = {fn a => a9}
+C(1)
+̂ = ∅ (76)
+C(2)
+̂ = ∅ (76)
+C(3)
+̂ = {fn a => a9}
+C(4)
+̂ = ∅ (77)
+C(5)
+̂ = ∅ (77)
+C(6)
+̂ = ∅ (76+77)
+C(7)
+
+ρ(̂ ) = {fn a => a9}
+ρ(̂ ) = ∅ (76, 77)
+
+̂ = {fn f => ((f1 762)3 + (f4 775)6)2}
+C(8)
+̂ = ∅ (76, 77)
+C(9)
+̂
+C(10)
+= {fn a => a9}
+̂
+C(11)
+=∅
+
+a
+
+f
+
+̂
+C(12)
+= {fn f => ((f1 762)3 + (f4 775)6)2}
+
+73
+
+===== slide 74 =====
+e ≜ ((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+1
+23
+4
+567
+̂
+(C,̂ ρ)̂ ⊧ e (fn f => ((f1 762)3+ (f4 775)6)7)8
+{fn f => ((f 76 ) + (f 77 ) ) } ∈ C(8)
+̂
+∧ (C,̂ ρ)̂ ⊧ (fn a => a9)10 {fn a => a9} ∈ C(10)
+∧
+
+∧ (C,̂ ρ)̂ ⊧ ((f1 762)3+ (f4 775)6)7
+
+(C,̂ ρ)̂ ⊧ (f1 762)3 ∧ (C,̂ ρ)̂ ⊧ (f4 775)6
+
+(C,̂ ρ)̂ ⊧ (f1 762)3
+
+̂ ⊆ ρ(a)
+̂ ⊆ C(3)
+̂
+̂ ∧ C(9)
+(C,̂ ρ)̂ ⊧ f1 ∧ (C,̂ ρ)̂ ⊧ 762 ∧ (C,̂ ρ)̂ ⊧ a9 ∧ C(2)
+
+(C,̂ ρ)̂ ⊧ (f4 775)6
+
+̂ ⊆ ρ(a)
+̂ ⊆ C(6)
+̂
+̂ ∧ C(9)
+(C,̂ ρ)̂ ⊧ f4 ∧ (C,̂ ρ)̂ ⊧ 775 ∧ (C,̂ ρ)̂ ⊧ a9 ∧ C(5)
+
+f
+
+f
+
+f
+
+̂ ∧
+ρ(̂ ) ⊆ C(4)
+i
+
+(C,̂ ρ)̂ ⊧ f4
+f
+
+̂ ∧
+ρ(̂ ) ⊆ C(1)
+
+f
+
+(C,̂ ρ)̂ ⊧ f1
+
+a
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+̂
+̂ ⊆ C(12)
+̂
+∧ C(10)
+⊆ ρ(̂ ) ∧ C(8)
+
+f
+
+i
+
+i
+
+i
+
+i
+
+i
+
+i
+
+i
+
+i
+
+Exercise 2
+
+(C,̂ ρ)̂ ⊧ a9
+
+̂
+ρ(̂ ) ⊆ C(9)
+74
+
+===== slide 75 =====
+Exercise 2
+
+((fn f => ((f1 762)3+ (f4 775)6)7)8 (fn a => a9)10)12
+1
+
+23
+
+4
+
+562
+
+̂
+{fn f => ((f 76 ) + (f 77 ) ) } ∈ C(8)
+9
+̂
+{fn a => a } ∈ C(10)
+̂
+C(10)
+⊆ ρ(̂ )
+̂ ⊆ C(12)
+̂
+C(8)
+̂ ⊆ ρ(a)
+̂
+C(2)
+̂ ⊆ C(3)
+̂
+C(9)
+̂ ⊆ C(6)
+̂
+C(9)
+̂
+ρ(̂ ) ⊆ C(1)
+̂
+ρ(̂ ) ⊆ C(4)
+̂
+ρ(̂ ) ⊆ C(9)
+
+̂ = {fn a => a9}
+C(1)
+̂ = ∅ (76)
+C(2)
+̂ = ∅ (76)
+C(3)
+
+̂ = {fn f => ((f1 762)3 + (f4 775)6)2}
+C(8)
+̂ = ∅ (76, 77)
+C(9)
+̂
+C(10)
+= {fn a => a9}
+̂
+C(11)
+=∅
+
+̂
+C(12)
+= {fn f => ((f1 762)3 + (f4 775)6)2}
+f
+
+a
+
+f
+
+f
+a
+
+ρ(̂ ) = ∅ (76, 77)
+
+̂ = {fn a => a9}
+C(4)
+̂ = ∅ (77)
+C(5)
+̂ = ∅ (77)
+C(6)
+̂ = ∅ (76+77)
+C(7)
+
+75
+
+f
+
+ρ(̂ ) = {fn a => a9}
+
+===== slide 76 =====
+Exercise 3
+Consider and add labels to the
+following expression
+Guess an analysis result and
+verify it
+
+let f = fn x => x 1
+in let g = fn y => y+ 2
+in let h = fn z => z + 3
+in (f g) + (f h)
+1 2 34
+
+idw ≜ fn w => wl
+
+e ≜ (let f = (fn x => (x 1 ) )
+in (let g = (fn y => (y5+ 26)7)8
+in (let h = (fn z => (z9 + 310)11)12
+in ((f13 g14)15 + (f16h17)18)19)20)21)22
+
+Complete the exercise
+76
+
+===== slide 77 =====
+Theoretical properties
+
+77
+
+===== slide 78 =====
+Semantic correctness
+Goal: show that acceptable CFA results are semantically correct
+The analysis information is a safe description of what will happen during the
+evaluation of the program, i.e., a sound over-approximation of the runtime
+behaviour. For instance, if at runtime
+̂
+• t l evaluates to a function, then this must be duly recorded in C(l)
+̂
+• x is bound to a function at runtime, this must also be duly recorded in ρ(x)
+
+78
+
+===== slide 79 =====
+Semantic correctness
+The analysis information is a safe description of what will happen during the evaluation
+of the program, i.e., a sound over-approximation of the runtime behaviour
+To reason on correctness, we define a Small Step Structural Operational Semantics
+for FUN, where:
+• We use intermediate expressions ie to handle the binding of local variables
+• We choose an approach based on explicit environments (matching the CFA abstraction)
+rather than substitutions
+to preserve the identity of
+functions (and hence
+abstract values) during
+evaluation
+
+Subject reduction result
+If the abstract (ρ)̂ and concrete environments (ρ) agree (ρ R ρ):̂
+(C,̂ ρ)̂ ⊧ ie and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie′ ρ R ρ̂ dom(ρ) ⊆ dom(ρ)̂ ∧ ∀x ∈ dom(ρ) ∀tx ∀ρx :
+(ρ(x) =
+
+￼
+
+̂ ∧ ρx R ρ)̂
+ρx) ⇒ (tx ∈ ρ(x)
+
+fi
+
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+f
+
+f
+
+i
+
+￼
+
+79
+
+tx
+
+===== slide 80 =====
+A function definition will evaluate to a closure containing
+• the syntax of the function definition, together with
+• an environment mapping its free variables to their values
+
+v ∈ Val: values (evaluation results)
+ρ ∈ Env: environments (mapping free variables to their values)
+v ::= c |
+t ρ
+ρ ::= [] | ρ[x ↦ v]
+
+Static binding:
+functions evaluate to
+closures capturing their
+environment
+
+fi
+
+fi
+
+fi
+
+n
+
+i
+
+e
+
+s
+
+o
+
+80
+l
+
+c
+
+Con gurations
+
+===== slide 81 =====
+Terms and expressions
+
+ie ∈ IExp: intermediate expressions
+it ∈ ITerm: intermediate terms
+ie ::= it l
+it ::= c | x | x ⇒ e0 |
+x ⇒ e0
+ie0
+e1
+e2|
+x = ie1 e2 | ie1 ie2
+| ie1 ie2 |
+ρ ie // bind the environment (encoding of frames)
+|
+|
+t ρ // closure
+Transitions: ρ ⊢ ie → ie′ one step of computation of the expression ie
+e
+
+s
+
+l
+
+e
+
+n
+
+n
+
+i
+
+i
+
+f
+
+e
+
+n
+
+d
+
+s
+
+n
+
+e
+
+n
+
+t
+
+o
+
+p
+
+i
+
+l
+
+n
+
+u
+
+h
+
+f
+
+e
+
+￼
+
+81
+n
+
+f
+
+f
+
+i
+
+t
+
+l
+
+i
+
+o
+
+b
+
+c
+
+Structural Operational Semantic
+
+===== slide 82 =====
+[var] ρ ⊢ x l → v l
+
+x ∈ Dom(ρ)
+
+ρ(x) = v
+
+The value of a variable is obtained from the environment
+
+∈ Dom(ρ)
+
+ρ( ) = 7
+x
+
+d
+
+f
+
+f
+
+i
+
+82
+n
+
+Example
+ρ ⊢ x1 → 71 if
+
+a
+
+x
+
+Rule for variables
+
+===== slide 83 =====
+Rule for functions
+[ fn] ρ ⊢ (
+
+ρ0)l
+Static scoping:
+freeze the environment
+at definition time
+
+This axiom constructs the appropriate closure
+It restricts the environment ρ to the free variables of the abstraction
+Note that the label l is preserved in the closure
+
+e
+
+s
+
+only free variables
+are kept
+o
+
+n
+
+f
+
+n
+
+f
+e
+
+s
+
+o
+
+e
+
+l
+
+r
+c
+
+y
+
+e
+fi
+
+y
+
+h
+y
+
+w
+
+83
+
+[ ↦ 7])4
+l
+
+[ ↦ 7] ⊢ (fn x => (x1 y2)3)4 → (
+(fn x => (x1 y2)3)
+ρ0 = ρ | {y} = [ ↦ 7], since FV(fn x => (x1 y2)3) ={y}
+
+c
+
+Example
+
+n
+
+i
+
+x ⇒ e0)l → (
+( x ⇒ e0)
+ρ0 = ρ | FV( x ⇒ e0)
+
+===== slide 84 =====
+Rule for let binding
+e2)l → (
+ρ0[x ↦ v]
+ρ0 = ρ | FV(e2)
+
+e2)l
+
+The expression e2 is evaluated in the environment augmented with the new
+binding
+
+n
+
+(f3 34)584)6, where ρ0 = ρ | { } = []
+i
+
+t
+
+l
+
+f
+
+f
+
+d
+
+n
+
+e
+
+ρ0[ ↦ (fn x => x1)2]
+i
+
+r
+b
+
+e
+
+h
+
+w
+
+→(
+
+e
+
+Example
+[g ↦ (fn y => y1)2] ⊢ (let f = (fn x => x1)2 in (f3 34)5)
+n
+
+i
+
+x = v l1
+
+[let2] ρ ⊢ (
+
+===== slide 85 =====
+[appfn] ρ ⊢ ((
+(
+
+l1
+
+( x ⇒ e1) ρ1)
+ρ1[x ↦ v2] e1)l
+
+l2 l
+v2 ) →
+
+This axiom describes the binding of the actual parameter to the formal
+parameter
+
+Example
+
+(fn x => (x1+ y2)3)4 [y ↦ 7])435)6
+[y ↦ 5] ⊢ ((
+→(
+[ ↦ 7, ↦ 3] (x1+ y2)3)6, where y = 7 (not 5)
+n
+
+i
+
+n
+
+f
+
+n
+
+e
+
+i
+
+s
+
+o
+
+l
+
+x
+
+c
+y
+
+d
+
+fi
+
+n
+
+i
+
+e
+
+d
+
+s
+
+b
+
+n
+
+o
+
+i
+
+l
+
+c
+
+b
+
+85
+
+n
+
+i
+
+Rule for application
+
+Static scoping:
+we use the definition
+environment, not the call
+
+===== slide 86 =====
+Rules for binding
+[bind1]
+
+ρ⊢(
+
+ρ ⊢ ie1 → ie′1
+ie1)l → (
+
+ρ1
+
+[bind2] ρ ⊢ (
+
+ie′1)l
+
+ρ1
+
+v1l1)l → v1l
+
+ρ1
+
+• The bind construct is evaluated by repeatedly applying [bind1]
+• The nal evaluation result is get by using rule [bind2]
+Example
+
+[y ↦ 5] ⊢ (
+
+x1 + y2)6 → * 106
+
+[ ↦ 7, ↦ 3]
+
+d
+
+n
+
+i
+
+b
+
+n
+
+i
+
+d
+
+n
+
+i
+
+n
+
+￼
+
+i
+
+b
+x
+
+d
+
+n
+
+i
+y
+
+d
+
+fi
+
+n
+
+i
+
+n
+
+b
+
+i
+
+b
+
+86
+
+===== slide 87 =====
+Structural Operational Semantic I
+
+87
+
+===== slide 88 =====
+Structural Operational Semantic II
+
+88
+
+===== slide 89 =====
+Back to Example 1: evaluation
+((fn x => x1)2 (fn y => y3)4)5
+[] ⊢ ((fn x => x1)2 (fn y => y3)4)5
+→ ((close(fn x => x1) in [])2 (fn y => y3)4)5
+→ ((close(fn x => x1) in [])2 (close (fn y => y3) in []4)5
+→ (bind [x ↦ (close (fn y => y3) in [])] in x1)5
+→ (bind [x ↦ (close (fn y => y3) in [])] in (close (fn y => y3)4 in [])1)5
+→ (close (fn y => y3) in [])5
+
+89
+
+===== slide 90 =====
+New CFA clauses
+[bind] (C,̂ ρ)̂ ⊧ (
+[close] (C,̂ ρ)̂ ⊧ (
+ρ R ρ̂
+
+(C,̂ ρ)̂ ⊧ it0l0 ∧
+̂ 0) ⊆ C(l)
+̂ ∧ ρ R ρ̂
+C(l
+̂ ∧ ρ R ρ̂
+{t0} ⊆ C(l)
+
+it0l0)l
+
+ρ
+t0
+
+ρ)l
+
+dom(ρ) ⊆ dom(ρ)̂ ∧ ∀x ∈ dom(ρ) ∀tx ∀ρx :
+̂ ∧ ρx R ρ)̂
+(ρ(x) =
+tx ρx) ⇒ (tx ∈ ρ(x)
+
+For the other clauses just replace e with ie
+
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+f
+
+f
+
+i
+
+f
+
+f
+
+i
+
+i
+
+n
+
+i
+
+n
+
+i
+
+e
+
+s
+
+d
+
+o
+
+n
+
+l
+
+i
+
+c
+
+b
+
+90
+
+===== slide 91 =====
+Relation between environments
+ρ R ρ̂
+
+dom(ρ) ⊆ dom(ρ)̂ ∧ ∀x ∈ dom(ρ) ∀tx ∀ρx :
+̂ ∧ ρx R ρ)̂
+(ρ(x) =
+tx ρx) ⇒ (tx ∈ ρ(x)
+
+• The concrete domain must be included in the abstract one (is an overapproximation)
+tx ρx then
+• For all variables x ∈ dom(ρ), if ρ(x) =
+
+̂ : the function is predicted
+• tx ∈ ρ(x)
+• ρx R ρ:̂ the captured environment ρx is also correct
+
+• This second condition is recursive: ρx may contain closures, whose
+environments must also be checked
+The abstract environment over-approximates every concrete closure,
+including all environments they recursively capture
+n
+
+i
+n
+
+i
+
+e
+
+s
+
+o
+
+e
+
+l
+s
+
+o
+
+l
+
+c
+
+f
+
+f
+
+i
+
+c
+
+91
+
+===== slide 92 =====
+Relation between values
+The definition of R can be split into two mutually recursive definitions
+v V (ρ,̂ v)̂
+ρ R ρ̂
+
+∀t ∀ρ : (v =
+
+t
+
+ρ) ⇒ (t ∈ v̂ ∧ ρ R ρ)̂
+
+̂
+dom(ρ) ⊆ dom(ρ)̂ ∧ ∀x ∈ dom(ρ) : ρ(x) V (ρ,̂ ρ(x))
+
+The two definitions of R are equivalent. We focus on v V (ρ,̂ v)̂
+• The values must agree as well
+• For all t, and for all ρ in (v =
+• tx ∈ v̂ : the value is predicted
+
+t
+
+ρ)
+
+• ρx R ρ:̂ the captured environment ρx is also correct
+• This check is recursive: environments may contain closures
+
+A concrete value is a closure, so we must approximate both the function
+and all the environments it captures
+
+fi
+
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+n
+
+i
+
+e
+f
+
+s
+
+f
+
+i
+
+o
+
+l
+f
+
+fi
+
+f
+
+i
+
+c
+
+92
+
+===== slide 93 =====
+Subject reduction
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Idea: if there is a possible evaluation of the program s.t. the function at a call
+point evaluates to some abstraction, then this abstraction has to be in the set
+of possible abstractions computed by the analysis
+All acceptable analysis results remain acceptable under evaluation
+Proof idea
+We assume that ρ R ρ ̂ and ρ ⊢ ie → ie′ and prove (C,̂ ρ)̂ ⊧ ie′ by induction on the
+structure of the inference tree for ρ ⊢ ie → ie′
+For each rule, we show CFA is preserved
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+93
+
+===== slide 94 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+Proof
+We assume that ρ R ρ ̂ and ρ ⊢ ie → ie′ and prove (C,̂ ρ)̂ ⊧ ie′ by induction
+on the structure of the inference tree for ρ ⊢ ie → ie′
+The case [var]. Here ρ ⊢ ie → ie′ is ρ ⊢ x l → v l because x ∈
+[Case v = c]: nothing to prove.
+t0 ρ0].
+[Case v =
+
+(ρ) ∧ v = ρ(x)
+
+̂
+̂
+ρ0 R ρ.̂
+and hence t0 ∈ ρ(x)
+• From ρ R ρ ̂ we get v V ( ρ,̂ ρ(x))
+̂ , and hence t0 ∈ C(l)
+̂ .
+̂ ⊆ C(l)
+• From (C,̂ ρ)̂ ⊧ ie we get ρ(x)
+
+̂ and ρ0 R ρ ̂ we have established (C,̂ ρ)̂ ⊧ ie′.
+Since t0 ∈ C(l)
+ρ) ⇒ (t ∈ v̂ ∧ ρ R ρ)̂
+94
+
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+f
+
+f
+
+c
+
+f
+
+f
+
+i
+
+i
+
+n
+
+￼
+
+￼
+
+￼
+
+￼
+
+i
+
+d
+
+￼
+
+￼
+
+￼
+
+n
+
+a
+
+e
+
+s
+
+m
+
+o
+
+o
+
+l
+
+d
+
+c
+
+̂
+̂ ⊆ C(l)
+[var] (C,̂ ρ)̂ ⊧ x l
+ρ(x)
+v V (ρ,̂ v)̂
+∀t ∀ρ : (v =
+t
+
+the value is already
+predicted by the
+analysis
+
+===== slide 95 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Proof
+( x ⇒ e0) ρ0)l
+The case [fn]. Here ρ ⊢ ie → ie′ is ρ ⊢ ( x ⇒ e0)l → (
+where ρ0 = ρ | FV( x ⇒ e0)
+̂ .
+• From (C,̂ ρ)̂ ⊧ ie we get { x ⇒ e0} ⊆ C(l)
+• From ρ R ρ ̂ we get we immediately get ρ0 R ρ ̂ and then we can establish
+(C,̂ ρ)̂ ⊧ ie′.
+the abstraction is already
+[ fn] (C,̂ ρ)̂ ⊧ ( x ⇒ e0)l
+{
+[close] (C,̂ ρ)̂ ⊧ (
+t0 ρ)l
+
+recorded in Ĉ(l)
+
+̂
+x ⇒ e0} ⊆ C(l)
+̂ ∧ ρ R ρ̂
+{t0} ⊆ C(l)
+
+n
+
+i
+
+n
+
+f
+n
+
+f
+
+f
+
+i
+
+f
+
+e
+
+s
+
+o
+
+f
+
+l
+
+f
+
+i
+
+c
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+￼
+
+￼
+
+n
+
+n
+
+f
+
+f
+
+￼
+
+￼
+
+n
+
+f
+
+n
+
+f
+
+95
+
+===== slide 96 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+
+Proof
+The case [app1]. Here ρ ⊢ ie → ie′ is ρ ⊢ (ie1ie2)l → (ie′1ie2)l because ρ ⊢ ie1 → ie′1
+• From the induction hypothesis applied to (C,̂ ρ)̂ ⊧ ie1, ρ R ρ ̂ and ρ ⊢ ie1 → ie′1, we get
+(C,̂ ρ)̂ ⊧ ie′.
+This su ces to establish (C,̂ ρ)̂ ⊧ (ie′1ie2)l.
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+ffi
+
+￼
+
+96
+
+===== slide 97 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+Proof
+The case [appfn].
+
+( x ⇒ t0l0) ρ1)l1 v2l2 → (
+ρ1[x ↦ v2] t0l0)l
+( x ⇒ t0l0) ρ1)l1 , which yields
+• From (C,̂ ρ)̂ ⊧ ie we have (C,̂ ρ)̂ ⊧ (
+̂ 1) and ρ R ρ.̂
+{ x ⇒ t0l0} ⊆ C(l
+̂ ∧ ρ R ρ̂
+[close] (C,̂ ρ)̂ ⊧ (
+t0 ρ)l
+{t0} ⊆ C(l)
+l2
+̂
+̂
+(
+C,
+ρ)
+⊧
+v
+Further,
+we
+have
+•
+2
+̂ 0) ⊆ C(l)
+̂ ∧ ρ R ρ̂
+[bind] (C,̂ ρ)̂ ⊧ (
+ρ it0l )l
+(C,̂ ρ)̂ ⊧ it0l ∧ C(l
+[case v2 = c]: immediate.
+we simulate all
+l2
+̂
+t2 ρ2]: it follows immediately from (C, ρ)̂ ⊧ v2 .
+[case v2 =
+possible function calls
+Finally, the rst universally quanti ed formula of the definition of (C,̂ ρ)̂ ⊧ ie gives
+̂ 2) ⊆ C(l)
+̂ and (ρ1[x ↦ v2]) R ρ ̂ leading to establish (C,̂ ρ)̂ ⊧ ie′.
+(C,̂ ρ)̂ ⊧ t0l0, C(l
+Here ρ ⊢ ie → ie′ is ρ ⊢ (
+
+0
+
+0
+
+fi
+
+n
+
+i
+
+b
+
+n
+
+i
+f
+
+f
+f
+
+f
+
+i
+
+n
+
+i
+n
+
+i
+
+n
+
+i
+
+i
+
+n
+
+e
+
+s
+
+o
+
+f
+d
+
+l
+
+n
+
+n
+
+i
+
+b
+
+c
+
+i
+
+e
+
+n
+
+￼
+
+￼
+
+f
+
+s
+
+￼
+
+o
+
+￼
+
+l
+
+fi
+
+c
+
+e
+
+e
+
+s
+
+s
+
+o
+
+o
+
+l
+
+l
+
+c
+
+c
+
+n
+
+f
+
+97
+
+===== slide 98 =====
+Subject reduction
+
+Theorem
+If ρ R ρ ̂ and ρ ⊢ ie → ie′ then (C,̂ ρ)̂ ⊧ ie implies (C,̂ ρ)̂ ⊧ ie′
+Fact
+
+̂ 1) ⊆ C(l
+̂ 2) then (C,̂ ρ)̂ ⊧ it l2
+(C,̂ ρ)̂ ⊧ it l1 and C(l
+Proof
+The case [bind2]. Here ρ ⊢ ie → ie′ is ρ ⊢ (
+
+ρ1 v1l1)l → v1l
+l
+̂ 1) ⊆ C(l)
+̂
+• From (C,̂ ρ)̂ ⊧ ie we have (C,̂ ρ)̂ ⊧ v1 1 and C(l
+The desired (C,̂ ρ)̂ ⊧ v1l follows from Fact.
+This completes the proof.
+[bind] (C,̂ ρ)̂ ⊧ (
+
+ρ
+
+̂ 0) ⊆ C(l)
+̂ ∧ ρ R ρ̂
+(C,̂ ρ)̂ ⊧ it0l0 ∧ C(l
+
+it0l0)l
+
+CFA predictions are stable under evaluation
+
+f
+
+f
+
+i
+
+n
+
+i
+
+d
+
+n
+
+n
+
+i
+
+i
+
+￼
+
+￼
+b
+
+￼
+
+d
+
+n
+
+i
+
+b
+
+98
+
+===== slide 99 =====
+Back to Example 1: correctness of the solution
+((fn x => x1)2 (fn y => y3)4)5
+*
+
+(Close(fn y => y3) in [])5
+
+(C,̂ ρ)̂ ⊧ ((fn x => x1)2 (fn y => y3)4)5
+By Subject Reduction Theorem
+
+5
+3
+̂
+(Close(fn
+y
+=>
+y
+)
+in
+[])
+(C, ρ)̂ ⊧
+
+Exercise: Verify that the result (the closure) is acceptable
+99
+
+===== slide 100 =====
+5
+3
+̂
+(Close(fn
+y
+=>
+y
+)
+in
+[])
+̂
+(Ce, ρe) ⊧
+
+̂ ∧ [] R ρ ̂
+{(fn y => y3)} ⊆ C(5)
+✓
+
+trivially true
+
+The solution (Ĉe, ρê ) correctly predicts
+the result of evaluation
+n
+
+i
+
+e
+
+s
+
+o
+
+l
+
+c
+
+f
+
+f
+
+i
+
+f
+
+100
+f
+
+i
+
+Back to Example 1: correctness of the solution
+the closure carries an
+(cont.)
+empty environment
+
+ρ R ρ̂
+
+dom(ρ) ⊆ dom(ρ)̂ ∧ ∀x ∈ dom(ρ) ∀tx ∀ρx :
+̂ ∧ ρx R ρ)̂
+(ρ(x) =
+tx ρx) ⇒ (tx ∈ ρ(x)
+
+===== slide 101 =====
+Program Analysis 2025-26
+Lecture #19
+Control Flow Analysis
+
+===== slide 102 =====
+Existence
+
+102
+
+===== slide 103 =====
+Existence of solutions
+• So far we have only considered a procedure for validating whether or not
+a proposed solution (C,̂ ρ)̂ is acceptable
+• Now it is natural to ask the following questions:
+• Does each expression e admit a Control Flow Analysis, i.e., does there
+exist (C,̂ ρ)̂ such that (C,̂ ρ)̂ ⊧ e? Yes
+• There may be di erent possible analyses for the same expression e
+• Does each expression e have a "least" CFA? Yes
+
+ff
+
+103
+
+===== slide 104 =====
+Comparing analyses
+Fewer possible ows
+
+more precise analysis
+
+Which partial order to compare di erent CFAs?
+The set of proposed solutions can be partially ordered by setting
+
+(Ĉ1, ρ1̂ ) ⊑ (Ĉ2, ρ2̂ ) i
+
+pointwise inclusion
+
+∀l ∈ Lab : Ĉ1(l) ⊆ Ĉ2(l)
+
+{∀x ∈ Var : ρ ̂ (x) ⊆ ρ ̂ (x)
+
+1
+
+2
+
+smaller = more precise
+
+This su ces for making the set of proposed solutions into a complete lattice
+
+ff
+
+ff
+
+fl
+
+ffi
+
+104
+
+===== slide 105 =====
+Comparing analyses
+1 2
+
+Back to our example e ≜ ((fn x => x )
+
+(fn y => y3)4)5
+
+(Ĉe, ρê ) ⊑ (C′̂e′, ρ′ê ′)
+
+￼
+
+￼
+
+￼
+
+￼
+
+105
+
+===== slide 106 =====
+Moore family
+
+model intersection
+property
+
+A Moore family is a subset Y of a complete lattice L = (L, ⊑ ) that is closed
+under greatest lower bounds: (⊓Y′) ∈ Y for all Y′ ⊆ Y
+• It follows that a Moore family always contains a least element ⊓ Y, and a
+greatest element ⊓ ∅, which equals the greatest element ⊤ from L
+• A Moore family is never empty
+{1,2} ∩ {2,3} = {2} ∈ S ...
+
+The subsets:
+
+⊓ ∅ = {1,2,3} ∈ S
+
+∅ ∩ {1,2,3} = ∅ ∈ S and
+⊓ ∅ = {1,2,3} ∈ S
+
+• {{2}, {1,2}, {2,3}, {1,2,3}} and {∅,{1,2,3}} are both
+
+Moore families, while
+• {{1}, {2}} and {∅, {1}, {2}, {1,2}} are not
+{1} ∩ {2} = ∅ ∉ S
+
+￼
+
+￼
+
+The complete lattice (℘({1,2,3}), ⊆ )
+
+106
+
+⊓ ∅ = {1,2,3} ∉ S
+
+===== slide 107 =====
+Existence of least CFA
+The set of acceptable analyses is a complete lattice closed under
+intersection and it forms a Moore family
+In particular, the set of acceptable analyses has a least element
+Theorem
+For all ie ∈ IExp the set {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie} is a Moore
+family
+Proof idea
+
+By coinduction on ie: we assume that ∀i ∈ I : (Ĉi, ρî ) ⊧ ie andtewe
+prove
+ction
+e
+s
+r
+y in
+b
+d
+̂
+e
+that ⊓i (Ci, ρî ) ⊧ ie
+tain
+b
+o
+s
+i
+FA
+C
+t
+s
+a
+The le
+107
+
+===== slide 108 =====
+Existence
+Theorem
+For all ie ∈ IExp the set {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie} is a Moore
+family
+taking the intersection over an
+empty set yields a valid analysis
+
+Corollaries:
+• all intermediate expressions admit a CFA: let Y′ = ∅, then
+(⊓Y′) ∈ {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie}. So there is at least an analysis of ie
+
+• all intermediate expressions have a least CFA: let Y′ = {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie},
+then (⊓Y′) ∈ {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧ ie}. So it will also be an analysis of ie. Clearly
+(⊓Y′) ⊑ (C,̂ ρ)̂ for all other analyses (C,̂ ρ)̂ of ie so it is the least analysis
+result.
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+108
+
+===== slide 109 =====
+Towards the least solution
+Back to our example e ≜ ((fn x => x1)2 (fn y => y3)4)5
+
+The last two are different
+solutions w.r.t. the previously
+introduced ones
+
+• (C′̂e, ρ′ê ) and (C′̂e′, ρ′ê ′) are acceptable, but neither is the least solution
+
+• Their pointwise “intersection” (C′̂e ⊓ C′̂e′, ρ′ê ⊓ ρ′ê ′) = (Ĉe, ρê ) is still a solution
+• It is smaller, hence more precise, and is the least acceptable solution
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+109
+
+===== slide 110 =====
+Coinduction vs Induction
+If acceptability were defined inductively with an acceptability relation ⊧′ then
+there exists an expression e* such that acceptable analyses are not closed
+under intersection
+Idea:
+• If there are circular dependencies, it cannot resolve anything and
+may therefore return an empty solution
+• Inductive definitions are too strict: they exclude valid overapproximations
+
+fi
+
+fi
+
+￼
+
+110
+
+===== slide 111 =====
+Coinduction vs Induction
+If acceptability were defined inductively with an acceptability relation ⊧′ then
+there exists an expression e* such that acceptable analyses are not closed
+under intersection
+Proposition
+There exists e* ∈ Exp such that the set {(C,̂ ρ)̂ | (C,̂ ρ)̂ ⊧′ e*} is
+not a Moore family
+Proof idea: Use a very simple but “tricky” program and examine its
+CFA solutions:
+• with the greatest fixed point → everything is ne
+• with the least fixed point → we get a “bad” set (∅)
+We conclude it is not a Moore family
+
+fi
+
+fi
+
+￼
+fi
+
+￼
+
+111
+
+===== slide 112 =====
+How to compute the least solution?
+Least solutions (w.r.t. ⊑) exist, but how can we compute them?
+Naive approach:
+1.enumerate all candidate solutions
+2.determine whether they are indeed solutions,
+3.if so, take the greatest lower bound w.r.t. the others found so far
+
+112
+
+===== slide 113 =====
+How to compute the least solution?
+Least solutions (w.r.t. ⊑) exist, but how can we compute them?
+Alternative:
+1.derive a nite set of constraints from the program, such as the ones of
+the form lhs ⊆ rhs,
+2.take the least solution to this system of constraints (using fixpoint
+computation)
+
+First, we will introduce a more computationally oriented specification: ⊧s
+Syntax directed specification
+
+fi
+
+fi
+
+113
+
+===== slide 114 =====
+Syntax directed CFA
+
+114
+
+===== slide 115 =====
+Syntax directed specification
+Look for a more computationally oriented specification
+Goal: analyze each function body at most once rather than each time the
+function could be applied
+Idea: one way to obtain this is to analyse each function body exactly once, at
+its definition
+This is done in the so-called syntax directed O-CFA analysis:
+• acceptability relation: ⊧s
+• judgments: (C,̂ ρ)̂ ⊧s e*
+Since semantic correctness was dealt
+with for the previous CFA there is no longer
+any need to consider intermediate
+expressions
+
+fi
+
+115
+
+===== slide 116 =====
+Syntax directed specification
+If we want to analyze a given expression e*, we reformulate the specification
+of (C,̂ ρ)̂ ⊧ e* into the more computationally oriented specification (C,̂ ρ)̂ ⊧s e*
+such that:
+(C,̂ ρ)̂ ⊧s e* ⇒ (C,̂ ρ)̂ ⊧ e* (if restricted to program terms)
+
+i.e., ⊧s is a safe approximation of ⊧: all solutions accepted by ⊧s are also valid
+for ⊧
+
+We need to focus on solutions satisfying some additional properties (e.g.,
+that only program fragments of e* appear in the range of Ĉ and ρ)̂
+
+116
+
+===== slide 117 =====
+Clause for functions
+[ fn] (C,̂ ρ)̂ ⊧s (
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+(C,̂ ρ)̂ ⊧s e0
+
+x ⇒ e0)l
+
+{
+
+NEW: Function body e0 is now analyzed at definition time, even if the
+function is never applied
+
+Example
+e ≜ (fn x => x1)2
+̂ ⊇ {fn x => x1} and ρ(x)
+̂
+̂ ⊆ C(1)
+C(2)
+
+f
+
+f
+
+i
+
+n
+
+f
+
+117
+
+===== slide 118 =====
+[ fn] (C,̂ ρ)̂ ⊧s (
+
+x ⇒ e0)l
+
+{
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+
+(C,̂ ρ)̂ ⊧s e0
+
+Example
+e ≜ (fn x => ((fn y => y2)3 x4)5)6
+
+These additional
+constraints
+are not required in ⊨,
+where only reachable
+behaviors matter
+
+̂ ∧
+(C,̂ ρ)̂ ⊧s e {fn x => ((fn y => y2)3 x4)5} ⊆ C(2)
+(C,̂ ρ)̂ ⊧s ((fn y => y2)3 x4)5 (C,̂ ρ)̂ ⊧s (fn y => y2)3 ∧ (C,̂ ρ)̂ ⊧s x4 ∧
+̂ ∧ (C,̂ ρ)̂ ⊧s y2
+(C,̂ ρ)̂ ⊧s (fn y => y2)3 {fn y => y2} ⊆ C(3)
+̂
+̂
+̂ ⊆ C(4)
+̂ ⊆ C(2)
+(C,̂ ρ)̂ ⊧s x4 ρ(x)
+(C,̂ ρ)̂ ⊧s y2 ρ(y)
+̂ :C(4)
+̂ ⊆ ρ(̂ ) ∧ C(2)
+̂ ⊆ C(5)
+̂
+{fn y => y2} ∈ C(3)
+f
+
+f
+
+i
+
+y
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+118
+f
+
+i
+
+i
+
+i
+
+i
+
+Clause for functions (cont.)
+
+===== slide 119 =====
+Clause for recursive functions
+[ fun] (C,̂ ρ)̂ ⊧s (
+
+x ⇒ e0)l
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+
+{
+
+(C,̂ ρ)̂ ⊧s e0
+{
+x ⇒ e0} ⊆ ρ(̂ f )
+
+NEW:
+• Function body e0 is now analysed at definition time, even if the function is
+never applied
+• checks on the recursive binding for [fun] is included: self-binding is
+enforced immediately
+See Example 2 next
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+119
+
+===== slide 120 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧s (t1l1t2l2)l
+NEW: The body constraints
+have already been generated
+by [fn]
+
+(C,̂ ρ)̂ ⊧s t1l1 ∧ (C,̂ ρ)̂ ⊧s t2l2 ∧
+l0
+̂ 1) :
+x ⇒ t0 ) ∈ C(l
+
+( ∀(
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+
+̂ 1) :
+( ∀(
+x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+
+All other rules are unchanged: just replace ⊧ with ⊧s
+See Example 2 next
+f
+
+f
+
+i
+
+f
+
+n
+
+n
+
+u
+
+f
+
+f
+
+120
+
+===== slide 121 =====
+Syntax directed CFA
+
+121
+
+===== slide 122 =====
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5in (g6 (fn z => z7)8)9)10
+
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+from new [fun]
+
+̂ ) ⊧s 5 ∧ (Ĉlp, ρlp
+̂ ) ⊧s g6 (fn z => z7)8
+(Ĉlp, ρlp
+
+̂ ) ⊧s
+(Ĉlp, ρlp
+
+̂ (g) ∧ Ĉlp(9) ⊆ Ĉlp(10)
+∧ Ĉlp(5) ⊆ ρlp
+1
+234
+̂
+̂
+
+̂ ) ⊧s 5
+(Ĉlp, ρlp
+
+̂ ( )
+(Clp, ρlp) ⊧s (f (fn y => y ) ) ∧ { } ⊆ Ĉlp(5) ∧ { } ⊆ ρlp
+1
+
+234
+
+1
+
+̂ ) ⊧s (f (fn y => y ) )
+(Ĉlp, ρlp
+3
+)
+y
+
+̂ ) ⊧s (
+(Ĉlp, ρlp
+
+{
+
+y
+
+Immediate
+
+̂ ) ⊧s f ∧ (Ĉlp, ρlp
+̂ ) ⊧s (
+(Ĉlp, ρlp
+lp
+
+lp
+
+lp
+
+s
+
+f
+
+x
+
+f
+
+f
+
+f
+
+i
+
+d
+
+i
+
+p
+
+o
+
+d
+
+i
+
+o
+
+l
+
+f
+
+y
+
+d
+
+i
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+f
+
+3
+)
+y
+
+̂ (x) ∧ Ĉlp(4) ⊆ Ĉlp(4)
+∧ Ĉlp(3) ⊆ ρlp
+Immediate
+} ⊆ Ĉ (3) ∧ (Ĉ , ρ ̂ ) ⊧ 2
+122
+
+f
+
+i
+
+i
+
+Back to Example 2
+
+===== slide 123 =====
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5in (g6 (fn z => z7)8)9)10
+
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+̂ ) ⊧s
+(Ĉlp, ρlp
+using [app] and
+̂ ={}
+that C(6)
+
+from new [app]
+
+̂ ) ⊧s 5 ∧ (Ĉlp, ρlp
+̂ ) ⊧s g6 (fn z => z7)8
+(Ĉlp, ρlp
+
+̂ (g) ∧ Ĉlp(9) ⊆ Ĉlp(10)
+∧ Ĉlp(5) ⊆ ρlp
+
+̂ ) ⊧s g6 (fn z => z7)8
+(Ĉlp, ρlp
+̂ ) ⊧s ( z)
+(Ĉlp, ρlp
+
+8
+
+immediate
+
+̂ )⊧
+(Ĉlp, ρlp
+
+6
+
+̂ ) ⊧s ( z)8
+∧ (Ĉlp, ρlp
+
+̂ ( ) ∧ Ĉlp(4) ⊆ Ĉlp(9)
+∧ Ĉlp(8) ⊆ ρlp
+
+̂ ) ⊧s
+{ z} ⊆ Ĉlp(8) ∧ (Ĉlp, ρlp
+
+7
+
+f
+
+d
+
+i
+
+f
+
+f
+
+i
+
+x
+
+p
+
+o
+
+d
+
+i
+
+o
+
+l
+
+z
+
+g
+
+d
+
+f
+
+i
+
+f
+
+f
+
+f
+
+i
+
+123
+f
+
+i
+
+Back to Example 2
+
+Immediate
+
+===== slide 124 =====
+Back to Example 2
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5
+in (g6 (fn z => z7)8)9)10
+
+̂ ) is an acceptable guess for ⊧s
+We have proved that (Ĉlp, ρlp
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+No circular dependency => no need of coinduction
+
+124
+
+===== slide 125 =====
+Observation
+
+We can take ⊧s as the largest relation satisfying the specification
+However, given the syntax directed nature of the specification (the relation is
+fully determined by the structure of expressions), there is in fact only one
+relation that satisfies the specification
+unique
+
+Hence it would be technically correct, but intuitively misleading, to claim that
+we take the least relation that satisfies the specification, because it suggests
+a choice among many relations
+Before: many acceptable relations → take the least
+Now: only one relation → no minimisation needed
+Whether or not ⊧s is defined inductively or conductively, the same relation is
+defined. This is typical of syntax-directed definitions
+
+fi
+
+fi
+
+fi
+
+fi
+
+fi
+
+125
+
+===== slide 126 =====
+Exercise
+Let ⊧′s and ⊧′s′ be two relations satisfying the syntax-directed CFA clauses.
+Show, by structural induction on e that
+
+(C,̂ ρ)̂ ⊧′s e
+
+(C,̂ ρ)̂ ⊧′s′ e
+
+[Case c l]: trivial
+̂ and (C,̂ ρ)̂ ⊧′s′ x l
+̂
+̂ ⊆ C(l)
+̂ ⊆ C(l)
+ρ(x)
+ρ(x)
+[Case x l]: (C,̂ ρ)̂ ⊧′s x l
+Both relations satisfy the same clause on (C,̂ ρ)̂ , so they are equivalent.
+̂ ∧ (C,̂ ρ)̂ ⊧′s e0,
+{ x ⇒ e0} ⊆ C(l)
+[Case ( x ⇒ t0l0)l]: (C,̂ ρ)̂ ⊧′s ( x ⇒ t0l0)l
+
+̂ ∧ (C,̂ ρ)̂ ⊧′′s e0
+{ x ⇒ e0} ⊆ C(l)
+and (C,̂ ρ)̂ ⊧′s′ ( x ⇒ t0l0)l
+In each case, both ⊨s' and ⊨s'' satisfy the same de ning clause. Hence their
+equivalence reduces to the equivalence of the premises, which follows by the
+induction hypothesis ((C,̂ ρ)̂ ⊧′s t0l0
+(C,̂ ρ)̂ ⊧′s′ t0l0).
+The remaining cases are analogous.
+n
+
+n
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+i
+
+i
+
+f
+
+f
+
+f
+
+f
+
+i
+
+i
+
+f
+
+f
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+f
+
+i
+
+f
+
+i
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+126
+
+===== slide 127 =====
+If ⊧′ and ⊧′′ are two relations satisfying the non syntax-directed CFA clauses.
+Then, we cannot establish that
+3
+
+(C,̂ ρ)̂ ⊧′ e
+
+1 2 3
+
+a ≜ (0 0 ) : and suppose to have that
+̂ ,
+• (fn x => a4) ∈ C(1)
+̂ = C(2)
+̂ = ρ(x) = ∅
+• C(2)
+
+(C,̂ ρ)̂ ⊧′′ e
+
+s
+duce
+o
+r
+t
+n
+i
+Ĉ(1) y
+n
+i
+n
+o
+c
+uncti ependen tructure
+The f
+ad
+tic s
+c
+a
+t
+n
+y
+the s
+e
+d
+i
+s
+out
+
+(C,̂ ρ)̂ ⊧′ a3
+
+̂ ⊆ ρ(x) ∧ C(4)
+̂ ⊆ C(3)
+̂
+(C,̂ ρ)̂ ⊧′ 01 ∧ (C,̂ ρ)̂ ⊧′ 02 ∧ (C,̂ ρ)̂ ⊧′ a4 ∧ C(2)
+(C,̂ ρ)̂ ⊧′ a4
+The only critical point is that (C,̂ ρ)̂ ⊧′ a3
+This equivalence holds true whether or not you include `a` in the relation, i.e.,
+(C,̂ ρ)̂ ⊧′ a3 either is true or is false.
+Therefore, we can have two di erent relations that satisfy the same clauses:
+one that includes and one that does not.
+
+ff
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+i
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+f
+
+127
+f
+
+i
+
+i
+
+Observation on the exercise
+
+===== slide 128 =====
+Preservation of solutions
+The specification of the analysis uses potentially infinite value spaces
+although this is not really necessary
+We can easily restrict ourselves to entities occurring in the original expression
+and this forms the basis for relating the results of the analysis of syntax
+directed CFA to those of the previous CFA
+We obtainfinite sets
+Lab* ⊆ Lab: nite set of labels occurring in e*,
+Var* ⊆ Var: nite set of variables occurring in e*
+Term* ⊆ Term: nite set of subterms occurring in e*
+our universe
+
+fi
+
+fi
+
+fi
+
+fi
+
+fi
+
+128
+
+===== slide 129 =====
+Preservation of solutions
+the largest possible solution
+within the bounds of the
+expression
+
+̂ )
+We introduce the solution (Ĉ⊤, ρ⊤
+Ĉ⊤(l) =
+
+∅
+{Term*
+
+∅
+ρ ̂ (x) =
+{Term*
+
+l ∉ Lab*
+l ∈ Lab*
+
+⊤
+
+x ∉ Var*
+x ∈ Var*
+
+(C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ): intuitively, (C,̂ ρ)̂ is concerned only with subterms
+occurring in the expression e*
+
+We can directly reformulate the CFA in terms of restricted sets
+(C,̂ ρ)̂ ∈ Cache*̂ × Env* ̂
+
+f
+
+f
+
+f
+
+i
+
+f
+
+i
+
+i
+
+i
+
+Cache*̂ : Lab* → Val* ̂
+Env* ̂ : Var* → Val* ̂
+Val* ̂ = ℘(Term
+*)
+129
+
+===== slide 130 =====
+Why syntax-directed CFA is correct
+check when needed
+
+Two views of the analysis
+• Original CFA ⊧: checks correctness during the simulation of the evaluation,
+i.e., when analysing function application
+• Syntax-directed CFA ⊧s: analyzes all subterms upfront, so when we reach a
+call site, everything has already been analysed
+As a consequence:
+
+check in advance: nothing
+missing at call time
+
+(C,̂ ρ)̂ ⊧s e* ⇒ (C,̂ ρ)̂ ⊧ e* (if restricted to program terms)
+
+130
+
+===== slide 131 =====
+Preservation of solutions
+
+• We can prove that all the solutions to ⊧s e* that are "less than"(Ĉ⊤, ρ⊤̂ ) are
+also solutions to ⊧ e*
+• Syntax-directed CFA is a sound approximation of the original CFA when
+restricted to program terms
+boundedness condition
+Proposition
+⊤
+̂
+,
+ρ
+If (C,̂ ρ)̂ ⊧s e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ)̂ ⊧ e*
+Idea: syntax-directed CFA already enforces what the original CFA requires
+Proof idea:
+• Restrict to program terms and use coinduction
+• Show that every syntax-directed clause implies the original one
+• Therefore, the solution also holds for the original CFA
+131
+
+===== slide 132 =====
+Preservation of solutions
+Proposition
+If (C,̂ ρ)̂ ⊧s e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ e*
+Proof sketch:
+1.Restrict to program terms Exp*, the set of all sub-expressions occurring in e*
+2.By syntax-directedness: (C,̂ ρ)̂ ⊧s e* ⇒ ∀e ∈ Exp* : (C,̂ ρ)̂ ⊧s e
+3.By coinduction, show that every syntax-directed clause (its rhs) implies the
+original one. Intuitively:
+• [con], [var], [if], [let], [op]: immediate, since identical.
+• [fn],[fun]: syntax-directed rules are stronger than the original ones.
+• [app]: ⊧s already enforces all constraints required by ⊧ (function bodies are
+already analyzed by (2)).
+So, ⊧s captures all semantically required ows on reachable terms
+132
+
+===== slide 133 =====
+Does the converse hold?
+?
+
+(C,̂ ρ)̂ ⊧s e* ⇐ (C,̂ ρ)̂ ⊧ e* (if restricted to program terms)
+❌ No
+
+f never applied
+program evaluates to 0
+
+loop ≜ let f = fn x => (x x) (* problematic body *)
+in 0
+• Original CFA: checks only when needed
+• Syntax-directed CFA: checks all bodies
+• Unreachable code is ignored by ⊧, but not by ⊧s
+• ⊧s ⊆ ⊧: Syntax-directed CFA is more restrictive
+
+133
+
+===== slide 134 =====
+Existence
+Theorem
+
+{(C,̂ ρ)̂ ∈ (Cache*̂ × Env* ̂) | (C,̂ ρ)̂ ⊧s e} is a Moore family
+Corollaries:
+• Each expression e* admits a CFA that is "less than”(Ĉ⊤, ρ⊤̂ )
+• Each expression e* has a “least” CFA that is "less than”(Ĉ⊤, ρ⊤̂ )
+This means that the properties obtained for the original analysis holds for the
+syntax-directed one
+
+134
+
+===== slide 135 =====
+Theorem
+Proof:
+
+Existence
+
+{(C,̂ ρ)̂ ∈ (Cache*̂ × Env* ̂) | (C,̂ ρ)̂ ⊧s e} is a Moore family
+
+(Ĉ⊤* , ρ⊤*̂ ) is the greatest element of Cache*̂ × Env* ̂. It is immediate to show that:
+⊤
+(a) (Ĉ⊤
+* , ρ*̂ ) ⊧s e
+(b) (Ĉ1, ρ1̂ ) ⊧s e and (Ĉ2, ρ2̂ ) ⊧s e then ((Ĉ1, ρ1̂ ) ∩ (Ĉ2, ρ2̂ )) ⊧s e
+for all subexpressions e of e*, by means of structural induction on e. Hence:
+(a) and (b) also for e = e*.
+Next consider some
+
+Y ⊆ {(C,̂ ρ)̂ ∈ (Cache*̂ × Env* ̂) | (C,̂ ρ)̂ ⊧s e}
+
+and note that one can write
+Y = {(Ĉi, ρî ) | i ∈ {1,...,n}} for some n ≥ 0 since (Cache*̂ × Env* ̂) is nite. So
+
+⊓ Y ∈ {(Ĉi, ρî ) | i ∈ {1,...,n}}
+
+follows from (a) and (b), because
+
+⊓ Y = (Ĉ⊤* , ρ⊤*̂ ) ⊓ (Ĉ1, ρ1̂ ) ⊓ . . . ⊓ (Ĉn, ρn̂ )
+135
+
+===== slide 136 =====
+Exercise 1
+Modify the original Control Flow Analysis to take account of the left to right
+evaluation order imposed by a call-by-value semantics:
+• in the clause [app] there is no need to analyse the operand if the operator
+cannot produced any closures
+
+136
+
+===== slide 137 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+l0
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+137
+
+===== slide 138 =====
+New clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧
+
+( ∃(
+...
+
+guard operand analysis
+
+l0
+l2
+̂
+̂
+x ⇒ t0 ) ∈ C(l1) ⇒ (C, ρ)̂ ⊧ t2 ) ∧
+
+̂ 1) ∩ Val ̂) ≠ ∅ ⇒ (C,̂ ρ)̂ ⊧ t l2) ∧ . . .
+((C(l
+2
+
+If the only abstract values are only abstractions, we can use also
+
+Example: Try to nd a program where the modi ed analysis accepts analysis
+results rejected by the original analysis
+
+e ≜ 4 (fn y => y): the empty analysis is acceptable for the modi ed analysis
+but not for the original one
+
+f
+
+f
+
+i
+fi
+
+n
+
+f
+
+138
+
+===== slide 139 =====
+Reachability analysis
+• The syntax directed analysis analyzes each subexpression of e* “exactly
+once”, rather than "at most once" as really called for
+• This may introduce constraints from code that is never executed
+• How to amend this?
+Goal:
+• only expressions that are reachable will actually be analysed, and
+• the same expression is analysed “at most once”
+Idea:
+1. modify the analysis to track the reachability of subexpressions explicitly
+2. modify it such that subexpressions are analysed “at most once”
+139
+
+===== slide 140 =====
+Reachability analysis
+
+How?
+By introducing a new abstract reachability component
+
+R̂ ∈ Reach : Lab → ℘({on})
+
+and modifying the syntax directed analysis
+
+(C,̂ ρ,̂ R)̂ ⊧′s e
+
+̂
+{on} ⊆ R(l)
+means: the
+expression at label l is
+reachable
+
+̂
+= ∅: the program point l is not reachable (tl must be analysed)
+• R(l)
+̂ 0): the program point l is reachable
+• {on} ⊆ R(l
+•(
+
+̂ 0) i the function is indeed applied somewhere
+x ⇒ t0l0)l has {on} ⊆ R(l
+
+• A function body is analyzed only if it is reachable: the "recursive call"
+̂ 0)
+(C,̂ ρ,̂ R)̂ ⊧′s t0l0 is performed if and only if {on} ⊆ R(l
+• Hence, function bodies are analyzed “at most once”
+
+ff
+
+￼
+
+n
+
+f
+
+￼
+
+140
+
+===== slide 141 =====
+Clause for functions
+[ fn] (C,̂ ρ,̂ R)̂ ⊧′s (
+
+x ⇒ e0)l
+
+̂
+{ x ⇒ e0} ⊆ C(l))
+∧
+̂
+({on} ⊆ R(l)
+⇒ ∧ (C,̂ ρ,̂ R)̂ ⊧′s e0)
+
+NOW: Function body e0 is analysed at definition time, but only if the
+function is applied somewhere
+
+￼
+
+f
+
+i
+
+n
+
+f
+
+￼
+
+n
+
+f
+
+141
+
+===== slide 142 =====
+Clause for variables
+[var] (C,̂ ρ,̂ R)̂ ⊧′s x l
+
+̂
+({on} ⊆ R̂ ⇒ ρ(x) ⊆ C(l))
+
+NOW: x is analyzed only if reachable
+
+f
+
+f
+
+i
+
+￼
+
+142
+
+===== slide 143 =====
+Clause for function application
+[app] (C,̂ ρ,̂ R)̂ ⊧′s (t1l1t2l2)l
+NEW: If the function possibly
+occurs in an application, then
+this means it is reachable
+
+(C,̂ ρ,̂ R)̂ ⊧′s t1l1 ∧ (C,̂ ρ,̂ R)̂ ⊧′s t2l2 ∧
+l0
+̂ 1) :
+x ⇒ t0 ) ∈ C(l
+
+( ∀(
+̂
+̂ 0)) ∧
+({on} ⊆ R(l)
+⇒ {on} ⊆ R(l
+̂ 2) ⊆ ρ(x))
+̂
+̂
+({on} ⊆ R(l)
+⇒ C(l
+∧
+̂ 0) ⊆ C(l)))
+̂
+̂
+({on} ⊆ R(l)
+⇒ C(l
+∧ ...
+
+All other rules are unchanged: just replace ⊧s with ⊧′s
+
+￼
+
+f
+
+f
+
+i
+
+￼
+
+n
+
+f
+
+143
+
+===== slide 144 =====
+Example
+
+e* ≜ (fn x =>((fn y => y1)2x3)4)5
+
+̂ *) = R(5)
+̂ =∅
+We start knowing that R(l
+(C,̂ ρ,̂ R)̂ ⊧′s e*
+
+̂ , but we
+As a consequence, {fn x =>((fn y => y1)2x3)4} ⊆ C(5)
+̂ =∅
+cannot analyse the body with label 4, since R(5)
+
+￼
+
+144
+
+===== slide 145 =====
+Example
+
+e* ≜ ((fn x =>((fn y => y1)2x3)4)57)6
+
+(C,̂ ρ,̂ R)̂ ⊧′s e*
+
+̂
+As a consequence, {fn x =>((fn y => y1)2x3)4} ⊆ C(5)
+This triggers the propagation in the [app] clause that enforces
+̂ , so allowing to analyse the body of the function
+{on} ⊆ R(4)
+
+￼
+
+145
+
+===== slide 146 =====
+Reachability
+
+Proposition
+̂ *) and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ t l*
+If (C,̂ ρ,̂ R)̂ ⊧′s t*l* and {on} ⊆ R(l
+* *
+*
+Proof sketch:
+1.Restrict to program terms, Exp*, the set of all reachable subexpressions occurring in e*
+
+̂ *) ⇒ (C,̂ ρ)̂ ⊧s e)
+2.By syntax-directedness: (C,̂ ρ,̂ R)̂ ⊧′s t*l* ⇒ ∀e ∈ Exp* : ({on} ⊆ R(l
+
+3.By coinduction, show that every syntax-directed clause (its rhs) implies the original one.
+Intuitively:
+• [con], [var], [if], [let], [op]: immediate, since identical.
+• [fn],[fun]: syntax-directed rules with the additional constraint on R̂ are equivalent to the
+original ones, on reachable terms.
+• [app]: ⊧s enforces all constraints required by ⊧ on reachable terms, and propagates
+reachability information R̂.
+So, ⊧′s captures all semantically required ows on reachable terms, provided that R̂
+correctly over-approximates reachability
+
+fl
+
+￼
+
+￼
+
+￼
+
+146
+
+===== slide 147 =====
+Reachability
+Proposition
+̂ *) and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ t l*
+If (C,̂ ρ,̂ R)̂ ⊧′s t*l* and {on} ⊆ R(l
+* *
+*
+Does the converse hold?
+1. (C,̂ ρ)̂ ⊧ e* then (C,̂ ρ,̂ R)̂ ⊧′s e* for some R̂
+
+⊤
+̂
+̂
+̂
+,
+ρ
+2. (C,̂ ρ)̂ ⊧ e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ,̂ R) ⊧′s e* for some R
+
+1. does not hold:
+
+• the original CFA can introduce and treat consistently “spurious”
+abstract values, without loosing acceptability, since it provides an overapproximation
+• the reachability CFA, instead, even forcing to on the “spurious” value,
+
+cannot analyze the abstraction (and its body), since it do not occur in e*
+
+⊤
+̂
+̂
+̂
+,
+ρ
+2.(C,̂ ρ)̂ ⊧ e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ,̂ R) ⊧′s e* for some R
+￼
+
+￼
+
+￼
+
+￼
+
+147
+
+===== slide 148 =====
+Reachability
+Proposition
+̂ *) and (C,̂ ρ)̂ ⊑ (Ĉ⊤, ρ⊤̂ ) then (C,̂ ρ)̂ ⊧ t l*
+If (C,̂ ρ,̂ R)̂ ⊧′s t*l* and {on} ⊆ R(l
+* *
+*
+Does the converse hold?
+1. (C,̂ ρ)̂ ⊧ e* then (C,̂ ρ,̂ R)̂ ⊧′s e* for some R̂
+
+⊤
+̂
+̂
+̂
+,
+ρ
+2. (C,̂ ρ)̂ ⊧ e* and (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then (C, ρ,̂ R) ⊧′s e* for some R
+⊤
+,
+ρ
+2. Since (C,̂ ρ)̂ ⊑ (Ĉ⊤
+* *̂ ) then no “spurious” value can be added. In this
+
+case the bodies analyzed in the two analyses are the same, provided a
+suitable R̂ is provided
+
+￼
+
+￼
+
+￼
+
+148
+
+===== slide 149 =====
+Program Analysis 2025-26
+Lecture #20
+Control Flow Analysis
+
+===== slide 150 =====
+Constraint Based 0-CFA
+Analysis
+
+150
+
+===== slide 151 =====
+151
+
+===== slide 152 =====
+Constraint Based 0-CFA Analysis
+• We are now ready to compute the least solution (C,̂ ρ)̂ such that
+• We have learnt that constraint generation is a syntax driven approach
+• We turn semantic rules into constraints
+• To this aim, we rst construct a nite set C*[[e*]] of constraints and
+conditional constraints ls in the form:
+if t may ow to rhs', then
+
+lhs ⊆ rhs
+{t} ⊆ rhs′ ⇒ lhs ⊆ rhs
+
+lhs must ow to rhs
+
+where:
+̂
+̂ {t} where t is a function abstraction
+| ρ(x),
+• lhs ::= C(l)
+̂
+̂
+| ρ(x)
+• rhs := C(l)
+
+fi
+
+fi
+
+fl
+
+fl
+
+￼
+
+152
+
+===== slide 153 =====
+From rules to constraints
+• Expand each clause de ning (C,̂ ρ)̂ ⊧s e* into a nite set of constraints and
+• Collect all constraints into C*[[e*]]
+logical formula
+set of syntactic
+entities
+
+Idea:
+Occurrences of Ĉ are changed into C and
+occurrences of ρ ̂ are changed into r
+
+C and r are the constraint variables representing the unknown solution
+The function C* given an expression e* returns a set of constraints C*[[e*]]
+We generate constraints from the syntax-directed rules
+
+fi
+
+153
+
+===== slide 154 =====
+Clauses for constants
+Constants generate no constraints
+
+[con] (C,̂ ρ)̂ ⊧s c l
+
+̂
+∅ ⊆ C(l)
+constants generate
+no constraints:
+
+C*[[c l]] = ∅
+
+Example
+
+f
+
+f
+
+154
+i
+
+e ≜ 71
+C*[[71]] = ∅
+
+===== slide 155 =====
+Clauses for variables
+Variables generate a constraint re ecting a ow from r(x) to C(l)
+
+[var] (C,̂ ρ)̂ ⊧s x l
+
+̂
+̂ ⊆ C(l)
+ρ(x)
+
+C*[[x l]] = {r(x) ⊆ C(l)}
+
+Example
+e ≜ x1
+
+C*[[ 1]] = {r( ) ⊆ C(1)}
+
+f
+
+f
+
+fl
+
+x
+
+x
+
+i
+
+155
+
+===== slide 156 =====
+Clauses for functions
+Function abstractions generate:
+• a ow constraint, and, recursively,
+• constraints from the body
+
+[ fn] (C,̂ ρ)̂ ⊧s (
+C*[[(
+
+x ⇒ e0)l
+
+̂ ∧ (C,̂ ρ)̂ ⊧s e0
+x ⇒ e0} ⊆ C(l)
+
+{
+
+x ⇒ e0)l]] = {{
+
+x ⇒ e0} ⊆ C(l)} ∪ C*[[e0l]]
+
+Example
+function constraint
+Body constraint
+e ≜ (fn x => x1)2
+C*[[(fn x => x1)2]] = {{fn x => x1} ⊆ C(2)} ∪ {r( ) ⊆ C(1)}
+
+fl
+
+n
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+n
+
+f
+
+n
+
+f
+
+x
+
+156
+
+===== slide 157 =====
+Function abstractions generate:
+• a ow constraint, and, recursively,
+• constraints from the body
+
+[ fun] (C,̂ ρ)̂ ⊧s (
+
+x ⇒ e0)l
+
+C*[[(
+
+x ⇒ e0)l]] = {{
+∪ {{
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+
+{
+
+(C,̂ ρ)̂ ⊧s e0 ∧ {
+
+x ⇒ e0} ⊆ ρ(̂ f )
+
+x ⇒ e0)l} ⊆ C(l)} ∪ C*[[e0l]]
+x ⇒ e0)l} ⊆ r( f )} recursive binding: function
+ows to f
+
+f
+
+f
+
+f
+
+i
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+f
+
+f
+
+n
+
+n
+
+u
+
+f
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+157
+
+fl
+
+fl
+
+Clauses for recursive functions
+
+===== slide 158 =====
+Clause for function application
+Application generates recursively constraints from its terms plus the body
+conditional constraints
+
+[app] (C,̂ ρ)̂ ⊧s (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧s t1l1 ∧ (C,̂ ρ)̂ ⊧s t2l2 ∧
+̂ 1) :
+( ∀( x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧ ...
+
+C*[[(t1l1t2l2)l]] = C*[[t1l1]] ∪ C*[[t2l2]] ∪
+
+{{t} ⊆ C(l1) ⇒ C(l2) ⊆ r(x) | t = (
+
+{{t} ⊆ C(l1) ⇒ C(l0) ⊆ C(l) | t = (
+
+Conditional
+constraints
+
+x ⇒ t0l0) ∈ Term*} ∪
+
+x ⇒ t0l0) ∈ Term*} ∪ . . .
+
+For each possible function t at l1 in Term*: if t ows to l1, then:
+The set of function
+• argument ows to parameter
+abstractions in the
+• result ows to l
+terms to analyze
+
+fl
+
+fl
+
+n
+
+f
+
+n
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+158
+
+===== slide 159 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧s (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧s t1l1 ∧ (C,̂ ρ)̂ ⊧s t2l2 ∧
+̂ 1) :
+( ∀( x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+̂ 1) :
+( ∀(
+x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+
+C*[[(t1l1t2l2)l]] = C*[[t1l1]] ∪ C*[[t2l2]] ∪ {{t} ⊆ C(l1) ⇒ C(l2) ⊆ r(x) | t = (
+
+∪ {{t} ⊆ C(l1) ⇒ C(l0) ⊆ C(l) | t = (
+∪ {{t} ⊆ C(l1) ⇒ C(l2) ⊆ r(x) | t = (
+∪ {{t} ⊆ C(l1) ⇒ C(l0) ⊆ C(l) | t = (
+
+x ⇒ t0l0) ∈ Term*}
+x ⇒ t0l0) ∈ Term*}
+x ⇒ t0l0) ∈ Term*}
+
+f
+
+n
+
+n
+
+n
+
+u
+
+f
+
+f
+
+u
+
+f
+
+f
+
+f
+
+159
+i
+
+f
+
+n
+
+n
+
+u
+
+f
+
+f
+
+See Example 1 next
+
+x ⇒ t0l0) ∈ Term*}
+
+===== slide 160 =====
+Constraint based CFA
+
+160
+
+===== slide 161 =====
+Back to Example 1
+We generate the following set of
+constraints for our expression
+
+((fn x => x1)2 (fn y => y3)4)5
+[app]
+
+C*[[e*]] = C*[[(fn x => x1)2]] ∪ C*[[(fn y => y3)]] ∪
+
+{fn y => y3} ∈ Terms*
+
+{fn x => x1} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+
+{fn y => y3} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+
+{fn x => x1} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+
+{fn y => y3} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+[fn]
+
+We use that fn x => x1 and
+fn y => y3 are the only
+abstractions in Term*
+
+C*[[(fn x => x1)2]] = {fn x => x1} ⊆ C(2) ∪ C*[[ x1]]
+C*[[(fn y => y3)4]] = {fn y => y3} ⊆ C(4) ∪ C*[[ y3]]
+[var]
+
+161
+
+C*[[ x1]] = r(x) ⊆ C(1)
+C*[[ y3]] = r(y) ⊆ C(3)
+
+===== slide 162 =====
+Back to Example 1
+We generate the following set of
+constraints for our expression
+
+((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{fn x => x1} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{fn y => y3} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{fn y => y3} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+{fn x => x1} ⊆ C(2)
+{fn y => y3} ⊆ C(4)
+
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+162
+
+===== slide 163 =====
+Complexity
+
+The function C* uses the set of terms Term*. Let n be the size of the expression e*
+Naive estimate:
+the number of sub-terms
+2
+• O(n ) constraints
+• O(n 4) conditional constraints
+Re ned estimate:
+Key observation: Every construct, except applications, gives us only one constraint.
+Applications may gives us O(n) constraints:
+• O(n) constraints
+• O(n 2) conditional constraints
+Each of the O(n) sub-terms only generate O(1) constraints and O(n) conditional
+constraints
+The analysis remains polynomial despite higher-order functions
+
+fi
+
+163
+
+===== slide 164 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+n=5
+
+worst-case bounds, but not
+reached here
+
+fi
+
+Re ned estimate:
+• O(n) = 5 constraints
+• O(n 2) = 25 conditional constraints
+Here, we just have two functions and one application. For each t ∈ C(2) we
+generate two conditional constraints. For each subterm we only generate one
+constraint
+• 4 constraints
+• 4 conditional constraints {fn x => x1} ⊆ C(2) {fn x => x1} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{fn y => y3} ⊆ C(4) {fn x => x1} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+1
+We use that fn x => x and
+3
+{fn
+y
+=>
+y
+} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+r(x)
+⊆
+C(1)
+3
+fn y => y are the only
+{fn y => y3} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+r(y) ⊆ C(3)
+abstractions in Term*
+
+===== slide 165 =====
+From rules to constraints
+To give meaning to the syntax, we can translate syntactic entities to sets of
+terms:
+
+̂
+̂
+(C,̂ ρ)[[C(l)]]
+= C(l)
+̂
+̂
+= ρ(x)
+(C,̂ ρ)[[r(x)]]
+
+̂
+(C,̂ ρ)[[{t}]]
+= {t}
+̂
+(C,̂ ρ)[[{t}
+⊆ rhs′ ⇒ lhs]] =
+
+̂
+(C,̂ ρ)[[lhs]]
+{∅
+
+̂
+{t} ∈ (C,̂ ρ)[[rhs′
+]]
+
+Satisfaction relation for constraints:
+
+e
+
+s
+
+i
+
+w
+
+165
+￼
+
+f
+
+f
+f
+
+i
+
+￼
+
+f
+
+f
+
+i
+
+i
+
+set of constraints
+
+r
+
+e
+
+h
+
+t
+
+o
+
+̂
+̂
+̂
+(C,̂ ρ)[[C(l)]]
+⊧c (ls ⊆ rhs)
+(C,̂ ρ)[[ls]]
+⊆ (C,̂ ρ)[[rhs]]
+̂
+(C,̂ ρ)[[C(l)]]
+⊧c C
+∀(ls ⊆ rhs) ∈ C : (C,̂ ρ)̂ ⊧c (ls ⊆ rhs)
+
+===== slide 166 =====
+Preservation of solutions
+• All solutions to the set C*[[e*]] of constraints also satisfy the syntax directed
+specification of the CFA and vice versa (when restricted to program terms)
+• Thus computing the least solution of the constraints C*[[e*]] gives exactly
+the least CFA solution (C,̂ ρ)̂ to (C,̂ ρ)̂ ⊧s e*
+Proposition
+If (C,̂ ρ)̂ ⊆ (Ĉ⊤, ρ⊤̂ )
+(C,̂ ρ)̂ ⊧c C*[[e*]]
+then (C,̂ ρ)̂ ⊧s e*
+
+fi
+
+f
+
+f
+
+i
+
+166
+
+===== slide 167 =====
+Preservation of solutions
+• All solutions to the set C*[[e*]] of constraints also satisfy the syntax directed
+specification of the CFA and vice versa (when restricted to program terms)
+• Thus computing the least solution of the constraints C*[[e*]] gives exactly
+the least CFA solution (C,̂ ρ)̂ to (C,̂ ρ)̂ ⊧s e*
+Proposition
+If (C,̂ ρ)̂ ⊆ (Ĉ⊤, ρ⊤̂ )
+(C,̂ ρ)̂ ⊧c C*[[e*]]
+then (C,̂ ρ)̂ ⊧s e*
+Proof sketch
+(C,̂ ρ)̂ ⊧c C*[[e]]
+A simple structural induction on e shows that (C,̂ ρ)̂ ⊧s e
+for all sub-terms e of e*.
+In the case of function application (t1l1t2l2)l the assumption (C,̂ ρ)̂ ⊆ (Ĉ⊤, ρ⊤̂ )
+
+̂ 1) ⊆ Terms*
+is used to ensure that C(l
+
+fi
+
+f
+
+f
+
+f
+
+i
+
+f
+
+i
+
+167
+
+===== slide 168 =====
+Finding the least solution of the constraints amounts to computing the least
+xed point of a function
+1.De ne a suitable monotone function F* over analyses that propagates
+constraints over C and r
+
+F* : Cache*̂ × Env* ̂ → Cache*̂ × Env* ̂
+show that it has a least fixed point lfp(F*) that is indeed the least solution
+2.Compute the lfp(F*)
+
+Straightforward techniques allow us to compute the least fixed point in O(n 5)
+time when n is the size of the expression e*
+But we can do better, using graph formulation of the constraints: we
+obtain O(n 3)
+
+fi
+
+168
+
+fi
+
+fi
+
+Solving the Constraints
+
+===== slide 169 =====
+Solving the Constraints
+We can visualize a constraint system as a constraint graph:
+Nodes
+• a node C(l) for each label l ∈ Lab*
+• a node r(x) for each variable x ∈ Var*
+Edges
+• Each constraint p1 ⊆ p2 adds an initial
+edge (p1, p2) to the graph
+• Each constraint {t} ⊆ p ⇒ p1 ⊆ p2
+adds
+• a candidate edge (p1, p2), with
+“trigger” {t} ⊆ p, and
+• an edge (p, p2)
+169
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+===== slide 170 =====
+Solving the Constraints
+We can visualize a constraint system as a constraint graph:
+Nodes
+• a node C(l) for each label l ∈ Lab*
+• a node r(x) for each variable x ∈ Var*
+Edges
+• Each constraint p1 ⊆ p2 adds an initial
+edge (p1, p2) to the graph
+• Each constraint {t} ⊆ p ⇒ p1 ⊆ p2
+adds
+• a candidate edge (p1, p2), with
+“trigger” {t} ⊆ p, and
+• an edge (p, p2)
+170
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+{idy} ⊆ C(2)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 171 =====
+Solving the Constraints: idea
+Associated with each node p we have a data eld D[p] representing the
+current knowledge. Initially D[p] is given by
+
+D[p] = {t | ({t} ⊆ p) ∈ C*[[e*]]}
+All edges are traversed in order to propagate information from one data eld
+to another
+
+171
+
+===== slide 172 =====
+Value sets
+Each node p of the constraint
+graph is associated with a
+set (Data array) D[p] of values
+Goal: nd the value set of every
+node
+
+syntactical representations
+of functions
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+Initially, we have
+
+D[p] = {t | ({t} ⊆ p) ∈ C*[[e*]]}
+
+{idy} ⊆ C(2)
+
+Example 1
+
+D[C(2)] = {idx}
+D[C(4)] = {idy}
+D[p] = ∅ for other nodes p
+
+r(y)
+
+{idy} ⊆ C(2)
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+172
+
+fi
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 173 =====
+Propagation
+
+The idea of the algorithm is to
+iteratively propagate the information
+from one data eld to another
+according to the constraints
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+• If we have an edge (p1, p2) in our
+graph, then the value set of p1 must
+ow into the value set of p2
+
+{idy} ⊆ C(2)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+r(y)
+
+{idy} ⊆ C(2)
+173
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+• If a trigger is true then also in the
+corresponding edge the value set
+ows
+
+fi
+
+fl
+
+fl
+
+Constraint solving =
+graph reachability +
+propagation
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 174 =====
+The Constraint Solver
+Input: a set of constraint C*[[e*]]
+Output: the least solution (C,̂ ρ)̂ to the constraints (an assignment to variables
+C(l) and r(x)
+Data structures:
+• a worklist W containing the nodes whose data array should be propagated (a
+list of nodes whose outgoing edges should be traversed)
+• a data array D storing for each node the current abstract value in Val*
+• an edge array E storing for each node a list of the constraints that the node
+may a ect (i.e., a list of constraints from which a list of the successor nodes
+can be computed)
+The nodes consist C(l) for all labels l and r(x) for all labels x
+The solver computes a least fixed point by propagating values until saturation
+
+fi
+
+ff
+
+174
+
+===== slide 175 =====
+The algorithm
+Constraint solving =
+graph reachability +
+propagation
+
+Idea
+Each node stores a set of abstract values, and edges describe how these
+values must be propagated
+The algorithm propagates abstract values along edges until no new
+information appears
+• D = current knowledge
+• E = how knowledge propagates
+• W = what still needs to be processed
+
+175
+
+===== slide 176 =====
+The algorithm: step 1
+
+Initialize all the data structures D, E and W to [ ]
+
+176
+
+===== slide 177 =====
+Build the graph:
+Nodes
+• a node C(l) for each label l ∈ Lab*
+• a node r(x) for each variable x ∈ Var*
+E[p1] :=
+Edges E[p1] :=
+
+(p1 ⊆ p2, E[p1])
+({t} ⊆ p ⇒ p1 ⊆ p2, E[p1])
+
+E[p] :=
+
+({t} ⊆ p ⇒ p1 ⊆ p2, E[p])
+
+• Each constraint p1 ⊆ p2 adds an initial edge (p1, p2) to the graph
+• Each constraint {t} ⊆ p ⇒ p1 ⊆ p2 adds a candidate edge (p1, p2), with
+“trigger” {t} ⊆ p, and an edge (p, p2)
+Initial assignments to D: if ({t} ⊆ p) ∈ C*[[e*]] and {t} ⊈ D[p]:
+( , { })
+• incorporates {t} into D[p] and
+• adds to the worklist W
+D[p] = {t | ({t} ⊆ p) ∈ C [[e ]]}
+*
+
+s
+
+s
+
+n
+
+n
+
+o
+
+o
+
+s
+
+n
+
+c
+
+t
+o
+
+c
+
+c
+
+p
+
+d
+
+177
+d
+
+a
+
+p
+
+The algorithm: step 2
+
+*
+
+===== slide 178 =====
+Continue propagating the information from one data eld to another, along
+edges, as long as W is non-empty
+E[q]: list of the constraints that
+q may affect
+
+We extract the head element q of W and for all constraints cc in E[q]
+• cc = p1 ⊆ p2: If we have an edge (p1, p2) in our graph , then the value set
+(p2, D[p1]))
+of p1 must ow into the value set of p2 (
+• cc = {t} ⊆ p ⇒ p1 ⊆ p2: If the trigger is true (t ∈ D[p]), then also in the
+corresponding edge the value set ows (
+(p2, D[p1]))
+
+fl
+
+fl
+
+d
+
+d
+
+d
+
+178
+d
+
+a
+
+a
+
+The algorithm: step 3
+
+===== slide 179 =====
+The algorithm: step 4
+
+Record the solution in a more familiar form:
+
+̂
+:= D[C(l)]
+• ∀l ∈ Lab* : C(l)
+̂ := D[r(x)]
+• ∀x ∈ Var* : ρ(x)
+
+179
+
+===== slide 180 =====
+The algorithm pseudocode (1)
+(* Step 1: Initialization *)
+W := [];
+for q in Vars do
+D[q] := [];
+E[q] := [];
+done
+
+180
+
+===== slide 181 =====
+The algorithm pseudocode (2)
+(* Step 2: Build the graph *)
+for cc in C*[[e*]] do
+match cc with
+| {t} ⊆ p -> add(p,{t})
+| p1 ⊆ p2 -> E[p1] := cc :: E[p1]
+| {t} ⊆ p => p1 ⊆ p2 -> E[p1] := cc :: E[p1];
+E[p] := cc :: E[p];
+done
+let add(q,d) =
+if ¬ (d ⊆ D[q])
+then D[q] := D[q] ∪ d;
+W := push W q;
+181
+
+===== slide 182 =====
+Back to ex. 1: step 2
+Initially, we have
+
+D[p] = {t | ({t} ⊆ p)
+∈ C*[[e*]]}
+Current
+abstract values
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+D[C(2)] = {idx}
+D[C(4)] = {idy}
+D[p] = ∅ for other nodes p
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+add(C(2), idx)
+
+add(C(4), idy)
+{idy} ⊆ C(2)
+
+Initial worklist
+
+r(y)
+
+{idy} ⊆ C(2)
+182
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+W = [C(4), C(2)]
+
+These are the nodes, whose
+outgoing edges should be
+traversed
+
+(* Step 2: Build the graph *)
+for cc in C*[[e*]] do
+match cc with
+| {t} ⊆ p -> add(p,{t})
+| p1 ⊆ p2 -> E[p1] := cc :: E[p1]
+| {t} ⊆ p =) p1 ⊆ p2 -> E[p1] := cc :: E[p1];
+E[p] := cc :: E[p];
+done
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 183 =====
+Back to ex. 1: step 2
+(* Step 2: Build the graph *)
+for cc in C*[[e*]] do
+match cc with
+| {t} ⊆ p -> add(p,{t})
+| p1 ⊆ p2 -> E[p1] := cc :: E[p1]
+| {t} ⊆ p =) p1 ⊆ p2 -> E[p1] := cc :: E[p1];
+E[p] := cc :: E[p];
+done
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E[r(x)] := {r(x) ⊆ C(1)} :: [ ]
+E[r(y)] := {r(y) ⊆ C(3)} :: [ ]
+E[p]: list of the constraints that
+p may affect
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+E[C(4)] := {{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)} :: []
+E[C(2)] := {{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)} :: []
+E[C(1)] := {{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)} :: []
+E[C(2)] := {{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)} :: E[C(2)]
+E[C(4)] = {{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+E[C(2)] = {{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)} :: E[C(2)]
+E[C(3)] = {{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)}
+
+E[C(2)] = {{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)} :: E[C(2)]
+183
+
+===== slide 184 =====
+Back to ex. 1: after Step 2
+W = [C(4), C(2)]
+
+list of the constraints
+that p may affect
+
+Current
+abstract value
+
+184
+
+===== slide 185 =====
+The algorithm
+We have now built the graph and initialized the analysis
+Next, we propagate abstract values along edges, through Step 3, until we
+reach a fixpoint
+This is a standard worklist-based fixpoint computation
+
+fi
+
+fi
+
+185
+
+===== slide 186 =====
+The algorithm pseudocode (3,4)
+(* Step 3: Iteration *)
+Iterative fixpoint
+while W ≠ nil do
+q:= head(W); W := tail(W);
+It propagates
+for cc in E[q] do
+D[p1] in D[p2]
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);// propagate if t ∈ D[p] then
+propagate
+// all values from p1 to p2
+D[p1] in D[p2]
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D(p] then add(p2,D[p1]);
+// // activate conditional constraint
+(* Step 4: Recording the solution *)
+̂ : = D[C(l)];
+for l ∈ Lab* do C(l)
+̂ := D[r(x)];
+for x ∈ Var*, do ρ(x)
+
+fi
+
+186
+
+===== slide 187 =====
+Continue propagating the information from one data eld to another, along
+edges, as long as W is non-empty
+E[q]: list of the constraints that
+q may affect
+
+We extract the head element q of W and for all constraints cc in E[q]
+• cc = p1 ⊆ p2: If we have an edge (p1, p2) in our graph , then the value set
+(p2, D[p1]))
+of p1 must ow into the value set of p2 (
+• cc = {t} ⊆ p ⇒ p1 ⊆ p2: If the trigger is true (t ∈ D[p]), then also in the
+corresponding edge the value set ows (
+(p2, D[p1]))
+
+fl
+
+fl
+
+d
+
+d
+
+d
+
+187
+d
+
+a
+
+a
+
+The algorithm: step 3
+
+===== slide 188 =====
+Back to ex. 1: 1st iteration (C(4))
+W = [C(4), C(2)]
+Take C(4) from the top
+D[C(4)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(4)) =
+{{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x),
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D[p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+
+idx ∈ D[C(2)] = {idx}:
+add(r(x), D[C(4)])
+
+propagate
+D[C(4)] to r(x)
+
+• incorporate {idy} into D[r(x)]
+• add r(x) to W
+
+D[r(x)] := {idy}
+W := [r(x), C(2)]
+
+188
+
+===== slide 189 =====
+Back to ex. 1: 1st iteration (C(4))
+W = [C(4), C(2)]
+Take C(4) from the top
+D[C(4)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(4)) =
+{{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x),
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+{idy} ⊆ C(2)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+
+idx ∈ D[C(2)] = {idx}:
+add(r(x), D[C(4)])
+
+propagate
+D[C(4)] to r(x)
+
+• incorporate {idy} into D[r(x)]
+• add r(x) to W
+
+D[r(x)] := {idy}
+W := [r(x), C(2)]
+
+{idy} ⊆ C(2)
+189
+
+===== slide 190 =====
+Back to ex. 1: 1st iteration (C(4))
+W = [C(4), C(2)]
+Take C(4) from the top
+D[C(4)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(4)) =
+{{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x),
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D[p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is not triggered since
+
+idY ∉ D[C(2)] = {idx}
+
+hence no propagation from
+D[C(4)] to r(y)
+
+190
+
+===== slide 191 =====
+Back to ex. 1: 2nd iteration (r(x))
+W = [r(x), C(2)]
+Take r(x) from the top
+D[r(x)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(r(x)) =
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D(p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+idx ∈ D[C(2)] = {idx}:
+
+add(C(1), D[r(x)])
+
+D[C(1)] = {idy}
+W = [C(1), C(2)]
+191
+
+propagate
+D[r(x)] to C(1)
+
+===== slide 192 =====
+Back to ex. 1: 2nd iteration (r(x))
+W = [r(x), C(2)]
+Take r(x) from the top
+D[r(x)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(r(x)) =
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+{idy} ⊆ C(2)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy}
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+idx ∈ D[C(2)] = {idx}:
+
+add(C(1), D[r(x)])
+
+D[C(1)] = {idy}
+W = [C(1), C(2)]
+192
+
+propagate
+D[r(x)] to C(1)
+
+===== slide 193 =====
+Back to ex. 1: 3rd iteration (C(1))
+W = [C(1), C(2)]
+Take C(1) from the top
+D[C(1)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(1)) =
+
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D(p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+idx ∈ D[C(2)]:
+add(C(5), D[C(1)])
+
+D[C(5)] = {idx}
+W = [C(5), C(2)]
+193
+
+propagate
+D[C(1)] to C(5)
+
+===== slide 194 =====
+Back to ex. 1: 3rd iteration (C(1))
+W = [C(1), C(2)]
+Take C(1) from the top
+D[C(1)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(1)) =
+
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+{idy} ⊆ C(2)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+{idy}
+
+Constraint is triggered since
+idx ∈ D[C(2)]:
+add(C(5), D[C(1)])
+
+{idy} ⊆ C(2)
+
+D[C(5)] = {idx}
+W = [C(5), C(2)]
+
+C(5)
+
+C(2)
+r(x)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+C(1)
+{idy}
+
+{idy} ⊆ C(2)
+194
+
+propagate
+D[C(1)] to C(5)
+
+===== slide 195 =====
+Back to ex. 1: 4th iteration (C(5))
+W = [C(5), C(2)]
+Take C(5) from the top
+D[C(1)] = {idx}
+E(C(5)) = ∅
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+No update
+
+W = [C(2)]
+
+195
+
+===== slide 196 =====
+Back to ex. 1: 4th iteration (C(5))
+W = [C(5), C(2)]
+Take C(5) from the top
+D[C(1)] = {idx}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(5)) = ∅
+
+{idy} ⊆ C(2)
+
+{idy} ⊆ C(2)
+
+No update
+
+r(y)
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+{idy}
+
+{idy} ⊆ C(2)
+
+W = [C(2)]
+
+C(5) {idy}
+
+C(2)
+r(x)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+C(1)
+{idy}
+
+{idy} ⊆ C(2)
+196
+
+===== slide 197 =====
+Back to ex. 1: 5th iteration (C(2))
+W = [C(2)]
+Take C(2) from the top
+D[C(2)] = {idx}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(2)) = {
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+}
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Only constraints for
+idx are triggered
+add(r(x), D[C(4)]) ✓
+add(C(5), D[C(1)]) ✓
+No new information is added
+no node is reinserted in W
+
+W becomes empty
+( fixpoint reached)
+
+fi
+
+197
+
+W = []
+
+===== slide 198 =====
+fi
+
+Back to ex. 1: iteration steps
+
+x point
+198
+
+===== slide 199 =====
+Back to ex. 1: the solution
+((fn x => x1)2 (fn y => y3)4)5
+̂
+∀l
+∈
+Lab
+:
+C(l)
+:= D[C(l)]
+•
+*
+The computed solution is (C,̂ ρ)̂ :
+̂ := D[r(x)]
+• ∀x ∈ Var* : ρ(x)
+̂ = {idy}
+C(1)
+̂ = {idx}
+C(2)
+̂ =∅
+C(3)
+̂ = {idy}
+C(4)
+̂ = {idy}
+C(5)
+̂ = {idy}
+ρ(x)
+̂ =∅
+ρ(y)
+199
+
+===== slide 200 =====
+Complexity
+
+200
+
+===== slide 201 =====
+Correctness of the algorithm
+Proposition
+Given the input C*[[e*]], the algorithm terminates and the
+result (C,̂ ρ)̂ satisfies
+
+(C,̂ ρ)̂ = ⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+and hence it is the least solution to C*[[e*]]
+
+As a consequence (C,̂ ρ)̂ ⊧c C*[[e*]], i.e., the computed
+solution satisfies all constraints
+Corollary
+Assume that (C,̂ ρ)̂ is the solution to the constraints
+C*[[e*]] computed by the algorithm, then (C,̂ ρ)̂ ⊧ e*
+Solving constraints yields a sound analysis
+
+￼
+
+￼
+
+￼
+fi
+
+fi
+
+￼
+
+201
+
+is the least
+solution of the
+constraints
+
+(C,̂ ρ)̂ is a valid
+CFA of e*
+
+===== slide 202 =====
+Correctness of the algorithm
+Proposition
+Given the input C*[[e*]], the algorithm terminates and the
+result (C,̂ ρ)̂ satisfies
+
+(C,̂ ρ)̂ = ⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+and hence it is the least solution to C*[[e*]]
+
+￼
+
+￼
+fi
+
+￼
+fi
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+Proof sketch
+Termination:
+(The steps 1,2,4 terminate. We have just to look at step 3).
+The algorithm uses a nite set of terms (Term*) and monotone updates.
+Soundness:
+If (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}: the following invariant is maintained:
+D[C(l)] ⊆ C′̂ (l) and D[r(x)] ⊆ ρ′̂ (x).
+Hence (C,̂ ρ)̂ ⊆ (C′̂ , ρ′̂ ).
+We must prove that (C,̂ ρ)̂ ⊧c C*[[e*]]. 202
+
+===== slide 203 =====
+Correctness of the algorithm
+Proposition
+Given the input C*[[e*]], the algorithm terminates and the
+result (C,̂ ρ)̂ satisfies
+
+(C,̂ ρ)̂ = ⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+and hence it is the least solution to C*[[e*]]
+
+Proof sketch (cont.)
+Soundness (cont.):
+Assume by contradiction that some constraint cc ∈ C*[[e*]] is not satisfied by
+(C,̂ ρ)̂ . According to the algorithm this could not be true.
+The computed solution satisfies all cc ∈ C*[[e*]], i.e., (C,̂ ρ)̂ ⊧c cc.
+Minimality:
+The result is included in every solution
+
+￼
+
+￼
+
+￼
+
+fi
+
+fi
+
+￼
+
+203
+￼
+
+￼
+
+￼
+
+￼
+
+⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+
+it is the least solution, computed as
+
+===== slide 204 =====
+Computation vs check of acceptability
+Goal: Compute a solution vs check that a solution is acceptable
+There are applications where the ability to check (C,̂ ρ)̂ ⊧ e* is more important
+than computing the solution
+Scenario
+Open system e0 that uses resources of an unspeci ed library e*
+Analyses and optimizations of e0 therefore rely on an abstraction (C,̂ ρ)̂
+expressing the relevant properties about the library e*, meaning that
+
+(C,̂ ρ)̂ ⊧ e*
+
+Idea:
+Use (C,̂ ρ)̂ as a specification of the library e*
+Guarantee
+Any other library e′* such that (C,̂ ρ)̂ ⊧ e′* can safely replace e*, since the
+specification (C,̂ ρ)̂ still guarantees all required properties about the library e′*
+
+fi
+
+￼
+fi
+
+￼
+
+￼
+
+204
+
+===== slide 205 =====
+Adding Data Flow Analysis
+
+205
+
+===== slide 206 =====
+CFA + DFA
+We extend Control Flow Analysis with data- ow information
+Abstract values = functions + data- ow properties
+
+v̂ ∈ Vald ̂ = ℘(Term ∪ Data)
+
+Abstract values
+Now contain
+• possible functions (as before) and
+• abstract data- ow properties, (i.e., properties of booleans and integers,
+such as sign, constantness, or ranges of values)
+The data- ow component can be:
+• a powerset (e.g., sets of possible values)
+• a complete lattice (e.g., intervals, signs, constants)
+
+fl
+
+fl
+
+fl
+
+206
+
+===== slide 207 =====
+Abstract domains
+v̂ ∈ Vald ̂ = ℘(Term ∪ Data)
+
+Constants
+Each constant c ∈ Const is mapped to an element dc ∈ Data specifying
+the abstract property of c:
+dc can be thought as α(c) for a suitable abstraction α
+
+Operators are lifted from concrete data to abstract values, i.e., they operate
+on abstract properties instead of concrete values
+
+op̂ : Vald ̂ × Vald ̂ → Vald ̂ telling how op operates on abstract properties
+To each operator op ∈ Op, corresponds a total function
+
+Abstract operators over-approximate concrete operations
+207
+
+===== slide 208 =====
+Abstract operators
+op̂ : Vald ̂ × Vald ̂ → Vald ̂
+
+We apply the operator to all combinations of abstract data values
+Typically, op̂ has a definition of the form
+
+v1̂ op̂ v1̂ =
+
+⋃
+
+{dop(d1, d2) | d1 ∈ v1̂ ∩ Data, d2 ∈ v2̂ ∩ Data}
+
+for some function op : Data × Data → ℘(Data) specifying how the
+operator computes with the abstract properties of integers and booleans
+This over-approximates all possible concrete computations
+
+fi
+
+208
+
+===== slide 209 =====
+Example: signs analysis
+Data
+
+= { , , − ,0,+}
+
+Each constant is mapped to a sign: dtrue =
+Take, e.g., +̂ as
+
+This defines the
+abstract
+semantics of +
+
+v1̂ +̂ v2̂ =
+
+⋃
+
+d1∈v1̂ ,d2∈v2̂
+
+Abstract
+addition
+on signs
+
+and d7 = + ,...
+
+{d+(d1, d2)}
+For instance, if
+v1̂ = {−,0} and v2̂ = { + }
+then
+
+v1̂ +̂ v2̂ =
+d+( − , + ) ∪ d+(0,+) = {−,0,+}
+
+fi
+
+f
+
+f
+
+t
+
+t
+
+t
+
+t
+
+n
+
+g
+
+i
+
+s
+
+209
+
+===== slide 210 =====
+Acceptability relation
+The acceptability relation of the combined analysis has the form
+
+(C,̂ ρ)̂ ⊧d e
+Each rule over-approximates both control- ow and data- ow
+The rules are as before, but operate on enriched abstract values
+Key clauses:
+• [con]: maps constants to abstract data values
+• [if]: uses abstract boolean information to select possible branches
+• [op]: uses abstract operators on data
+Data- ow information is propagated through the evaluation of expressions
+
+fl
+
+210
+
+===== slide 211 =====
+Clause for constants
+[con] (C,̂ ρ)̂ ⊧d c l
+
+̂
+{dc} ⊆ C(l)
+
+We now track data values: the CFA records that dc is a possible value of c
+Constants introduce abstract data into the analysis
+NEW: constants contribute data (not functions)
+Example
+
+c l = 7l
+CFA:
+
+̂
+C(l)
+=∅
+CFA+DFA:
+
+f
+
+f
+
+211
+i
+
+̂
+C(l)
+={+}
+
+===== slide 212 =====
+[if ] (C,̂ ρ)̂ ⊧d ( t0l0
+
+Is ow sensitive: sensitive: can
+t1l1
+t2l2)l
+determine whether true or false
+branches can be taken
+l0
+̂
+(C, ρ)̂ ⊧d t0 ∧
+l1
+̂
+̂
+̂ 1) ⊆ C(l)))
+̂
+̂
+(dtrue ∈ Cl0 ⇒ ((C, ρ) ⊧d t1 ∧ C(l
+∧
+̂ 2) ⊆ C(l)))
+̂
+(dfalse ∈ Ĉl0 ⇒ ((C,̂ ρ)̂ ⊧d t2l2 ∧ C(l
+
+• Increased precision: we analyze only those branches consistent with the
+abstract value of the condition, which now is trackable
+• control- ow is now ltered by data- ow
+Example
+e ≜ (if (31> 02)3 then (fn y => y4)5 else (fn z => z6)7)8
+
+̂
+̂ ⊆ C(8)
+̂ ...δ
+⊑ C(3)
+⇒ C(5)
+
+̂
+⋢ C(3)
+⇒
+
+s
+
+l
+
+n
+
+e
+
+h
+
+e
+
+fl
+
+fi
+
+f
+
+i
+fl
+
+t
+
+212
+
+e
+
+e
+
+s
+
+l
+
+u
+
+a
+
+r
+
+t
+
+fl
+
+f
+
+f
+
+δ
+f
+
+i
+
+Clause for conditional
+
+===== slide 213 =====
+Clause for binary operation
+l1
+̂
+[op] (C, ρ)̂ ⊧d (t1
+
+l2 l
+t2 )
+
+l1
+l2
+̂
+̂
+(C, ρ)̂ ⊧d t1 ∧ (C, ρ)̂ ⊧d t2 ∧
+̂ 1) op̂ C(l
+̂ 2) ⊆ C(l)
+̂
+C(l
+
+NOW: we do track data values
+This rule applies abstract operators to propagate data- ow information
+Data- ow is computed locally using abstract operators
+Example
+
+e ≜ (71 + 42)3
+CFA:
+
+̂ = ∅...
+C(3)
+CFA +DFA:
+
+̂
+̂ ⊆ C(3)
+̂ if C(1)
+̂ and C(2)
+̂ contain { + } then C(3)
+̂ contains { + }
+C(1)
++̂ C(2)
+
+fl
+
+f
+
+f
+
+i
+
+p
+
+o
+
+213
+
+===== slide 214 =====
+To recap
+• [con]: introduces data (abstract values)
+• [if]: uses abstract values to guide control- ow
+• [op]: computes data- ow using abstract values
+
+fl
+
+214
+
+===== slide 215 =====
+CFA with abstract values as powersets
+
+215
+
+===== slide 216 =====
+Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+Pure 0-CFA:
+it cannot determine that the else branch is unreachable
+CFA + Sign Analysis:
+• since x ∈ {+}, the condition x > 0 is always true
+• else branch is unreachable
+
+• C(̂ 12) = { fn y => y4}, i.e., only fn y => y4 ows to label 12
+216
+
+===== slide 217 =====
+Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+
+At label 12:
+• Pure CFA: C(̂ 12) = {fn y => y4, fn z => 256 }
+
+• With signs: C(̂ 12) = {fn y => y4}
+Note, in particular, that
+• x is always positive: ρ(̂ x) = { + }
+
+̂ ={ }
+• condition is always true: C(3)
+̂ =∅
+• else branch is unreachable: C(7)
+• e will evaluate to a value with property {0}
+t
+
+t
+
+217
+
+Pure CFA
+
+CFA + Sign Analysis
+
+===== slide 218 =====
+Observation
+The combined analysis does not directly yield a valid 0-CFA solution
+Reason
+data- ow information restricts the control ow
+Intuition
+If the condition is known to be false (or true), some branches are not
+analyzed at all
+Even if we restrict to terms:
+
+̂ ∩ Term and
+• C′̂ (l) = C(l)
+̂ ∩ Term
+• ρ′̂ (x) = ρ(x)
+
+this does not guarantee a valid CFA solution, i.e.,
+
+(C,̂ ρ)̂ ⊧d e does not guarantee that (C′̂ , ρ′̂ ) ⊧ e
+￼
+fl
+
+￼
+
+￼
+
+￼
+
+218
+
+===== slide 219 =====
+Program Analysis 2025-26
+Lecture #21
+Control Flow Analysis
+
+===== slide 220 =====
+Abstract Values as Complete Lattices
+• Instead of using sets of concrete data, we can use structured abstract
+domains
+• We separate:
+• Term information
+Two components
+
+• Data information
+
+v̂ ∈ Vald ̂ = ℘(Term ∪ Data) ≡ ℘(Term) × ℘(Data)
+
+• replace ℘(Data) by a complete lattice L
+• and perform a development closely related to that of the (forward)
+Monotone Frameworks
+220
+
+===== slide 221 =====
+Abstract Values as Complete Lattices
+A monotone structure consists of:
+• a complete lattice L, and
+
+• a set F of monotone functions of L × L → L
+An instance of a monotone structure then consists of the structure (L, F)
+• a mapping ι . from the constants c ∈ Const to values in L, and
+
+• a mapping f . from the binary operators op ∈ Op to functions of F
+No need of ow component: it is up to the Control Flow Analysis to
+determine the ow
+
+fl
+
+fl
+
+221
+
+===== slide 222 =====
+Example
+Lift concrete operations to abstract values
+Take the following monotone structure:
+
+• L = ℘(Data)
+• F: monotone functions of L × L → L
+An instance of this monotone structure is obtained by taking
+• ιc = {dc} for each constant c ∈ Const (and with dc ∈ Data)
+
+Apply the
+operator to all
+pairs of possible
+values
+
+• fop(l1, l2) = ⋃ {dop(d1, d2) | d1 ∈ l1, d2 ∈ l2}
+for all op ∈ Op (and where dop : Data × Data → Data is like before)
+222
+
+===== slide 223 =====
+Example: Constant Propagation Analysis
+A monotone structure for Constant Propagation Analysis
+⊤
+×
+℘({
+,
+})
+Z
+with
+• L = Z⊤
+⊥
+⊥ is flat(Z) where ⊤ indicates
+
+that a variable is non constant
+• F: monotone functions of L × L → L
+An instance of this monotone structure is obtained by taking, e.g.,
+ιc = (7,∅) and ι = ( ⊥ , { })
+
+f
+
+i
+
+t
+
+f
+
+t
+
+f
+
+t
+
+t
+
+d
+
+n
+
+e
+
+u
+
+a
+
+r
+
+t
+
+e
+
+u
+
+r
+
+223
+t
+
+e
+
+s
+
+i
+
+w
+
+r
+
+f
+
+z2 = ⊥
+
+i
+
+) = ( ⊥ , ∅) since z1 ∈ Z
+
+e
+
+f+ propagates constants when possible,
+otherwise returns ⊥ (unknown)
+
+For example:
+
+f+(ιc, ι
+
+h
+
+o
+
+f+(l1, l2) =
+
+t
+
+(z1 + z2, ∅) l1 = (z1, . . . ), l2 = (z2, . . . )
+z1, z2 ∈ Z
+( ⊥ , ∅) l1 = (z1, . . . ), l2 = (z2, . . . )
+z1 = ⊥
+z2 = ⊥ ∈ Z
+( ⊤ , ∅)
+
+===== slide 224 =====
+We combine CFA and DFA information, by tracking both functions and
+data simultaneously
+Control- ow and dataVald ̂ = ℘(Term) × ℘(Data)
+ow are computed
+Abstract domains
+
+v̂ ∈ Val ̂ = ℘(Term)
+ρ ̂ ∈ Env ̂ : Var → Val ̂
+Ĉ ∈ Cachê : Lab → Val ̂
+CFA part
+
+decoupling
+
+together
+
+DFA part
+
+d ̂ ∈ Data ̂ = L
+δ ̂ ∈ DEnv̂ : Var → Data ̂
+D̂ ∈ DCachê : Lab → Data ̂
+
+Acceptability relation
+
+(C,̂ D,̂ ρ,̂ δ)̂ ⊧D e
+224
+
+fl
+
+fl
+
+New CFA
+
+===== slide 225 =====
+Clause for constants
+[con] (C,̂ D,̂ ρ,̂ δ)̂ ⊧D c l
+
+̂
+ιc ⊑ D(l)
+
+At label l, the abstract data value of c must be recorded
+
+Constants inject
+data- ow information
+into the analysis
+
+ι tells us which abstract value a constant contributes
+
+Example
+
+fl
+
+f
+
+f
+
+225
+i
+
+c=7
+ιc = { + }
+̂
+D(l)
+must contain { + }
+
+===== slide 226 =====
+Clause for binary operation
+[op] (C,̂ D,̂ ρ,̂ δ)̂ ⊧D (t1l1
+
+t2l2)l
+
+(C,̂ D,̂ ρ,̂ δ)̂ ⊧D t1l1 ∧ (C,̂ D,̂ ρ,̂ δ)̂ ⊧D t2l2 ∧
+̂ 1), D(l
+̂ 2)) ⊑ D(l)
+̂
+fop(D(l
+
+Now, we use the component f .
+
+Compute the abstract
+result of the operation
+and propagate it to the
+result label
+
+Example
+x ∈ {+, 0}, y ∈ {+}
+x + y ∈ {+, 0, −}
+
+̂
+D(l)
+must include {+, 0, −}
+f
+
+f
+
+i
+
+p
+
+o
+
+226
+
+===== slide 227 =====
+[if ] (C,̂ D,̂ ρ,̂ δ)̂ ⊧D ( t0l0
+t1l1
+(C,̂ D,̂ ρ,̂ δ)̂ ⊧D t l0 ∧
+(ι
+(ι
+
+t2l2)l
+
+0
+
+̂ 1) ⊆ C(l)
+̂ ∧ D(l
+̂ 0) ⇒ (C,̂ D,̂ ρ,̂ δ)̂ ⊧D t l1 ∧ C(l
+̂ 1) ⊑ D(l))
+̂
+⊑ D(l
+∧
+1
+̂ 2) ⊆ C(l)
+̂ ∧ D(l
+̂ 0) ⇒ (C,̂ D,̂ ρ,̂ δ)̂ ⊧D t l2 ∧ C(l
+̂ 2) ⊑ D(l))
+̂
+⊑ D(l
+2
+
+The clause [if]
+• analyze condition
+• use abstract boolean value and propagate only analysed branches
+
+l
+
+e
+
+n
+
+e
+
+f
+
+i
+
+e
+
+e
+
+e
+
+s
+
+s
+
+l
+
+u
+
+e
+
+l
+
+u
+
+a
+
+r
+
+a
+
+r
+
+t
+f
+
+f
+
+t
+
+f
+
+227
+
+̂
+⋢ D(3)
+⇒
+h
+
+̂ ⊆ C(8)
+̂ and D(5)
+̂
+̂
+̂ ...ι
+⊑ D(3)
+⇒ C(5)
+⊆ D(8)
+
+ι
+
+t
+
+Example
+e ≜ (if (31> 02)3 then (fn y => y4)5 else (fn z => z6)7)8
+
+f
+
+i
+
+Clause for conditional
+
+===== slide 228 =====
+CFA with abstract values as complete lattices
+
+228
+
+===== slide 229 =====
+Back to our Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+
+The last column describes the
+solution (C,̂ D,̂ ρ,̂ δ)̂ , where it is
+evident the splitting between
+• the control ow component (C,̂ ρ)̂
+• and the data ow component (D,̂ δ)̂
+Note, e.g., that
+̂ ={+}
+• x is always positive: δ(x)
+
+̂
+={ }
+• condition is always true: D(3)
+
+fl
+
+fl
+
+t
+
+t
+
+229
+
+Pure CFA CFA (powersets) CFA (complete lattices)
+
+===== slide 230 =====
+Correctness of the analysis
+The combined CFA + DFA is sound w.r.t. the operational semantics
+• Same proof techniques as before apply
+• The algorithm terminates if L satisfies the Ascending Chain Condition (ACC),
+as in the case for Monotone Frameworks
+no infinite strictly increasing sequences
+fixpoint computation terminates
+
+fi
+
+fi
+
+fi
+
+230
+
+===== slide 231 =====
+Staging the specification
+• If we change the [if] clause in such a way that the data ow component
+cannot in uence the control ow component, with a modi ed relation ⊧′D,
+then (C,̂ D,̂ ρ,̂ δ)̂ ⊧′D e guarantees that (C,̂ ρ)̂ ⊧ e
+
+We can solve:
+1. control- ow (Ĉ and ρ)̂ rst
+
+2. data- ow (D̂ and δ)̂ afterwards
+• The analysis still yields the least solution of the combined set of constraints
+
+fl
+
+fi
+
+￼
+fl
+
+fl
+
+fl
+
+￼
+
+231
+
+===== slide 232 =====
+Back to Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+
+If we modify the [if] clause as
+discussed above then Ĉ and ρ ̂ are as
+in pure CFA, while D̂ and δ ̂ associate
+slightly larger sets with some labels
+and variables
+
+̂
+={+}
+• D(6)
+
+̂
+= {0,+}
+• D(14)
+̂
+= {0,+}
+• D(15)
+̂ = {0}
+• δ(z)
+
+232
+
+Pure CFA
+
+CFA (powersets) CFA (complete lattices)
+
+===== slide 233 =====
+More instances and precision
+
+233
+
+===== slide 234 =====
+Example 4
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+̂ )
+The least O-CFA analysis is given by (Ĉid, ρid
+1
+6
+• Ĉid(1) = {fn x => x ,fn y => y }
+1
+• Ĉid(2) = {fn x => x }
+1
+• Ĉid(3) = {fn x => x }
+1
+• Ĉid(4) = {fn x => x }
+1
+6
+• Ĉid(5) = {fn x => x ,fn y => y }
+6
+• Ĉid(6) = {fn y => y }
+
+6
+• Ĉid(7) = {fn y => y }
+1
+6
+• Ĉid(8) = {fn x => x ,fn y => y }
+1
+6
+• Ĉid(9) = {fn x => x ,fn y => y }
+̂ ( ) = {fn x => x1}
+• ρid
+̂ ( ) = {fn x => x1),fn y => y6}
+• ρid
+̂ ( ) = {fn y => y6}
+• ρid
+
+Only fn y => y6 is a possible result of the evaluation of e
+0-CFA merges di erent calling contexts loss of precision
+
+ff
+
+y
+
+x
+
+f
+
+234
+
+===== slide 235 =====
+Example 4 bis
+Idea: duplicate functions per call site
+separate each use of f
+e’ ≜ (let f1 = (fn x1 => x11)2
+in (let f2 = (fn x2 => x23)4
+in ((f15 f26)7 (fn y => y8)9)10)11)12
+
+• ...
+
+8
+• Ĉid(12) = {fn y => y }
+̂ ( ) = {fn x2 => x23}
+• ρid
+̂ ( ) = {fn y => y8}
+• ρid
+
+Now each parameter is bound in a single context:
+3
+• x1 can only be bound to fn x2 => x2 and
+8
+• x2 can only be bound to fn y => y
+• so no merging of ows precise result: fn y => y8 only
+1
+
+fl
+
+fl
+
+x
+
+x
+
+2
+
+235
+
+precision comes from
+separating ows
+
+===== slide 236 =====
+Adding Context Information
+
+236
+
+===== slide 237 =====
+Uniform k-CFA Analysis
+
+237
+
+===== slide 238 =====
+Adding contexts
+• 0-CFA is a context-insensitive (or mono-variant) analysis
+• It does not distinguish various instances of program variables and program
+points from each other, in particular does not distinguish di erent calling
+contexts
+• Context-sensitive (or poly-variant) analysis does distinguish
+• Examples of such analyses include k-CFA analyses, uniform k-CFA
+analyses, polynomial k-CFA analyses and the Cartesian Product
+Algorithm
+• We focus on uniform k-CFA (“uniform” because environment and cache
+have the same precision)
+
+238
+
+===== slide 239 =====
+Abstract domains: contexts
+Idea: extend Val ̂to include context information
+Goal: distinguish di erent function calls
+
+• Contexts δ ̂ record the k last dynamic call sites, e.g., for k = 1, the context
+amounts just to the label of the expression that called the current function
+• In general, contexts are sequences of labels of length at most ≤ k
+
+δ ̂ ∈ Δ = Lab≤k
+
+We track information separately for di erent call strings*
+• Same function, di erent contexts di erent analyses
+*A call string is a list of labels l1, . . . , ln denoting that the last n calls were of the form
+
+(e1n e2n)ln . . . (e11 e21)l1 with (e11 e21)l1 being the most recent call; we write ε for the empty call string
+
+ff
+
+ff
+
+ff
+
+239
+
+===== slide 240 =====
+Abstract domains: context environment
+• A context environment records in which context each variable was defined
+• So we associate a context to each variable occurrence
+De nition points of free
+variables of terms
+
+ce ∈ Cenv = Var → Δ
+
+• The same variable may have di erent values in di erent contexts
+
+• The context environment will play a role similar to the environment of the
+semantics
+
+ff
+
+fi
+
+240
+
+===== slide 241 =====
+Context-sensitive abstract values
+In our set of values, instead of just the function abstractions, we need to
+track closures, i.e., a pair of a function label and a context environment
+• A value is paired with the context environment where it was created
+• We shall extend the abstract values as
+
+v̂ ∈ Val ̂ = ℘(Val × Cenv)
+
+241
+
+===== slide 242 =====
+Context-sensitive environments
+• Abstract environment ρ ̂ and abstract cache Ĉ will now map a variable (a
+label, resp.) and a context to an abstract value
+
+ρ ̂ ∈ Cenv ̂ = (Var × Δ) → Val ̂
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+
+• Values are now indexed by context
+• This treatment prevents merging values from di erent calls (as in the
+previous example)
+
+242
+
+===== slide 243 =====
+k-CFAs
+• In uniform k-CFA we have a cache for each possible context
+
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+
+where Δ: set of call strings (length ≤ k)
+• In the classical k-CFA, we have instead a cache for each possible full
+environment
+
+Ĉ ∈ Cachê = (Lab × CEnv) → Val ̂
+
+• In the polynomial k-CFA, instead of Val ̂ = ℘(Val × Cenv) we have
+more expensive
+
+v̂ ∈ Val ̂ = ℘(Val × Δ)
+243
+
+===== slide 244 =====
+To recap
+ce ∈ Cenv = Var → Δ
+δ ̂ ∈ Δ = Lab≤k
+
+v̂ ∈ Val ̂ = ℘(Val × Cenv)
+ρ ̂ ∈ Cenv ̂ = (Var × Δ) → Val ̂
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+
+244
+
+===== slide 245 =====
+Acceptability relation
+(C,̂ ρ)̂ ⊧ce
+δ e
+
+• ce is the current context environment:
+
+• it tracks the context in which each variable of e is bound
+• it changes when variables are bound
+• δ ̂ is the current calling context
+• it changes when functions are applied
+The formula expresses that (C,̂ ρ)̂ is an acceptable analysis of e in the
+context speci ed by ce and δ ̂
+
+Acceptability is now context-dependent: we analyse e in a specific calling
+context δ ̂
+
+fi
+
+245
+
+===== slide 246 =====
+l
+[var] (C,̂ ρ)̂ ⊧ce
+x
+δ
+
+̂ δ)
+̂ ce(x)) ⊆ C(l,
+ρ(x,
+
+We look up x in the context where it was bound and
+propagate it to the current context
+
+Same variable,
+different contexts → different values
+
+• ce(x) context where x was defined [definition context]
+• δ: current context (where we use x) [use context]
+
+A variable carries the context where it was created, but is used in the
+current context
+Example
+Suppose x was bound at call site 5, i.e., ce2( ) = 5, then
+2 1
+̂ (1,5) [see Example 4]
+̂ ) ⊧ce
+̂
+x
+(C′̂id, ρ′id
+ρ′
+(
+,5)
+⊆
+C′
+id
+id
+5
+f
+
+f
+
+fi
+
+￼
+
+￼
+
+x
+
+￼
+
+￼
+
+x
+
+f
+
+i
+
+246
+
+f
+
+i
+
+Clause for variables
+
+===== slide 247 =====
+[ fn] (C,̂ ρ)̂ ⊧ce
+δ (
+
+̂ δ)
+x ⇒ e0)l
+{( x ⇒ e0, ce0)} ⊆ C(l,
+where ce0 = ce | FV( x ⇒ e0)
+
+̂ δ) together with the
+x ⇒ e0 must be included in C(l,
+The functional term
+current context environment ce, restricted to the free variables of the
+function (denoted ce0)
+Functions are represented as closures: a function is paired with the context
+in which it is defined, restricted to its free variables
+∅,
+
+Example: Suppose Λ be the empty sequence of labels and ce = [x ↦ 5,y ↦ 3]
+12
+1
+environment at
+̂ ) ⊧ce
+(C′̂id, ρ′id
+(fn
+x
+=>
+x
+)
+{
+(fn
+x
+=>
+x
+, ce0)} ⊆ C′̂id(2,Λ)
+Λ
+application time
+
+1
+
+with ce0 = [] since FV(fn x => x ) = ∅ [see Example 4]
+Note that if the function were (fn x => y), then FV(fn x => y) = {y}
+
+fi
+
+￼
+
+￼
+
+￼
+
+f
+
+n
+
+n
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+n
+
+f
+
+247
+
+f
+
+f
+
+i
+
+Clause for functions
+
+===== slide 248 =====
+[let] (C,̂ ρ)̂ ⊧ce
+δ (
+
+x = t1l1
+
+l1
+̂ ρ)̂ ⊧ce′ t l2 ∧
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+
+t2l2)l
+
+̂ 1, δ) ⊆ ρ(x,
+̂ 2, δ) ⊆ C(l,
+̂ δ)
+̂ δ) ∧ C(l
+C(l
+where ce′ = ce[x ↦ δ]
+we record that x is defined
+
+This clause
+in the current context δ
+• requires checking the sub-expressions
+• the definition context of the bound variable of the let-construct is the
+current context (as no application point is passed)
+Double ow: propagation of the values
+̂ 1, δ) to ρ(x,
+̂ δ) [binding]
+• from C(l
+̂ 2, δ) to C(l,
+̂ δ) [evaluation]
+• from C(l
+Example
+l2
+̂ ) ⊧[]Λ (let f = (fn x => x1)2 in (f3 34)5)6 (C,̂ ρ)̂ ⊧[]Λ t1l1 ∧ (C,̂ ρ)̂ ⊧[x↦δ]
+(C′̂id, ρ′id
+t
+∧
+δ
+2
+
+fi
+
+f
+fl
+
+￼
+fi
+
+￼
+
+f
+
+￼
+
+f
+
+i
+
+n
+
+i
+
+t
+
+e
+
+l
+
+̂
+̂
+̂
+C(2,Λ)
+⊆ ρ(̂ , Λ) and C(5,Λ)
+⊆ C(6,Λ)
+...
+248
+
+f
+
+i
+
+Clause for the let binding
+
+===== slide 249 =====
+Clause for function application
+ce l1 l2 l
+̂
+̂
+[app] (C, ρ) ⊧δ (t1 t2 )
+both subexpressions are
+analysed in the same context
+δ and environment ce
+operator may evaluate to a
+function closure
+body analysed in the updated
+context δ0 using the updated
+closure environment ce0
+
+we extend the current
+context with the call site l
+
+ce l1
+ce l2
+̂
+̂
+̂
+̂
+(C, ρ) ⊧δ t1 ∧ (C, ρ) ⊧δ t2 ∧
+l0
+̂ 1, δ) :
+( ∀( x ⇒ t0 , ce0) ∈ C(l
+0 l0
+(C,̂ ρ)̂ ⊧ce′
+t ∧
+δ0 0
+̂ 2, δ) ⊆ ρ(x,
+̂ 0, δ) ⊆ C(l,
+̂ δ))
+̂ δ) ∧ C(l
+C(l
+
+where δ0 = ⌈δ, l⌉k and
+
+∧ ...
+
+Propagation
+as before
+
+ce′0 = ce0[x ↦ δ0]
+
+x is now bound in the new
+calling context δ0 but using the
+
+fi
+
+f
+
+f
+
+249
+i
+
+￼
+
+n
+
+f
+
+￼
+
+definition environment ce0
+
+===== slide 250 =====
+Clause for function application
+l1 l2 l
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+t
+)
+δ
+1 2
+
+• We proceed in a similar
+way
+• both f and x are bound in
+the new calling context δ0
+when analyzing the body
+
+l1
+̂ ρ)̂ ⊧ce t l2 ∧
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+
+∧ ...
+
+̂ 1, δ) :
+( ∀(
+x ⇒ t0l0, ce0) ∈ C(l
+0 l0
+(C,̂ ρ)̂ ⊧ce′
+t
+∧
+δ0 0
+̂ 2, δ) ⊆ ρ(x,
+̂ 0, δ) ⊆ C(l,
+̂ δ))
+̂ δ) ∧ C(l
+C(l
+{(
+x ⇒ t0l0, ce0)} ∈ ρ(̂ f, δ0) :
+where δ0 = ⌈δ, l⌉k and
+ce′0 = ce0[ f ↦ δ0, x ↦ δ0]
+∧ ...
+f
+
+f
+
+i
+￼
+
+f
+
+f
+
+n
+
+u
+
+n
+
+f
+
+￼
+
+u
+
+f
+
+250
+
+===== slide 251 =====
+Uniform k-CFA
+
+251
+
+===== slide 252 =====
+Back to Example 4: 0-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+̂ )
+The least O-CFA analysis is given by (Ĉid, ρid
+1
+6
+• Ĉid(1) = {fn x => x ,fn y => y }
+1
+• Ĉid(2) = {fn x => x }
+1
+• Ĉid(3) = {fn x => x }
+1
+• Ĉid(4) = {fn x => x }
+1
+6
+• Ĉid(5) = {fn x => x ,fn y => y }
+6
+• Ĉid(6) = {fn y => y }
+
+6
+• Ĉid(7) = {fn y => y }
+1
+6
+• Ĉid(8) = {fn x => x ,fn y => y }
+1
+6
+• Ĉid(9) = {fn x => x ,fn y => y }
+̂ ( ) = {fn x => x1}
+• ρid
+̂ ( ) = {fn x => x1),fn y => y6}
+• ρid
+̂ ( ) = {fn y => y6}
+• ρid
+
+Only fn y => y6 is a possible result of the evaluation of e
+0-CFA merges di erent calling contexts loss of precision
+
+ff
+
+y
+
+x
+
+f
+
+252
+
+===== slide 253 =====
+Back to Example 4: uniform 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+• The initial context will be Λ, the empty sequence of labels
+• In the course of the analysis the current context will be modi ed at the two
+application points with labels 5 and 8
+• since we only records call strings of length at most 1 the only contexts of
+interest will therefore be in {Λ, 5, 8}
+• In 0-CFA the two calls are merged
+• In 1-CFA they are instead separated because they have di erent call sites: this
+is enough to restore precision
+253
+
+===== slide 254 =====
+Back to Example 4: uniform 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+• Context environments generated during the analysis:
+• ce0 = [] initial (empty) context environment
+
+• ce1 = ce0[ f ↦ Λ] used for analyzing the body of the let: f is defined in context Λ
+• ce2 = ce0[x ↦ 5] used for analyzing the body of f: x bound at call site 5
+• ce3 = ce0[x ↦ 8] used for analyzing the body of f: x bound at call site 8
+
+We start from the closure environment ce0 (captured at definition time), not from
+the current ce
+
+254
+
+===== slide 255 =====
+Back to Example 4: uniform 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+̂ ) • C′̂id(1,5) = {(fn x => x1,ce0)} • ρ′id̂ ( , Λ) = {(fn x => x1,ce0)}
+Look at the solution (C′̂id, ρ′id
+1
+• C′̂id(2,Λ) = {(fn x => x ,ce0)} • ρ′̂ ( ,5) = {(fn x => x1,ce0)}
+id
+1
+• C′̂id(4,Λ) = {(fn x => x ,ce0)} • ρ′̂ ( ,8) = {(fn y => y6,ce0)}
+id
+With this CFA we can:
+6
+• C′̂id(7,Λ) = {(fn y => y ,ce0)}
+• distinguish the values of x
+6
+• C′̂id(9,Λ) = {(fn y => y ,ce0)}
+in the two calling contexts
+6
+̂
+• determine that fn y => y6 is • C′id(1,8) = {(fn y => y ,ce0)}
+1
+the only result possible
+• C′̂id(3,Λ) = {(fn x => x ,ce0)}
+1
+• C′̂ (5,Λ) = {(fn x => x ,ce0)}
+id
+
+6
+• C′̂id(8,Λ) = {(fn y => y ,ce0)}
+
+f
+
+x
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+255
+
+===== slide 256 =====
+Back to Example 4: 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+To check acceptability, i.e.,
+̂ ) ⊧ce0 e we proceed by
+(C′̂id, ρ′id
+Λ
+
+f
+
+x
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+clauses:
+• [let], to check the update of
+the context environment
+• [app] at label 8, to check
+check x1 in context 8 and
+• [app] at label 5, to check
+check x1 in context 8
+• for each closure, we check
+argument + body in updated
+context
+
+We check acceptability
+
+1
+• C′̂id(1,5) = {(fn x => x ,ce0)}
+1
+• C′̂id(2,Λ) = {(fn x => x ,ce0)}
+1
+• C′̂id(4,Λ) = {(fn x => x ,ce0)}
+6
+• C′̂id(7,Λ) = {(fn y => y ,ce0)}
+6
+• C′̂id(9,Λ) = {(fn y => y ,ce0)}
+6
+• C′̂id(1,8) = {(fn y => y ,ce0)}
+1
+• C′̂id(3,Λ) = {(fn x => x ,ce0)}
+1
+• C′̂id(5,Λ) = {(fn x => x ,ce0)}
+6
+• C′̂id(8,Λ) = {(fn y => y ,ce0)}
+
+256
+
+̂ ( , Λ) = {(fn x => x1,ce0)}
+• ρ′id
+̂ ( ,5) = {(fn x => x1,ce0)}
+• ρ′id
+̂ ( ,8) = {(fn y => y6,ce0)}
+• ρ′id
+
+===== slide 257 =====
+Back to Example 4: 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+We check acceptability
+
+0
+̂ ) ⊧ce
+[let]:To check (C′̂id, ρ′id
+e it su ces ([let]) to verify
+Λ
+
+ce0 = []
+
+ce1 3 4 5
+678
+0
+̂ ) ⊧ce
+̂
+(fn x => x1)2 and (C′̂id, ρ′id
+((f
+f
+)
+(fn
+y
+=>
+y
+) )
+(C′̂id, ρ′id
+)
+⊧
+Λ
+Λ
+
+because C′̂id(2,Λ) ⊆ ρ′id̂ ( , Λ) and C′̂id(8,Λ) ⊆ C′̂id(9,Λ)
+
+ce1 = ce0[ f ↦ Λ]
+
+[app] at label 8: Since C′̂id(5,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+678
+1
+̂ ) ⊧ce
+((f
+f
+)
+(fn
+y
+=>
+y
+) ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+
+ce3 = ce0[x ↦ 8]
+
+3 45
+1
+̂ , ρ′̂ ) ⊧ce1 (fn y => y6)7 and (C′̂ , ρ′̂ ) ⊧ce3 x1
+̂ ) ⊧ce
+(f
+f
+)
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+8
+
+̂ (x,8) ⊆ Ĉid(8,Λ)
+ρid
+
+because C′̂id(7,Λ) ⊆ ρ′id̂ ( ,8) and C′̂id(1,8) ⊆ C′̂id(8,Λ)
+
+δ0 = ⌈Λ,8⌉1 = 8
+
+[app] at label 5: Since C′̂id(3,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+1
+̂ ) ⊧ce
+(f
+f ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+1 3
+̂ , ρ′̂ ) ⊧ce1 f4 and (C′̂ , ρ′̂ ) ⊧ce2 x1
+̂ ) ⊧ce
+f
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+5
+
+because C′̂id(4,Λ) ⊆ ρ′id̂ ( ,5) and C′̂id(1,5) ⊆ C′̂id(5,Λ)
+
+ffi
+
+ffi
+
+ffi
+
+x
+
+f
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+δ0 = ⌈Λ,5⌉1 = 5
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+i
+
+257
+
+ce2 = ce0[x ↦ 5]
+
+===== slide 258 =====
+Back to Example 4: 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+We check acceptability
+
+0
+̂ ) ⊧ce
+[let]:To check (C′̂id, ρ′id
+e it su ces ([let]) to verify
+Λ
+
+ce0 = []
+
+ce1 3 4 5
+678
+0
+̂ ) ⊧ce
+̂
+(fn x => x1)2 and (C′̂id, ρ′id
+((f
+f
+)
+(fn
+y
+=>
+y
+) )
+(C′̂id, ρ′id
+)
+⊧
+Λ
+Λ
+
+because C′̂id(2,Λ) ⊆ ρ′id̂ ( , Λ) and C′̂id(8,Λ) ⊆ C′̂id(9,Λ)
+
+ce1 = ce0[ f ↦ Λ]
+
+[app] at label 8: Since C′̂id(5,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+678
+1
+̂ ) ⊧ce
+((f
+f
+)
+(fn
+y
+=>
+y
+) ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+
+ce3 = ce0[x ↦ 8]
+
+3 45
+1
+̂ , ρ′̂ ) ⊧ce1 (fn y => y6)7 and (C′̂ , ρ′̂ ) ⊧ce3 x1
+̂ ) ⊧ce
+(f
+f
+)
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+8
+
+̂ (x,8) ⊆ Ĉid(8,Λ)
+ρid
+
+because C′̂id(7,Λ) ⊆ ρ′id̂ ( ,8) and C′̂id(1,8) ⊆ C′̂id(8,Λ)
+
+[app] at label 5: Since C′̂id(3,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+1
+̂ ) ⊧ce
+(f
+f ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+1 3
+̂ , ρ′̂ ) ⊧ce1 f4 and (C′̂ , ρ′̂ ) ⊧ce2 x1
+̂ ) ⊧ce
+f
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+5
+
+because C′̂id(4,Λ) ⊆ ρ′id̂ ( ,5) and C′̂id(1,5) ⊆ C′̂id(5,Λ)
+
+only fn y => y6can ow to C′̂id(9,Λ)
+
+ffi
+
+ffi
+
+ffi
+
+fl
+
+x
+
+f
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+i
+
+￼
+
+258
+
+ce2 = ce0[x ↦ 5]
+
+===== slide 259 =====
+Correctness and implementation of the uniform k-CFA
+Soundness
+The analysis is sound w.r.t. the operational semantics
+Implementation
+The analysis can be implemented via constraint solving / fixpoint iteration
+Trade-o
+• Higher k
+
+more precision
+
+• But exponential worst-case complexity
+
+ff
+
+259
+
+===== slide 260 =====
+Complexity of uniform k-CFA
+
+• even for k = 1: exponential worst case complexity
+Why? (intuition)
+exponential blow up comes from the number of
+abstract closure environments:
+• Program size: n, number of variables: p
+each variable can be associated with one term
+• Contexts:
+O(n ⋅ p) di erent pairs (x, δ) and
+• Δ has O(n) elements
+O(n . n) = O(n 2) di erent pairs (l, δ)
+• Abstract states:
+closures
+• (C,̂ ρ)̂ can be seen as an O(n 2) tuple of values from Val ̂
+
+• Val ̂ itself is a powerset of pairs of the form (t, ce)
+
+• Values:
+
+O(n ⋅ n p) such pairs,
+
+• Hence Val ̂ has height O(n ⋅ n p)
+• Since p = O(n), we have the exponential worst case complexity
+
+ff
+
+ff
+
+260
+
+===== slide 261 =====
+Example
+Suppose to have
+• Var = {x, y}
+
+• Δ = {a, b, c} so | Δ | = 3
+
+• For every context ce we need ce(x) and ce(y), so we have 9 contexts with
+
+ce(x) and ce(y) ranging over {a, b, c}
+• If we have 4 functions fi, we have 36 abstract closures
+
+With two variables, each closure environment is a pair of contexts
+With p variables, it becomes a p-tuple of contexts, yielding n p possible
+environments
+261
+
+===== slide 262 =====
+Complexity of 0-CFA
+• Here for k = 0
+Why? (intuition)
+• Program size: n, number of variables: p
+• No contexts:
+O(1 ⋅ p) di erent pairs (x, δ) and
+• Δ is a singleton (O(1))
+O(1 ⋅ n) di erent pairs (l, δ)
+• Abstract states:
+
+• (C,̂ ρ)̂ can be seen as an O(p + n) tuple of values from Val ̂
+
+• Val ̂ (powerset of pairs of the form (t, ce))
+
+• Values:
+
+but here only (t, ce0)
+
+O(n)
+
+• Val ̂ has height O(n) and we have the polynomial complexity we already
+
+saw for non contextual analyses
+
+ff
+
+ff
+
+262
+
+===== slide 263 =====
+Possible improvements of complexity
+• In k-CFA, Val ̂ = ℘(Val × Cenv)
+• Context environments cause exponential blow-up
+Problem:
+
+• Using abstraction to limit Val ̂
+• Standard abstract interpretation techniques
+Idea 1: reduce lattice height
+
+263
+
+===== slide 264 =====
+Possible improvements of complexity
+Idea 2: simplify contexts Val ̂ = ℘(Val × Cenv)
+Replace context environments with contexts only
+
+Val ̂ = ℘(Term × Δ)
+
+• No full environment
+• Only call strings δ
+E ect:
+• Lattice of polynomial height
+
+closures = function +
+call string
+
+• No combinations of variables inside ce
+• Number of abstract values drastically reduced
+• Less precision, but much cheaper
+264
+
+ff
+
+closures = function +
+full environment
+
+===== slide 265 =====
+Program Analysis 2025-26
+Lecture #22
+Control Flow Analysis
+
+===== slide 266 =====
+Cartesian Product Algorithm
+(CPA)
+
+266
+
+===== slide 267 =====
+FUN: syntax
+term
+
+t ::= ...
+e ::= t l
+
+|...
+
+n
+
+n
+
+• well-formedness condition: all function abstractions are closed, i.e.,
+FV( x1, . . . , xm ⇒ e0) = ∅
+• we do not treat recursive functions
+f
+f
+
+x1, . . . , xm ⇒ eb // function definition
+(with m arguments)
+| e0(e1, . . . , em) // function application
+(with m arguments)
+|
+
+267
+
+===== slide 268 =====
+The Cartesian Product Algorithm: adding context
+We extend the analysis to take context into account
+In this variant, contexts are tuples of argument values
+
+v̂ ∈ Val ̂ = ℘(Term)
+ρ ̂ ∈ Cenv ̂ = (Var × Δ) → Val ̂
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+δ ∈ Δ = Termm
+
+The resulting analysis is a re nement of 0-CFA that partitions the ow of
+values to expressions and variables according to the actual argument
+types in their dynamic calling context
+
+fi
+
+268
+
+===== slide 269 =====
+Rephrasing the O-CFA analysis: [fn]
+[ fn] (C,̂ ρ)̂ ⊧ (
+
+x1, ⋯, xm ⇒ eb)l
+
+Example
+e ≜ (fn x y => (x1 + y2)3
+̂ ⊇ {(fn x y => x1 + y2)} ...
+C(3)
+n
+
+f
+
+269
+
+{
+
+̂
+x1, ⋯, xm ⇒ eb} ⊆ C(l)
+
+===== slide 270 =====
+fl
+
+Rephrasing the O-CFA analysis: [app]
+[app] (C,̂ ρ)̂ ⊧ (t0l0(t1l1, ⋯, tmlm))l (C,̂ ρ)̂ ⊧ t0l0 ∧
+lm
+l1
+̂
+̂
+̂
+̂
+(
+C,
+ρ)
+⊧
+t
+∧
+⋯
+∧
+(
+C,
+ρ)
+⊧
+t
+m
+each argument
+ows to its
+corresponding
+parameter
+
+1
+
+lb
+̂ 0) :
+x1, ⋯, xm ⇒ tb ) ∈ C(l
+
+( ∀(
+̂ 1) × ⋯ × C(l
+̂ m) ⊆ ρ(x
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+C(l
+
+̂ i) is empty
+In the case where no C(l
+(C,̂ ρ)̂ ⊧ tblb ∧
+̂ 1) ⊆ ρ(x
+̂ m) ⊆ ρ(x
+̂ 1) ∧ ⋯ ∧ C(l
+̂ m)
+C(l
+̂ b) ⊆ C(l))
+̂
+C(l
+∧ ...
+
+Example
+̂ ⊇ {(fn x => x1 + y2)} then
+e ≜ (f3(44,65))6 supposing that C(3)
+̂ ⊆ ρ(1)
+̂ ⊆ ρ(2)
+̂ and C(5)
+̂
+C(4)
+n
+
+f
+
+270
+
+===== slide 271 =====
+Adding context: [var], [fn]
+tuple of argument values
+
+[var] (C,̂ ρ)̂ ⊧δCPA x l
+x1, ⋯, xm ⇒ eb)l
+
+{
+
+̂ δ)
+x1, ⋯, xm ⇒ eb} ⊆ C(l,
+
+n
+
+f
+
+f
+
+i
+
+271
+f
+
+[ fn] (C,̂ ρ)̂ ⊧δCPA (
+
+̂ δ)
+̂ δ) ⊆ C(l,
+ρ(x,
+
+===== slide 272 =====
+Adding context: [app]
+[app] (C,̂ ρ)̂ ⊧δCPA (t0l0(t1l1, ⋯, tmlm))l (C,̂ ρ)̂ ⊧δCPA t0l0 ∧ we distinguish calls
+by what they receive
+l
+l
+δ
+δ
+m
+1
+(C,̂ ρ)̂ ⊧CPA t1 ∧ ⋯ ∧ (C,̂ ρ)̂ ⊧CPA tm ∧
+̂ 0, δ) :
+( ∀( x1, ⋯, xm ⇒ tblb) ∈ C(l
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) :
+∀δb ∈ C(l
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+{δb} ⊆ ρ(x
+b
+(C,̂ ρ)̂ ⊧δCPA
+tblb ∧
+we analyse the body
+separately for each δb
+̂ b, δb) ⊆ C(l,
+̂ δ)) ∧ . . .
+C(l
+no data merging
+The Cartesian Product Algorithm derives its name from the cartesian
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) over which δb ranges
+product C(l
+n
+
+f
+
+272
+
+===== slide 273 =====
+Observation
+• The function body is analysed separately for each possible tuple of
+arguments
+• No merging across di erent tuples
+• This creates redundancy: it leads to many re-analyses of the same body:
+we need memoisation so that the bodies are only analysed once
+lb
+δ
+̂
+̂
+We
+memoise
+analyses
+of
+each
+(
+C,
+ρ)
+⊧
+t
+•
+CPA b as templates (with entries
+like tblb associated with x ↦ f, y ↦ a) and maintain them in a global pool
+• when a template is created it is only added to the pool if it is not already
+present (template reuse)
+
+ff
+
+273
+
+===== slide 274 =====
+Implementation
+
+• The analysis can be implemented in a straightforward manner because
+the product grows monotonically:
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) will increase each time one of the C(l
+̂ i, δ)
+• C(l
+increases (assuming that none is empty)
+
+274
+
+===== slide 275 =====
+If we remove the well-formedness condition, i.e., function abstractions are
+not closed, i.e., FV( x1, . . . , xm ⇒ e0) ≠ ∅, we need to extend the analysis,
+• treating functions as closure abstractions:, and
+• using new clauses
+where
+
+(C,̂ ρ)̂ ⊧ce
+δ e
+
+m
+
+• δ ∈ Δ = Term
+• ce ∈ CEnv = Var → Δ
+
+275
+n
+
+f
+
+Exercise
+
+===== slide 276 =====
+Adding context: [app]
+[app] (C,̂ ρ)̂ ⊧δCPA (t0l0(t1l1, ⋯, tmlm))l
+(C,̂ ρ)̂ ⊧δCPA t0l0 ∧
+lm
+l1
+δ
+δ
+̂
+̂
+(C, ρ)̂ ⊧CPA t1 ∧ ⋯ ∧ (C, ρ)̂ ⊧CPA tm
+̂ 0, δ) :
+( ∀( x1, ⋯, xm ⇒ tblb) ∈ C(l
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) :
+∀δb ∈ C(l
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+{δb} ⊆ ρ(x
+b
+(C,̂ ρ)̂ ⊧δCPA
+tblb ∧
+we analyse the body
+̂
+̂
+C(lb, δb) ⊆ C(l, δ)) ∧ . . .
+for each δb
+The Cartesian Product Algorithm derives its name from the cartesian
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) over which δb ranges
+product C(l
+n
+
+f
+
+276
+
+===== slide 277 =====
+Clause for function application
+l1 l2 l
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+t
+)
+δ
+1 2
+
+body analysed in the updated
+context δ0 using the updated
+closure environment ce0
+
+l1
+̂ ρ)̂ ⊧ce t l2 ∧
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+l0
+̂ 1, δ) :
+( ∀( x ⇒ t0 , ce0) ∈ C(l
+0 l0
+(C,̂ ρ)̂ ⊧ce′
+t ∧
+δ0 0
+̂ 2, δ) ⊆ ρ(x,
+̂ 0, δ) ⊆ C(l,
+̂ δ))
+̂ δ) ∧ C(l
+C(l
+
+where δ0 = ⌈δ, l⌉k and
+
+∧ ...
+
+ce′0 = ce0[x ↦ δ0]
+
+x is now bound in the new
+calling context δ0 but using the
+
+fi
+
+f
+
+f
+
+277
+i
+
+￼
+
+n
+
+f
+
+￼
+
+definition environment ce0
+
+===== slide 278 =====
+Adding context: [app]
+l0 l1
+lm l
+ce l0
+̂
+̂
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+(t
+,
+⋯,
+t
+))
+(
+C,
+ρ)
+⊧
+m
+δ
+δ t0 ∧
+0 1
+l1
+̂ ρ)̂ ⊧ce tmlm
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+⋯
+∧
+(
+C,
+δ 1
+δ
+̂ 0, δ) :
+( ∀( x1, ⋯, xm ⇒ tblb, ce0) ∈ C(l
+̂ 1, δ) × ⋯ × C(l
+̂ m, δ) :
+∀δb ∈ C(l
+̂ 1) × ⋯ × ρ(x
+̂ m) ∧
+{δb} ⊆ ρ(x
+0 lb
+(C,̂ ρ)̂ ⊧ce′
+t ∧
+δb b
+̂ b, δb) ⊆ C(l,
+̂ δ) ∧ . . .
+C(l
+
+where
+
+ce′0 = ce0[x1 ↦ δb ↓1 , . . . , xn ↦ δb ↓n ]
+with ↓i the projection on the i-th component
+￼
+
+n
+
+f
+
+￼
+
+278
+
+===== slide 279 =====
+The evolution of CFA for FUN
+
+0-CFA
+Context-insensitive and ow-insensitive ow analysis (merges all calls)
+Polynomial-time higher-order analysis
+Syntax-directed CFA
+Analyze each body once at definition site, but analyzes unreachable code
+Constraint-based formulation
+Context-sensitive CFA (k-CFA style)
+Track calling contexts and closure environments
+Distinguishes di erent calls
+Cartesian Product Algorithm
+Analyze bodies for each argument tuple
+Larger abstract state space
+
+fi
+
+fl
+
+ff
+
+For all CFAs, semantics are preserved, and a (least) solution exists.
+Moreover, an implementation can be provided
+279
+
+===== slide 280 =====
+CFA for FUN: conclusion
+Control- ow analysis for higher-order languages is a tradeo between:
+precision vs computational cost
+More context
+
+fewer spurious ows
+
+higher complexity
+
+The key challenge of CFA is balancing:
+• soundness
+• precision
+• scalability
+
+fl
+
+fl
+
+280

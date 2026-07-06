@@ -1,0 +1,2609 @@
+# ProgramAnalysis-14-AbstractDomains
+# auto-extracted from ProgramAnalysis-14-AbstractDomains.pdf (66 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #14
+Abstract numerical domains
+
+===== slide 2 =====
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+Chapter 2:
+Elements of Abstract Interpretation
+
+HAL Id: hal-01657536
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+2
+
+===== slide 3 =====
+Focus on Galois insertions
+most of the times
+C is a powerset
+ordered by inclusion ⊆
+
+(C, ⊆ )
+
+(A, ⊑ )
+γ
+
+γ(α(c))
+
+c
+
+α(c)
+
+α
+α
+
+3
+
+γ : A → C monotone
+α : C → A monotone
+c ⊆ γ(a) ⇔ α(c) ⊑ a
+α surjective
+γ injective
+α ∘ γ = id
+γ ∘ α extensive: c ⊆ γ(α(c))
+γ ∘ α idempotent
+γ ∘ α ∘ γ = γ (round-trip)
+α ∘ γ ∘ α = α (round-trip)
+α preserves lubs
+γ preserves glbs
+α induces γ
+γ induces α
+
+===== slide 4 =====
+Addendum:
+closure operators
+
+4
+
+===== slide 5 =====
+Expressible elements
+C
+
+c
+
+c = γ(α(c))
+
+each expressible
+element is the image
+of an abstract element
+
+A
+
+γ
+
+c = γ(α(c))
+⇒
+∃a ∈ A . c = γ(a)
+
+∀a . α(γ(a)) = a
+⇒
+∀a . γ(α(γ(a))) = γ(a)
+⇒
+∀a . γ(a) is expressible
+
+α
+Galois insertion
+
+α ∘ γ = id
+id ⊑ γ ∘ α
+
+γ(A) is the set of expressible elements
+5
+
+the image of an abstract
+element is expressible
+
+===== slide 6 =====
+Galois insertion as closures
+C
+
+The abstract domain
+can just be seen as
+a subset of the concrete domain
+
+A
+
+We write A(c)
+as a shorthand for γ(α(c))
+
+A(C) is the set of
+
+expressible elements
+Since A(A(c)) = A(c) the map A : C → C is a closure operator
+(monotone, extensive, idempotent)
+6
+
+===== slide 7 =====
+℘(Z)
+
+A
+
+t
+
+[−1,2]
+
+{−1,0,1,2}
+
+{−1,2}
+
+n
+
+I
+
+Example
+
+A
+
+No need of symbolic representations
+7
+
+===== slide 8 =====
+Examples
+({2,4,6,...}) = {2,3,4,5,6...} = [2,∞]
+Z
+
+({2,4,6,...}) = {1,2,3,4,5,6...} = Z>0
+
+Z>0
+∅
+
+({0,2,4,6,...}) = {0,1,2,3,4,5,6...} = [0,∞]
+1:2
+
+({0,2,4,6,...}) = { . . . , − 1,0,1,2,3,4,5,6...} = Z
+50
+
+Sign+
+
+Z
+
+Z0
+
+Z<0
+
+Z 0
+
+Z<0
+
+Z=0
+
+Z>0
+
+51
+52
+
++
+
+53
+
+({0,2,4,6,...}) = {0,1,2,3,4,5,6...} = Z≥0
+54
+55
+
+n
+
+n
+
+n
+
+t
+
+t
+
+g
+
+g
+
+g
+
+i
+
+i
+
+n
+
+n
+
+i
+
+n
+
+g
+
+i
+
+I
+
+S
+
+S
+
+I
+
+56
+S
+S
+
+Z<0
+
+57
+
+8
+58
+
+ú
+
+Fig. 1. Abstract Domain for Sign Analysis.
+
+===== slide 9 =====
+Sound abstract operators and
+BCAs
+
+9
+
+===== slide 10 =====
+Operator approximation
+For every concrete operator F : C → C
+#
+we must define a corresponding operator F : A → A in the abstract domain
+From the concretization map γ we derive the notion of sound / exact abstraction
+#
+
+#
+
+F is a sound abstraction of F if ∀a ∈ A :
+F( γ(a) ) ⊆ γ( F (a) )
+#
+or equivalently (by definition of GC) if ∀a ∈ A : α( F( γ(a) ) ) ⊑
+F (a)
+#
+or equivalently (see next slide) if ∀c ∈ C :
+α( F( c ) )
+⊑ F ( α( c ) )
+
+fi
+
+fi
+
+10
+
+===== slide 11 =====
+Operator approximation
+For every concrete operator F : C → C
+#
+we must define a corresponding operator F : A → A in the abstract domain
+From the concretization map γ we derive the notion of sound / exact abstraction
+#
+
+#
+
+F is a sound abstraction of F if ∀a ∈ A :
+F( γ(a) ) ⊆ γ( F (a) )
+#
+or equivalently (by definition of GC) if ∀a ∈ A : α( F( γ(a) ) ) ⊑
+F (a)
+#
+or equivalently (see next slide) if ∀c ∈ C :
+α( F( c ) )
+⊑ F ( α( c ) )
+GC: c ≤ γ(a) ⟺ α(c) ⊑ a
+fi
+
+fi
+
+11
+
+===== slide 12 =====
+Operator approximation
+For every concrete operator F : C → C
+#
+we must define a corresponding operator F : A → A in the abstract domain
+From the concretization map γ we derive the notion of sound / exact abstraction
+#
+
+#
+
+F is a sound abstraction of F if ∀a ∈ A :
+F( γ(a) ) ⊆ γ( F (a) )
+#
+or equivalently (by definition of GC) if ∀a ∈ A : α( F( γ(a) ) ) ⊑
+F (a)
+#
+or equivalently (see next slides) if ∀c ∈ C :
+α( F( c ) )
+⊑ F ( α( c ) )
+GC: c ≤ γ(a) ⟺ α(c) ⊑ a
+fi
+
+fi
+
+12
+
+===== slide 13 =====
+Operator approximation
+For every concrete operator F : C → C
+#
+we must define a corresponding operator F : A → A in the abstract domain
+From the concretization map γ we derive the notion of sound / exact abstraction
+#
+
+F is a sound abstraction of F if ∀a ∈ A :
+F∘γ
+or equivalently (by definition of GC) if ∀a ∈ A : α ∘ F ∘ γ
+or equivalently (see next slide) if ∀c ∈ C :
+α∘F
+
+#
+
+⊆γ∘F
+#
+⊑ F
+#
+⊑ F ∘α
+
+using functional notation
+
+GC: c ≤ γ(a) ⟺ α(c) ⊑ a
+fi
+
+fi
+
+13
+
+f ≤ g ⇔ ∀x . f(x) ≤ g(x)
+
+===== slide 14 =====
+Sound approximation
+α∘F∘γ⊑F
+α∘F∘γ⊑F
+
+#
+
+⟺
+
+#
+
+α∘F⊑F ∘α
+#
+
+#
+
+α∘F⊑F ∘α
+( function composition ) ⟹
+
+( function composition ) ⟺
+
+#
+
+#
+
+α∘F∘γ∘α⊑F ∘α
+
+α∘F∘γ⊑F ∘α∘γ
+
+( γ ∘ α extensive ) ⟹
+
+( α ∘ γ reductive ) ⟹
+
+#
+
+α∘F∘γ⊑F
+
+α∘F⊑F ∘α
+#
+
+any sound approximation F is less precise than F
+14
+
+A
+
+#
+
+≜α∘F∘γ
+
+===== slide 15 =====
+Sound approximations
+(C, ⊆ )
+
+(A, ⊑ )
+F∘γ⊆γ∘F
+
+γ
+#
+
+γ(F (a))
+
+#
+
+F (a)
+F(γ(a))
+
+F
+
+γ(a)
+
+a
+
+γ
+
+15
+
+F
+
+#
+
+#
+
+===== slide 16 =====
+Sound approximations
+(C, ⊆ )
+
+(A, ⊑ )
+#
+
+α
+
+#
+
+F (α(c))
+
+F(c)
+
+α(F(c))
+
+F
+
+c
+
+α
+
+16
+
+F
+α(c)
+
+#
+
+F∘γ⊆γ∘F
+⟺
+#
+α∘F⊑F ∘α
+
+===== slide 17 =====
+Best correct approximation (bca)
+(C, ⊆ )
+
+(A, ⊑ )
+
+#
+
+F∘γ⊆γ∘F
+2.3. APPROXIMATIONS
+⟺
+α
+#
+#
+F (a)
+α
+∘
+F
+⊑
+F
+∘
+α
+#
+F(γ(a))
+F
+A
+F (a)
+⟺
+An exact abstraction is always sound. For a sound abstraction
+to be exact,
+the concrete
+a
+image of any abstract-representable
+element must also be abstract-representable
+(e.g.,
+F
+# the
+α
+∘
+F
+∘
+γ
+⊑
+F
+γ
+
+image of an interval is an interval), which is quite rare.
+When we have a Galois
+notion of best
+γ(a) connection, we can additionally transport the
+A
+abstraction (Thm. 2.5) to operators:
+F ≜α∘F∘γ
+“
+
+≠
+≠
+≠
+Definition 2.16 (Best operator abstraction). Given a Galois connection (C, Æ) Ω
+≠≠–≠æ (A,
+ı) and a concrete operator f : C æ C, the best abstraction of f is given by – ¶ f ¶ “.
+17
+
+===== slide 18 =====
+℘(Z)
+F ≜ λX . {x + 1 ∣ x ∈ X}
+
+sound?
+#
+F1 ≜ λ[a, b] . [−∞, + ∞]
+#
+F2 ≜ λ[a, b] . [a + 1,b + 1]
+#
+F3 ≜ λ[a, b] . [a, b + 1]
+
+G ≜ λX . {2x ∣ x ∈ X}
+
+#
+G1 ≜ λ[a, b] . [2a,2b]
+
+t
+
+#
+G2 ≜ λ[a, b] . [a,2b]
+n
+
+I
+
+Examples
+
+18
+
+BCA?
+
+===== slide 19 =====
+Sound operator composition
+Theorem. Let F1 : C → C and F2 : C → C and be concrete (monotone) operators
+#
+#
+and let F1 : A → A and F2 : A → A some corresponding sound abstractions.
+#
+#
+Then, F2 ∘ F1 is a sound abstraction of F2 ∘ F1 .
+
+Proof.
+
+(F2 ∘ F1) ∘ γ ⊆
+
+#
+F2 ∘ γ ∘ F1
+
+#
+F1 ∘ γ ⊆ γ ∘ F1
+
+⊆
+
+#
+#
+γ ∘ (F2 ∘ F1 )
+
+#
+F2 ∘ γ ⊆ γ ∘ F2
+
+19
+
+===== slide 20 =====
+BCA composition?
+Remark. Let F1 : C → C and F2 : C → C and be concrete (monotone) operators
+A
+A
+and let F1 : A → A and F2 : A → A their corresponding BCAs.
+A
+A
+Then, F2 ∘ F1 is a sound abstraction of F2 ∘ F1 but not necessarily its BCA.
+A
+A
+F2 ∘ F1 = α ∘ F2 ∘ γ ∘ α ∘ F1 ∘ γ
+
+vs.
+
+α ∘ (F2 ∘ F1) ∘ γ
+
+A
+A
+The composition F2 ∘ F1 performs an additional trip γ ∘ α through the abstract
+
+world that represents a potential source of precision loss
+Thus, in general: (F2 ∘ F1)
+
+A
+
+A
+A
+#
+#
+⊑ F2 ∘ F1 ⊑ F2 ∘ F1
+
+20
+
+===== slide 21 =====
+℘(Z)
+
+sound?
+
+F1 ≜ λX . {2x ∣ x ∈ X}
+
+#
+F1 ≜ λ[a, b] . [2a,2b]
+
+F2 ≜ λX . {x ∈ X ∣ x ≤ 1}
+
+#
+F2 ≜ λ[a, b] . [a, min(1,b)]
+
+(α ∘ (F2 ∘ F1) ∘ γ) [0,1]
+= (α ∘ F2 ∘ F1) {0,1}
+= (α ∘ F2) {0,2}
+= α {0}
+= [0,0]
+
+#
+#
+(F2 ∘ F1 ) [0,1]
+#
+= F2 [0,2]
+
+= [0,1]
+
+[0,0] ⊑ [0,1]
+
+t
+
+n
+
+I
+
+BCA composition?
+
+21
+
+BCA?
+
+===== slide 22 =====
+Abstract domains
+
+22
+
+===== slide 23 =====
+General considerations
+the selection of an adequate abstract domain is at the
+foundation of the design of any static analysis tool
+(it xes the set of properties used in the analysis)
+the set of properties in an abstract domain is closed
+under intersection (called a Moore family)
+when de ning an adjunction,
+each adjoint uniquely determines the other
+fi
+
+fi
+
+23
+
+===== slide 24 =====
+Pirahã domain
+
+24
+
+===== slide 25 =====
+25
+
+===== slide 26 =====
+Pirahã domain
+∞
+
+γ( ⊤ ) = ∞
+γ( ⊥ ) = 3
+
+6
+5
+4
+
+∞
+
+(N , ≤ )
+
+α(n) = ⊥
+α(n) = ⊤
+
+3
+2
+1
+0
+
+γ
+
+∞
+
+(N , ≤ )
+26
+
+α
+
+⊤
+
+if n ≤ 3
+otherwise
+
+(AP, ⊑ )
+
+⊥
+
+===== slide 27 =====
+Exercise: sound abstractions
+γ( ⊤ ) = ∞
+γ( ⊥ ) = 3
+
++
+
+#
+
+⊥
+
+⊤
+
++
+
+#
+
+⊥
+
+⊤
+
+#
+
++
+
+⊥
+
+⊥
+
+⊤
+
+(commutative)
+
+⊥
+
+⊥
+
+(commutative)
+
+⊥
+
+⊤
+
+(commutative)
+
+⊤
+
+⊥
+
+⊥
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+sound? BCA?
+
+sound? BCA?
+
+27
+
+sound? BCA?
+
+===== slide 28 =====
+For the curious minded
+
+28
+
+===== slide 29 =====
+Pirandello domain
+
+29
+
+===== slide 30 =====
+Pirandello domain
+∞
+
+6
+5
+4
+3
+2
+1
+0
+
+∞
+
+(N , ≤ )
+
+γ( ⊤ ) = ∞
+γ( 1 ) = 1
+γ( ⊥ ) = 0
+α(0) = ⊥
+α(1) = 1
+α(n) = ⊤
+∞
+
+L
+
+(N , ≤ )
+30
+
+⊤
+1
+⊥
+otherwise
+
+γ
+
+α
+
+(A P, ⊑ )
+
+===== slide 31 =====
+Exercise: sound abstractions?
+γ( ⊤ ) = ∞
+γ( 1 ) = 1
+γ( ⊥ ) = 0
+
++
+
+#
+
+⊥
+
+1
+
+⊤
+
++
+
+#
+
+⊥
+
+1
+
+⊤
+
+#
+
++
+
+⊥
+
+1
+
+⊥
+
+⊤
+
+(commutative)
+
+⊥
+
+1
+
+(commutative)
+
+⊥
+
+⊥
+
+(commutative)
+
+1
+
+1
+
+1
+
+1
+
+1
+
+⊤
+
+1
+
+1
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+⊤
+
+sound? BCA?
+
+⊤
+
+sound? BCA?
+
+31
+
+⊤
+
+⊤
+
+sound? BCA?
+
+===== slide 32 =====
+Exercise: BCA
+γ( ⊤ ) = ∞
+γ( 1 ) = 1
+γ( ⊥ ) = 0
+
+×
+
+#
+
+⊥
+
+1
+
+⊥
+
+⊥
+
+(commutative)
+
+1
+
+⊥
+
+1
+
+⊤
+
+⊥
+
+⊤
+
+32
+
+⊤
+
+⊤
+
+===== slide 33 =====
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+Chapter 4:
+Non-relational abstract domains
+
+HAL Id: hal-01657536
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+33
+
+===== slide 34 =====
+Constant domains
+
+34
+
+===== slide 35 =====
+Constant domain
+a simple static analysis is constant propagation:
+it detects if some variables of expressions take only a
+single, fixed value during all executions and enables
+compiler optimization
+the constant domain nds application in such cases
+
+fi
+
+fi
+
+35
+
+===== slide 36 =====
+Constant domain
+γ( ⊤ ) =
+γ(k0) = {k0}
+...
+γ(kn) = {kn}
+γ( ⊥ ) = ∅
+
+(℘( ), ⊆ )
+
+γ
+
+V
+
+V
+
+V
+
+V
+
+(℘( ), ⊆ )
+36
+
+α
+
+(A , ⊑ )
+
+⊤
+k0 ... kn
+⊥
+
+===== slide 37 =====
+Constant domain
+γ( ⊤ ) = Z
+γ(n) = {n}
+γ( ⊥ ) = ∅
+
+Figure 4.4: Hasse diagram for the constant domain.
+γ
+(AZ, ⊑ )
+(℘(Z), ⊆ )
+α
+ ̆
+for the sake of generality, we do not require F to b
+37
+
+===== slide 38 =====
+Exercise: sound abstraction
+γ( ⊤ ) = Z
+γ(n) = {n}
+γ( ⊥ ) = ∅
++
+
+⊥
+
+m
+
+⊥
+
+⊥
+
+(commutative)
+
+n
+
+⊥ n+m
+
+⊤
+
+⊥
+
+#
+
+⊤
+
+38
+
+⊤
+
+⊤
+
+BCA?
+
+===== slide 39 =====
+Exercise: sound abstraction
+γ( ⊤ ) = Z
+γ(n) = {n}
+γ( ⊥ ) = ∅
+×
+
+⊥
+
+m
+
+⊥
+
+⊥
+
+(commutative)
+
+n
+
+⊥ n×m
+
+⊤
+
+⊥
+
+#
+
+⊤
+
+39
+
+⊤
+
+⊤
+
+BCA?
+
+===== slide 40 =====
+Exercise: sound abstraction
+γ( ⊤ ) = Z
+γ(n) = {n}
+γ( ⊥ ) = ∅
+0≠
+#
+
+m
+
+×
+
+⊥
+
+0
+
+⊥
+
+⊥
+
+(commutative)
+
+0
+
+⊥
+
+0
+
+0≠ n
+
+⊥
+
+0 n×m
+
+⊤
+
+⊥
+
+0
+
+40
+
+⊤
+
+⊤
+
+⊤
+
+BCA?
+
+===== slide 41 =====
+increasing chains, and the domain has no infinite increasing chain, we can enforce converdef
+ ̆
+gence by stating simply Ob = Ûb .
+
+Example
+
+Example 4.2 (Constant analysis). Consider the following very simple program:
+
+X Ω 0; Y Ω 10;
+while X < 100 do
+Y Ω Y ≠ 3;
+X Ω X + Y ;  ̧1 which values for X and Y ?
+Y ΩY +3
+done
+
+An analysis with the non-relational constant domain in denotational style, following
+Sect. 3.5, will iterate the loop twice. At the first loop iteration, at program point  ̧1, we
+would get X = 10, Y = 7. During the second iteration, we join at the loop head abstract
+states where X can have two different values: 0 and 10, hence X is not constant. We get
+ ̆
+at program point  ̧1 that X = €b , Y = 7. The result is stable after the second iteration,
+ ̆
+so that X = €b , Y = 7 is a program invariant at  ̧1: we have proved that Y equals 7 for
+every execution whenever it reaches  ̧1.
+While this result may seem straightforward, we point out that Y varies during the
+execution of the program: it has a different constant value at different program points,
+41
+
+===== slide 42 =====
+increasing chains, and the domain has no infinite increasing chain, we can enforce converdef
+ ̆
+gence by stating simply Ob = Ûb .
+
+Example
+
+Example 4.2 (Constant analysis). Consider the following very simple program:
+X Y
+X Ω 0; Y Ω 10;
+⊤ ⊤
+while X < 100 do
+7 10 ⊤
+0 10
+0 10
+Y Ω Y ≠ 3;
+⊤
+0
+⊤ 77
+X Ω X + Y ;  ̧1 which values for X and Y ?
+⊤ 77
+l1 7
+Y ΩY +3
+X don't know, but Y = 7
+7 10
+done ⊤ 10
+⊤
+
+An analysis with the non-relational constant domain in denotational style, following
+Sect. 3.5, will iterate the loop twice. At the first loop iteration, at program point  ̧1, we
+would get X = 10, Y = 7. During the second iteration, we join at the loop head abstract
+states where X can have two different values: 0 and 10, hence X is not constant. We get
+ ̆
+at program point  ̧1 that X = €b , Y = 7. The result is stable after the second iteration,
+ ̆
+so that X = €b , Y = 7 is a program invariant at  ̧1: we have proved that Y equals 7 for
+every execution whenever it reaches  ̧1.
+While this result may seem straightforward, we point out that Y varies during the
+execution of the program: it has a different constant value at different program points,
+42
+
+===== slide 43 =====
+Exercise
+De ne the adjoint abstraction map α : ℘(Z) → AZ
+
+γ( ⊤ ) = Z
+γ(n) = {n}
+γ( ⊥ ) = ∅
+
+fi
+
+43
+
+===== slide 44 =====
+Exercise
+De ne the adjoint abstraction map α : ℘(Z) → AZ
+
+γ( ⊤ ) = Z
+γ(n) = {n}
+γ( ⊥ ) = ∅
+
+α(∅) = ⊥
+α({n}) = n
+α(X) = ⊤ otherwise
+
+fi
+
+44
+
+===== slide 45 =====
+Constant set domain
+
+the constant set domain generalizes the previous domain
+by tracking several values instead of one
+
+45
+
+===== slide 46 =====
+Constant set domain
+
+(℘( ), ⊆ )
+
+γ( ⊤ ) =
+#
+#
+#
+γ(X ) = X if X ⊆ ℘k(K)
+
+V
+
+V
+
+V
+
+(℘( ), ⊆ )
+
+γ
+α
+
+(A|k|, ⊑ )
+46
+
+⊤
+℘k(K)
+
+===== slide 47 =====
+Constant set domain
+⊤
+
+⋯
+
+{−1,0} {−1,1} {0,1}
+{−1}
+
+(℘(Z), ⊆ )
+
+{0}
+
+γ
+α
+
+{1}
+
+⋯
+
+∅
+
+(A|2|, ⊑ )
+47
+
+===== slide 48 =====
+increasing chains, and the domain has no infinite increasing chain, we can enforce converdef
+ ̆
+gence by stating simply Ob = Ûb .
+
+Example
+
+Example 4.2 (Constant analysis). Consider the following very simple program:
+X Y
+X Ω 0; Y Ω 10;
+⊤ ⊤
+while X < 100 do
+7 10{0,7}
+0 10
+⊤
+{7,14} 10
+0 10
+Y Ω Y ≠ 3;
+{0,7}
+⊤
+0 7
+{0,7}
+⊤
+X Ω X + Y ;  ̧1 which values for X and Y ?
+7 77
+⊤
+l1 {7,14}
+Y ΩY +3
+X don't know, but Y = 7
+7 10
+done ⊤ 10
+{7,14}
+⊤
+
+An analysis with the non-relational constant domain in denotational style, following
+Sect. 3.5, will iterate the loop twice. At the first loop iteration, at program point  ̧1, we
+would get X = 10, Y = 7. During the second iteration, we join at the loop head abstract
+states where X can have two different values: 0 and 10, hence X is not constant. We get
+ ̆
+at program point  ̧1 that X = €b , Y = 7. The result is stable after the second iteration,
+ ̆
+so that X = €b , Y = 7 is a program invariant at  ̧1: we have proved that Y equals 7 for
+every execution whenever it reaches  ̧1.
+While this result may seem straightforward, we point out that Y varies during the
+execution of the program: it has a different constant value at different program points,
+48
+
+===== slide 49 =====
+Sound abstraction of sum
+#
+
+#
+
+#
+
+#
+
+#
+
+X + Y = ∅ if X =∅ or Y =∅
+# # #
+#
+#
+X BCA?
++ Y = ⊤ else if X =⊤ or Y =⊤
+# # #
+#
+#
+X + Y = ⊤ else if | {x + y ∣ x ∈ X , y ∈ Y } | > k
+# # #
+#
+#
+X + Y = {x + y ∣ x ∈ X , y ∈ Y } otherwise
+
+49
+
+===== slide 50 =====
+Sound abstraction of product
+#
+
+#
+
+#
+
+#
+
+#
+
+X × Y = ∅ if X =∅ or Y =∅
+# # #
+#
+#
+X BCA?
+× Y = ⊤ else if X =⊤ or Y =⊤
+# # #
+#
+#
+X × Y = ⊤ else if | {x × y ∣ x ∈ X , y ∈ Y } | > k
+# # #
+#
+#
+X × Y = {x × y ∣ x ∈ X , y ∈ Y } otherwise
+
+50
+
+===== slide 51 =====
+Exercise
+De ne the BCA for product in A|k|
+
+fi
+
+51
+
+===== slide 52 =====
+Exercise
+De ne the BCA for product in A|k|
+#
+
+#
+
+#
+
+#
+
+#
+
+X × Y = ∅ if X =∅ or Y =∅
+# # #
+#
+#
+X × Y = {0} else if X ={0} or Y ={0}
+# # #
+#
+#
+X × Y = ⊤ else if X =⊤ or Y =⊤
+# # #
+#
+#
+X × Y = ⊤ else if | {x × y ∣ x ∈ X , y ∈ Y } | > k
+# # #
+#
+#
+X × Y = {x × y ∣ x ∈ X , y ∈ Y } otherwise
+fi
+
+52
+
+===== slide 53 =====
+Exercise
+De ne the adjoint abstraction map α : ℘(Z) → A|2|
+
+fi
+
+53
+
+===== slide 54 =====
+Exercise
+De ne the adjoint abstraction map α : ℘(Z) → A|2|
+
+α(X) = X
+α(X) = ⊤
+
+if | X | ≤ 2
+otherwise
+
+fi
+
+54
+
+===== slide 55 =====
+X Ob Y
+ ̆
+
+ ̆ def
+
+=
+
+ ̆
+€b
+_
+_
+[X  ̆ fi Y  ̆
+
+else if |X  ̆ fi Y  ̆ | > k
+otherwise
+
+While we still use a bound k for set sizes, this bound only concerns, unlike the case of
+the bounded set domain, the invariants at program points where a widening is applied,
+while sets can be larger at other program points. We gain in expressiveness by lifting
+the restriction on set sizes, only enforcing the minimum constraints needed to ensure
+termination.
+The idea of using powersets to construct, from one domain, a more expressive one,
+is a general idea. It can be applied to other domains than the constant one. The generic
+construction, called powerset completion, will be described in details and applied to more
+expressive domains in Sect. 6.3.
+
+Interval domain
+
+4.5
+
+The Interval Domain
+
+We already mentioned interval abstractions several times in the previous chapters. Based
+4.5.
+THE
+INTERVAL
+DOMAIN
+on interval arithmetic, introduced by Moore [1966] for numeric analysis, and adapted to
+static analysis since the beginning of Abstract Interpretation by Cousot and Cousot [1976],
+it remains one of the most popular abstract domains because it is, as all non-relational
+domains, both simple and inexpensive, and yet it can express and infer valuable properties
+for program verification.
+76
+The interval domain abstracts the set of55 possible values of a variable as an interval.
+ ̆
+
+===== slide 56 =====
+union, hence, we define the lub as [a, b] Û [a , b ] = [min(a, a ), max(b, b )],
+Û ‹ = ‹ Û x = x. Indeed, [a, b] Û [aÕ , bÕ ] computes the smallest interval
+CHAPTER 2. ELEMENTS OF ABSTRACT INTERPRETATIO
+intervals [a, b] and [aÕ , bÕ ].
+
+Intervals
+
+r interval lattice (2.2) from the previous point is not complete as the
+mily of intervals { [0, i] | i Ø 0 } has no lub. We complete the interval
+a complete lattice by allowing positive and negative infinities as bounds:
+({ [a, b] | a œ Z fi { ≠Œ }, b œ Z fi { +Œ }, a Æ b } fi { ‹ },
+TM, Û, fl, ‹, [≠Œ, +Œ])
+
+[-∞,+∞]
+
+...
+
+...
+
+... [-∞,1] ... [-∞,9] ... [-1,+∞]
+
+[0,+∞]
+
+...
+
+...
+
+(2.3)
+
+23
+
+...
+
+...
+
+...
+
+...
+
+[-1,9]
+
+[-1,1]
+
+...
+
+... [0,9]
+
+...
+
+⊑
+
+γ( ⊥ ) = ∅
+γ([a, b]) = {x ∈ Z ∣ a ≤ x ≤ b}
+
+...
+
+[-1,0]
+
+... [-1,-1]
+
+[0,1]
+
+[0,0]
+
+... [1,9]
+
+[1,1]
+
+...
+
+...
+
+[9,9]
+
+...
+
+⊥
+
+Figure 2.3: Hasse diagram for the interval lattice, with bounds extended to Œ.
+56
+
+===== slide 57 =====
+Intervals structure
+a
+
+b
+
+a
+
+c
+d
+γ( ⊥ ) = ∅
+γ([a, b]) = {x ∈ Z ∣ a ≤ x ≤ b}
+
+b
+
+c
+
+d
+
+a
+
+b
+c
+
+[a, b] ⊑ [c, d] ⟺ (c ≤ a)∧(b ≤ d)
+#
+[a, b] ⊔ [c, d] ≜ [min(a, c), max(b, d)]
+#
+if l = max(a, c) ≤ min(b, d) = r
+[a, b] ⊓ [c, d] ≜ [l, r]
+#
+[a, b] ⊓ [c, d] ≜ ⊥
+otherwise
+57
+
+d
+
+===== slide 58 =====
+BCAs for sum
+a
+
+b
+c
+
+a
+
+d
+
+b
+c
+
+a
+d
+
+#
+
+[a, b] + [c, d] = [a + c, b + d]
+#
+
+[a, b] − [c, d] = [a − d, b − c]
+#
+
+− [a, b] = [−b, − a]
+58
+
+b
+c
+
+d
+
+===== slide 59 =====
+De ne a sound abstraction for product in
+a
+
+b
+c
+
+d
+
+a
+
+b
+c
+
+t
+
+59
+fi
+
+a
+d
+
+0
+
+n
+
+I
+
+Exercise
+b
+c
+
+d
+
+===== slide 60 =====
+De ne a sound abstraction for product in
+a
+
+b
+c
+
+d
+
+a
+
+b
+c
+
+a
+d
+
+b
+c
+
+d
+
+0
+
+#
+
+t
+
+[a, b] × [c, d] = [min(ac, ad, bc, bd),max(ac, ad, bc, bd)]
+60
+fi
+
+n
+
+I
+
+Exercise
+
+===== slide 61 =====
+Convergence of the analysis
+
+DOMAIN
+
+CHAPTER 2. ELEMENTS OF ABSTRACT IN
+
+Find the (important) di erence:
+
+[-∞,+∞]
+
+⊤
+
+⊤
+
+⊤
+1
+
+℘k(K)
+
+...
+
+...
+
+... [-∞,1] ... [-∞,9] ... [-1,+∞]
+
+[0,+∞]
+
+...
+
+...
+
+...
+
+...
+
+...
+
+[-1,9]
+
+[-1,1]
+
+...
+
+... [0,9]
+
+...
+
+⊑
+...
+
+⊥
+
+...
+
+⊥
+
+[-1,0]
+
+... [-1,-1]
+
+[0,1]
+
+[0,0]
+
+... [1,9]
+
+[1,1]
+
+...
+
+...
+
+[9,9]
+
+...
+
+⊥
+
+ACC! ACC!
+
+ACC!
+
+ACC!
+
+4.4: Hasse diagram for the constant domain.
+61
+
+ff
+
+not ACC!
+
+Figure 2.3: Hasse diagram for the interval lattice, with bounds
+Lubs are computed as: Û
+
+def
+
+[a , b ] = [min
+
+a , max
+
+b ]. More
+
+===== slide 62 =====
+In order to solve the convergence problemIin abstract domains, Cousot and Cousot [1977]
+x
+if
+y
+ı
+x
+def
+introduced a specific binary operator,
+the
+widening
+O:
+xOy =
+€ otherwise
+Definition 2.17. A binary operator O : A ◊ A æ A is a widening operator in an abstract
+domain (A, ı) if:
+⌥
+
+Widening
+
+it see
+computes
+bounds: ’x, y œ
+A: x ı x in
+O yChaps.
+and y 4–5,
+ı x Owhen
+y; presenting numeric
+We1.will
+many upper
+more sophisticated
+widenings
+abstract domains in details.
+i
+i
+2. and it enforces convergence: for any sequence (y )iœN in A, the sequence (x )iœN
+The following theorem
+states
+that
+widenings
+can
+indeed
+be
+used
+to
+approximate
+least
+def
+def
+0
+0
+i+1
+i
+i+1
+k+1
+k
+computed
+as
+x
+=
+y
+,
+x
+=
+x
+O
+y
+stabilizes
+in
+finite
+time:
+÷k
+Ø
+0:
+x
+=
+x
+.
+fifixpoints in the abstract:
+⌅
+Theorem 2.9. If f is a monotonic operator in a complete concrete lattice and g is a
+The first point allows us to construct increasing sequences by iterating abstract operators
+sound abstraction of f , then the following iteration:
+that are not necessarily monotonic. Another consequence of the first point is that the
+def
+result x O y is a sound approximation
+of
+the
+concrete
+join
+“(a)
+‚
+“(b).
+0
+x
+= ‹
+(2.6)
+The second point ensures that i+1
+all increasing
+sequences
+with
+widening
+are
+finite,
+even
+def
+i
+i
+x
+= x O g(x )
+if the abstract domain A has infinite strictly increasing chains.
+To illustrate
+thistime,
+definition,
+propose
+naive widening
+be applied
+converges
+in finite
+and itswelimit
+x isaasimple
+soundand
+abstraction
+of the that
+leastcan
+fifixpoint
+lfp f :
+to
+an
+arbitrary
+abstract
+domain
+with
+a
+greatest
+element
+€.
+It
+consists
+simply
+in
+putting
+lfp f Æ “(x).
+⌅
+62
+an unstable iterate to €:
+
+===== slide 63 =====
+In
+the
+test
+V
+Æ
+W
+,
+we
+use
+the
+upper
+bound
+of
+W
+to
+refine
+the
+upper
+bound
+of
+V
+,
+since
+ ̆
+an
+unstable
+iterate
+to
+€:
+simply apply (4.8), using an intersection Ù , for a finite fixed number of steps, which is
+any
+value
+of
+V
+which
+is
+greater
+than
+W
+’s
+upper
+bound
+cannot
+be
+part
+of
+a
+state
+satisfying
+sound
+and,
+by
+construction,
+terminates.
+Example
+2.16
+(Naive
+widening).
+the test. Similarly, we use the lower bound of V to refine the lower bound of W . We will
+I
+see in Sect. 4.6 a more general test abstraction
+that can handle arbitrary expressions.
+x if y ı x
+4.7.3 Widening with Thresholds
+def
+xOy =
+€ has
+otherwise
+Standard
+widening.
+The
+interval
+domain
+infinite
+strictly
+increasing
+chains,
+such
+naive
+widening
+Another natural solution to improve the precision of loop invariants is to design gentler
+as
+for
+instance
+[0,
+1],
+[0,
+2],
+.
+.
+.
+,
+[0,
+n],
+.
+.
+.
+.
+Hence,
+a
+proper
+widening
+is
+required
+to
+enforce
+widenings, that do not immediately abort unstable computations and push bounds to
+⌥
+convergence.
+The
+standard
+interval
+widening
+consists
+in
+replacing
+any
+unstable
+upper
+infinity. Consider, for instance, an iteration sequence starting with [10, 10], followed with
+bound
+with
++Œ,
+and
+any
+unstable
+lower
+bound
+with
+≠Œ:
+We
+willThen,
+see many
+more
+sophisticated
+widenings
+in Chaps. 4–5,
+when
+numeric
+[9, 10].
+instead
+of widening
+the sequence
+immediately
+to [≠Œ,
+10],presenting
+we can first
+widen
+
+Some widening
+
+CI
+
+I
+
+_
+_
+[≠Œ
+0
+
+_
+_
+[+Œ
+
+D
+
+abstract
+domains
+in 10]
+details.
+this sequence
+to [0,
+and, only
+if
+the
+lower
+bound
+of
+the
+next
+iterate
+becomes
+strictly
+a
+if
+a
+Æ
+c
+b
+if
+b
+Ø
+d
+def
+b]with
+Ob [c,
+d] =The
+,indeed be
+(4.7)
+The following
+theorem
+states
+that
+widenings
+used
+approximate
+least
+negative,
+replace[a,
+it
+≠Œ.
+widening
+willcan
+effectively
+stop
+at to
+0 to
+test its stability
+≠Œ otherwise
++Œ otherwise
+fifixpoints
+in the
+abstract:
+on the way
+to infinity.
+Formally, we defined O0 as:
+standard widening
+Once a bound is pushed to infinity,
+it
+becomes
+stable,
+as
+the
+widening
+never
+tightens
+Y
+SY
+T
+ ̆
+Theorem
+2.9.
+If
+f
+is
+a
+monotonic
+operator
+in
+a
+complete
+concrete
+lattice
+and
+g
+is
+a
+_
+_
+bounds. Each bound of each variable
+is ifhandled
+independently.
+The
+widening O on D ,
+a
+a
+Æ
+c
+b
+if
+b
+Ø
+d
+_
+_
+]
+]
+W
+X
+sound
+abstraction
+of
+f
+,
+then
+the
+following
+iteration:
+def
+0 converge W
+derived from O
+,
+will
+in
+at
+most
+2|V|
+iterations.
+b
+[a, b] Ob [c, d] = U 0
+(4.12)
+if 0 Æ c < a , 0
+if 0 Ø d > b X
+V
+
+otherwise
+otherwise
+x
+= ‹
+(2.6)
+def
+i+1
+i
+i
+x
+= x O g(x )
+Example
+4.6(Interval
+(Widening
+at zero).
+Consider
+theloop
+simple
+decrementing
+Ω
+Example 4.3
+analysis).
+Consider
+a63 simple
+“X Ω
+0; while X <loop:
+40 do“X
+XΩ
+widening with
+4.5.3
+Example
+Analysis
+threshold
+
+def
+
+===== slide 64 =====
+Example
+
+CHAPTER 4. NON-RELATIONAL ABSTRACT DOMAINS
+
+1
+X←0
+2
+X < 40
+
+3
+
+X ≥ 40
+
+6
+
+4
+X←X+1
+5
+
+(a)
+
+ ̧
+1
+2
+3O
+4
+5
+6
+
+ ̆0
+X ̧
+
+€
+‹
+‹
+‹
+‹
+‹
+
+ ̆4
+X ̧
+
+€
+0
+0
+0
+1
+‹
+
+ ̆5
+X ̧
+
+€
+0
+[0, +Œ]
+0
+1
+‹
+
+ ̆7
+X ̧
+
+€
+0
+[0, +Œ]
+[0, 39]
+[1, 40]
+[40, +Œ]
+
+ ̆8
+X ̧
+
+€
+0
+[0, +Œ]
+[0, 39]
+[1, 40]
+[40, +Œ]
+
+(b)
+
+Figure 4.7: Interval analysis example: (a) control-flow graph of a simple loop incrementing
+X, and (b) abstract iterations.
+
+[0,0] ∇ [1,1] = [0, + ∞]
+
+• Iterate 5 shows the first application of the widening as the interval [0, 0] gets increased
+def
+ ̆5
+ ̆4
+64
+to [0, 1] after getting some loop feed-back from X = 1 at point 5. We get X3 = X3 Ob
+
+===== slide 65 =====
+Example
+
+CHAPTER 4. NON-RELATIONAL ABSTRACT DOMAINS
+
+1
+X ← 40
+2
+X≠0
+
+6
+
+4
+X←X-1
+5
+
+3
+
+X=0
+
+(a)
+
+ ̧
+1
+2
+3O
+4
+5
+6
+
+intervals O
+€
+40
+[≠Œ, 40]
+[≠Œ, 40]
+[≠Œ, 39]
+0
+
+signs
+€
+>0
+Ø0
+>0
+Ø0
+Ø
+=0
+
+intervals O
+€
+40
+[0, 40]
+[1, 40]
+[0, 39]
+0
+
+0
+
+(b)
+
+Figure 4.12: Analysis of a decrementing loop using signs and intervals with various
+widenings.
+0
+widening Ob (4.12) allows the interval domain to find this invariant, though, as we get
+0
+[40, 40] Ob [39, 40] = [0, 40], which is stable. 65
+
+===== slide 66 =====
+Take home message
+With abstract
+domains, invariants are
+inferred, not guessed
+
+66

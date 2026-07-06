@@ -1,0 +1,1573 @@
+# ProgramAnalysis-07-MoreIL-NC
+# auto-extracted from ProgramAnalysis-07-MoreIL-NC.pdf (53 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #7
+More about IL and
+Necessary Conditions
+
+===== slide 2 =====
+More about IL:
+Soundness, Completeness
+
+2
+
+===== slide 3 =====
+from [[c]] ⊆ Σ × Σ
+to
+
+[[c]]
+[[c]]
+
+⊆Σ×Σ
+⊆Σ×Σ
+
+(Lecture #5)
+
+(Lecture #6)
+
+(this Lecture)
+
+to
+
+k
+
+r
+
+o
+
+e
+
+r
+
+: σ, ε : δ) ∣ (σ, δ) ∈ [[c]]ε}
+: σ, : σ) ∣ σ ∈ Σ}
+
+k
+k
+
+r
+
+[[c]] ⊆ Σε × Σε
+[[c]] ≜ {(
+Σε ≜ { , } × Σ
+∪ {(
+r
+
+o
+
+e
+
+e
+o
+
+e
+
+Yet another perspective
+
+3
+
+===== slide 4 =====
+Minimal set of rules
+[P] e [[[e]]P]
+
+[P] c1 [R] [R] c2 [Q]
+[seq]
+[P] c1; c2 [Q]
+
+[atom]
+
+￼
+
+￼
+
+￼
+
+￼
+
+∀i ∈ {1,2} [P] ci [Qi]
+∀n ≥ 0. [Pn] c [Pn+1]
+[choice]
+[iter]
+⋆
+[P] c1 + c2 [Q1 ∪ Q2]
+[P0] c [ ∃k . Pk]
+P′ ⇒ P [P′] c [Q′] Q ⇒ Q′
+[P] c [Q]
+4
+
+[cons]
+
+===== slide 5 =====
+Auxiliary rules
+[P1] c [Q1] [P2] c [Q2]
+[disj]
+[P1 ∨ P2] c [Q1 ∨ Q2]
+⋆
+
+[P] c [P]
+
+[iter0]
+
+assigned variables in c
+are disjoint from
+free variables in R
+
+[P] c ; c [Q]
+[unroll]
+⋆
+[P] c [Q]
+
+[P] c [Q]
+[frame]
+[P ∧ R] c [Q ∧ R]
+
+P′ ⇒ P [P′] c [Q]
+[P] c [Q]
+
+[P] c [Q′] Q ⇒ Q′
+[stren]
+[P] c [Q]
+
+[weak]
+
+￼
+
+￼
+
+￼
+
+￼
+
+⋆
+
+5
+
+===== slide 6 =====
+Soundness
+Th. Any derivable IL triple is valid
+Proof. By induction on the derivation tree
+Proof (sketch).
+It su ces to show the local soundness of each rule.
+For each axiom: it su ces to show it is valid.
+For each inference rule: we assume that the premises are valid and
+we show that the conclusion is valid as well.
+
+ffi
+
+ffi
+
+6
+
+===== slide 7 =====
+Soundness
+Th. Any derivable IL triple is valid
+
+[P] c1 [R] [R] c2 [Q]
+[seq]
+[P] c1; c2 [Q]
+
+Proof. Sample case [seq]
+
+We assume the premises valid and show the conclusion is valid
+as well.
+From [[c1]]P ⊇ R and [[c2]]R ⊇ Q
+we can conclude
+
+[[c1; c2]]P = [[c2]]([[c1]]P) ⊇ [[c2]]R ⊇ Q
+7
+
+===== slide 8 =====
+Soundness
+Th. Any derivable IL triple is valid
+Proof. Sample case [choice]
+
+∀i ∈ {1,2} [P] ci [Qi]
+[choice]
+[P] c1 + c2 [Q1 ∪ Q2]
+
+We assume the premises valid and show the conclusion is valid
+as well.
+From [[c1]]P ⊇ Q1 and [[c2]]P ⊇ Q2
+we can conclude
+
+[[c1 + c2]]P = [[c1]]P ∪ [[c2]]P ⊇ Q1 ∪ Q2
+8
+
+===== slide 9 =====
+Soundness
+Th. Any derivable IL triple is valid
+⋆
+
+[P] c ; c [Q]
+[unroll]
+⋆
+[P] c [Q]
+
+Proof. Sample case [unroll]
+
+We assume the premise valid and show the conclusion is valid
+⋆
+as well. From [[c ; c]]P ⊇ Q
+we can conclude
+⋆
+
+[[c ]]P =
+
+∞
+
+⋃
+k=0
+
+k
+
+[[c ]]P ⊇
+
+∞
+
+⋃
+
+k
+
+[[c ]]P = [[c]]
+
+k=1
+
+∞
+
+⋃
+k=0
+
+9
+
+k
+
+⋆
+
+[[c ]]P ⊇ [[c ; c]]P ⊇ Q
+
+===== slide 10 =====
+(Relative) Completeness
+independent of all but a nite
+number of variables
+involving nitely-supported predicates
+
+Th. Any valid IL triple can be derived, provided we have an
+oracle to decide implications
+Proof sketch. (Assuming an oracle to decide implications.)
+Solution: we go semantic!
+P and Q are sets of states, implications is subset inclusion, no
+issues with niteness.
+fi
+
+fi
+
+fi
+
+10
+
+===== slide 11 =====
+(Relative) Completeness
+Proof sketch ctd.
+First, we show that [P] c [[[c]]P] is derivable for any c and P.
+(We do so by induction on the structure of c.)
+Since any valid triple [P] c [Q] satisfies [[c]]P ⊇ Q,
+we derive it using the rule of consequence
+
+[P] c [[[c]]P]
+[[c]]P ⊇ Q
+[P] c [Q]
+fi
+
+11
+
+===== slide 12 =====
+(Relative) Completeness
+Proof sketch ctd. ([P] c [[[c]]P] is derivable)
+Roughly, by structural induction on the command c.
+Atomic commands: [atom]
+Choice and sequence: by inductive hyp. + [choice] / [seq]
+
+12
+
+===== slide 13 =====
+(Relative) Completeness: Kleene star
+⋆
+
+• [P] c [
+
+⋆
+
+: [[c ]]
+
+P]
+
+There exists a nite number of iterations of c that, starting from a state in P, reaches
+⋆
+⋆
+a state satisfying [[c ]] P (shortly written [[c ]] P)
+
+•
+
+inductive hyp. [P] c [[[c]]P]
+n
+
+n+1
+
+∀n
+≥
+0.
+[[[c
+]]P]
+c[[[c
+]]P]
+• Pn ≜ [[c ]]P and P0 ≜ P we instantiate [iter] as follows
+⋆
+k
+[P] c [ ∃k . [[c ]]P]
+n
+
+by applying the inductive hypothesis we know that
+n
+
+n
+
+n
+
+n
+
+k
+
+k
+
+o
+
+by applying applying [iter] we can conclude [P] c
+13
+
+fi
+
+o
+
+k
+
+o
+
+[[[c ]]P] c [[[c]]([[c ]]P)] but [[[c]]([[c ]]P)] ≡ [[[c ; c]]P] ≡ [[[c
+⋆
+
+k
+
+n+1
+
+]]P]
+⋆
+
+[ ∃k . [[c ]]P] ≡ [[[c ]]P]
+
+===== slide 14 =====
+(Relative) Completeness: Kleene star
+⋆
+
+• [P] c [
+
+:Q ]
+
+There exists a nite number of iterations of c that, starting from a state in P, reaches
+a state satisfying [ : Q ]
+By inductive hyp. ∀R, [R] c [er : Qer] and by previous result
+we know that [P] c
+⋆
+
+⋆
+
+k
+
+[ ∃k . [[c ]]P]. By instantiating R = ∃k . [[c ]]P we have
+
+k
+
+[P] c [ ∃k . [[c ]]P]
+
+k
+
+⋆
+
+[ ∃k . [[c ]]P] c [er : Qer]
+
+r
+r
+r
+
+e
+
+14
+fi
+
+by
+
+we conclude [P] c
+
+r
+
+e
+
+e
+
+[P] c ; c [er : Qer]
+e
+
+k
+
+⋆
+
+[er : Qer]
+
+===== slide 15 =====
+Exercises on IL and HL
+
+15
+
+===== slide 16 =====
+Is this “mixed” HL+IL inference rule sound ?
+
+[P]
+
+{P ∧ b} c {P}
+b
+c [ : P ∧ ¬b]
+
+Hint: recall sample rules seen previously for IL
+
+o
+
+d
+
+e
+
+l
+
+i
+
+k
+
+h
+
+[P0 ∧ b] c [P1]
+[P0] while b do c [P0 ∧ ¬b] [P0] while b do c [(P0 ∨ P1) ∧ ¬b]
+o
+
+w
+
+Mixed triples 1
+
+16
+
+===== slide 17 =====
+Is this “mixed” HL+IL inference rule sound ?
+
+[P]
+
+{P ∧ b} c {P}
+b
+c [ : P ∧ ¬b]
+
+o
+
+d
+
+e
+
+l
+
+i
+
+k
+
+h
+
+This rule is valid, because the conclusion is always valid
+
+o
+
+w
+
+Mixed triples 1
+
+17
+
+===== slide 18 =====
+Mixed triples 2
+Is this “mixed” HL+IL inference rule sound ?
+
+[P ∧ b] c [ : P]
+{P}
+b
+c {P ∧ ¬b}
+Hint: take, e.g.,
+
+x := x − 1
+
+o
+
+d
+
+o
+
+[P ∧ (x > 0)] x := x − 1 [ : P]
+(x > 0)
+x := x − 1 {P ∧ (x ≤ 0)}
+d
+
+o
+
+d
+
+e
+e
+
+e
+
+l
+l
+
+l
+
+i
+i
+
+i
+
+h
+
+k
+
+k
+
+h
+
+h
+
+o
+
+o
+
+w
+
+w
+
+w
+
+{P}
+
+(x > 0)
+
+18
+
+===== slide 19 =====
+Is this “mixed” HL+IL inference rule sound ?
+
+[P ∧ b] c [ : P]
+{P}
+b
+c {P ∧ ¬b}
+
+o
+
+o
+
+o
+
+d
+
+d
+
+d
+
+o
+
+d
+
+e
+
+l
+
+i
+
+e
+
+e
+
+e
+
+l
+
+l
+
+l
+
+i
+
+i
+
+h
+
+i
+
+k
+
+k
+
+h
+
+h
+
+h
+
+w
+
+o
+
+No. This rule is not sound.
+Take, P = b ≜ (x > 0), c ≜ x := x − 1, then the IL triple
+[x > 0]
+x>0
+x := x − 1 [ : x > 0] is valid,
+x>0
+x := x − 1 {false}
+but the HL triple {x > 0}
+is not valid, because [[
+x>0
+x := x − 1]]P ⊈ ∅
+o
+
+w
+
+w
+
+w
+
+Mixed triples 2
+
+19
+
+===== slide 20 =====
+Backward Analysis
+
+20
+
+===== slide 21 =====
+Regular commands
+regular
+command
+
+atomic
+command
+
+choice
+c ::= e
+| c1; c2
+| c1 + c2
+⋆
+| c
+Kleene
+star
+
+e ::= skip | x := a | b? | ...
+Syntactic sugar
+
+if b then c1 else c2 ≜ (b?; c1) + ( ¬b?; c2)
+
+while b do c
+
+21
+
+⋆
+
+≜ (b?; c) ; ¬b?
+
+===== slide 22 =====
+Backward analysis
+Backward Analysis
+
+Forward Analysis
+
+int Simple (bool b)
+interval
+{ int z;
+analysis
+if (b)
+z := 12; z∈ [12,12]
+else
+z := -12; z∈ [-12,-12]
+z∈ [-12,12]
+Possible
+return 1/z;
+division by 0
+}
+
+int Simple (bool b)
+{ int z;
+if (b)
+z := 12;
+else
+z := -12;
+return 1/z;
+}
+
+22
+
+z≠0
+z≠0
+z≠0
+
+===== slide 23 =====
+Backward semantics
+Di erent from WLP!
+
+[[c]] δ ≜ { σ ∣ δ ∈ [[c]]σ }
+
+σ ∈ [[c]] δ ⇔ δ ∈ [[c]]σ
+
+Hoare called it weakest possible precondition
+
+As before we can extend it
+to sets
+
+P
+
+p
+
+o
+
+p
+
+p
+
+p
+
+o
+
+o
+
+o
+
+σ
+
+ff
+
+Q
+δ
+
+c
+
+23
+
+[[c]] Q =
+
+⋃
+
+δ∈Q
+
+[[c]] δ
+
+===== slide 24 =====
+Example
+Let us focus on natural numbers
+
+c ≜
+
+wlp(c, Q) , { | [[c]]{ } ✓ Q}
+<latexit sha1_base64="eX73qh7lc9EBTUfZyjISlhLBqAg=">AAACT3icdVBNTxsxFPQGWiD9IKXHXkxDJSpV0W4OaXJD7YUjkQggrVeR1/sSLGzvYr9tFa32d/E7OPbAFX4Ct6reNEhQ0ZEsjWee9TyTFko6DMNfQWtt/cXLjc2t9qvXb95ud97tnLi8tAImIle5PUu5AyUNTFCigrPCAtepgtP04nvjn/4A62RujnFRQKL53MiZFBy9NO2M95jmeC6x+qmKel98GX9maCU3cwWXlFXMybnmlGmZ0ZjtxiJhu8mDzGrKXJk6QD879rc92m5PO92wF3oMBrQh0TCMPBmNhv3+iEZLKwy7ZIWjaeeOZbkoNRgUijsXR2GBScUtSqGgbrPSQcHFBZ9D7KnhGlxSLaPX9JNXMjrLrT8G6VJ9/KLi2rmFTv1kk9P96zXic15c4myYVNIUJYIRfxfNSkUxp02PNJMWBKqFJ1xY6f9KxTm3XKBv+8kWh5rbhc1q38xDfPp/ctLvRYPeYNzvHnxbdbRJPpCPZJ9E5Cs5IIfkiEyIIFfkhtySu+A6uA9+t1ajrWBF3pMnaG39AcOns/I=</latexit>
+
+Divisor_of(x) {
+wlp(c, [s = 5, x = 17]) = ??? (x prime,0,1)
+...
+s := nondet[2..x/2]; wlp(c, [s = 5, x = 15]) = ??? (x prime,0,1)
+if (x%s==0)
+skip
+op
+0
+0
+JcK
+Q
+,
+{
+|
+2
+JcK
+,
+2
+Q}
+else
+op
+while true do skip JcK [s = 5, x = 17] = ??? ∅
+op
+}
+JcK [s = 5, x = 15] = ??? (x = 15)
+<latexit sha1_base64="Gi05dKeiBvaW8DsMT3bGTYjsbrU=">AAACH3icbVDJTgJBEO1xRdxGPXppBRNMCJkhEbyQEL14xESWBCakp2mgQ8+S7hqVTDj7HX6AV/0Eb8YrX+Bv2CwHAV9Syct7Vamq54aCK7CssbG2vrG5tZ3YSe7u7R8cmkfHNRVEkrIqDUQgGy5RTHCfVYGDYI1QMuK5gtXdwe3Erz8yqXjgP8AwZI5Hej7vckpAS23zLN3yCPQ5xE8iHGVotqlKV9nnkl10LnEJp5PJtpmyctYUeJXYc5JCc1Ta5k+rE9DIYz5QQZRq2lYITkwkcCrYKNmKFAsJHZAea2rqE48pJ56+MsIXWungbiB1+YCn6t+JmHhKDT1Xd07uVsveRPzPa0bQvXZi7ocRMJ/OFnUjgSHAk1xwh0tGQQw1IVRyfSumfSIJBZ3ewhYFHpFD2RnpZOzlHFZJLZ+zC7nCfT5VvplnlECn6BxlkI2KqIzuUAVVEUUv6A29ow/j1fg0vozvWeuaMZ85QQswxr/C46Es</latexit>
+
+<latexit sha1_base64="6PoqcWntwk8fGOJpqNp5EWRSM68=">AAACH3icbVDJTgJBEO1xRdxGPXppBRNMCJkhAb2QEL14xESWBCakp2mgQ8+S7hqVTDj7HX6AV/0Eb8YrX+Bv2CwHAV9Syct7Vamq54aCK7CssbG2vrG5tZ3YSe7u7R8cmkfHNRVEkrIqDUQgGy5RTHCfVYGDYI1QMuK5gtXdwe3Erz8yqXjgP8AwZI5Hej7vckpAS23zLN3yCPQ5xE8iHGVotqlKhexzyS44l7iE08lk20xZOWsKvErsOUmhOSpt86fVCWjkMR+oIEo1bSsEJyYSOBVslGxFioWEDkiPNTX1iceUE09fGeELrXRwN5C6fMBT9e9ETDylhp6rOyd3q2VvIv7nNSPoXjsx98MImE9ni7qRwBDgSS64wyWjIIaaECq5vhXTPpGEgk5vYYsCj8ih7Ix0MvZyDqukls/ZxVzxPp8q38wzSqBTdI4yyEZXqIzuUAVVEUUv6A29ow/j1fg0vozvWeuaMZ85QQswxr+/oaEq</latexit>
+
+<latexit sha1_base64="AY2Ri+u8Aa0mTYulVpOAy6HxII0=">AAACd3icdVHBbhMxEPUuFEqANsCRAyNSoIcq2s0hJLcKLhwbibSV4hB5nUlq1fYu9izSatkP5cSRb+CGt10QRWUkS8/vvfHYz1mhlack+RbFd+7u3Lu/+6D38NHjvf3+k6enPi+dxLnMde7OM+FRK4tzUqTxvHAoTKbxLLt83+pnX9B5lduPVBW4NGJr1UZJQYFa9asDrnXmhLxEAsmd6/CnOi8amAFwckrYrcbPwGvgXm2NAH70lR91mzfAlYXbT+ksf6ytcwa8OYBeb9UfJMMk1HgMLUgnSRrAdDoZjaaQXklJMmBdnaz6P/g6l6VBS1IL7xdpUtCyFo6U1Nj0eOmxCGPFFhcBWmHQL+uriBp4FZg1bHIXlg13bNm/O2phvK9MFpxG0IX/V2vJ27RFSZvJsla2KAmtvB60KTVQDm3esFYOJekqACGdCncFeSFCPBR+5cYUT0a4yq2bkMzv58P/welomI6H49locPyuy2iXPWcv2SFL2Vt2zD6wEzZnkn2PdqK9aD/6Gb+IX8eH19Y46nqesRsVp78AnG6+Vw==</latexit>
+
+<latexit sha1_base64="4655KbomFLeSb6KFam2WtmWa9BU=">AAACKHicbVDLSsNAFJ3UV62vqEs3g60gIiUp2LopFN24rGAfkMQymUzboZMHMxMxhP6D3+EHuNVPcCfduvE3nLZZ2NYDA4dz7uXcOW7EqJCGMdFya+sbm1v57cLO7t7+gX541BZhzDFp4ZCFvOsiQRgNSEtSyUg34gT5LiMdd3Q79TtPhAsaBg8yiYjjo0FA+xQjqaSeflGyGXM5wiMiIbY5z/hjGkZjS9SvLp/rZs2plwqFnl40ysYMcJWYGSmCDM2e/mN7IY59EkjMkBCWaUTSSRGXFDMyLtixIJFKQwNiKRognwgnnf1pDM+U4sF+yNUL1GlT9e9GinwhEt9Vkz6SQ7HsTcX/PCuW/WsnpUEUSxLgeVA/ZlCGcFoQ9CgnWLJEEYQ5VbdCPESqFalqXEgR0kc84d5YNWMu97BK2pWyWS1X7yvFxk3WUR6cgFNwDkxQAw1wB5qgBTB4AW/gHXxor9qn9qVN5qM5Lds5BgvQvn8B8GGmHA==</latexit>
+
+<latexit sha1_base64="flLXCjiv/cdiHJYmRXVF7/3+2kQ=">AAACKHicbVDLSsNAFJ3UV62vqEs3g60gIiUptLopFN24rGAfkMQymUzaoZMHMxOxhP6D3+EHuNVPcCfduvE3nLZZ2NYDA4dz7uXcOW7MqJCGMdFya+sbm1v57cLO7t7+gX541BZRwjFp4YhFvOsiQRgNSUtSyUg35gQFLiMdd3g79TtPhAsahQ9yFBMnQP2Q+hQjqaSeflGyGXM5wkMiIbY5z/hjGsVjS9Srl891s+rUS4VCTy8aZWMGuErMjBRBhmZP/7G9CCcBCSVmSAjLNGLppIhLihkZF+xEkFiloT6xFA1RQISTzv40hmdK8aAfcfVCddpU/buRokCIUeCqyQDJgVj2puJ/npVI/9pJaRgnkoR4HuQnDMoITguCHuUESzZSBGFO1a0QD5BqRaoaF1KEDBAfcW+smjGXe1gl7UrZrJVr95Vi4ybrKA9OwCk4Bya4Ag1wB5qgBTB4AW/gHXxor9qn9qVN5qM5Lds5BgvQvn8B7SWmGg==</latexit>
+
+24
+
+===== slide 25 =====
+Unexpected result?
+Behind any programming activity there is an expectation
+What the program should do
+Sort an array, nd the maximum...
+What the program should not do
+Read private data, divide by zero...
+Loop forever, irresponsive user interface...
+The expectation is the program specification
+fi
+
+fi
+
+25
+
+===== slide 26 =====
+What is programming about?
+Speci cation
+What my code should do and should not do
+Hacking
+Write the code
+Debugging / Veri cation
+“Prove” my code follows its specification
+fi
+
+fi
+
+fi
+
+26
+
+===== slide 27 =====
+Speci cation
+Can be informal
+No hang, no infinite loops, no crashes, no wrong output...
+Can be formal
+Simplest: Test cases
+What I expect in some nite cases
+More complex: formal specification language
+fi
+
+fi
+
+fi
+
+fi
+
+27
+
+===== slide 28 =====
+Debugging / Veri cation
+Runtime analysis
+Run the program, observe the behavior for some specific runs
+Check if the behavior violates the specification
+Static analysis / verification
+Do not run the program, observe the properties for all runs
+Check if the behavior meets the specification
+
+fi
+
+fi
+
+fi
+
+fi
+
+fi
+
+28
+
+===== slide 29 =====
+Example: Abs
+Which is the specification for this code?
+
+public int32 Abs(int32 x)
+Reminder:
+{
+31 31
+int32 = [−2 ,2 − 1]
+if (x < 0)
+31
+31
+−(−2 ) = − 2
+return -x;
+else
+to return a non-negative value?
+return x;
+equal to the absolute value of x?
+}
+does it work?
+under which conditions?
+<latexit sha1_base64="/f2ywWhYmZ0fMmdKs/AJtp2RhVo=">AAACtXicdZBLb9NAFIUn5lXMK4UlmysipHSBZefZCJAKbFgWibSVYisaj6/D0JmxmRmXRJb/I1v+CFsYp0G0CO7q6NzHmfnSUnBjw/B7x7tx89btO3t3/Xv3Hzx81N1/fGKKSjOcs0IU+iylBgVXOLfcCjwrNVKZCjxNz9+1/dML1IYX6qPdlJhIulI854xaZy27n+MUV1zVbiZ1lmz8skoFZ8CVHQ7gTWr6l2p94Nc+8Bz6a3gF4YEPABptpRW8WL/0AYXBK56zGj9Glf25vOz2wiAcz0bTAYTBOIxmo6ETs9nhaDKGKAi31SO7Ol7ud4ZxVrBKorJMUGMWUVjapKbacibQ3a8MlpSd0xUunFRUoknqLZQGnleG2gJK1MAFbE28ulFTacxGpm5SUvvJ/N1rzX/1FpXND5Oaq7KyqFgbZLnAbZBhmrv/ImTccbC0fTk6lMCoptai5kAZc2bliFwLNFZSvdGZ+5TCr6yQkjp2cYY5fmnquH2FRlHHacVF5hTEFw6D5lStXHZcuFSoXzdN4zvMv1nC/8XJIIgmweTDoHf0dgd8jzwlz0ifRGRKjsh7ckzmhJFv5Af52SHe1Eu8zMsvR73ObucJuVZe8Qu1MdVL</latexit>
+
+fi
+
+29
+
+===== slide 30 =====
+Overview
+
+Problem: Automatic inference of preconditions
+
+30
+
+===== slide 31 =====
+Which preconditions?
+Su cient Precondition: if it holds, the code is correct
+Su cient Precondition: if it does not hold... we don't know
+Necessary Precondition: if it does not hold, the code is not correct
+Necessary Precondition: if it does not hold, something bad can happen
+
+ffi
+
+ffi
+
+31
+
+===== slide 32 =====
+Suf cient preconditions
+int Example1(int x,
+object[] a) Su cient precondition: (a != null)
+{
+Too strong for the caller
+if (x >= 0)
+no runtime errors also when
+{
+(x < 0) and (a == null)
+return a.length;
+Users of verification tools complained about it
+}
+“wrong
+preconditions”
+return -1;
+}
+<latexit sha1_base64="DCMinyYaDr8ZxMLd2ChS5CqKnU0=">AAAC0HicdVBNb9NAEF2br2I+msCNXlZESKkEkZ0maaOqqAIhcSyItJXiKBqvJ+nS3bXZXZdEloU4cOEf8hv4E6zTIFoEc3r75s2+mZfkghsbhj88/8bNW7fvbNwN7t1/8HCz0Xx0bLJCMxyxTGT6NAGDgiscWW4FnuYaQSYCT5Lz13X/5AK14Zn6YJc5TiTMFZ9xBtZR08a3OME5V6XTJI6SVcCVpW8WIHOBUbt+LJ4H9GplyUdkdjyhsB2UAZ/R9oK+PKDhtpOVl1KNttCKQkegmtuzfcdWwZp8Ee0HVRCjSv+YThutsBP2h73dLg07/TAa9nYcGA73eoM+jTrhqlpkXUfTprcTpxkrJCrLBBgzjsLcTkrQljOB7v/CYA7sHOY4dlCBRDMpV3lV9FlhwGY0R025oCsSr06UII1ZysQpJdgz83evJv/VGxd2tjcpucoLi4rVRpYLXBkZprm7F2nKXRAW6s2RckUZaLAWNafAmCMLl8g1Q2Ml6KVO3VEKP7NMSnDZxSnO8FNVxvUWGkUZJwUXqUM0vnAxaA5q7rzjzLnS8qCqqsDF/DtL+n9w3O1Eg87gXbd1+God+AbZIk9Jm0RklxySt+SIjAgjP72m98Tb8t/7C/+L//VS6nvrmcfkWvnffwE0Vtpp</latexit>
+
+Su cient Precondition: if it holds, no error is raised
+fi
+
+fi
+
+ffi
+
+ffi
+
+32
+
+===== slide 33 =====
+Necessary preconditions
+Su cient precondition: false
+
+int Example2 (object[ ] a)
+{ for (int i=0; i<=a.length;
+{
+a[i]=f(a[i]);
+if ( nondet() )
+return;
+}
+}
+<latexit sha1_base64="CqBsydj3FyjhF/PkgFiiPCJiyH8=">AAADB3icdVDLbtNAFLXNq5hXCks2V42QHFWynDRJG4VIFQipyxaRtlJsRePxdTp0PDYz40Jk+QP4GnaIBRs+g79hnKaFIjgbH517rs+dExecKR0EP23n1u07d+9t3HcfPHz0+Elr8+mxyktJcUpznsvTmCjkTOBUM83xtJBIspjjSXz+upmfXKBULBfv9LLAKCMLwVJGiTbSvPU9jHHBRGU8sZGy2mVCw5tPJCs49sDL4/dI9QwiANIBtwJIcwleY2KTYAzs5YT4HMVCn40B2Pa2MUED47wkBmTGoknqNZ/O+FplKXggcpGg9jrQuZKv5wYSdSnFeqV2azdEkfy+dd5qB34wGPV3exD4g6A76u8YMhrt9YcD6PrBCm1rjcP5pr0TJjktMxSacqLUrBsUOqqI1IxyNP8vFRaEnpMFzgwVJEMVVauaa3hRKqJzKFAC47AS8c+NimRKLbPYODOiz9Tfs0b812xW6nQvqpgoSo2CNkGacVwFKSqZeS9CwkwZmjSXIzABlEiiNUoGhFIjlqaRG4FKZ0QuZWIeJfAjzbOMmO7CBFP8UFdhc4VEXoVxyXhiGIQXpgbJiFiY7DA3qVBN6rp2Tc1XXcL/yXHP7w794VGvvf9qXfiG9dzasjyra+1a+9aBdWhNLWpv2Qf2kf3W+ex8cb463y6tjr3eeWbdgPPjFyuL5lg=</latexit>
+
+i++)
+The function may fail
+So eliminate all runs!
+
+Necessary precondition: (a != null &
+0 < a.length)
+If(0==a.length) then it will always fail!
+
+Su cient Precondition: if it holds, no error is raised
+Necessary Precondition: if it does not hold, something bad can happen
+ffi
+
+ffi
+
+33
+
+===== slide 34 =====
+Necessary conditions (NC)
+
+34
+
+===== slide 35 =====
+VMCAI 2013
+Automatic Inference of Necessary Preconditions
+Patrick Cousot1 , Radhia Cousot2 , Manuel Fähndrich3 , and Francesco Logozzo3
+1
+
+NYU, ENS, CNRS, INRIA
+pcousot@cims.nyu.edu
+2
+CNRS, ENS, INRIA
+rcousot@ens.fr
+3
+Microsoft Research
+{maf,logozzo}@microsoft.com
+
+Abstract. We consider the problem of automatic precondition inference. We argue that the common notion of sufficient precondition inference (i.e., under which precondition is the program correct?) imposes
+too large a burden on callers, and hence it is unfit for automatic program
+analysis. Therefore, we define the problem of necessary precondition inference (i.e., under which precondition, if violated, will the program always be incorrect?). We designed and implemented several new abstract
+interpretation-based analyses to infer atomic, disjunctive, universally and
+existentially quantified necessary preconditions.
+We experimentally validated the analyses on large scale industrial
+code. For unannotated code, the inference algorithms find necessary preconditions for almost 64% of methods which contained warnings. In 27%
+of these cases the inferred preconditions were also sufficient, meaning all
+warnings within the method body disappeared. For annotated code, the
+inference algorithms find necessary preconditions for over 68% of methods with warnings. In almost 50% of these cases the preconditions were
+also sufficient. Overall, the precision improvement obtained by precondition inference (counted as the additional number of methods with no
+warnings) ranged between 9% and 21%.
+
+1
+
+“Under which precondition, if violated,
+will the program always be incorrect?”
+
+Introduction
+
+Design by Contract [28] is a programming methodology which systematically requires the programmer to provide the preconditions, postconditions and object
+invariants (collectively called contracts) at design time. Contracts allow automatic generation of documentation, amplify the testing process, and naturally
+enable assume/guarantee reasoning for divide and conquer static program analysis and verification. In the real world, relatively few methods have contracts
+that are sufficient to prove the method correct. Typically, the precondition of
+a method is weaker than necessary, resulting in unproven assertions within the
+method, but making it easier to prove the precondition at call-sites. Inference
+has been advocated as the holy grail to solve this problem.
+In this paper we focus on the problem of computing necessary preconditions
+which are inevitable checks from within the method that are hoisted to the
+R. Giacobazzi, J. Berdine, and I. Mastroeni (Eds.): VMCAI 2013, LNCS 7737, pp. 128–148, 2013.
+c Springer-Verlag Berlin Heidelberg 2013
+!
+
+35
+
+===== slide 36 =====
+Necessary preconditions
+When automatic inference is considered,
+necessary preconditions make much more sense
+Su cient preconditions impose too large a burden to callers
+Necessary preconditions are easy to explain to users
+Implemented in the contract checker veri er Clousot (Microsoft)
+Precision improvements 9% to 21%
+Extremely low false positive ratio
+fi
+
+ffi
+
+36
+
+===== slide 37 =====
+Necessary preconditions
+The idea of NC is to prevent the invocation of the function with arguments that
+will inevitably lead to some error
+Given Q the set of good nal states (the specification), the NC triple
+
+(P) c (Q)
+means that any states σ that admits at least one non-erroneous execution of c is in P
+
+Q
+
+P
+c
+
+It is an over-approximation!
+
+fi
+
+37
+fi
+
+op
+
+JcK Q ✓ P
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+===== slide 38 =====
+Necessary Conditions
+(P) c (Q)
+Program traces: T = G ∪ B ∪ I
+
+G = good traces, terminating in a state in Q
+B = bad traces, terminating outside Q in an assertion violation
+assertions:
+Language-induced: division by zero, null pointers, bu er overrun ...
+User-supplied annotations: assertions, preconditions, postconditions, object invariants
+
+I = infinite traces, non-termination
+Notation: G(σ) are the good traces starting from σ,....
+ff
+
+fi
+
+38
+
+===== slide 39 =====
+Suf cient Conditions
+wlp(c, Q)
+
+If the state σ ∈ wlp(c, Q), then no bad state is reachable starting from σ
+The following holds :
+
+σ ∈ wlp(c, Q) ⟹ B(σ) = ∅
+So that it may exists some initial state σ such that
+
+σ ∉ wlp(c, Q) ∧ G(σ) ≠ ∅
+i.e., σ ∉ wlp(c, Q) but it does not necessarily lead to a bad state
+fi
+
+39
+
+===== slide 40 =====
+Necessary Conditions
+(P) c (Q)
+
+If the state σ ∈ P, then σ cannot reach bad states only
+Equivalently :
+
+G(σ) ≠ ∅ ⟹ σ ∈ P (i.e., σ ∉ P ⟹ G(σ) = ∅ )
+σ ∉ P ⟹ ( ( I(σ) = ∅ ) ⟹ B(σ) ≠ ∅ ∧ G(σ) = ∅ )
+i.e., if σ ∉ P, either
+a computation diverge, or reach only bad states
+40
+
+===== slide 41 =====
+Comparison ignoring termination
+Does σ belongs to the ...
+
+G(σ)
+
+G(σ)
+
+B(σ)
+
+B(σ)
+41
+
+===== slide 42 =====
+Compare approximation logics
+Forward
+
+Backward
+
+Over
+
+Under
+
+JcKP ✓ Q
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+{HL}
+
+42
+
+===== slide 43 =====
+Compare approximation logics
+Forward
+
+Over
+
+Under
+
+Backward
+
+JcKP ✓ Q
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+{HL}
+
+JcKP ◆ Q
+<latexit sha1_base64="GWTIqoMfcoRbXpXafHnQClX3+HM=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrqONKAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A+YnpgU=</latexit>
+
+[IL]
+
+43
+
+===== slide 44 =====
+Compare approximation logics
+Forward
+
+Over
+
+JcKP ✓ Q
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+{HL}
+
+JcKP ◆ Q
+<latexit sha1_base64="GWTIqoMfcoRbXpXafHnQClX3+HM=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrqONKAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A+YnpgU=</latexit>
+
+Under
+
+Backward
+
+[IL]
+
+op
+
+(NC) JcK
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+44
+
+Q✓P
+
+===== slide 45 =====
+Compare approximation logics
+Forward
+
+Over
+
+{HL}
+
+[IL]
+
+op
+
+(NC) JcK
+
+JcKP ✓ Q
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+Q✓P
+
+? Lecture #08
+
+JcKP ◆ Q
+<latexit sha1_base64="GWTIqoMfcoRbXpXafHnQClX3+HM=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrqONKAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A+YnpgU=</latexit>
+
+Under
+
+Backward
+
+45
+
+===== slide 46 =====
+Which consequence rule?
+op
+
+{HL}
+
+JcK Q ✓ P
+
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+
+???
+
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+(NC)
+
+There’s not a proof system but...
+
+{P} c{Q}
+
+[IL]
+
+P′ ⇒ P [P′] c [Q′] Q ⇒ Q′
+[P]c [Q]
+
+Weaken the pre and strengthen the post!
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+(NC)
+
+P′ ⇒ P (P′) c (Q′) Q ⇒ Q′
+(P) c (Q)
+46
+
+===== slide 47 =====
+HL vs NC: weakest/strongest pre and post
+
+Given Q, we look for
+the strongest P
+
+Given P, we look for
+the strongest Q
+
+op
+
+(NC) JcK
+
+{HL}{HL} JrKP
+JcKP✓✓QQ
+
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+<latexit sha1_base64="FAyKLk8vVidAindPsF4vxlmCsnM=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISJWr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyL0A6U/9ujJmv9cj3zKTPcKCXvan4n9eKsXfVHosgihECPg/qxZJiSKcN0a5QwFGODGFcCXMr5QNmakHT40KKRp+pkepOTDPOcg+rpF4sOKVCqVrMla+TjtLkhJySc+KQS1Imt6RCaoSTR/JMXsir9WS9We/W53w0ZSU7x2QB1tcP6NqmBg==</latexit>
+
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+Given Q, we look for
+the weakest P
+
+Q✓P
+
+Given P, we look for
+the weakest Q
+
+47
+
+===== slide 48 =====
+HL vs NC: relation
+{P }c{Q} () (¬P )c(¬Q)
+<latexit sha1_base64="OYbYi/hIM5OG9GhVPNsr66KUh1w=">AAACQHicbZDPThsxEMa9UAqkpaRw7GXUUAku0S4H4IjgwqGHRGoAKRtFXmd2Y+G1V/YsVbTK+/Q5+gBcgScoN8SVE07YA3/6SZZ+/mZGY39JoaSjMLwNFhY/LH1cXlltfPq89mW9+XXj1JnSCuwJo4w9T7hDJTX2SJLC88IizxOFZ8nF8ax+donWSaN/0aTAQc4zLVMpOHlr2DzaiivoxFMAAZ664DH+aXSmMCUrszFxa81vgG2INWbQ2Zl11pcu7Gw1GsNmK2yHc8F7iGposVqdYfNfPDKizFGTUNy5fhQWNKi4JSkUThtx6bDg4oJn2PeoeY5uUM3/OoUf3hlBaqw/mmDuvpyoeO7cJE98Z85p7N7WZub/av2S0oNBJXVREmrxvCgtFZCBWXAwkhYFqYkHLqz0bwUx5pYL8vG+2uIo53ZiR1OfTPQ2h/dwutuO9tp73d3W4VGd0Qr7xr6zbRaxfXbITliH9Zhgf9gVu2Y3wd/gLrgPHp5bF4J6ZpO9UvD4BCSsrDs=</latexit>
+
+that means
+
+op
+
+JcKP ✓ Q () JcK (¬Q) ✓ ¬P
+<latexit sha1_base64="FyannCxFLDdvcu3pJMfeO2uMBak=">AAACeXicbVHLattAFB2paZO4L6VddnMTp+B2YaQU0i5Ds+miCxviJGC5ZjS+koeMZtSZqwQj/KFddpWP6KYjx4G8Dgwczn2cy5msUtJRHP8Jwmcbz19sbm13Xr56/eZttPPu1JnaChwJo4w9z7hDJTWOSJLC88oiLzOFZ9nFcVs/u0TrpNEntKhwUvJCy1wKTl6aRs1+qlRmubhAApFae8thAJC6OnNI+BtgCC066U+jC4U5WVnMiVtrruDpBb8aUy2hl2osYPjp7q6VBIP9zjTqxv14BXhMkjXpsjUG0+g6nRlRl6hJKO7cOIkrmjTckhQKl520dlh5d17g2FPNS3STZhXSEj56ZQa5sf5pf2qr3p1oeOncosx8Z8lp7h7WWvGp2rim/NukkbqqCbW4McprBWSgTRxm0qIgtfCECyv9rSDm3KdE/l/uuTgquV3Y2dInkzzM4TE5Pegnh/3D4UH36Ps6oy32ge2xHkvYV3bEfrABGzHB/gabQRTsBP/C3bAXfr5pDYP1zHt2D+GX/982vmg=</latexit>
+
+48
+
+===== slide 49 =====
+The proof
+
+We prove one implication,
+the other is similar
+
+JcKP ✓ Q =) JcK (¬Q) ✓ (¬P ) Let us assume [[c]]P ⊆ Q
+<latexit sha1_base64="iEdMgWD0tJi3SilXWEeaRUb7JBc=">AAACd3icbVFNT9tAFFy7pdBAIbTHHvpEKAqXyOYAPaJy6aGHRGoAKU6j9ebFWbHeNbvPRZaVH9oTR34Dt65JKvE10kqjeR/zNJsWSjqKor9B+Obt2rv1jfetza0P2zvt3Y/nzpRW4FAYZexlyh0qqXFIkhReFhZ5niq8SK/OmvrFH7ROGv2LqgLHOc+0nEnByUuTdrWfKJVaLq6QQCTW/ufQB0hcmTokvAYYQINW8tPozMpsTtxacwOvD/+uTbGAbqIxg8Hh4z1LDfqH+61JuxP1ogfASxKvSIet0J+075KpEWWOmoTizo3iqKBxzS1JoXDRSkqHhffnGY481TxHN64fIlrAV69MYWasf9of26iPJ2qeO1flqe/MOc3d81ojvlYblTT7Nq6lLkpCLZZGs1IBGWjyhqm0KEhVnnBhpb8VxJz7nMj/yhMXRzm3lZ0ufDLx8xxekvOjXnzcOx4cdU6/rzLaYJ/ZHuuymJ2wU/aD9dmQCXYbrAXbwU5wH34JD8LusjUMVjOf2BOE8T8FGrz6</latexit>
+
+op
+
+We want to prove [[c]]
+
+op
+
+Let us take σ ∈ [[c]]
+
+op
+
+( ¬Q) ⊆ ( ¬P)
+op
+
+( ¬Q) it must exist δ ∈ ( ¬Q) such that σ ∈ [[c]] δ
+i.e., such that δ ∈ [[c]]σ
+
+if σ ∈ P, then it would mean that δ ∈ [[c]]σ ⊆ [[c]]P ⊆ Q
+but this is not possible, because we know that δ ∉ Q
+therefore, it must be the case that σ ∉ P
+49
+
+===== slide 50 =====
+HL vs NC
+r
+
+¬P
+
+¬Q
+
+{ ¬P} c { ¬Q} () (P) c (Q)
+<latexit sha1_base64="FsFlBZxgHDSSxH8BSMc73w5ywJA=">AAACD3icbVDLSsNAFJ3UVxNfqS7dDBbBVUm6qC6LblxWsA9IQplMJu3QmSTMTJQQ+hF+gFv9BHfi1k/wC/wNp4+FbT1w4XDOvZzLCTNGpXKcb6Oytb2zu1c1rf2Dw6Nju3bSk2kuMOnilKViECJJGE1IV1HFyCATBPGQkX44uZ35/UciJE2TB1VkJOBolNCYYqS0NLRrvmeZPo1j0/QDy7Qsa2jXnYYzB9wk7pLUwRKdof3jRynOOUkUZkhKz3UyFZRIKIoZmVp+LkmG8ASNiKdpgjiRQTl/fQovtBLBOBV6EgXn6t+LEnEpCx7qTY7UWK57M/E/z8tVfB2UNMlyRRK8CIpzBlUKZz3AiAqCFSs0QVhQ/SvEYyQQVrqtlRSpOBKFiKa6GXe9h03SazbcVqN136y3b5YdVcEZOAeXwAVXoA3uQAd0AQZP4AW8gjfj2Xg3PozPxWrFWN6cghUYX7+C5JoW</latexit>
+
+<latexit sha1_base64="I5PZ83vm3KrAhHezTRi9iCFZ9FY=">AAACEHicbVDLSsNAFJ3UVxNfsS7dDBbBVUm6qC6LblxWsA9IQplMJu3QmSTMTMQQ+hN+gFv9BHfi1j/wC/wNp4+FbT1w4XDOvZzLCTNGpXKcb6Oytb2zu1c1rf2Dw6Nj+6TWk2kuMOnilKViECJJGE1IV1HFyCATBPGQkX44uZ35/UciJE2TB1VkJOBolNCYYqS0NLRrvmdBn8axZZp+YJmWZQ3tutNw5oCbxF2SOliiM7R//CjFOSeJwgxJ6blOpoISCUUxI1PLzyXJEJ6gEfE0TRAnMijnv0/hhVYiGKdCT6LgXP17USIuZcFDvcmRGst1byb+53m5iq+DkiZZrkiCF0FxzqBK4awIGFFBsGKFJggLqn+FeIwEwkrXtZIiFUeiENFUN+Ou97BJes2G22q07pv19s2yoyo4A+fgErjgCrTBHeiALsDgCbyAV/BmPBvvxofxuVitGMubU7AC4+sX4MyaQQ==</latexit>
+
+P
+
+op
+
+JcK(¬P ) ✓ (¬Q) () JcK Q ✓ P
+<latexit sha1_base64="vTppgodZ5CiGdEu8LkjRsX2NTss=">AAACMnicbVDLSgNBEJz1GeMr6tFLYyJ4Crsi0WPQi8cETBSyMcxOOnFw9uFMrxCW/Ijf4Qd41T/Qm3jw4kc4iXvwVTBQVHVTPRUkShpy3WdnZnZufmGxsFRcXlldWy9tbLZNnGqBLRGrWF8E3KCSEbZIksKLRCMPA4XnwfXJxD+/RW1kHJ3RKMFuyIeRHEjByUq90kEFfKUCzcU1Eghf65xfZnEyBmgC+CYNDBLeADQAKlAs9kplt+pOAX+Jl5Myy9Hold79fizSECMSihvT8dyEuhnXJIXCcdFPDSY2lg+xY2nEQzTdbPq7MexapQ+DWNsX2Rsn6veNjIfGjMLAToacrsxvbyL+53VSGhx1MxklKWEkvoIGqQKKYVIV9KVGQWpkCRda2ltBXHFbD9lCf6QYCrke6f7YNuP97uEvae9XvVq11twv14/zjgpsm+2wPeaxQ1Znp6zBWkywO/bAHtmTc++8OK/O29fojJPvbLEfcD4+AQWQqQY=</latexit>
+
+<latexit sha1_base64="8WjNL7AZbjg+wDdsg2tyh52lKcc=">AAACNnicbVA9TwJBEN3zW/xCLW02ogk05I4CKYk2lpCImHCE7C0DbNjbO3fnTAjhr/g7/AG22tvYGVp/goueiYAv2eTNm5m82RfEUhh03TdnZXVtfWNzazuzs7u3f5A9PLo1UaI5NHgkI30XMANSKGigQAl3sQYWBhKawfBq1m8+gDYiUjc4iqEdsr4SPcEZWqmTrZz5Ugaa8SEg5dTX+rfI+wr6tFag1DdJYADhPtXqhbNMppPNuUX3G3SZeCnJkRS1TnbqdyOehKCQS2ZMy3NjbI+ZRsElTDJ+YiC21qwPLUsVC8G0x98/nNBzq3RpL9L2KXvoTP27MWahMaMwsJMhw4FZ7M3E/3qtBHuV9lioOEFQ/Meol0iKEZ3FRbtCA0c5soRxLeytlA+YjQhtqHMuBkOmR7o7scl4izksk9tS0SsXy/VSrnqZZrRFTsgpyROPXJAquSY10iCcPJJn8kJenSfn3flwpj+jK066c0zm4Hx+Ac5gqmc=</latexit>
+
+Q
+
+50
+
+===== slide 51 =====
+Exercises
+
+51
+
+===== slide 52 =====
+WLP vs WPP
+Let c ≜ (z := x) + (z := y)
+and let Q ≜ (z = 0)
+What is wlp(c, Q) ?
+What is [[c]]
+
+op
+
+Q?
+
+(x = y = 0)
+
+wlp(c, Q) , { | [[c]]{ } ✓ Q}
+<latexit sha1_base64="eX73qh7lc9EBTUfZyjISlhLBqAg=">AAACT3icdVBNTxsxFPQGWiD9IKXHXkxDJSpV0W4OaXJD7YUjkQggrVeR1/sSLGzvYr9tFa32d/E7OPbAFX4Ct6reNEhQ0ZEsjWee9TyTFko6DMNfQWtt/cXLjc2t9qvXb95ud97tnLi8tAImIle5PUu5AyUNTFCigrPCAtepgtP04nvjn/4A62RujnFRQKL53MiZFBy9NO2M95jmeC6x+qmKel98GX9maCU3cwWXlFXMybnmlGmZ0ZjtxiJhu8mDzGrKXJk6QD879rc92m5PO92wF3oMBrQh0TCMPBmNhv3+iEZLKwy7ZIWjaeeOZbkoNRgUijsXR2GBScUtSqGgbrPSQcHFBZ9D7KnhGlxSLaPX9JNXMjrLrT8G6VJ9/KLi2rmFTv1kk9P96zXic15c4myYVNIUJYIRfxfNSkUxp02PNJMWBKqFJ1xY6f9KxTm3XKBv+8kWh5rbhc1q38xDfPp/ctLvRYPeYNzvHnxbdbRJPpCPZJ9E5Cs5IIfkiEyIIFfkhtySu+A6uA9+t1ajrWBF3pMnaG39AcOns/I=</latexit>
+
+(x = 0 ∨ y = 0) JcK Q , { |
+<latexit sha1_base64="AY2Ri+u8Aa0mTYulVpOAy6HxII0=">AAACd3icdVHBbhMxEPUuFEqANsCRAyNSoIcq2s0hJLcKLhwbibSV4hB5nUlq1fYu9izSatkP5cSRb+CGt10QRWUkS8/vvfHYz1mhlack+RbFd+7u3Lu/+6D38NHjvf3+k6enPi+dxLnMde7OM+FRK4tzUqTxvHAoTKbxLLt83+pnX9B5lduPVBW4NGJr1UZJQYFa9asDrnXmhLxEAsmd6/CnOi8amAFwckrYrcbPwGvgXm2NAH70lR91mzfAlYXbT+ksf6ytcwa8OYBeb9UfJMMk1HgMLUgnSRrAdDoZjaaQXklJMmBdnaz6P/g6l6VBS1IL7xdpUtCyFo6U1Nj0eOmxCGPFFhcBWmHQL+uriBp4FZg1bHIXlg13bNm/O2phvK9MFpxG0IX/V2vJ27RFSZvJsla2KAmtvB60KTVQDm3esFYOJekqACGdCncFeSFCPBR+5cYUT0a4yq2bkMzv58P/welomI6H49locPyuy2iXPWcv2SFL2Vt2zD6wEzZnkn2PdqK9aD/6Gb+IX8eH19Y46nqesRsVp78AnG6+Vw==</latexit>
+
+52
+
+op
+
+0
+
+2 JcK ,
+
+0
+
+2 Q}
+
+===== slide 53 =====
+Validity
+Recalling that both {
+} c {Q} and {P} c {
+}
+are valid HL triples (for any P, Q and c)
+can we claim something about the validity of NC triples such as
+
+) c (Q) ⟺ {
+
+} c { ¬Q}
+
+⟺ { ¬P} c {
+⟺{
+e
+
+e
+
+s
+
+l
+
+u
+
+a
+
+}
+
+} c { ¬Q}
+
+) ⟺ { ¬P} c {
+r
+
+e
+
+e
+
+s
+
+a
+
+r
+
+f
+
+e
+
+e
+
+e
+
+e
+
+s
+
+e
+
+e
+
+s
+
+s
+
+l
+
+u
+
+l
+
+l
+
+u
+
+u
+
+a
+
+r
+
+a
+
+a
+
+r
+
+r
+
+f
+
+t
+
+f
+
+t
+
+t
+
+f
+
+t
+
+(P) c (
+
+l
+
+) c (Q)
+u
+
+(
+
+)
+
+f
+
+(P) c (
+
+t
+
+(
+
+53
+
+}

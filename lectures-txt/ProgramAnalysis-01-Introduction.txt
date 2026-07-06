@@ -1,0 +1,1174 @@
+# ProgramAnalysis-01-Introduction
+# auto-extracted from ProgramAnalysis-01-Introduction.pdf (58 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #01
+Introduction
+
+1
+
+===== slide 2 =====
+Administrivia
+
+2
+
+===== slide 3 =====
+Course information
+Timetable
+
+Mon
+
+Tue
+
+09-11
+
+Wed
+
+Thu
+
+Fri
+
+Room C1
+
+11-13
+14-16
+
+Program Analysis
+[0078A], 6 CFU, 48h
+
+16-18
+
+Room C1
+
+Teachers
+Chiara Bodei
+
+Roberto Bruni
+
+Roberta Gori
+
+chiara.bodei@unipi.it
+
+roberto.bruni@unipi.it
+
+roberta.gori@unipi.it
+
+3
+
+===== slide 4 =====
+What we will see
+Program Logics
+•Collecting semantics
+•Correctness analyses
+•Incorrectness analyses
+•Separation Logic(s)
+
+Abstract Interpretation
+•Galois Insertions
+•Abstract Domains
+•Local Completeness Logic
+
+Control Flow Analysis
+•Constraint based approach
+•O-CFA
+•Taint analysis
+
+4
+
+===== slide 5 =====
+Books (only selected chapters)
+
+Additional reading material will be suggested during the classes
+5
+
+===== slide 6 =====
+How to pass the exam
+The exam consists of a written test taken by all students,
+immediately followed by an individual oral discussion
+
+6
+
+===== slide 7 =====
+Introduction and motivation
+
+7
+
+===== slide 8 =====
+Have you seen this picture before?
+
+8
+
+===== slide 9 =====
+Bugs
+1947
+
+1947: a page from the
+Harvard Mark II
+electromechanical
+computer's log,
+featuring a dead moth,
+removed from the
+device...
+“First actual case of bug
+being found” (1947)
+First use of the word
+debugging in Computer
+Science
+9
+
+===== slide 10 =====
+Bugs
+1947
+
+A software bug is an
+error, aw or fault in the
+design, development, or
+operation of computer
+software that causes it
+to produce an incorrect
+or unexpected result
+
+fl
+
+10
+
+===== slide 11 =====
+The need for verification
+Friday, 24th June [1949]
+Checking a large routine by Dr A. Turing.
+How can one check a routine in the sense of making sure that it is right?
+
+“Program correctness and incorrectness
+are two sides of the same coin”
+Peter O’Hearn (2020)
+
+fi
+
+11
+
+===== slide 12 =====
+Software Veri cation
+Correctness
+
+the aim is to prove the absence of bugs
+
+Incorrectness
+
+the aim is to prove the presence of bugs
+
+fi
+
+12
+
+===== slide 13 =====
+Why do we need to verify our code?
+The code that exploded Ariane 5 rocket!
+
+13
+
+===== slide 14 =====
+A software bug
+
+14
+
+===== slide 15 =====
+Ariane 5 Rocket Explosion (1996)
+Caused due to numeric overflow error in the SRI
+Attempt to t 64-bit format data into 16-bit space
+Cost: $370 M of dollars for loss of mission
+Multi-year set back to the Ariane program
+Read more at:
+https://www.bugsnag.com/blog/bug-day-ariane-5-disaster/
+fl
+
+fi
+
+15
+
+===== slide 16 =====
+Unfortunately
+It was one of the most serious but not the only one....
+
+https://www.cs.tau.ac.il/~nachumd/horror.html
+Boeing 747 Max Crashes
+350 people died
+Sanity check on data missing
+
+Toyota unintended acceleration
+4 people died
+Stack overflow
+fl
+
+16
+
+===== slide 17 =====
+Costs of SW bugs
+
+Knight Capital Trading Glitch (2012)
+$ 440 M
+
+Nissan Airbag Malfunction (2014)
+1 Million Vehicles Recalled
+
+Software Fails Watch (Tricentis, 2017): SW bugs lead to $ 1.7 Trillion revenue lost
+CISION PR Newswire (2020): SW bugs cost $ 61 Billion loss in productivity annually
+https://www.tricentis.com/news/tricentis-software-fail-watch- nds-3-6-billion-people-a ected-and-1-7-trillion-revenue-lost-by-software-failures-last-year/
+https://www.prnewswire.com/news-releases/study-software-failures-cost-the-enterprise-software-market-61b-annually-301066579.html
+ff
+
+fi
+
+17
+
+===== slide 18 =====
+Complexity of programs
+Size of Linux Kernel
+
+Lines of code iOS/Android on Git
+
+always increasing!
+18
+
+===== slide 19 =====
+The Earlier the Better
+
+19
+
+===== slide 20 =====
+Success stories
+
+efore
+success
+A long
+time before success
+
+Other Famous Other
+Success
+Stories
+Famous
+Success Stories
+
+I Flight control software
+I Flight
+of A380:
+verifies
+absence
+ofverifi
+controlAstree
+software
+of A380:
+Astree
+run-time errors (2005,
+abstract
+interpretation)
+run-time
+errors
+(2005, abstract interpretation
+
+sisted verification
+is an old verification
+idea
+Computer-assisted
+is an old idea
+I Turing, 1948
+948
+are logic,I1969
+Floyd-Hoare logic, 1969
+
+http://www.astree.ens.fr/
+http://www.astree.ens.fr/
+
+I Microsoft’s hypervisor:
+I Microsoft’s
+using Microsoft’s
+and
+the Z3 VC
+hypervisor:VCC
+using
+Microsoft’s
+automated prover (2008,
+deductive
+automated
+proververification)
+(2008, deductive verificati
+
+http://research.microsoft.com/en-us/projects/vcc/
+http://research.microsoft.com/en-us/projects
+
+More recently: verification
+of PikeOS
+More recently:
+verification of PikeOS
+
+actice: Success
+only frominthe
+mid-1990s
+practice:
+only from the mid-1990s
+Importance
+of the increase
+of performance of computers
+ce of theIincrease
+of performance
+of computers
+
+I Certified
+I Certified C compiler,
+C compiler,
+developed
+developed
+using the
+Coq proofusing the C
+assistant (2009, correct-by-construction
+assistant (2009, correct-by-construction
+code generated bycod
+a proof assistant) a proof assistant)
+
+s story:A first success story:
+I using
+Paris metro
+14, using
+Atelier B (1998, refinement
+ro line 14,
+Atelierline
+B (1998,
+refinement
+approach)
+)
+
+http://compcert.inria.fr/
+http://compcert.inria.fr/
+
+I L4.verified
+I L4.verified micro-kernel,
+using
+tools on top o
+usingmicro-kernel,
+tools on top of
+Isabelle/HOL
+proof
+assistant
+(2010, C
+Haskell
+Cc
+proof assistant (2010,
+Haskell
+prototype,
+code, prototype,
+proof
+assistant)
+assistant)
+
+http://www.ertos.nicta.com.au/research/l4.ve
+http://www.ertos.nicta.com.au/research/l4.verified/
+
+20
+
+===== slide 21 =====
+Program analysis
+Program analysis is the systematic examination of a program
+to determine its properties
+Wide variety of applications
+
+• Finding bugs
+• Optimizing performance and compilers
+• Detecting security vulnerabilities
+• Improving software maintainability and understandability
+21
+
+===== slide 22 =====
+The main question
+Will our program behave as we intended?
+We need to analyse all executions of the
+program
+The semantics of a program is a description of
+its run-time behaviors
+Checking if a software will run as intended is
+equivalent to checking if the code satisfies a
+(semantic) property of interest
+fi
+
+22
+
+===== slide 23 =====
+How can we check it?
+This kinds of checks requires programming language semantics,
+to answer questions such as:
+What does it mean to execute a certain command?
+How does it a ect the given state?
+
+ff
+
+23
+
+===== slide 24 =====
+Formal methods
+
+24
+
+===== slide 25 =====
+A program
+
+Its meaning
+
+[[ ]]
+syntax
+(how the program is written)
+
+semantics
+(its computed function)
+
+c
+
+c
+
+Semantics = assigning meaning to syntax
+
+25
+
+===== slide 26 =====
+Memory states
+state
+
+set of
+variables
+
+σ:X→Z
+set of all
+states
+
+Σ ≜ {σ : X → Z}
+26
+
+set of
+integers
+
+===== slide 27 =====
+We start from input state σ and we want to characterise the reachable output states
+
+Input store
+
+A program
+
+Output store
+
+σ
+σ
+
+[[ ]]σ
+
+[[ ]]σ = ⊥
+
+Non terminating execution
+Programs are seen as
+functions from
+state to state
+
+c
+
+[[ ]] : Σ → Σ⊥
+
+c
+
+Denotational semantics
+c
+
+c
+
+Forward semantics for deterministic programs
+
+27
+
+Σ⊥ = Σ ⊎ { ⊥ }
+
+===== slide 28 =====
+Example
+Denotational semantics
+
+c ≜
+
+[[c]][ ↦ 1] = [ ↦ 1, ↦ 0]
+[[c]][ ↦ 2] = ⊥
+
+x
+
+n
+
+n
+
+n
+
+while (n>1) {
+n := n+1;
+x := 0;
+}
+x := n-1;
+
+28
+
+===== slide 29 =====
+A program
+
+Input stores
+
+σ
+
+P
+
+Output store
+
+[[ ]]σ
+[[ ]]P =
+
+σ
+
+[[ ]]σ = ⊥
+
+⋃
+
+[[ ]]σ
+
+σ∈P
+
+Collecting semantics
+
+[[ ]] : ℘(Σ) → ℘(Σ) Consider all trajectories simultaneously
+
+c
+
+c
+
+c
+
+c
+
+[[ ]] : Σ → Σ⊥
+
+c
+
+Denotational semantics
+
+c
+
+c
+
+Collecting semantics for deterministic programs
+
+29
+
+===== slide 30 =====
+Example
+Collecting Semantics
+c ≜
+
+[[c]]( > 0) = {[ ↦ 1, ↦ 0]}
+
+x
+
+[[c]]( ≥ 0) = {[ ↦ 1, ↦ 0],
+[ ↦ 0, ↦ − 1]}
+
+x
+
+x
+
+n
+
+n
+
+n
+
+n
+
+n
+
+n
+
+while (n>1) {
+n := n+1;
+x := 0;
+}
+x := n-1;
+
+[[c]]( > 1) = Ø
+
+30
+
+===== slide 31 =====
+Ideal exact analysis
+[[c]] : ℘(Σ) → ℘(Σ)
+[[c]]P
+
+?
+
+∈ [[c]]P
+
+it is a property about the
+computed function, not
+about how c is written
+
+semantic property of a program c : a property about [[c]]
+
+P
+
+(c) ≡ ∀P ≠ Ø . ∃δ ∈ [[c]]P . δ(x) ≠ 0
+31
+
+===== slide 32 =====
+Undecidability in the way
+non trivial property:
+- there exists a program c such that (c) holds true, and
+- there exists also some program c such that (c) is false
+Rice theorem.
+Let (c) be a non trivial semantic property of programs c.
+There exists no algorithm such that, for every program c,
+it returns true if and only if (c) holds true
+no analysis method that is automatic, universal, exact!
+P
+
+P
+
+P
+
+for any program
+
+P
+
+algorithmic
+
+32
+
+no false positive/negative
+
+===== slide 33 =====
+For some program...
+(c) ≡ ∀P ≠ ∅ . ∃δ ∈ [[c]]P . δ(x) ≠ 0
+c ≜
+
+x := 1;
+[[c]]P = {δ ∣ σ ∈ P, δ = σ[x ↦ 1]} independently from the initial value of x
+
+P
+
+Therefore, there always exists at least one nal state di erent from zero
+
+ff
+
+fi
+
+33
+
+===== slide 34 =====
+and for some other program...
+(c) ≡ ∀P ≠ ∅ . ∃δ ∈ [[c]]P . δ(x) ≠ 0
+c ≜
+
+while (n>1) {
+n = n+1;
+x := 0;
+}
+x := n-1;
+If, e.g., P = { [n ↦ 2] } the program loops and [[c]]P = Ø
+P
+
+Hence there is no δ ∈ [[c]]P such that δ(x) ≠ 0, because there is no nal state
+fi
+
+34
+
+===== slide 35 =====
+Collatz's conjecture
+8
+< 1
+M
+f (n/2)
+f (n) =
+:
+f (3n + 1)
+<latexit sha1_base64="hqcWo7qt3SaHiEUV1ReGPGw+jCQ=">AAAC23icbVFNb9NAEF2br2IKpHBESCPSVq2Qgh0QIEGlCi4ci0TaStkoWm/Gzqrrtbs7bqgsn7ghrvwF/hP/hnUaodIyp6d58+btvkkrrRzF8e8gvHHz1u07a3eje+v3HzzsbTw6dGVtJY5kqUt7nAqHWhkckSKNx5VFUaQaj9KTjx1/dIbWqdJ8ofMKJ4XIjcqUFORb096vbMfsAp9hhqcQcY0Z8YanmCvTCGvFedto3UKUwDbwIi2/NiqDTeMHTyHZbDmHyG94MdyF7cu08XQMfIGzHMHwQtCcqOFbLQxhD+JO6HUvzfPkr7CkOdqFcthGHM1s5c6tyuc0mPb68SBeFlwHyQr02aoOphvBUz4rZV2gIamFc+Mkrmjit5KSuvOoHVZCnogcxx4aUaCbNMtAW9iqnaASKrSgNCybeFnRiMK58yL1k93X3FWua/6PG9eUvZ00ylQ1oZGdESmNSyMnrfKXQpgpi0SiezmCMiCFFURoFQgpfbP2p4t8wgtZFoXwSV1cr22WMVvU/n610jOPgJ/5D1slTO5deOn3Q7PXtm3kA02uxncdHA4HyetB/PlVf//DKto19oQ9YzssYW/YPvvEDtiIyWA9GAbvgvfhJPwWfg9/XIyGwUrzmP1T4c8//Rng0w==</latexit>
+
+if n  1
+if n 6= 0 ^ n%2 = 0
+otherwise
+
+∀n, f(n) = 1 ?
+
+<latexit sha1_base64="dEsUQ9ihNuEDcalbFCnHYsECoMk=">AAACf3icbVBNb9QwEPWGr7J8bdsjQrJYIZbLKi6llEOlCi6IU5HYttJmtZo4k61V2wn2pFUV5T/11yBxgp+Cs8kBWubynt94/DwvLbXyFMc/B9Gdu/fuP9h4OHz0+MnTZ6PNrWNfVE7iTBa6cKcpeNTK4owUaTwtHYJJNZ6k55/a/skFOq8K+42uSlwYWFmVKwkUpOXoSz4RO2/4Ac8nex287UDEHb7rj313v4PdDvpJ0YJYjsbxNF4Xv01ET8asr6Pl5uBFkhWyMmhJavB+LuKSFjU4UlJjM0wqjyXIc1jhPFALBv2iXi/d8FeVByp4iY4rzdci/j1Rg/H+yqThpgE68zd7rfi/3ryifH9RK1tWhFa2RqQ0ro28dCqkiTxTDomg/TlyZbkEB0ToFAcpg1iFeIeJxUtZGAM2q5MMc/ze1Enr51DXSVopnQXGk4uwsFNgV8ElKcL7vD5ommYYAhU347tNjnemYm8af90dH37so91gz9lLNmGCvWeH7DM7YjMm2TX7wX6x39Egeh1No7i7Gg36mW32T0Uf/gBoPbfu</latexit>
+
+f (12) = f (6) = f (3) = f (10) = f (5) = f (16) = f (8) = f (4) = f (2) = f (1) = 1
+
+35
+
+===== slide 36 =====
+but for Collatz’s conjecture?
+(c) ≡ ∀P ≠ ∅ . ∃δ ∈ [[c]]P . δ(x) ≠ 0
+c ≜
+
+while (x>1) {
+if (even(x)) { x := x/2; }
+else { x := 3x+1; }
+} % does it terminate for any value of x?
+Will this process eventually reach the number 1, regardless of the positive integer initially chosen?
+This is true IFF c terminates
+
+P
+
+As of 2020, the conjecture has been checked by computer for all starting values up to 268 ≈ 2.95×1020
+(no general proof, though)
+36
+
+===== slide 37 =====
+Limitations of the analysis
+no analysis method that is automatic, universal, exact!
+We need to give something up:
+automation: machine-assisted techniques
+the universality “for all programs”:
+targeting only a restricted class of programs
+claim to nd exact answers: introduce approximations
+fi
+
+37
+
+===== slide 38 =====
+You can't have everything at once
+
+38
+
+===== slide 39 =====
+Over approximations
+
+[[c]]P
+
+39
+
+===== slide 40 =====
+Over approximations
+Good for proving correctness
+
+[[c]]P
+
+true negatives
+
+Bad for bug- nding!
+true positives
+
+[[c]]P
+
+fi
+
+40
+
+false positive
+
+===== slide 41 =====
+Example
+c ≜
+
+while (n>1) {
+n := n+1;
+x := 0;
+}
+x := n-1;
+
+[[c]]( ≥ 0) = {[ ↦ 1, ↦ 0],
+[
+↦
+0,
+↦
+−
+1]}
+over-approximation
+ov
+
+[[c]] ( ≥ 0) = { ∈ {0,1}, ≤ 0}
+ov
+
+∉ [[c]] ( ≥ 0) ⟹
+
+We can prove correctness!!
+
+y := 1/(x-2);
+
+fi
+
+x
+
+x
+
+x
+n
+
+n
+n
+
+n
+
+n
+
+n
+
+n
+
+Undefined behaviour for
+
+x=2
+
+∉ [[c]]( ≥ 0)
+
+41
+
+===== slide 42 =====
+Example
+c ≜
+
+while (n>1) {
+n := n+1;
+x := 0;
+}
+x := n-1;
+
+[[c]]( ≥ 0) = {[ ↦ 1, ↦ 0],
+[
+↦
+0,
+↦
+−
+1]}
+over-approximation
+ov
+
+[[c]] ( ≥ 0) = { ∈ {0,1}, ≤ 0}
+∉ [[c]]( ≥ 0)
+ov
+
+∈ [[c]] ( ≥ 0)
+
+y := 1/(x+2);
+
+False Positive
+
+We cannot draw a de nitive conclusion!
+x
+
+x
+
+x
+n
+
+n
+
+x=−2
+fi
+
+fi
+
+n
+
+n
+
+n
+
+n
+
+n
+
+Undefined behaviour for
+42
+
+===== slide 43 =====
+Under approximations
+[[c]]P
+
+43
+
+===== slide 44 =====
+Under approximations
+Good for bug- nding!
+true positives
+
+[[c]]P
+
+Bad for proving correctness
+false negative
+
+[[c]]P
+
+fi
+
+44
+
+true negative
+
+===== slide 45 =====
+Example
+c ≜
+
+while (n>1) {
+n := n+1;
+x := 0;
+}
+x := n-1;
+
+y := 1/(x);
+
+[[c]]( ≥ 0) = {[ ↦ 1, ↦ 0],
+[
+↦
+0,
+↦
+−
+1]}
+under-approximation
+un
+
+[[c]] ( ≥ 0) = {[ ↦ 1, ↦ 0]}
+un
+
+∈ [[c]] ( ≥ 0) ⟹
+
+We can prove there is an error!
+
+fi
+
+x
+
+x
+
+x
+n
+
+n
+n
+
+n
+
+n
+
+n
+
+n
+
+Undefined behaviour for
+
+x=0
+
+∈ [[c]]( ≥ 0)
+
+45
+
+===== slide 46 =====
+Example
+c ≜
+
+while (n>1) {
+n := n+1;
+x := 0;
+}
+x := n-1;
+
+[[c]]( ≥ 0) = {[ ↦ 1, ↦ 0],
+[
+↦
+0,
+↦
+−
+1]}
+under-approximation
+un
+
+[[c]] ( ≥ 0) = {[ ↦ 1, ↦ 0]}
+un
+
+∉ [[c]] ( ≥ 0)
+∈ [[c]]( ≥ 0)
+
+y := 1/(x+1);
+
+fi
+
+x
+
+x
+
+x
+n
+
+n
+n
+
+n
+
+n
+
+n
+
+n
+
+Undefined behaviour for
+
+x=−1
+
+46
+
+False Negative
+
+===== slide 47 =====
+Soundness and Completeness
+Given a semantic property
+
+∀ program c,
+
+, ideally we would like an analysis such that
+
+⇔
+
+analysis(c) = true
+
+(c)
+
+which consists of
+1) ∀ program c,
+
+(c)
+
+P
+
+analysis(c) = true
+
+P
+
+⇒
+
+P
+
+(c)
+
+⇒
+
+P
+
+2) ∀ program c,
+
+analysis(c) = true
+
+47
+
+[soundness]
+[completeness]
+
+===== slide 48 =====
+Soundness / Completeness
+
+48
+
+===== slide 49 =====
+Soundness / Completeness
+
+49
+
+===== slide 50 =====
+Soundness / Completeness
+
+50
+
+===== slide 51 =====
+Spectrum of Program Analysis Techniques
+• Testing
+• Machine-assisted proving
+• Finite-state model checking
+• Conservative static analysis
+• Bug- nding
+
+fi
+
+51
+
+===== slide 52 =====
+Testing
+
+Observe just a nite (small) number of executions
+
+For each execution, check whether it violates the spec,
+if no bugs were found, then the program passes the test
+Unsound: can accept programs violating the spec
+Complete: does not reject programs that satisfy the spec
+fi
+
+52
+
+===== slide 53 =====
+Machine-assisted Proving
+Use a specific language, manually supply invariants
+Not automatic: key proof arguments provided by
+users and checked by the system
+Sound: if the formalization is correct
+Quasi-complete: (only limited by the
+expressiveness of the logics)
+Tools: Rocq, Isabelle/HOL, PVS, ...
+
+fi
+
+53
+
+===== slide 54 =====
+Finite-State Model Checking
+Focus on nite state models of programs
+Perform exhaustive exploration of program states
+Automatic, sound & complete (only w.r.t. the nite models)
+May not terminate:
+• SW has infinitely many states
+• the models need approximation or non-termination.
+
+fi
+
+fi
+
+fi
+
+54
+
+===== slide 55 =====
+Conservative Static Analysis: over-approximation
+Perform automatic verification, yet which may fail
+Compute a conservative approximation of the program semantics
+Automatic & Sound: accepted programs are safe
+Incomplete: may reject safe programs
+
+Tools: Astree, Julia, Facebook Infer, Meta Zoncolan....
+
+fi
+
+55
+
+===== slide 56 =====
+Bug Finding
+
+Automatic and fast
+Unsound: may accept an incorrect program
+Incomplete: may reject a correct program
+Used to increase SW quality without any guarantee
+Commercial tools: Coverity, CodeSonar,
+...
+56
+
+===== slide 57 =====
+Comparison
+any accepted program
+satisfies the property
+
+fi
+
+fi
+
+57
+
+any programs that
+satisfies the property
+is accepted
+
+===== slide 58 =====
+Focus of this course:
+Static Analysis!
+58

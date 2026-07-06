@@ -1,0 +1,1880 @@
+# ProgramAnalysis-03-HL
+# auto-extracted from ProgramAnalysis-03-HL.pdf (49 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #03
+Hoare Logic
+
+1
+
+===== slide 2 =====
+Program correctness:
+a long standing problem
+
+===== slide 3 =====
+Origins? Turing’s assertions
+1
+
+“how can one check a routine in the
+sense of making sure that it is right?”
+Alan Turing (1949)
+
+===== slide 4 =====
+Checking factorial
+• a dashed letter indicates
+
+•
+
+s
+r
+n
+u
+v
+
+•
+•
+•
+
+the value at the end of the
+process represented by
+the box
+an undashed letter
+represents the initial value
+of a quantity
+TEST is test for zero
+□ denotes factorial
+at the end (D) v = n!
+
+===== slide 5 =====
+General snapshots (P. Naur, 1966)
+BIT 6 (1966), 310-316
+
+PROOF OF ALGORITHMS BY GENERAL SNAPSHOTS
+PETER NAUR
+Abstract.
+A constructive approach to the question of proofs of algorithms is to consider
+proofs that an object resulting from the execution of an algorithm possesses certain static characteristics. It is shown by an elementary example how this possibility may be used to prove the correctness of an algorithm written in ALGOL 60.
+The stepping stone of the approach is what is called General Snapshots, i.e. expressions of static conditions existing whenever the execution of the algorithm
+reaches particular points. General Snapshots are further shown to be useful for
+constructing algorithms.
+
+Key words: Algorithm, proof, computer, programming.
+Introduction.
+
+I t is a deplorable consequence of the lack of influence of m a t h e m a t i c a l
+thinking on the w a y in which c o m p u t e r p r o g r a m m i n g is c u r r e n t l y being
+pursued, t h a t the regular use of systematic proof procedures, or even
+the realization t h a t such proof procedures exist, is u n k n o w n to the large
+m a j o r i t y of programmers. U n d o u b t e d l y , this f a c t a c c o u n t s for at least
+a large share of the unreliability a n d t h e a t t e n d a n t lack of over-all effectiveness of programs as t h e y are used t o - d a y .
+Historically this state of affairs is easily explained. L a r g e scale comp u t e r p r o g r a m m i n g s t a r t e d so r e c e n t l y t h a t all of its practitioners are,
+in fact, amateurs. A t the same time t h e m o d e r n c o m p u t e r s are so effective t h a t t h e y offer a d v a n t a g e s in use even when t h e i r powers are largely
+wasted. The stress has been on always larger, and, allegedly, more powerful systems, in spite of the fact t h a t the available p r o g r a m m e r competence often is unable to cope with their complexities.
+However, a r e a c t i o n is b o u n d to come. W e c a n n o t indefinitely continue to build on sand. W h e n this is realized t h e r e will be an increased
+interest in the less glamorous, b u t more solid, basic principles. This will
+go in parallel with t h e i n t r o d u c t i o n of these principles in the e l e m e n t a r y
+school curricula. One subject which will t h e n come up for a t t e n t i o n is
+t h a t of proving t h e correctness of algorithms. T h e purpose of t h e present
+article is to show in a n e l e m e n t a r y w a y t h a t this subject n o t only exists,
+b u t is ripe to be used in practise. The illustrations are p h r a s e d in A L G O L
+60, b u t the t e c h n i q u e m a y be used with a n y p r o g r a m m i n g language.
+Copyright (~ 1966 by Peter Naur.
+
+the process.
+From this definition it immediately follows t h a t the values of variables given in a General Snapshot normally at best can be expressed as
+general, mathematical expressions or by equivalent formulations. I have
+to say " a t best" because in m a n y cases we can only give certain limits on
+the value, and I have to admit "equivalent formulations" because we do
+not always have suitable mathematical notation available.
+In order to illustrate this notion, here is a version of the above algorithm
+expanded with General Snapshots at six different points:
+
+“expression of static conditions
+existing whenever the execution of the
+algorithm reaches particular points”
+PROGRAM 2
+Greatest number, with snapshots
+
+c o m m e n t General Snapshot 1 : 1 < N;
+
+r:=l;
+c o m m e n t General Snapshot 2 : 1 < N, r = 1;
+for i : = 2 step 1 u n t i l / V do
+begin c o m m e n t General Snapshot 3 : 2 <= i <= N, 1 < r <= i - 1,
+
+A[r] is the greatest among the elements A[1],A[2] . . . . , A [ i - 1 ] ;
+if A[i] > Air] then r : = i;
+c o m m e n t General Snapshot 4: 2 < i < N , l < r< i, A[r] is the greatest
+among the elements A [ 1], A [2] . . . . . A [i];
+end;
+c o m m e n t General Snapshot 5 : 1 < r <-N, A[r] is the greatest among the
+
+elements A[1],A[2] . . . . . A[_N];
+
+R : = A[r];
+c o m m e n t General Snapshot 6: R is the greatest value of any element,
+
+A[1J,A[2] . . . . . A [~¢'];
+
+===== slide 6 =====
+Floyd’s interpretations (1967)
+Robert W. Floyd
+
+“an association of a proposition with
+each connection in the ow of
+control through a program, where
+the proposition is asserted to hold
+whenever that connection is taken”
+
+A flowchart language. To make these notions more specific, consider a
+particular flowchart language with five statement types, represented
+pictorially as in Figure 2, having the usual interpretations as an assignment
+operation, a conditional branch, a join of control, a starting point for the
+ASSIGNING MEANINGS TO PROGRAMSl
+program, and a halt for the program.
+Introduction. This paper attempts to provide an adequate basis for Take specifically the assignment operator x+- f(x, y), where x is a variable
+formal definitions of the meanings of programs in appropriately defined
+and f is an expression which may contain occurrences of x and of the vector
+programming languages, in such a way that a rigorous standard is established
+y of other program variables. Considering the effect of the command, it
+for proofs about computer programs, including proofs of correctness,
+of clearly desirable that if P is (x = xo/\ R), and Ql is (x = f(xo, y) /\ R),
+equivalence, and termination. The basis of our approach is the notion is
+l
+an interpretation of a program: that is, an association of a proposition
+where R contains no free occurrences of x, then VC(P l ; Ql). Applying the
+with each connection in the flow of control through a program, where the
+proposition is asserted to hold whenever that connection is taken. To prevent
+axioms, we shall establish a definition of V.I-f(.I.,) which is complete and
+an interpretation from being chosen arbitrarily, a condition is imposed on
+consistent if the underlying deductive system is, and which is, in that
+each command of the program. This condition guarantees that whenever
+a command is reached by way of a connection whose associated proposition
+sense, the most general semantic definition of the assignment operator.
+is then true, it will be left (if at all) by a connection whose associated
+proposition will be true at that time. Then by induction on the number of
+commands executed, one sees that if a program is entered by a connection
+whose associated proposition is then true, it will be left (if at all) by a
+connection whose associated proposition will be true at that time. By this
+means, we may prove certain properties of programs, particularly properties
+of the form: "If the initial values of the program variables satisfy the
+relation Rit the final values on completion will satisfy the relation R z."
+Proofs of termination are dealt with by showing that each step of a program
+decreases some entity which cannot decrease indefinitely.
+These modes of proof of correctness and termination are not original;
+they are based on ideas of Perlis and Gorn, and may have made their
+earliest appearance in an unpublished paper by Gorn. The establishment
+of formal standards for proofs about programs in languages which admit
+assignments, transfer of control, etc., and the proposal that the semantics
+of a programming language may be defined independently of all processors
+for that language, by establishing standards of rigor for proofs about
+1 This work
+
+was supported by the Advanced
+the Secretary of Defense (SD-146).
+
+Projects Agency of the Office of
+
+19
+
+1
+
+01
+
+(STAr)
+bl
+
+fl
+
+FIGURE 2
+
+===== slide 7 =====
+Floyd’s examples
+
+to be an entrance to (or an exit from) the command c at vertex v if its
+destination (or origin) is v. An interpretation I of a flowchart is a mapping
+of its edges on propositions. Some, but not necessarily all, of the free
+variables of these propositions may be variables manipulated by the
+
+-
+
+-
+
+-
+
+-
+
+-
+
+-
+
+-
+
+n E J+ (J+ is the set of positive integers)
+
+-
+
+- - - - - - - - n E J+ /\ i = 1/\ S = 0
+_____ -
+
+-
+
+-
+
+n
+
+E J+ /\ i E J+ /\ i
+
+i-l
+
+n
+
++ 1/\ S = 1: OJ
+j-l
+
+i-I
+
+-
+
+-
+
+______
+
+-
+
+n E J1- /\ i = n
+
+n
+
++ 1/\ S = j1:
+OJ; i.e., S = j1:
+OJ
+-l
+-l
+i-l
+
+- - - - - - - - n E J+ /\ i E J+ /\ i
+
+n /\ S = 1: OJ
+j-1
+
+.
+
+I
+
+- - - - - - - - n E J+ /\ i E J+ /\ i
+
+n /\ S = L. OJ
+j-1
+
+i- i+ 1
+- - - - - - - - n E J+ Ai ¤ J+ 1\ 2
+
+i-l
+
+i
+
+n + 1/\ S = 1: OJ
+
+FIGURE 1. Flowchart of program t() compute S = 1:1-1 OJ (n
+
+j-l
+
+0)
+
+===== slide 8 =====
+Floyd’s examples
+
+to be an entrance to (or an exit from) the command c at vertex v if its
+destination (or origin) is v. An interpretation I of a flowchart is a mapping
+of its edges on propositions. Some, but not necessarily all, of the free
+variables of these propositions may be variables manipulated by the
+
+non-negative?
+
+to prove
+termination
+
+START
+-
+
+-
+
+-
+
+-
+
+-
+
+-
+
+-
+
+n E J+ (J+ is the set of positive integers)
+
+-
+
+weakening
+
+-
+
+-
+
+n
+
+E J+ /\ i E J+ /\ i
+
+n
+
++ 1/\ S = 1: OJ
+
+---"'--
+
+i-I
+
+-
+
+-
+
+-
+
+n E J1- /\ i = n
+
+weakening
+
+,C
+
+_ _ _ _ _ {R
+i-l
+
+,_----'1""-_--,
+
+n /\ S = 1: OJ
+
+O,X = R + QY
+
+R < Y,X
+(X - Q,2)
+
+No
+(X -
+
+0, X = R + QY
+
+HALT)
+
+I_tO
+
+n
+
++ 1/\ S = j1:
+OJ; i.e., S = j1:
+OJ
+-l
+-l
+
+- - - - - - - - n E J+ /\ i E J+ /\ i
+
+°
+
+(X-Q,4)
+_ _ _ _ _ {R 0, X 0, Y > 0, Q
+(X - Q,3) _ __
+
+i-l
+
+j-l
+
+______
+
+r-----lI=----,
+
+0, Y> 0, Q =
+(X - Q, 5)
+
+R-X
+_____
+
+- - - - - - - - n E J+ /\ i = 1/\ S = 0
+_____ -
+
+_ _ _ _ _ {X
+
+Y> 0, X
+
+0, Q
+
+0, X = R + QY
+
+Q, 2)
+
+j-1
+
+.
+
+I
+
+- - - - - - - - n E J+ /\ i E J+ /\ i
+
+n /\ S = L. OJ
+j-1
+
+i- i+ 1
+- - - - - - - - n E J+ Ai ¤ J+ 1\ 2
+
+i-l
+
+i
+
+n + 1/\ S = 1: OJ
+
+FIGURE 1. Flowchart of program t() compute S = 1:1-1 OJ (n
+
+j-l
+
+0)
+
+0, Y > 0, X
+(X - Q,4)
+
+_ _ _ _ _ {R
+
+0, Q > 0, X = R + QY
+
+FIGURE 5. Algorithm to compute quotient Qand remainder R of
+X.;- y, for integers X
+0, Y >
+
+°
+
+REFERENCES
+
+===== slide 9 =====
+Hoare Logic
+An Axiomatic Basis for
+Computer Programming
+C. A. R. HOARE
+
+The Queen's University of Belfast,* Northern Ireland
+
+of axioms it is possible to deduce such simple theorems as:
+
+x=x+yXO
+y<r
+
+~r
+
++y
+
+X q = (r-
+
+y) + y
+
+The proof of the second of these is:
+
+A5
+
+(r--y) + y X (l+q)
+= (r--y)+
+
+In this paper an attempt is made to explore the logical foundations of computer programming by use of techniques which
+were first applied in the study of geometry and have later
+been extended to other branches of mathematics. This involves the elucidation of sets of axioms and rules of inference
+which can be used in proofs of the properties of computer
+programs. Examples are given of such axioms and rules, and
+a formal proof o f a simple theorem is displayed. Finally, it is
+argued that important advantages, both theoretical and practical, may follow from a pursuance of these topics.
+KEY WORDS AND PHRASES: axiomatic method, theory of programming'
+proofs of programs, formal language definition, programming language
+design, machine-independentprogramming, program documentation
+CR CATEGORY: 4.0, 4.21,4.22, 5.20, 5.21,5.23, 5.24
+
+1.
+
+Introduction
+
+Computer programming is an exact science in that all
+the properties of a program and all the consequences of
+executing it in any given environment can, in principle,
+be found out from the text of the program itself by means
+of purely deductive reasoning. Deductive reasoning involves the application of valid rules of inference to sets of
+valid axioms. I t is therefore desirable and interesting to
+elucidate the axioms and rules of inference which underlie
+our reasoning about computer programs. The exact choice
+of axioms will to some extent depend on the choice of
+programming language. For illustrative purposes, this
+paper is confined to a very simple language, which is effectively a subset of all eurrent procedure-oriented languages.
+
+2.
+
+Computer Arithmetic
+
+The first requirement in valid reasoning about a program is to know the properties of the elementary operations
+which it invokes, for example, addition and multiplication
+of integers. Unfortunately, in several respects computer
+arithmetic is not the same as the arithmetic familiar to
+mathematicians, and it is necessary to exercise some care
+in selecting an appropriate set of axioms. For example, the
+axioms displayed in Table I are rather a small selection
+of axioms relevant to integers. From this incomplete set
+* Depurtment of Computer Science
+576
+
+Communications of the ACM
+
+X (1 + q )
+
+(yXl+yXq)
+
+A9
+
+= ( r - - y) + (y + y
+
+A3
+
+= ((r--y)+y)+yXq
+
+A6
+
+= r + y X q
+
+X q)
+
+providedy < r
+
+The axioms A1 to A9 are, of course, true of the traditional infinite set of integers in mathematics. However,
+they are also true of the finite sets of "integers" which are
+manipulated by computers provided that they are confined to nonnegative numbers. Their truth is independent
+of the size of the set; furthermore, it is largely independent
+of the choice of technique applied in the event of "overflow"; for example:
+(1) Strict interpretation: the result of an overflowing
+operation does not exist; when overflow occurs, the offending program never completes its operation. Note that in
+this case, the equalities of A1 to A9 are strict, in the sense
+that both sides exist or fail to exist together.
+(2) Firm boundary: the result of an overflowing operation is taken as the maximum value represented.
+(3) Modulo arithmetic: the result of an overflowing
+operation is computed modulo the size of the set of integers
+represented.
+These three techniques are illustrated in Table II by
+addition and multiplication tables for a trivially small
+model in which 0, 1, 2, and 3 are the only integers represented.
+I t is interesting to note that the different systems satisfying axioms A1 to A9 may be rigorously distinguished from
+each other by choosing a particular one of a set of mutually
+exclusive supplementary axioms. For example, infinite
+arithmetic satisfies the axiom:
+A10z
+
+~3xVy
+
+(y < x),
+
+where all finite arithmetics satisfy:
+A10~
+
+Vx
+
+(x < max)
+
+where "max" denotes the largest integer represented.
+Similarly, the three treatments of overflow may be
+distinguished by a choice of one of the following aMoms
+relating to the value of max + 1:
+Alls
+
+~ 3x
+
+(x = max + 1)
+
+(strict interpretation)
+
+All,
+
+max + 1 = max
+
+(firm boundary)
+
+AllM
+
+max + 1 = 0
+
+(modulo arithmetic)
+
+Having selected one of these axioms, it is possible to
+use it in deducing the properties of programs; however,
+Volume 12 / Number 10 / October, 1969
+
+“the purpose of this study is to
+provide a logical basis for proofs
+of the properties of a program”
+C.A.R. Hoare (1969)
+
+===== slide 10 =====
+d in Table I. For simplicity we use the trivial
+If ~P A B{S}P then ~-P{while B do S} ~ B A P
+nt method of successive subtraction. The pro3.5. EXAMPLE
+amThe
+is:axioms quoted above are sufficient to construct the
+
+Hoare’s example
+TABLE
+
+proof
+of
+properties
+of
+simple
+programs,
+for
+example,
+a
+q := 0); w h i l e
+routine intended to find the quotient q and remainder r
+y
+<
+r
+d
+o
+q
+:
+=
+l
++
+q
+)
+)
+obtained
+on
+dividing
+x
+by
+y.
+All
+variables
+are
+assumed
+to
+nd
+the
+quotient
+and
+the
+remainder
+range over a set of nonnegative integers conforming to the
+nt
+property
+of
+this
+program
+is
+t
+h
+a
+t
+when
+it
+axioms
+listed in Table
+I. For simplicity
+obtained
+on dividing
+bywe use the trivial
+we
+can recover
+the
+numerator
+x by adding
+but inefficient
+method
+of successive
+subtraction.
+The pro- to
+posed
+program
+is:
+er
+r the
+product
+of the divisor y and the quo-
+
+( r : =qr - - y ;
+
+x
+
+y
+
+r
+
+hile
+x((r=:= r x;+ qy :=X0);q). wFurthermore,
+the remainder
+y
+<
+r
+d
+o
+(
+r
+:
+=
+r
+y
+;
+q:= l+q))
+he divisor. These properties may be expressed
+
+= r + y X q
+
+fi
+
+where Q stands for the program displayed above. This
+
+Line
+number
+Formal proof
+1
+true ~x = x ~ y X 0
+2
+
+x = x-{-yX
+
+3
+
+x = r~yXO{q:=
+
+4
+
+true
+
+5
+
+t r u e {r := x;
+
+6
+
+x = r~yX
+
+7
+
+Justification
+Lemmal
+
+O{r := x } x =
+
+r.-t-yXO
+
+O}x=
+
+r.-byX
+
+DO
+DO
+
+q
+
+{r : = x} x = r ~ y X 0
+
+(r-y)
+
+D1 (1, 2)
+
+q := 0} x = r -t- y X q
+q A y ~ r ~ x
+
+D 2 (4, 3)
+
+=
+
+~ y X (1-t-q)
+
+x = (r--y)
+
+.-{- y X
+
+Lemma 2
+
+(1-t-q){r := r - y } x
+
+=
+
+r + y X (l+q)
+8
+9
+
+DO
+
+x = r + y X ( l + q ) [ q : = 1.-bq}x =
+r-t-y
+
+DO
+
+X q
+
+x = (r--y)
+
+-~ y X ( l + q ) { r : = r - - y ;
+
+q : = 1+q} x = r + y X q
+10
+,
+
+An important property of this program is t h a t when it
+~terminates, we can recover the numerator x by adding to
+the
+{ Q }remainder
+~ y ~<r the
+r A xproduct
+= ofr the
++ divisor
+y X qy and the quotient q (i.e. x = r + y X q). Furthermore, the remainder
+for the
+thedivisor.
+program
+displayed
+This
+isnds
+less than
+These properties
+mayabove.
+be expressed
+formally:
+necessary (but not sufficient) condition for
+
+t
+r
+u
+e
+{
+Q
+}
+~
+y
+~<
+r
+A
+x
+ness" of the program.
+
+III
+
+x = r + y X q A
+
+q := l+q}
+
+11
+
+D2 (7, 8)
+
+y ~ r {r := r - - y ;
+
+x = r + y X q
+
+x = r -b y X q [ w h i l e y ~ r
+(r := r - - y ;
+
+D 1 (6, 9)
+
+do
+
+q := 1--bq)}
+
+-Ty < r /~ x = r ~ y X q
+12
+
+t r u e {((r := x;
+(r := r - - y ;
+
+r + y X q
+
+q := 0);
+
+D3 (10)
+while y ~ rdo
+
+q : = l + q ) ) } -~y ~ r A x
+
+=
+D2 (5,11)
+
+NOTES
+i. The left hand column is used to number the lines, and the
+right hand column to justify each line, by appealing to an axiom,
+a l e m m a or a rule of inference applied to one or two previous
+
+lines, indicated in brackets. Neither of these columns is part
+of the formal proof. For example, line 2 is an instance of the
+axiom of assignment (DO); line 12 is obtained from lines 5 and 11
+by application of the rule of composition (D2).
+2. Lemma 1 may be proved from axioms A7 and AS.
+3. Lemma 2 follows directly from the theorem proved in See. 2.
+
+The mos
+accomplishe
+can be desc
+values of va
+the executi
+in this pap
+program, p
+gramming l
+have been
+established
+which desc
+circuits. W
+and the har
+with mathe
+great relian
+their prope
+reliability o
+The prac
+will not bec
+ful proof te
+not be easy
+ing will eve
+increasing
+method wh
+the correct
+cases and t
+respond to
+wide variet
+to work, h
+spent in th
+time spent
+realistic co
+the cost of
+this phase.
+The cost
+has gone in
+of items of
+large part
+the cost of
+
+===== slide 11 =====
+⋯
+1 2
+
+Premises
+Conclusion
+
+• Inference rules are logical clauses formed by a set of premises and
+a conclusion
+• Their function is to establish that, if the premises are satisfied, then
+the conclusion hold
+
+φ
+
+n
+
+• Rules without premises represent facts that are accepted without
+proof, called axioms
+φ
+
+φ
+
+φ
+
+Inference rules
+
+===== slide 12 =====
+A set of inference rules
+
+y
+
+s
+
+o
+
+y
+
+p
+
+x
+
+x
+
+s
+
+s
+
+s
+
+o
+
+o
+
+o
+
+(1)
+p
+
+p
+
+p
+
+Proof system
+
+( )
+
+( )
+
+( + )
+
+===== slide 13 =====
+Derivation Tree
+Inference rules allow proof to be constructed in the form of derivation
+trees, tree structures that represent the logical path by which a
+conclusion is reached starting from a set of premises
+
+(1)
+
+s
+s
+
+s
+
+s
+
+s
+
+s
+
+s
+
+s
+
+s
+
+o
+o
+
+o
+
+o
+
+o
+
+o
+
+o
+
+o
+
+o
+
+p
+p
+
+p
+
+p
+
+p
+
+p
+
+p
+
+p
+
+p
+
+(1)
+
+(1)
+(2)
+(5)
+
+(1)
+(4)
+
+(1)
+(2)
+
+===== slide 14 =====
+A simple imperative language
+integer
+variable
+
+command
+
+a ::= n | x | a1 + a2 | ...
+
+c ::= x := a
+|
+|
+|
+|
+
+skip
+
+arithmetic
+expression
+
+c1; c2
+if b then c1 else c2
+while b do c
+b ::= a1 ≤ a2 | b1 ∧ b2 | ...
+Boolean
+expression
+
+===== slide 15 =====
+Hoare Logic (HL)
+
+===== slide 16 =====
+Hoare triples
+{ } { }
+
+Precondition
+
+Postcondition
+
+Q
+
+c
+
+P
+
+cc
+
+Whenever is executed in a state satisfying P
+if the execution of terminates, it terminates in a state satisfying Q
+
+===== slide 17 =====
+Hoare triples
+{ } { }
+i
+
+[[c]]P ⊆ Q
+
+f
+
+c
+
+Q
+
+c
+
+P
+
+We talk about partial correctness because the previous semantic condition
+does not guarantee that the execution of on states satisfying P terminate
+
+===== slide 18 =====
+Hoare triples
+{ } { }
+i
+
+[[c]]P ⊆ Q
+Q is an over-approximation of the states that can be reached by states in P
+
+Q
+
+Q
+
+c
+P
+
+c
+f
+
+c
+
+P
+
+[[ ]]
+
+[[c]]P
+
+===== slide 19 =====
+Hoare triples
+{y ≥ 0}
+
+{y > 1}
+{y
+≥
+1}
+{y ≥ − 1}
+
+===== slide 20 =====
+Hoare Logic as a Proof System
+• Programs are annotated with logical assertions
+• Correctness is reduced to proving Hoare triples
+• Proofs are derived using inference rules
+Instead of verifying a whole program at once:
+• We specify each command locally
+• We assign:
+◦ a precondition describing the required input state
+◦ a postcondition describing the guaranteed output state
+• We use syntactic proof rules for each construct
+
+===== slide 21 =====
+Hoare Logic as a Proof System
+For every language construct, we define a rule:
+• Assignment
+• Sequential composition
+• Conditional statements
+• While loops
+Each rule explains how to compute or transform:
+
+Postcondition
+
+fi
+
+Precondition
+
+===== slide 22 =====
+{P}
+
+p
+
+p
+
+i
+
+i
+
+k
+
+{x > 0}
+k
+
+s
+
+s
+
+An obvious axiom
+{P}
+
+{x > 0}
+
+===== slide 23 =====
+Let's work it out together
+{P} x := a ?
+
+{x > 0,y = 3x, z = x} x := x + y ?
+
+===== slide 24 =====
+Floyd’s axiom for assignment
+{P} x := a { ∃x′ . P[x′/x] ∧ x = a[x′/x]}
+syntax
+replacement
+
+} r := x { ∃r′ .
+
+, r = x} ≡ {r = x}
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+e
+
+u
+
+r
+
+{x = r + qy} r := r − y { ∃r′ . x = r′ + qy, r = r′ − y}
+≡ { ∃r′ . x = r + y + qy, r′ = r + y}
+≡ {x = r + (q + 1)y}
+t
+
+￼
+
+￼
+
+￼
+
+￼
+
+e
+
+u
+
+r
+
+t
+
+{
+
+syntax
+replacement
+
+===== slide 25 =====
+Hoare’s axiom for assignment
+? x := a {Q}
+
+{z > 0,x = z, y = 3z} x := x + y {z > 0,x = 4z, y = 3z}
+
+===== slide 26 =====
+Hoare’s axiom for assignment
+{Q[a/x]} x := a {Q}
+syntax
+replacement
+
+{
+
+} ≡ {x = x + 0y} r := x {x = r + 0y}
+
+e
+
+u
+
+r
+
+t
+
+{x = r} ≡ {x = r + 0y} q := 0 {x = r + qy}
+{x = r + qy} ≡
+{x = r − y + (q + 1)y} r := r − y {x = r + (q + 1)y}
+
+===== slide 27 =====
+An observation
+forward oriented
+[Floyd’s]
+
+{P} x := a { ∃x′ . P[x′/x] ∧ x = a[x′/x]}
+backward oriented
+
+￼
+
+￼
+
+￼
+
+{Q[a/x]} x := a {Q}
+
+[Hoare’s]
+
+===== slide 28 =====
+Correctness
+Th. Any derivable HL triple is valid
+
+{P} skip{P} is valid, since [[skip]]P = P ⊆ P
+
+===== slide 29 =====
+Composition rule
+{P} c1 {R} {R} c2 {Q}
+{P} c1; c2 {Q}
+
+forward / backward
+
+{x = r + qy} r := r − y {x = r + (q + 1)y}
+{x = r + (q + 1)y} q := q + 1 {x = r + qy}
+
+{x = r + qy} r := r − y; q := q + 1 {x = r + qy}
+
+===== slide 30 =====
+Inlining assertions
+{x = r + qy} r := r − y {x = r + (q + 1)y}
+{x = r + (q + 1)y} q := q + 1 {x = r + qy}
+
+{x = r + qy} r := r − y; q := q + 1 {x = r + qy}
+{x = r + qy}
+r := r − y;
+{x = r + (q + 1)y}
+q := q + 1
+{x = r + qy}
+
+===== slide 31 =====
+Correctness
+Th. Any derivable HL triple is valid
+Proof. By induction on the derivation tree, e.g.
+
+{P} c1 {R} {R} c2 {Q}
+{P} c1; c2 {Q}
+
+We prove the conclusion is valid
+assuming the premises are valid
+
+[[c1; c2]]P = [[c2]]([[c1]]P) ⊆ [[c2]]R ⊆ Q
+
+===== slide 32 =====
+{P ∧ b} c1 {Q} {P ∧ ¬b} c2 {Q}
+{
+
+o
+
+d
+
+x
+
+x
+
+e
+
+u
+
+s
+
+r
+
+l
+
+e
+
+x
+
+{x ≥ 0}
+
+b
+
+f
+
+t
+
+b
+
+c
+e
+
+}
+≥0
+{x ≥ 0}
+skip;
+
+{P} if b then c1 else c2 {Q}
+
+{ ¬(x ≥ 0)}≡ {x < 0}
+:= − ;
+{x > 0} ⇒ {x ≥ 0}
+
+Qc
+
+i
+
+Conditional rule
+
+1
+
+¬
+2
+
+===== slide 33 =====
+While rule
+{P}
+
+o
+
+d
+
+o
+
+d
+
+e
+
+l
+
+e
+
+l
+
+i
+
+{x ≥ 0}
+x>0
+{x ≥ 0 ∧ x > 0} ≡ {x > 0} ≡ {x ≥ 1} ≡ {x − 1 ≥ 0}
+x := x − 1;
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+i
+
+h
+
+h
+
+loop
+invariant
+
+w
+w
+
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+===== slide 34 =====
+While rule
+{P}
+
+o
+
+d
+
+o
+
+d
+
+e
+
+l
+
+e
+
+l
+
+i
+
+{x ≥ 0}
+x>0
+{x ≥ 0 ∧ x > 0} ≡ {x > 0} ≡ {x ≥ 1} ≡ {x − 1 ≥ 0}
+x := x − 1;
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+i
+
+h
+
+h
+
+loop
+invariant
+
+w
+w
+
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+===== slide 35 =====
+While rule
+{P}
+
+o
+
+d
+
+o
+
+d
+
+e
+
+l
+
+e
+
+l
+
+i
+
+{x ≥ 0}
+x>0
+{x ≥ 0 ∧ x > 0} ≡ {x > 0} ≡ {x ≥ 1} ≡ {x − 1 ≥ 0}
+x := x − 1;
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+i
+
+h
+
+h
+
+loop
+invariant
+
+w
+w
+
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+===== slide 36 =====
+While rule
+{P}
+
+o
+
+d
+
+o
+
+d
+
+e
+
+l
+
+e
+
+l
+
+i
+
+{x ≥ 0}
+x>0
+{x ≥ 0 ∧ x > 0} ≡ {x > 0} ≡ {x ≥ 1} ≡ {x − 1 ≥ 0}
+x := x − 1;
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+i
+
+h
+
+h
+
+loop
+invariant
+
+w
+w
+
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+===== slide 37 =====
+While rule
+{P}
+
+o
+
+d
+
+o
+
+d
+
+e
+
+l
+
+e
+
+l
+
+i
+
+{x ≥ 0}
+x>0
+{x ≥ 0 ∧ x > 0} ≡ {x > 0} ≡ {x ≥ 1} ≡ {x − 1 ≥ 0}
+x := x − 1;
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+i
+
+h
+
+h
+
+loop
+invariant
+
+w
+w
+
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+===== slide 38 =====
+Invariants
+Instead of reasoning about each individual iteration, we give a single
+correctness proof that must account for all possible loop iterations.
+• We do not know how many times the loop will execute
+• The proof must be valid for any number of iterations
+• The invariant expresses a general condition that is true for every
+execution, but is still strong enough to guarantee the desired
+postcondition when the loop terminates
+
+===== slide 39 =====
+Consequence rule
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+{P} c {Q}
+weakening
+strengthening
+
+￼
+
+￼
+
+￼
+
+￼
+
+{x ≥ 0 ∧ y > 0} ⇒
+{−y < 0 ∧ x ≥ 0 ∧ y ≥ 0} ⇒
+{x − y < x ∧ x + y ≥ 0}
+n := x − y;
+{n < x ∧ x + y ≥ 0}
+
+forward / backward
+
+===== slide 40 =====
+Consequence rule
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+{P} c {Q}
+weakening
+strengthening
+
+￼
+
+￼
+
+￼
+
+￼
+
+{x ≥ 0 ∧ y > 0} ⇒
+{−y < 0 ∧ x ≥ 0 ∧ y ≥ 0} ⇒
+{x − y < x ∧ x + y ≥ 0}
+n := x − y;
+{n < x ∧ x + y ≥ 0}
+
+forward / backward
+
+===== slide 41 =====
+Consequence rule
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+{P} c {Q}
+weakening
+strengthening
+
+￼
+
+￼
+
+￼
+
+￼
+
+{x > 0 ∧ y > 0} ⇒
+{−y < 0 ∧ x ≥ 0 ∧ y ≥ 0} ⇒
+{x − y < x ∧ x + y ≥ 0}
+n := x − y;
+{n < x ∧ x + y ≥ 0}
+
+forward / backward
+
+===== slide 42 =====
+Consequence rule
+P ⇒ P′ {P′} c {Q′} Q′ ⇒ Q
+{P} c {Q}
+weakening
+strengthening
+{P′} c{Q′}
+
+P ⊆ P′
+
+forward / backward
+
+Q′ ⊆ Q
+
+i
+
+f
+
+"′
+P
+
+then
+
+[[c]]P ⊆ [[c]]P′ ⊆ Q′ ⊆ Q
+￼
+
+￼
+
+￼
+
+￼
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+!
+
+[[c]]P′ ⊆ Q′
+
+!′
+
+!
+
+===== slide 43 =====
+The HL rules
+
+===== slide 44 =====
+Validity
+A HL triple {P} c {Q} is valid if [[c]]P ⊆ Q
+Is {x > 0} x := 10x {x > 10} valid?
+Is {x > 0,y > 0} x := yx {x ≥ 0} valid?
+
+e
+
+e
+
+s
+
+l
+
+u
+
+a
+
+r
+
+f
+
+t
+
+Is {
+
+} c {Q} valid?
+
+Is {P} c {
+
+} valid?
+
+===== slide 45 =====
+Exercise
+Is this rule valid in HL?
+
+{P} c {Q}
+{P ∧ R} c {Q ∧ R}
+
+===== slide 46 =====
+Exercise
+Is this rule valid in HL?
+
+{P} c {Q}
+{P ∧ R} c {Q}
+
+===== slide 47 =====
+Exercise
+Is this rule valid in HL?
+
+{P} c {Q}
+{P} c {Q ∧ R}
+
+===== slide 48 =====
+Exercise
+Is this rule valid in HL?
+
+{P} c {Q} {R} c {Q}
+{P ∨ R} c {Q}
+
+===== slide 49 =====
+Exercise
+Is this rule valid in HL?
+
+{P} c {R} {R} c {Q}
+{P} c {Q}

@@ -1,0 +1,1736 @@
+# ProgramAnalysis-04-TotalCorrectness
+# auto-extracted from ProgramAnalysis-04-TotalCorrectness.pdf (47 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #04
+Total Correctness and Invariants
+
+1
+
+===== slide 2 =====
+The HL rules
+
+===== slide 3 =====
+Euclidean division algorithm
+The Euclidean division algorithm computes the quotient and the
+remainder of the division of an integer x by a positive integer y.
+r := x
+
+we want to prove that it is correct!
+
+q := 0;
+y≤r
+r := r − y;
+
+o
+
+d
+
+e
+
+l
+
+e
+
+i
+u
+
+h
+
+r
+
+t
+
+w
+
+q := q + 1
+
+At the end given x and y>0, it produces integers
+q and r such that
+
+x = qy + r and 0 ≤ r < y
+
+{
+
+} C {x = qy + r, 0 ≤ r < y}
+
+===== slide 4 =====
+{
+}
+r := x
+q := 0;
+y≤r
+r := r − y;
+
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+q := q + 1
+t
+
+w
+
+Hoare’s proof
+
+===== slide 5 =====
+{
+} ≡ {x = x}
+r := x
+{x = r}
+q := 0;
+y≤r
+r := r − y;
+
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+q := q + 1
+t
+
+w
+
+Hoare’s proof
+{Q[a/x]} x := a {Q}
+
+===== slide 6 =====
+{
+} ≡ {x = x}
+r := x
+{x = r} ≡ {x = r + 0y}
+q := 0;
+{x = r + qy}
+y≤r
+r := r − y;
+
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+q := q + 1
+t
+
+w
+
+Hoare’s proof
+{Q[a/x]} x := a {Q}
+
+===== slide 7 =====
+{
+} ≡ {x = x}
+r := x
+{x = r} ≡ {x = r + 0y}
+loop invariant?
+q := 0;
+{x = r + qy}
+y≤r
+r := r − y;
+
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+o
+
+q := q + 1
+t
+
+w
+
+Hoare’s proof
+{P}
+
+{P ∧ b} c {P}
+{P ∧ ¬b}
+
+===== slide 8 =====
+{
+} ≡ {x = x}
+r := x
+{x = r} ≡ {x = r + 0y}
+q := 0;
+loop invariant?
+{x = r + qy}
+y≤r
+{x = r + qy ∧ y ≤ r}
+r := r − y;
+
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+o
+
+q := q + 1
+{x = r + qy}
+{x = r + qy ∧ y > r}
+u
+
+r
+
+h
+
+t
+
+w
+
+Hoare’s proof
+{P}
+
+{P ∧ b} c {P}
+{P ∧ ¬b}
+
+===== slide 9 =====
+{
+} ≡ {x = x}
+r := x
+{x = r} ≡ {x = r + 0y}
+{P}
+q := 0;
+loop invariant?
+{x = r + qy}
+consequence
+rule
+y≤r
+{x = r + qy ∧ y ≤ r} ⇒ {x = r + qy}
+r := r − y;
+
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+o
+
+q := q + 1
+{x = r + qy}
+{x = r + qy ∧ y > r}
+u
+
+r
+
+h
+
+t
+
+w
+
+Hoare’s proof
+{P ∧ b} c {P}
+{P ∧ ¬b}
+
+===== slide 10 =====
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+o
+
+{
+} ≡ {x = x}
+r := x
+{P ∧ b} c {P}
+{x = r} ≡ {x = r + 0y}
+{P}
+{P ∧ ¬b}
+q := 0;
+loop invariant?
+{x = r + qy}
+consequence
+rule
+y≤r
+{x = r + qy ∧ y ≤ r} ⇒ {x = r + qy} ≡ {x = (r − y) + (q + 1)y}
+r := r − y;
+{x = r + (q + 1)y}
+{Q[a/x]}
+x
+:=
+a
+{Q}
+q := q + 1
+{x = r + qy}
+{x = r + qy ∧ y > r}
+t
+
+w
+
+Hoare’s proof
+
+===== slide 11 =====
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+{
+} ≡ {x = x}
+r := x
+{x = r} ≡ {x = r + 0y}
+[[c]][x ↦ 5,y ↦ − 2] = ... = ∅
+q := 0;
+{x = r + qy}
+y≤r
+{x = r + qy ∧ y ≤ r} ⇒ {x = (r − y) + (q + 1)y}
+r := r − y;
+{x = r + (q + 1)y}
+q := q + 1
+{x = r + qy}
+{x = r + qy ∧ y > r}
+t
+
+w
+
+Wait a moment...
+
+===== slide 12 =====
+o
+
+d
+
+e
+
+e
+
+l
+
+i
+
+u
+
+r
+
+h
+
+{
+} ≡ {x = x}
+r := x
+{x = r} ≡ {x = r + 0y}
+[[c]][x
+↦
+5,y
+↦
+2,z
+↦
+0]
+∅
+=
+...
+=
+q := 0;
+{x = r + qy}
+z=0
+{x = r + qy ∧ z = 0} ⇒ {x = (r − y) + (q + 1)y}
+r := r − y;
+{x = r + (q + 1)y}
+q := q + 1
+{x = r + qy}
+{x = r + qy ∧ z ≠ 0}
+t
+
+w
+
+Wait a moment...
+
+===== slide 13 =====
+[[c]][x ↦ 5] = ... = ∅
+
+o
+
+d
+
+e
+
+l
+
+i
+
+{x ≥ 0}
+x>0
+{x ≥ 0 ∧ x > 0} ≡ {x + 1 ≥ 0}
+x := x + 1;
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+
+h
+
+w
+
+No guarantee of termination
+
+===== slide 14 =====
+{x = 1}
+
+x>0
+
+x := x + 1 {x = 0}
+
+complete the proof below
+
+o
+
+o
+
+d
+
+d
+
+e
+
+e
+
+l
+
+l
+
+i
+
+i
+
+h
+
+{x = 1} ⇒ { ? }
+x>0
+{ ? ∧ x > 0}
+x := x + 1;
+{?}
+{ ? ∧ x ≤ 0} ⇒ {x = 0}
+h
+
+w
+
+w
+
+False positive
+not a possible
+output!
+
+===== slide 15 =====
+Partial vs total correctness
+when the precondition is met,
+executing the command
+establishes the postcondition
+
+partial
+
+{P} c {Q}
+
+total
+
+when the precondition is met,
+executing the command terminates
+and establishes the postcondition
+total correctness = partial correctness + termination
+
+===== slide 16 =====
+{P}
+
+choose a measure
+called "variant"
+(e.g., an arithmetic expression
+over program variables)
+
+t
+
+t=z
+t<z
+
+fi
+
+o
+
+d
+
+e
+
+l
+
+i
+
+b
+{P ∧ b}
+c
+{P}
+{P ∧ ¬b}
+h
+
+w
+
+Total correctness: the idea
+
+here z is a fresh variable
+that keeps the value of t
+before the execution of c
+
+prove that each execution
+of the body c
+decreases the value of t
+
+Choose a an arithmetic expression on program
+variables, called t, such that
+• t decreases at every iteration
+• t is bounded below
+• therefore the loop cannot execute infinitely many
+times
+This gives termination.
+
+prove that
+whenever the loop invariant holds
+the value of t is bounded below
+
+t≥0
+
+===== slide 17 =====
+in red the two proof obligations
+for termination
+
+Whenever the invariant and the guard hold, executing the body strictly decreases the variant
+variant =
+termination
+function
+
+fresh
+variable
+
+precedence
+relation
+
+{P ∧ b} c {P} {P ∧ b ∧ t = z} c {t < z} P ⇒ t ≥ 0
+{P}
+
+b
+
+c {P ∧ ¬b}
+bounded
+decrease
+
+o
+
+d
+
+e
+
+l
+
+i
+
+Whenever the invariant holds, the variant is bounded below
+h
+
+w
+
+Rule for total correctness
+
+.
+
+===== slide 18 =====
+o
+
+d
+
+e
+
+l
+
+i
+
+proof
+P⇒t≥0
+{x ≥ 0} take t ≜ x
+obligations
+x>0
+x≥0⇒x ≥0
+{x ≥ 0 ∧ x > 0} ≡ {x − 1 ≥ 0}
+x := x − 1;
+{P ∧ b ∧ t = z} c {t < z}
+{x ≥ 0}
+{x ≥ 0 ∧ x ≤ 0} ≡ {x = 0}
+{x ≥ 0 ∧ x > 0 ∧ x = z} ⇒
+
+h
+
+w
+
+Total correctness proof
+
+{x = z} ⇒
+{x < z + 1} ≡
+{x − 1 < z} ⇒
+x := x − 1
+{x < z}
+
+===== slide 19 =====
+o
+
+d
+
+e
+
+l
+
+i
+
+{x ≥ 0 ∧ y > 0} ≡ {x ≥ 0 ∧ y > 0 ∧ x = x + 0y}
+r := x
+{x ≥ 0 ∧ y > 0 ∧ x = r + 0y} ≡ {r ≥ 0 ∧ y > 0 ∧ x = r + 0y}
+q := 0;
+{r ≥ 0 ∧ y > 0 ∧ x = r + qy}
+y≤r
+take t ≜ r
+{r ≥ y > 0 ∧ x = r + qy} ⇒ {r − y ≥ 0 ∧ y > 0 ∧ x = r − y + (q + 1)y}
+r := r − y;
+{r ≥ 0 ∧ y > 0 ∧ x = r + (q + 1)y}
+q := q + 1
+{r ≥ 0 ∧ y > 0 ∧ x = r + qy}
+{y > r ≥ 0 ∧ x = r + qy}
+h
+
+w
+
+Total correctness proof
+
+===== slide 20 =====
+take t ≜ r
+
+Proof obligations
+P⇒t≥0
+
+(r ≥ 0 ∧ y > 0 ∧ x = r + qy) ⇒ r ≥ 0
+
+{P ∧ b ∧ t = z} c {t < z}
+{r ≥ y > 0 ∧ ⋯ ∧ r = z} ⇒ {r ≥ 0 ∧ y > 0 ∧ ⋯ ∧ r − y < z}
+r := r − y;
+{r ≥ 0 ∧ y > 0 ∧ ⋯ ∧ r < z}
+q := q + 1
+{r ≥ 0 ∧ y > 0 ∧ ⋯ ∧ r < z} ⇒ {r < z}
+
+===== slide 21 =====
+{
+}
+k := 1;
+r := x;
+k>0
+r > 100
+r := r − 10;
+k := k − 1
+
+f?
+
+fi
+
+n
+
+o
+
+e
+
+d
+
+h
+
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+h
+
+s
+
+t
+
+l
+
+r := r + 11;
+k := k + 1
+{r = f(x)}
+what is
+f
+
+w
+
+i
+
+e
+
+Finding invariants is dif cult!
+
+===== slide 22 =====
+{
+}
+k := 1;
+r := x;
+k>0
+r > 100
+r := r − 10;
+k := k − 1
+
+n
+
+o
+
+e
+
+d
+
+h
+
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+h
+
+s
+
+t
+
+l
+
+r := r + 11;
+k := k + 1
+{r = f(x)}
+f
+
+w
+
+i
+
+e
+
+McCarthy’s 91 function
+
+<latexit sha1_base64="7zrwHozaVOio7EbWiyRHrXqOXqI=">AAACY3icdVHPb9MwGHXCBiPjRxncEJJFBWqFiJzRduttggvHIdFtUl1VjvslteY4wf4CraL+mRw4cOSv4IJTigQI3unpfe/74ee00sohY1+C8Mbe/s1bB7ejwzt3793vPDi6cGVtJUxkqUt7lQoHWhmYoEINV5UFUaQaLtPrN2398iNYp0rzHtcVzAqRG5UpKdBL806Z9VZ9ytEqYXINH2jENWTIm4inkCvTCGvFetNovYmynje/SJJ+nz6nK966E8Y4j1YvE+YlXqTlqilxCfaTcrCJOJjFbkDErcqXGM87XRaz4XhwckxZPGTJePDKk/H4dDAa0iRmW3TJDufzzle+KGVdgEGphXPThFU481NRSd3uqB1UQl6LHKaeGlGAmzXbYDb0We0ElrQCS5WmWxF+72hE4dy6SL2zELh0f9da8V+1aY3Z6axRpqoRjGwXodKwXeSkVT5xoAtlAVG0lwNVhkphBSJYRYWUXqz9F0Q+j1+Ppv8nF8dxMopH7wbds9e7ZA7IY/KU9EhCTsgZeUvOyYRI8pl8D/aC/eBbeBgehY9+WsNg1/OQ/IHwyQ9aSLXf</latexit>
+
+f (x) ,
+<latexit sha1_base64="Did7GHTd1cvTci4H0hQ9DiHEJ5k=">AAACW3icdVBNbxMxFHS2fBRTaABx4mIRgcqBlbckafdWwYVjkUhbKY4ir/Oyser1LvbbNtEqP5EfwKG/gitIeEOQAMGcnubNeJ4nq4z2yPmXTrRz6/adu7v36P29Bw/3u48en/mydgpGqjSlu8ikB6MtjFCjgYvKgSwyA+fZ5bt2f34FzuvSfsRVBZNC5lbPtZIYqGk3nx8sXzGBTkubG/jEqDAwR9FQkUGubSOdk6t1Y8yapgl7yZaiVSWcC0GXrxMeKFFk5bIpcQHuWntYUwF2tjVS4XS+wHja7fGYD9L+0SHj8YAnaf9NGNL0uD8csCTmG/TIFqfT7o2YlaouwKIy0vtxwiuchFdRK9Nm1B4qqS5lDuMwWlmAnzSbQtbsRe0llqwCx7RhGxJ+dzSy8H5VZEFZSFz4v3ct+a/duMb58aTRtqoRrGqDUBvYBHnldGga2Ew7QJTt5cC0ZUo6iQhOM6lUIOtQPQ19/Po0+/9wdhgnw3j4od87ebttZpc8I8/JAUnIETkh78kpGRFFPpOv5Bv53rmJdiIa7f2URp2t5wn5A9HTH1FltYQ=</latexit>
+
+f (x) ,
+
+⇢
+
+⇢
+
+f (f (x + 11))
+x 10
+
+91
+x 10
+
+x  100
+otherwise
+
+x  100
+otherwise
+
+===== slide 23 =====
+n
+
+o
+
+e
+
+d
+
+h
+
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+r := r + 11;
+k := k + 1
+{ ? } ⇒ {r = f(x)}
+h
+
+s
+
+t
+
+l
+
+{
+}
+k := 1;
+which
+invariant?
+r := x;
+{?}
+k>0
+r > 100
+r := r − 10;
+k := k − 1
+
+f
+
+w
+
+i
+
+e
+
+Invariant for McCarthy’s 91 function?
+
+<latexit sha1_base64="7zrwHozaVOio7EbWiyRHrXqOXqI=">AAACY3icdVHPb9MwGHXCBiPjRxncEJJFBWqFiJzRduttggvHIdFtUl1VjvslteY4wf4CraL+mRw4cOSv4IJTigQI3unpfe/74ee00sohY1+C8Mbe/s1bB7ejwzt3793vPDi6cGVtJUxkqUt7lQoHWhmYoEINV5UFUaQaLtPrN2398iNYp0rzHtcVzAqRG5UpKdBL806Z9VZ9ytEqYXINH2jENWTIm4inkCvTCGvFetNovYmynje/SJJ+nz6nK966E8Y4j1YvE+YlXqTlqilxCfaTcrCJOJjFbkDErcqXGM87XRaz4XhwckxZPGTJePDKk/H4dDAa0iRmW3TJDufzzle+KGVdgEGphXPThFU481NRSd3uqB1UQl6LHKaeGlGAmzXbYDb0We0ElrQCS5WmWxF+72hE4dy6SL2zELh0f9da8V+1aY3Z6axRpqoRjGwXodKwXeSkVT5xoAtlAVG0lwNVhkphBSJYRYWUXqz9F0Q+j1+Ppv8nF8dxMopH7wbds9e7ZA7IY/KU9EhCTsgZeUvOyYRI8pl8D/aC/eBbeBgehY9+WsNg1/OQ/IHwyQ9aSLXf</latexit>
+
+f (x) ,
+<latexit sha1_base64="Did7GHTd1cvTci4H0hQ9DiHEJ5k=">AAACW3icdVBNbxMxFHS2fBRTaABx4mIRgcqBlbckafdWwYVjkUhbKY4ir/Oyser1LvbbNtEqP5EfwKG/gitIeEOQAMGcnubNeJ4nq4z2yPmXTrRz6/adu7v36P29Bw/3u48en/mydgpGqjSlu8ikB6MtjFCjgYvKgSwyA+fZ5bt2f34FzuvSfsRVBZNC5lbPtZIYqGk3nx8sXzGBTkubG/jEqDAwR9FQkUGubSOdk6t1Y8yapgl7yZaiVSWcC0GXrxMeKFFk5bIpcQHuWntYUwF2tjVS4XS+wHja7fGYD9L+0SHj8YAnaf9NGNL0uD8csCTmG/TIFqfT7o2YlaouwKIy0vtxwiuchFdRK9Nm1B4qqS5lDuMwWlmAnzSbQtbsRe0llqwCx7RhGxJ+dzSy8H5VZEFZSFz4v3ct+a/duMb58aTRtqoRrGqDUBvYBHnldGga2Ew7QJTt5cC0ZUo6iQhOM6lUIOtQPQ19/Po0+/9wdhgnw3j4od87ebttZpc8I8/JAUnIETkh78kpGRFFPpOv5Bv53rmJdiIa7f2URp2t5wn5A9HTH1FltYQ=</latexit>
+
+f (x) ,
+
+⇢
+
+⇢
+
+f (f (x + 11))
+x 10
+
+91
+x 10
+
+x  100
+otherwise
+
+x  100
+otherwise
+
+===== slide 24 =====
+Ask an expert?
+
+===== slide 25 =====
+n
+
+o
+
+e
+
+d
+
+h
+
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+r := r + 11;
+k := k + 1
+{ ? } ⇒ {r = f(x)}
+h
+
+s
+
+t
+
+l
+
+{
+}
+k := 1;
+r := x;
+{ r = x + 11k }
+k>0
+r > 100
+r := r − 10;
+k := k − 1
+
+f
+
+w
+
+i
+
+e
+
+Invariant for McCarthy’s 91 function?
+don't
+think so!
+
+when (k = 1,r = x) then r = x + 11k does not hold!
+
+<latexit sha1_base64="7zrwHozaVOio7EbWiyRHrXqOXqI=">AAACY3icdVHPb9MwGHXCBiPjRxncEJJFBWqFiJzRduttggvHIdFtUl1VjvslteY4wf4CraL+mRw4cOSv4IJTigQI3unpfe/74ee00sohY1+C8Mbe/s1bB7ejwzt3793vPDi6cGVtJUxkqUt7lQoHWhmYoEINV5UFUaQaLtPrN2398iNYp0rzHtcVzAqRG5UpKdBL806Z9VZ9ytEqYXINH2jENWTIm4inkCvTCGvFetNovYmynje/SJJ+nz6nK966E8Y4j1YvE+YlXqTlqilxCfaTcrCJOJjFbkDErcqXGM87XRaz4XhwckxZPGTJePDKk/H4dDAa0iRmW3TJDufzzle+KGVdgEGphXPThFU481NRSd3uqB1UQl6LHKaeGlGAmzXbYDb0We0ElrQCS5WmWxF+72hE4dy6SL2zELh0f9da8V+1aY3Z6axRpqoRjGwXodKwXeSkVT5xoAtlAVG0lwNVhkphBSJYRYWUXqz9F0Q+j1+Ppv8nF8dxMopH7wbds9e7ZA7IY/KU9EhCTsgZeUvOyYRI8pl8D/aC/eBbeBgehY9+WsNg1/OQ/IHwyQ9aSLXf</latexit>
+
+f (x) ,
+<latexit sha1_base64="Did7GHTd1cvTci4H0hQ9DiHEJ5k=">AAACW3icdVBNbxMxFHS2fBRTaABx4mIRgcqBlbckafdWwYVjkUhbKY4ir/Oyser1LvbbNtEqP5EfwKG/gitIeEOQAMGcnubNeJ4nq4z2yPmXTrRz6/adu7v36P29Bw/3u48en/mydgpGqjSlu8ikB6MtjFCjgYvKgSwyA+fZ5bt2f34FzuvSfsRVBZNC5lbPtZIYqGk3nx8sXzGBTkubG/jEqDAwR9FQkUGubSOdk6t1Y8yapgl7yZaiVSWcC0GXrxMeKFFk5bIpcQHuWntYUwF2tjVS4XS+wHja7fGYD9L+0SHj8YAnaf9NGNL0uD8csCTmG/TIFqfT7o2YlaouwKIy0vtxwiuchFdRK9Nm1B4qqS5lDuMwWlmAnzSbQtbsRe0llqwCx7RhGxJ+dzSy8H5VZEFZSFz4v3ct+a/duMb58aTRtqoRrGqDUBvYBHnldGga2Ew7QJTt5cC0ZUo6iQhOM6lUIOtQPQ19/Po0+/9wdhgnw3j4od87ebttZpc8I8/JAUnIETkh78kpGRFFPpOv5Bv53rmJdiIa7f2URp2t5wn5A9HTH1FltYQ=</latexit>
+
+f (x) ,
+
+⇢
+
+⇢
+
+f (f (x + 11))
+x 10
+
+91
+x 10
+
+x  100
+otherwise
+
+x  100
+otherwise
+
+===== slide 26 =====
+{
+}
+k := 1;
+k
+1
+r := x;
+when (k = 1,r = x) then both k ≥ 0 and f (r) = f (x) = f(x) hold
+k
+{k ≥ 0 ∧ f (r) = f(x)}
+k>0
+⇢
+r > 100
+f (f (x + 11)) x  100
+f
+(x)
+,
+r := r − 10;
+x 10
+otherwise
+k := k − 1
+⇢
+<latexit sha1_base64="7zrwHozaVOio7EbWiyRHrXqOXqI=">AAACY3icdVHPb9MwGHXCBiPjRxncEJJFBWqFiJzRduttggvHIdFtUl1VjvslteY4wf4CraL+mRw4cOSv4IJTigQI3unpfe/74ee00sohY1+C8Mbe/s1bB7ejwzt3793vPDi6cGVtJUxkqUt7lQoHWhmYoEINV5UFUaQaLtPrN2398iNYp0rzHtcVzAqRG5UpKdBL806Z9VZ9ytEqYXINH2jENWTIm4inkCvTCGvFetNovYmynje/SJJ+nz6nK966E8Y4j1YvE+YlXqTlqilxCfaTcrCJOJjFbkDErcqXGM87XRaz4XhwckxZPGTJePDKk/H4dDAa0iRmW3TJDufzzle+KGVdgEGphXPThFU481NRSd3uqB1UQl6LHKaeGlGAmzXbYDb0We0ElrQCS5WmWxF+72hE4dy6SL2zELh0f9da8V+1aY3Z6axRpqoRjGwXodKwXeSkVT5xoAtlAVG0lwNVhkphBSJYRYWUXqz9F0Q+j1+Ppv8nF8dxMopH7wbds9e7ZA7IY/KU9EhCTsgZeUvOyYRI8pl8D/aC/eBbeBgehY9+WsNg1/OQ/IHwyQ9aSLXf</latexit>
+
+<latexit sha1_base64="Did7GHTd1cvTci4H0hQ9DiHEJ5k=">AAACW3icdVBNbxMxFHS2fBRTaABx4mIRgcqBlbckafdWwYVjkUhbKY4ir/Oyser1LvbbNtEqP5EfwKG/gitIeEOQAMGcnubNeJ4nq4z2yPmXTrRz6/adu7v36P29Bw/3u48en/mydgpGqjSlu8ikB6MtjFCjgYvKgSwyA+fZ5bt2f34FzuvSfsRVBZNC5lbPtZIYqGk3nx8sXzGBTkubG/jEqDAwR9FQkUGubSOdk6t1Y8yapgl7yZaiVSWcC0GXrxMeKFFk5bIpcQHuWntYUwF2tjVS4XS+wHja7fGYD9L+0SHj8YAnaf9NGNL0uD8csCTmG/TIFqfT7o2YlaouwKIy0vtxwiuchFdRK9Nm1B4qqS5lDuMwWlmAnzSbQtbsRe0llqwCx7RhGxJ+dzSy8H5VZEFZSFz4v3ct+a/duMb58aTRtqoRrGqDUBvYBHnldGga2Ew7QJTt5cC0ZUo6iQhOM6lUIOtQPQ19/Po0+/9wdhgnw3j4od87ebttZpc8I8/JAUnIETkh78kpGRFFPpOv5Bv53rmJdiIa7f2URp2t5wn5A9HTH1FltYQ=</latexit>
+
+n
+
+o
+
+e
+
+d
+
+h
+
+r := r + 11;
+k := k + 1
+k
+{k = 0 ∧ f (r) = f(x)} ⇒ {r = f(x)}
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+h
+
+s
+
+t
+
+l
+
+f (x) ,
+
+f
+
+w
+
+i
+
+e
+
+Invariant for McCarthy’s 91 function
+
+91
+x 10
+
+x  100
+otherwise
+
+===== slide 27 =====
+which variant
+(for termination)?
+
+<latexit sha1_base64="7zrwHozaVOio7EbWiyRHrXqOXqI=">AAACY3icdVHPb9MwGHXCBiPjRxncEJJFBWqFiJzRduttggvHIdFtUl1VjvslteY4wf4CraL+mRw4cOSv4IJTigQI3unpfe/74ee00sohY1+C8Mbe/s1bB7ejwzt3793vPDi6cGVtJUxkqUt7lQoHWhmYoEINV5UFUaQaLtPrN2398iNYp0rzHtcVzAqRG5UpKdBL806Z9VZ9ytEqYXINH2jENWTIm4inkCvTCGvFetNovYmynje/SJJ+nz6nK966E8Y4j1YvE+YlXqTlqilxCfaTcrCJOJjFbkDErcqXGM87XRaz4XhwckxZPGTJePDKk/H4dDAa0iRmW3TJDufzzle+KGVdgEGphXPThFU481NRSd3uqB1UQl6LHKaeGlGAmzXbYDb0We0ElrQCS5WmWxF+72hE4dy6SL2zELh0f9da8V+1aY3Z6axRpqoRjGwXodKwXeSkVT5xoAtlAVG0lwNVhkphBSJYRYWUXqz9F0Q+j1+Ppv8nF8dxMopH7wbds9e7ZA7IY/KU9EhCTsgZeUvOyYRI8pl8D/aC/eBbeBgehY9+WsNg1/OQ/IHwyQ9aSLXf</latexit>
+
+f (x) ,
+<latexit sha1_base64="Did7GHTd1cvTci4H0hQ9DiHEJ5k=">AAACW3icdVBNbxMxFHS2fBRTaABx4mIRgcqBlbckafdWwYVjkUhbKY4ir/Oyser1LvbbNtEqP5EfwKG/gitIeEOQAMGcnubNeJ4nq4z2yPmXTrRz6/adu7v36P29Bw/3u48en/mydgpGqjSlu8ikB6MtjFCjgYvKgSwyA+fZ5bt2f34FzuvSfsRVBZNC5lbPtZIYqGk3nx8sXzGBTkubG/jEqDAwR9FQkUGubSOdk6t1Y8yapgl7yZaiVSWcC0GXrxMeKFFk5bIpcQHuWntYUwF2tjVS4XS+wHja7fGYD9L+0SHj8YAnaf9NGNL0uD8csCTmG/TIFqfT7o2YlaouwKIy0vtxwiuchFdRK9Nm1B4qqS5lDuMwWlmAnzSbQtbsRe0llqwCx7RhGxJ+dzSy8H5VZEFZSFz4v3ct+a/duMb58aTRtqoRrGqDUBvYBHnldGga2Ew7QJTt5cC0ZUo6iQhOM6lUIOtQPQ19/Po0+/9wdhgnw3j4od87ebttZpc8I8/JAUnIETkh78kpGRFFPpOv5Bv53rmJdiIa7f2URp2t5wn5A9HTH1FltYQ=</latexit>
+
+f (x) ,
+
+n
+
+o
+
+e
+
+d
+
+h
+
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+r := r + 11;
+k := k + 1
+k
+{k = 0 ∧ f (r) = f(x)} ⇒ {r = f(x)}
+h
+
+s
+
+t
+
+l
+
+{
+}
+k := 1;
+r := x;
+k
+{k ≥ 0 ∧ f (r) = f(x)} t ≜ ?
+k>0
+r > 100
+r := r − 10;
+k := k − 1
+
+f
+
+w
+
+i
+
+e
+
+Variant for McCarthy’s 91 function?
+
+⇢
+
+⇢
+
+f (f (x + 11))
+x 10
+
+91
+x 10
+
+x  100
+otherwise
+
+x  100
+otherwise
+
+===== slide 28 =====
+lexicographic
+order
+
+t = ( | 101 − r + 10k | , k)
+⇢
+f (f (x + 11))
+f (x) ,
+x 10
+<latexit sha1_base64="7zrwHozaVOio7EbWiyRHrXqOXqI=">AAACY3icdVHPb9MwGHXCBiPjRxncEJJFBWqFiJzRduttggvHIdFtUl1VjvslteY4wf4CraL+mRw4cOSv4IJTigQI3unpfe/74ee00sohY1+C8Mbe/s1bB7ejwzt3793vPDi6cGVtJUxkqUt7lQoHWhmYoEINV5UFUaQaLtPrN2398iNYp0rzHtcVzAqRG5UpKdBL806Z9VZ9ytEqYXINH2jENWTIm4inkCvTCGvFetNovYmynje/SJJ+nz6nK966E8Y4j1YvE+YlXqTlqilxCfaTcrCJOJjFbkDErcqXGM87XRaz4XhwckxZPGTJePDKk/H4dDAa0iRmW3TJDufzzle+KGVdgEGphXPThFU481NRSd3uqB1UQl6LHKaeGlGAmzXbYDb0We0ElrQCS5WmWxF+72hE4dy6SL2zELh0f9da8V+1aY3Z6axRpqoRjGwXodKwXeSkVT5xoAtlAVG0lwNVhkphBSJYRYWUXqz9F0Q+j1+Ppv8nF8dxMopH7wbds9e7ZA7IY/KU9EhCTsgZeUvOyYRI8pl8D/aC/eBbeBgehY9+WsNg1/OQ/IHwyQ9aSLXf</latexit>
+
+<latexit sha1_base64="Did7GHTd1cvTci4H0hQ9DiHEJ5k=">AAACW3icdVBNbxMxFHS2fBRTaABx4mIRgcqBlbckafdWwYVjkUhbKY4ir/Oyser1LvbbNtEqP5EfwKG/gitIeEOQAMGcnubNeJ4nq4z2yPmXTrRz6/adu7v36P29Bw/3u48en/mydgpGqjSlu8ikB6MtjFCjgYvKgSwyA+fZ5bt2f34FzuvSfsRVBZNC5lbPtZIYqGk3nx8sXzGBTkubG/jEqDAwR9FQkUGubSOdk6t1Y8yapgl7yZaiVSWcC0GXrxMeKFFk5bIpcQHuWntYUwF2tjVS4XS+wHja7fGYD9L+0SHj8YAnaf9NGNL0uD8csCTmG/TIFqfT7o2YlaouwKIy0vtxwiuchFdRK9Nm1B4qqS5lDuMwWlmAnzSbQtbsRe0llqwCx7RhGxJ+dzSy8H5VZEFZSFz4v3ct+a/duMb58aTRtqoRrGqDUBvYBHnldGga2Ew7QJTt5cC0ZUo6iQhOM6lUIOtQPQ19/Po0+/9wdhgnw3j4od87ebttZpc8I8/JAUnIETkh78kpGRFFPpOv5Bv53rmJdiIa7f2URp2t5wn5A9HTH1FltYQ=</latexit>
+
+f (x) ,
+
+n
+
+o
+
+e
+
+d
+
+h
+
+t
+
+e
+
+e
+
+l
+
+i
+
+u
+
+e
+
+r
+
+r := r + 11;
+k := k + 1
+k
+{k = 0 ∧ f (r) = f(x)} ⇒ {r = f(x)}
+h
+
+s
+
+t
+
+l
+
+{
+}
+k := 1;
+r := x;
+k
+{k ≥ 0 ∧ f (r) = f(x)}
+k>0
+r > 100
+r := r − 10;
+k := k − 1
+
+f
+
+w
+
+i
+
+e
+
+Finding invariants (McCarthy91)
+
+⇢
+
+91
+x 10
+
+x  100
+otherwise
+
+x  100
+otherwise
+
+===== slide 29 =====
+Correctness
+Th. Any derivable HL triple is valid
+Proof. By induction on the derivation tree.
+Remember the proof for composition of commands
+
+{P} c1 {R} {R} c2 {Q}
+{P} c1; c2 {Q}
+[[c1; c2]]P = [[c2]]([[c1]]P) ⊆ [[c2]]R ⊆ Q
+
+===== slide 30 =====
+Floyd’s axiom soundness
+{P} x := a { ∃x′ . P[x′/x] ∧ x = a[x′/x]}
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+Let us take δ ∈ [[x := a]]P,
+we need to show that δ ⊧ ∃x′ . P[x′/x] ∧ x = a[x′/x]
+It must be the case that δ = σ[v/x] for some σ ⊧ P such that v = [[a]]σ
+Let x′ = σ(x). Then δ(x) = v and
+[[a[x′/x]]]δ =[[a[x′/x]]]σ[v/x] = [[a[x′/x]]]σ = [[a]]σ = v.
+Therefore, δ ⊧ (x = a[x′/x]).
+Moreover, [[P[x′/x]]]δ = [[P[x′/x]]]σ[v/x] = [[P[x′/x]]]σ = [[P]]σ = true
+Therefore, δ ⊧ P[x′/x].
+From which we conclude δ ⊧ ∃x′ . P[x′/x] ∧ x = a[x′/x]
+
+===== slide 31 =====
+Conditional rule: correctness
+{P ∧ b} c1 {Q} {P ∧ ¬b} c2 {Q}
+{P} if b then c1 else c2 {Q}
+We assume the validity of the premises:
+[[c1]](P ∧ b) ⊆ Q and [[c2]](P ∧ ¬b) ⊆ Q
+Therefore:
+[[if b then c1 else c2]]P = [[b?; c1 + ¬b?; c2]]P
+= [[c1]]([[b]]P) ∪[[c2]]([[ ¬b]]P)
+= [[c1]](P ∧ b) ∪ [[c2]](P ∧ ¬b) ⊆ Q ∪ Q = Q
+
+===== slide 32 =====
+{P}
+
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+We assume the validity of the premise: [[c]](P ∧ b) ⊆ P, i.e., [[b?; c]]P ⊆ P
+k
+It can be proved by induction that, for any k ∈ N it holds [[b?; c]] P ⊆ P
+Therefore:
+
+[[
+
+⋆
+
+b
+∞
+o
+
+d
+
+o
+
+d
+
+e
+
+l
+
+e
+
+i
+
+l
+
+h
+
+i
+
+k=0
+
+∞
+
+k
+
+c]]P = [[(b?; c) ; ¬b?]]P = [[ ¬b]]( [[b?; c]] P)
+⋃
+
+⊆ [[ ¬b]]( P) = [[ ¬b]]P = (P ∧ ¬b)
+⋃
+h
+
+w
+w
+
+While rule: correctness
+
+k=0
+
+===== slide 33 =====
+Incompleteness I
+Conjecture Any valid HL triple is derivable
+
+e
+
+e
+
+s
+
+l
+
+u
+
+a
+
+r
+
+t
+
+f
+
+Counterexample:
+{
+}c{
+} is valid only when c diverges
+but halting problem is not r.e.
+while the set of derivable HL triples is r.e.
+
+===== slide 34 =====
+Conjecture Any valid HL triple is derivable
+
+ff
+
+e
+
+u
+
+p
+
+i
+
+r
+
+t
+
+Counterexample:
+{
+}
+{Q} is valid when Q is a tautology
+but Godel’s Incompleteness Theorem (1939) tells us that there
+is no e ective proof system such that its theorems coincide with
+all valid arithmetic assertions
+
+k
+
+s
+
+Incompleteness II
+
+===== slide 35 =====
+Relative completeness I
+Relative completeness: suppose we can consult an oracle to
+check if an assertion P ⇒ P′ is valid or not, then HL is complete
+
+￼
+
+In other words, we separate concerns about programs and
+reasoning about them from concerns to do with arithmetic and
+the incompleteness of any proof system for it
+
+===== slide 36 =====
+Dijkstra’s weakest precondition
+Given a command c and a postcondition Q a weakest liberal
+precondition is a predicate P such that for any precondition R
+
+{R} c {Q} i R ⇒ P
+i.e., P is the least restrictive requirement that guarantees that
+Q holds after executing c (if it terminates)
+
+ff
+
+ij
+
+Typically, it is denoted by wlp(c, Q) ≜ {σ ∈ Σ ∣ [[c]]{σ} ⊆ Q}
+
+===== slide 37 =====
+Adjoints
+P ⇒ wlp(c, Q)
+i
+
+ff
+
+[[c]]P ⊆ Q
+
+===== slide 38 =====
+(Relative) Completeness
+for any postcondition Q expressible in the logic
+and for any command c, the precondition
+wlp(c, Q) is also expressible in the logic
+
+Th. If the logic language is expressive enough, then any valid HL
+triple can be derived.
+Proof. Suppose {P} c {Q} is valid (with P and Q expressible).
+By structural induction on c we can build an assertion R that is
+equivalent to wlp(c, Q) and such that {R} c {Q} is derivable.
+By applying the consequence rule we derive {P} c {Q}.
+
+===== slide 39 =====
+Adding nondeterminism
+
+===== slide 40 =====
+Regular commands
+regular
+command
+
+e ::= skip | x := a | b? | ...
+
+atomic
+command
+
+r ::= e
+| r1; r2
+| r1 + r2
+⋆
+| r
+Kleene
+star
+
+choice
+
+[[b?]]P ≜ [[b]]P
+[[r1 + r2]]P ≜ [[r1]]P ∪ [[r2]]P
+⋆
+
+[[r ]]P ≜
+
+∞
+
+⋃
+k=0
+
+k
+
+[[r]] P
+
+===== slide 41 =====
+Encoding while commands
+if b then c1 else c2 ≜ (b?; c1) + ( ¬b?; c2)
+while b do c
+
+⋆
+
+≜ (b?; c) ; ¬b?
+
+===== slide 42 =====
+Minimal set of rules
+{P} e {[[e]]P}
+
+{atom}
+
+{P} r1 {R} {R} r2 {Q}
+{seq}
+{P} r1; r2 {Q}
+
+￼
+
+￼
+
+￼
+
+￼
+
+∀i ∈ {1,2} {P} ri {Q}
+{choice}
+{P} r1 + r2 {Q}
+
+{P} r {P}
+{iter}
+⋆
+{P} r {P}
+
+P ⇒ P′ {P′} r {Q′} Q′ ⇒ Q
+{P} r {Q}
+
+{cons}
+
+===== slide 43 =====
+Auxiliary rules
+{P1} r {Q1} {P2} r {Q2}
+{disj}
+{P1 ∨ P2} r {Q1 ∨ Q2}
+
+assigned variables in r
+are disjoint from
+free variables in R
+
+{P1} r {Q1} {P2} r {Q2}
+{P} r {Q}
+{conj}
+{frame}
+{P1 ∧ P2} r {Q1 ∧ Q2}
+{P ∧ R} r {Q ∧ R}
+
+￼
+
+￼
+
+￼
+
+￼
+
+P ⇒ P′ {P′} r {Q}
+{P} r {Q}
+
+{stren}
+
+{P} r {Q′} Q′ ⇒ Q
+{weak}
+{P} r {Q}
+
+===== slide 44 =====
+Can we take P = ¬b an invariant?
+
+{P}
+
+o
+
+o
+
+d
+
+d
+
+e
+
+e
+
+e
+
+s
+
+l
+
+l
+
+l
+
+i
+
+i
+
+a
+
+h
+
+h
+
+{ ¬b}
+f
+
+w
+
+w
+
+Question 1
+{P ∧ b} c {P}
+b
+c {P ∧ ¬b}
+
+{
+
+} c { ¬b}
+b
+c { ¬b}
+
+===== slide 45 =====
+Find a derivation for the HL triple
+
+e
+
+s
+
+l
+
+z := x
+
+e
+
+n
+
+e
+
+h
+
+x≥y
+
+t
+
+e
+
+}
+
+u
+
+r
+
+t
+
+{
+
+f
+
+i
+
+Question 2
+z := y {z = max(x, y)}
+
+===== slide 46 =====
+Question 3
+Prove that rule {conj} is sound
+
+{P1} r {Q1} {P2} r {Q2}
+{conj}
+{P1 ∧ P2} r {Q1 ∧ Q2}
+
+===== slide 47 =====
+Question 4
+Show that the following rule for assignment is not sound
+
+{P} x := a {P[a/x]}
+syntax
+replacement

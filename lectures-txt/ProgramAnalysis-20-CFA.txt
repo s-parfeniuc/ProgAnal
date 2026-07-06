@@ -1,0 +1,2285 @@
+# ProgramAnalysis-20-CFA
+# auto-extracted from ProgramAnalysis-20-CFA.pdf (70 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #20
+Control Flow Analysis
+
+===== slide 2 =====
+Constraint Based 0-CFA
+Analysis
+
+150
+
+===== slide 3 =====
+151
+
+===== slide 4 =====
+Constraint Based 0-CFA Analysis
+• We are now ready to compute the least solution (C,̂ ρ)̂ such that
+• We have learnt that constraint generation is a syntax driven approach
+• We turn semantic rules into constraints
+• To this aim, we rst construct a nite set C*[[e*]] of constraints and
+conditional constraints ls in the form:
+if t may ow to rhs', then
+
+lhs ⊆ rhs
+{t} ⊆ rhs′ ⇒ lhs ⊆ rhs
+
+lhs must ow to rhs
+
+where:
+̂
+̂ {t} where t is a function abstraction
+| ρ(x),
+• lhs ::= C(l)
+̂
+̂
+| ρ(x)
+• rhs := C(l)
+
+fi
+
+fi
+
+fl
+
+fl
+
+￼
+
+152
+
+===== slide 5 =====
+From rules to constraints
+• Expand each clause de ning (C,̂ ρ)̂ ⊧s e* into a nite set of constraints and
+• Collect all constraints into C*[[e*]]
+logical formula
+set of syntactic
+entities
+
+Idea:
+Occurrences of Ĉ are changed into C and
+occurrences of ρ ̂ are changed into r
+
+C and r are the constraint variables representing the unknown solution
+The function C* given an expression e* returns a set of constraints C*[[e*]]
+We generate constraints from the syntax-directed rules
+
+fi
+
+153
+
+===== slide 6 =====
+Clauses for constants
+Constants generate no constraints
+
+[con] (C,̂ ρ)̂ ⊧s c l
+
+̂
+∅ ⊆ C(l)
+constants generate
+no constraints:
+
+C*[[c l]] = ∅
+
+Example
+
+f
+
+f
+
+154
+i
+
+e ≜ 71
+C*[[71]] = ∅
+
+===== slide 7 =====
+Clauses for variables
+Variables generate a constraint re ecting a ow from r(x) to C(l)
+
+[var] (C,̂ ρ)̂ ⊧s x l
+
+̂
+̂ ⊆ C(l)
+ρ(x)
+
+C*[[x l]] = {r(x) ⊆ C(l)}
+
+Example
+e ≜ x1
+
+C*[[ 1]] = {r( ) ⊆ C(1)}
+
+f
+
+f
+
+fl
+
+x
+
+x
+
+i
+
+155
+
+===== slide 8 =====
+Clauses for functions
+Function abstractions generate:
+• a ow constraint, and, recursively,
+• constraints from the body
+
+[ fn] (C,̂ ρ)̂ ⊧s (
+C*[[(
+
+x ⇒ e0)l
+
+̂ ∧ (C,̂ ρ)̂ ⊧s e0
+x ⇒ e0} ⊆ C(l)
+
+{
+
+x ⇒ e0)l]] = {{
+
+x ⇒ e0} ⊆ C(l)} ∪ C*[[e0l]]
+
+Example
+function constraint
+Body constraint
+e ≜ (fn x => x1)2
+C*[[(fn x => x1)2]] = {{fn x => x1} ⊆ C(2)} ∪ {r( ) ⊆ C(1)}
+
+fl
+
+n
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+n
+
+f
+
+n
+
+f
+
+x
+
+156
+
+===== slide 9 =====
+Function abstractions generate:
+• a ow constraint, and, recursively,
+• constraints from the body
+
+[ fun] (C,̂ ρ)̂ ⊧s (
+
+x ⇒ e0)l
+
+C*[[(
+
+x ⇒ e0)l]] = {{
+∪ {{
+
+̂
+x ⇒ e0} ⊆ C(l)
+∧
+
+{
+
+(C,̂ ρ)̂ ⊧s e0 ∧ {
+
+x ⇒ e0} ⊆ ρ(̂ f )
+
+x ⇒ e0)l} ⊆ C(l)} ∪ C*[[e0l]]
+x ⇒ e0)l} ⊆ r( f )} recursive binding: function
+ows to f
+
+f
+
+f
+
+f
+
+i
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+f
+
+f
+
+n
+
+n
+
+u
+
+f
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+157
+
+fl
+
+fl
+
+Clauses for recursive functions
+
+===== slide 10 =====
+Clause for function application
+Application generates recursively constraints from its terms plus the body
+conditional constraints
+
+[app] (C,̂ ρ)̂ ⊧s (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧s t1l1 ∧ (C,̂ ρ)̂ ⊧s t2l2
+̂ 1) :
+( ∀( x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧ ...
+
+C*[[(t1l1t2l2)l]] = C*[[t1l1]] ∪ C*[[t2l2]] ∪
+
+{{t} ⊆ C(l1) ⇒ C(l2) ⊆ r(x) | t = (
+
+{{t} ⊆ C(l1) ⇒ C(l0) ⊆ C(l) | t = (
+
+Conditional
+constraints
+
+x ⇒ t0l0) ∈ Term*} ∪
+
+x ⇒ t0l0) ∈ Term*} ∪ . . .
+
+For each possible function t at l1 in Term*: if t ows to l1, then:
+The set of function
+• argument ows to parameter
+abstractions in the
+• result ows to l
+terms to analyze
+
+fl
+
+fl
+
+n
+
+f
+
+n
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+158
+
+===== slide 11 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧s (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧s t1l1 ∧ (C,̂ ρ)̂ ⊧s t2l2
+̂ 1) :
+( ∀( x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+̂ 1) :
+( ∀(
+x ⇒ t0l0) ∈ C(l
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+
+C*[[(t1l1t2l2)l]] = C*[[t1l1]] ∪ C*[[t2l2]] ∪ {{t} ⊆ C(l1) ⇒ C(l2) ⊆ r(x) | t = (
+
+∪ {{t} ⊆ C(l1) ⇒ C(l0) ⊆ C(l) | t = (
+∪ {{t} ⊆ C(l1) ⇒ C(l2) ⊆ r(x) | t = (
+∪ {{t} ⊆ C(l1) ⇒ C(l0) ⊆ C(l) | t = (
+
+x ⇒ t0l0) ∈ Term*}
+x ⇒ t0l0) ∈ Term*}
+x ⇒ t0l0) ∈ Term*}
+
+f
+
+n
+
+n
+
+n
+
+u
+
+f
+
+f
+
+u
+
+f
+
+f
+
+f
+
+159
+i
+
+f
+
+n
+
+n
+
+u
+
+f
+
+f
+
+See Example 1 next
+
+x ⇒ t0l0) ∈ Term*}
+
+===== slide 12 =====
+Constraint based CFA
+
+160
+
+===== slide 13 =====
+Back to Example 1
+We generate the following set of
+constraints for our expression
+
+((fn x => x1)2 (fn y => y3)4)5
+[app]
+
+C*[[e*]] = C*[[(fn x => x1)2]] ∪ C*[[(fn y => y3)]] ∪
+
+{fn y => y3} ∈ Terms*
+
+{fn x => x1} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+
+{fn y => y3} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+
+{fn x => x1} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+
+{fn y => y3} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+[fn]
+
+We use that fn x => x1 and
+fn y => y3 are the only
+abstractions in Term*
+
+C*[[(fn x => x1)2]] = {fn x => x1} ⊆ C(2) ∪ C*[[ x1]]
+C*[[(fn y => y3)4]] = {fn y => y3} ⊆ C(4) ∪ C*[[ y3]]
+[var]
+
+161
+
+C*[[ x1]] = r(x) ⊆ C(1)
+C*[[ y3]] = r(y) ⊆ C(3)
+
+===== slide 14 =====
+Back to Example 1
+We generate the following set of
+constraints for our expression
+
+((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{fn x => x1} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{fn y => y3} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{fn y => y3} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+{fn x => x1} ⊆ C(2)
+{fn y => y3} ⊆ C(4)
+
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+162
+
+===== slide 15 =====
+Complexity
+
+The function C* uses the set of terms Term*. Let n be the size of the expression e*
+Naive estimate:
+the number of sub-terms
+2
+• O(n ) constraints
+• O(n 4) conditional constraints
+Re ned estimate:
+Key observation: Every construct, except applications, gives us only one constraint.
+Applications may gives us O(n) constraints:
+• O(n) constraints
+• O(n 2) conditional constraints
+Each of the O(n) sub-terms only generate O(1) constraints and O(n) conditional
+constraints
+The analysis remains polynomial despite higher-order functions
+
+fi
+
+163
+
+===== slide 16 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+n=5
+
+worst-case bounds, but not
+reached here
+
+fi
+
+Re ned estimate:
+• O(n) = 5 constraints
+• O(n 2) = 25 conditional constraints
+Here, we just have two functions and one application. For each t ∈ C(2) we
+generate two conditional constraints. For each subterm we only generate one
+constraint
+• 4 constraints
+• 4 conditional constraints {fn x => x1} ⊆ C(2) {fn x => x1} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{fn y => y3} ⊆ C(4) {fn x => x1} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+1
+We use that fn x => x and
+3
+{fn
+y
+=>
+y
+} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+r(x)
+⊆
+C(1)
+3
+fn y => y are the only
+{fn y => y3} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+r(y) ⊆ C(3)
+abstractions in Term*
+
+===== slide 17 =====
+From rules to constraints
+To give meaning to the syntax, we can translate syntactic entities to sets of
+terms:
+
+̂
+̂
+(C,̂ ρ)[[C(l)]]
+= C(l)
+̂
+̂
+= ρ(x)
+(C,̂ ρ)[[r(x)]]
+
+̂
+(C,̂ ρ)[[{t}]]
+= {t}
+̂
+(C,̂ ρ)[[{t}
+⊆ rhs′ ⇒ lhs]] =
+
+̂
+(C,̂ ρ)[[lhs]]
+{∅
+
+̂
+{t} ∈ (C,̂ ρ)[[rhs′
+]]
+
+Satisfaction relation for constraints:
+
+e
+
+s
+
+i
+
+w
+
+165
+￼
+
+f
+
+f
+f
+
+i
+
+￼
+
+f
+
+f
+
+i
+
+i
+
+set of constraints
+
+r
+
+e
+
+h
+
+t
+
+o
+
+̂
+̂
+̂
+(C,̂ ρ)[[C(l)]]
+⊧c (ls ⊆ rhs)
+(C,̂ ρ)[[ls]]
+⊆ (C,̂ ρ)[[rhs]]
+̂
+(C,̂ ρ)[[C(l)]]
+⊧c C
+∀(ls ⊆ rhs) ∈ C : (C,̂ ρ)̂ ⊧c (ls ⊆ rhs)
+
+===== slide 18 =====
+Preservation of solutions
+• All solutions to the set C*[[e*]] of constraints also satisfy the syntax directed
+specification of the CFA and vice versa (when restricted to program terms)
+• Thus computing the least solution of the constraints C*[[e*]] gives exactly
+the least CFA solution (C,̂ ρ)̂ to (C,̂ ρ)̂ ⊧s e*
+Proposition
+If (C,̂ ρ)̂ ⊆ (Ĉ⊤, ρ⊤̂ )
+(C,̂ ρ)̂ ⊧c C*[[e*]]
+then (C,̂ ρ)̂ ⊧s e*
+
+fi
+
+f
+
+f
+
+i
+
+166
+
+===== slide 19 =====
+Preservation of solutions
+• All solutions to the set C*[[e*]] of constraints also satisfy the syntax directed
+specification of the CFA and vice versa (when restricted to program terms)
+• Thus computing the least solution of the constraints C*[[e*]] gives exactly
+the least CFA solution (C,̂ ρ)̂ to (C,̂ ρ)̂ ⊧s e*
+Proposition
+If (C,̂ ρ)̂ ⊆ (Ĉ⊤, ρ⊤̂ )
+(C,̂ ρ)̂ ⊧c C*[[e*]]
+then (C,̂ ρ)̂ ⊧s e*
+Proof sketch
+(C,̂ ρ)̂ ⊧c C*[[e]]
+A simple structural induction on e shows that (C,̂ ρ)̂ ⊧s e
+for all sub-terms e of e*.
+In the case of function application (t1l1t2l2)l the assumption (C,̂ ρ)̂ ⊆ (Ĉ⊤, ρ⊤̂ )
+
+̂ 1) ⊆ Terms*
+is used to ensure that C(l
+
+fi
+
+f
+
+f
+
+f
+
+i
+
+f
+
+i
+
+167
+
+===== slide 20 =====
+Finding the least solution of the constraints amounts to computing the least
+xed point of a function
+1.De ne a suitable monotone function F* over analyses that propagates
+constraints over C and r
+
+F* : Cache*̂ × Env* ̂ → Cache*̂ × Env* ̂
+show that it has a least fixed point lfp(F*) that is indeed the least solution
+2.Compute the lfp(F*)
+
+Straightforward techniques allow us to compute the least fixed point in O(n 5)
+time when n is the size of the expression e*
+But we can do better, using graph formulation of the constraints: we
+obtain O(n 3)
+
+fi
+
+168
+
+fi
+
+fi
+
+Solving the Constraints
+
+===== slide 21 =====
+Solving the Constraints
+We can visualize a constraint system as a constraint graph:
+Nodes
+• a node C(l) for each label l ∈ Lab*
+• a node r(x) for each variable x ∈ Var*
+Edges
+• Each constraint p1 ⊆ p2 adds an initial
+edge (p1, p2) to the graph
+• Each constraint {t} ⊆ p ⇒ p1 ⊆ p2
+adds
+• a candidate edge (p1, p2), with
+“trigger” {t} ⊆ p, and
+• an edge (p, p2)
+169
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+===== slide 22 =====
+Solving the Constraints
+We can visualize a constraint system as a constraint graph:
+Nodes
+• a node C(l) for each label l ∈ Lab*
+• a node r(x) for each variable x ∈ Var*
+Edges
+• Each constraint p1 ⊆ p2 adds an initial
+edge (p1, p2) to the graph
+• Each constraint {t} ⊆ p ⇒ p1 ⊆ p2
+adds
+• a candidate edge (p1, p2), with
+“trigger” {t} ⊆ p, and
+• an edge (p, p2)
+170
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+{idy} ⊆ C(2)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 23 =====
+Solving the Constraints: idea
+Associated with each node p we have a data eld D[p] representing the
+current knowledge. Initially D[p] is given by
+
+D[p] = {t | ({t} ⊆ p) ∈ C*[[e*]]}
+All edges are traversed in order to propagate information from one data eld
+to another
+
+171
+
+===== slide 24 =====
+Value sets
+Each node p of the constraint
+graph is associated with a
+set (Data array) D[p] of values
+Goal: nd the value set of every
+node
+
+syntactical representations
+of functions
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+Initially, we have
+
+D[p] = {t | ({t} ⊆ p) ∈ C*[[e*]]}
+
+{idy} ⊆ C(2)
+
+Example 1
+
+D[C(2)] = {idx}
+D[C(4)] = {idy}
+D[p] = ∅ for other nodes p
+
+r(y)
+
+{idy} ⊆ C(2)
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+172
+
+fi
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 25 =====
+Propagation
+
+The idea of the algorithm is to
+iteratively propagate the information
+from one data eld to another
+according to the constraints
+
+Example 1
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+• If we have an edge (p1, p2) in our
+graph, then the value set of p1 must
+ow into the value set of p2
+• If a trigger is true then also in the
+corresponding edge the value set
+ows
+
+{idy} ⊆ C(2)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+r(y)
+
+{idy} ⊆ C(2)
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+173
+
+fi
+
+fl
+
+fl
+
+Constraint solving =
+graph reachability +
+propagation
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 26 =====
+The Constraint Solver
+Input: a set of constraint C*[[e*]]
+Output: the least solution (C,̂ ρ)̂ to the constraints (an assignment to variables
+C(l) and r(x)
+Data structures:
+• a worklist W containing the nodes whose data array should be propagated (a
+list of nodes whose outgoing edges should be traversed)
+• a data array D storing for each node the current abstract value in Val*
+• an edge array E storing for each node a list of the constraints that the node
+may a ect (i.e., a list of constraints from which a list of the successor nodes
+can be computed)
+The nodes consist C(l) for all labels l and r(x) for all labels x
+The solver computes a least fixed point by propagating values until saturation
+
+fi
+
+ff
+
+174
+
+===== slide 27 =====
+The algorithm
+Constraint solving =
+graph reachability +
+propagation
+
+Idea
+Each node stores a set of abstract values, and edges describe how these
+values must be propagated
+The algorithm propagates abstract values along edges until no new
+information appears
+• D = current knowledge
+• E = how knowledge propagates
+• W = what still needs to be processed
+
+175
+
+===== slide 28 =====
+The algorithm: step 1
+
+Initialize all the data structures D, E and W to [ ]
+
+176
+
+===== slide 29 =====
+Build the graph:
+Nodes
+• a node C(l) for each label l ∈ Lab*
+• a node r(x) for each variable x ∈ Var*
+E[p1] :=
+Edges E[p1] :=
+
+(p1 ⊆ p2, E[p1])
+({t} ⊆ p ⇒ p1 ⊆ p2, E[p1])
+
+E[p] :=
+
+({t} ⊆ p ⇒ p1 ⊆ p2, E[p])
+
+• Each constraint p1 ⊆ p2 adds an initial edge (p1, p2) to the graph
+• Each constraint {t} ⊆ p ⇒ p1 ⊆ p2 adds a candidate edge (p1, p2), with
+“trigger” {t} ⊆ p, and an edge (p, p2)
+Initial assignments to D: if ({t} ⊆ p) ∈ C*[[e*]] and {t} ⊈ D[p]:
+( , { })
+• incorporates {t} into D[p] and
+• adds to the worklist W
+D[p] = {t | ({t} ⊆ p) ∈ C [[e ]]}
+*
+
+s
+
+s
+
+n
+
+n
+
+o
+
+o
+
+s
+
+n
+
+c
+
+t
+o
+
+c
+
+c
+
+p
+
+d
+
+177
+d
+
+a
+
+p
+
+The algorithm: step 2
+
+*
+
+===== slide 30 =====
+Continue propagating the information from one data eld to another, along
+edges, as long as W is non-empty
+E[q]: list of the constraints that
+q may affect
+
+We extract the head element q of W and for all constraints cc in E[q]
+• cc = p1 ⊆ p2: If we have an edge (p1, p2) in our graph , then the value set
+(p2, D[p1]))
+of p1 must ow into the value set of p2 (
+• cc = {t} ⊆ p ⇒ p1 ⊆ p2: If the trigger is true (t ∈ D[p]), then also in the
+corresponding edge the value set ows (
+(p2, D[p1]))
+
+fl
+
+fl
+
+d
+
+d
+
+d
+
+178
+d
+
+a
+
+a
+
+The algorithm: step 3
+
+===== slide 31 =====
+The algorithm: step 4
+
+Record the solution in a more familiar form:
+
+̂
+:= D[C(l)]
+• ∀l ∈ Lab* : C(l)
+̂ := D[r(x)]
+• ∀x ∈ Var* : ρ(x)
+
+179
+
+===== slide 32 =====
+The algorithm pseudocode (1)
+(* Step 1: Initialization *)
+W := [];
+for q in Vars do
+D[q] := [];
+E[q] := [];
+done
+
+180
+
+===== slide 33 =====
+The algorithm pseudocode (2)
+(* Step 2: Build the graph *)
+for cc in C*[[e*]] do
+match cc with
+| {t} ⊆ p -> add(p,{t})
+| p1 ⊆ p2 -> E[p1] := cc :: E[p1]
+| {t} ⊆ p => p1 ⊆ p2 -> E[p1] := cc :: E[p1];
+E[p] := cc :: E[p];
+done
+let add(q,d) =
+if ¬ (d ⊆ D[q])
+then D[q] := D[q] ∪ d;
+W := push W q;
+181
+
+===== slide 34 =====
+Back to ex. 1: step 2
+Initially, we have
+
+D[p] = {t | ({t} ⊆ p)
+∈ C*[[e*]]}
+Current
+abstract values
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+D[C(2)] = {idx}
+D[C(4)] = {idy}
+D[p] = ∅ for other nodes p
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+add(C(2), idx)
+
+add(C(4), idy)
+{idy} ⊆ C(2)
+
+Initial worklist
+
+r(y)
+
+{idy} ⊆ C(2)
+182
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+W = [C(4), C(2)]
+
+These are the nodes, whose
+outgoing edges should be
+traversed
+
+(* Step 2: Build the graph *)
+for cc in C*[[e*]] do
+match cc with
+| {t} ⊆ p -> add(p,{t})
+| p1 ⊆ p2 -> E[p1] := cc :: E[p1]
+| {t} ⊆ p =) p1 ⊆ p2 -> E[p1] := cc :: E[p1];
+E[p] := cc :: E[p];
+done
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+===== slide 35 =====
+Back to ex. 1: step 2
+(* Step 2: Build the graph *)
+for cc in C*[[e*]] do
+match cc with
+| {t} ⊆ p -> add(p,{t})
+| p1 ⊆ p2 -> E[p1] := cc :: E[p1]
+| {t} ⊆ p =) p1 ⊆ p2 -> E[p1] := cc :: E[p1];
+E[p] := cc :: E[p];
+done
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E[r(x)] := {r(x) ⊆ C(1)} :: [ ]
+E[r(y)] := {r(y) ⊆ C(3)} :: [ ]
+E[p]: list of the constraints that
+p may affect
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+E[C(4)] := {{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)} :: []
+E[C(2)] := {{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)} :: []
+E[C(1)] := {{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)} :: []
+E[C(2)] := {{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)} :: E[C(2)]
+E[C(4)] = {{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+E[C(2)] = {{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)} :: E[C(2)]
+E[C(3)] = {{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)}
+
+E[C(2)] = {{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)} :: E[C(2)]
+183
+
+===== slide 36 =====
+Back to ex. 1: after Step 2
+W = [C(4), C(2)]
+
+list of the constraints
+that p may affect
+
+Current
+abstract value
+
+184
+
+===== slide 37 =====
+The algorithm
+We have now built the graph and initialized the analysis
+Next, we propagate abstract values along edges, through Step 3, until we
+reach a fixpoint
+This is a standard worklist-based fixpoint computation
+
+fi
+
+fi
+
+185
+
+===== slide 38 =====
+The algorithm pseudocode (3,4)
+(* Step 3: Iteration *)
+Iterative fixpoint
+while W ≠ nil do
+q:= head(W); W := tail(W);
+It propagates
+for cc in E[q] do
+D[p1] in D[p2]
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);// propagate if t ∈ D[p] then
+propagate
+// all values from p1 to p2
+D[p1] in D[p2]
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D(p] then add(p2,D[p1]);
+// // activate conditional constraint
+(* Step 4: Recording the solution *)
+̂ : = D[C(l)];
+for l ∈ Lab* do C(l)
+̂ := D[r(x)];
+for x ∈ Var*, do ρ(x)
+
+fi
+
+186
+
+===== slide 39 =====
+Continue propagating the information from one data eld to another, along
+edges, as long as W is non-empty
+E[q]: list of the constraints that
+q may affect
+
+We extract the head element q of W and for all constraints cc in E[q]
+• cc = p1 ⊆ p2: If we have an edge (p1, p2) in our graph , then the value set
+(p2, D[p1]))
+of p1 must ow into the value set of p2 (
+• cc = {t} ⊆ p ⇒ p1 ⊆ p2: If the trigger is true (t ∈ D[p]), then also in the
+corresponding edge the value set ows (
+(p2, D[p1]))
+
+fl
+
+fl
+
+d
+
+d
+
+d
+
+187
+d
+
+a
+
+a
+
+The algorithm: step 3
+
+===== slide 40 =====
+Back to ex. 1: 1st iteration (C(4))
+W = [C(4), C(2)]
+Take C(4) from the top
+D[C(4)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(4)) =
+{{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x),
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D[p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+
+idx ∈ D[C(2)] = {idx}:
+add(r(x), D[C(4)])
+
+propagate
+D[C(4)] to r(x)
+
+• incorporate {idy} into D[r(x)]
+• add r(x) to W
+
+D[r(x)] := {idy}
+W := [r(x), C(2)]
+
+188
+
+===== slide 41 =====
+Back to ex. 1: 1st iteration (C(4))
+W = [C(4), C(2)]
+Take C(4) from the top
+D[C(4)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(4)) =
+{{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x),
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+{idy} ⊆ C(2)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+
+idx ∈ D[C(2)] = {idx}:
+add(r(x), D[C(4)])
+
+propagate
+D[C(4)] to r(x)
+
+• incorporate {idy} into D[r(x)]
+• add r(x) to W
+
+D[r(x)] := {idy}
+W := [r(x), C(2)]
+
+{idy} ⊆ C(2)
+189
+
+===== slide 42 =====
+Back to ex. 1: 1st iteration (C(4))
+W = [C(4), C(2)]
+Take C(4) from the top
+D[C(4)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(4)) =
+{{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x),
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)}
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D[p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is not triggered since
+
+idY ∉ D[C(2)] = {idx}
+
+hence no propagation from
+D[C(4)] to r(y)
+
+190
+
+===== slide 43 =====
+Back to ex. 1: 2nd iteration (r(x))
+W = [r(x), C(2)]
+Take r(x) from the top
+D[r(x)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(r(x)) =
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D(p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+idx ∈ D[C(2)] = {idx}:
+
+add(C(1), D[r(x)])
+
+D[C(1)] = {idy}
+W = [C(1), C(2)]
+191
+
+propagate
+D[r(x)] to C(1)
+
+===== slide 44 =====
+Back to ex. 1: 2nd iteration (r(x))
+W = [r(x), C(2)]
+Take r(x) from the top
+D[r(x)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(r(x)) =
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+{idy} ⊆ C(2)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+C(5)
+
+C(2)
+r(x)
+
+{idy}
+
+{idy} ⊆ C(2)
+
+C(1)
+
+{idy} ⊆ C(2)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+idx ∈ D[C(2)] = {idx}:
+
+add(C(1), D[r(x)])
+
+D[C(1)] = {idy}
+W = [C(1), C(2)]
+192
+
+propagate
+D[r(x)] to C(1)
+
+===== slide 45 =====
+Back to ex. 1: 3rd iteration (C(1))
+W = [C(1), C(2)]
+Take C(1) from the top
+D[C(1)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(1)) =
+
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+
+(* Step 3: Iteration *)
+while W ≠ nil do
+q:= head(W); W := tail(W);
+for cc in E[q] do
+case cc of
+p1 ⊆ p2: add(p2,D[p1]);
+{t} ⊆ p ⇒ p1 ⊆ p2:
+if t ∈ D(p] then add(p2,D[p1]);
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Constraint is triggered since
+idx ∈ D[C(2)]:
+add(C(5), D[C(1)])
+
+D[C(5)] = {idx}
+W = [C(5), C(2)]
+193
+
+propagate
+D[C(1)] to C(5)
+
+===== slide 46 =====
+Back to ex. 1: 3rd iteration (C(1))
+W = [C(1), C(2)]
+Take C(1) from the top
+D[C(1)] = {idy}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(1)) =
+
+{{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)}
+{idy} ⊆ C(2)
+
+r(y)
+{idx}
+
+{idy} C(4)
+{idy} ⊆ C(2)
+
+C(3)
+
+{idy}
+
+Constraint is triggered since
+idx ∈ D[C(2)]:
+add(C(5), D[C(1)])
+
+{idy} ⊆ C(2)
+
+D[C(5)] = {idx}
+W = [C(5), C(2)]
+
+C(5)
+
+C(2)
+r(x)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+C(1)
+{idy}
+
+{idy} ⊆ C(2)
+194
+
+propagate
+D[C(1)] to C(5)
+
+===== slide 47 =====
+Back to ex. 1: 4th iteration (C(5))
+W = [C(5), C(2)]
+Take C(5) from the top
+D[C(1)] = {idx}
+E(C(5)) = ∅
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+No update
+
+W = [C(2)]
+
+195
+
+===== slide 48 =====
+Back to ex. 1: 4th iteration (C(5))
+W = [C(5), C(2)]
+Take C(5) from the top
+D[C(1)] = {idx}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(5)) = ∅
+
+{idy} ⊆ C(2)
+
+{idy} ⊆ C(2)
+
+No update
+
+r(y)
+
+C(3)
+{idx}
+
+{idy} C(4)
+
+{idy}
+
+{idy} ⊆ C(2)
+
+W = [C(2)]
+
+C(5) {idy}
+
+C(2)
+r(x)
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+C(1)
+{idy}
+
+{idy} ⊆ C(2)
+196
+
+===== slide 49 =====
+Back to ex. 1: 5th iteration (C(2))
+W = [C(2)]
+Take C(2) from the top
+D[C(2)] = {idx}
+
+{idx} ⊆ C(2)
+{idy} ⊆ C(4)
+r(x) ⊆ C(1)
+r(y) ⊆ C(3)
+
+E(C(2)) = {
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+}
+
+{idx} ⊆ C(2) ⇒ C(4) ⊆ r(x)
+{idx} ⊆ C(2) ⇒ C(1) ⊆ C(5)
+{idy} ⊆ C(2) ⇒ C(4) ⊆ r(y)
+{idy} ⊆ C(2) ⇒ C(3) ⊆ C(5)
+
+Only constraints for
+idx are triggered
+add(r(x), D[C(4)]) ✓
+add(C(5), D[C(1)]) ✓
+No new information is added
+no node is reinserted in W
+
+W becomes empty
+( fixpoint reached)
+
+fi
+
+197
+
+W = []
+
+===== slide 50 =====
+fi
+
+Back to ex. 1: iteration steps
+
+x point
+198
+
+===== slide 51 =====
+Back to ex. 1: the solution
+((fn x => x1)2 (fn y => y3)4)5
+̂
+∀l
+∈
+Lab
+:
+C(l)
+:= D[C(l)]
+•
+*
+The computed solution is (C,̂ ρ)̂ :
+̂ := D[r(x)]
+• ∀x ∈ Var* : ρ(x)
+̂ = {idy}
+C(1)
+̂ = {idx}
+C(2)
+̂ =∅
+C(3)
+̂ = {idy}
+C(4)
+̂ = {idy}
+C(5)
+̂ = {idy}
+ρ(x)
+̂ =∅
+ρ(y)
+199
+
+===== slide 52 =====
+Complexity
+
+200
+
+===== slide 53 =====
+Correctness of the algorithm
+Proposition
+Given the input C*[[e*]], the algorithm terminates and the
+result (C,̂ ρ)̂ satisfies
+
+(C,̂ ρ)̂ = ⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+and hence it is the least solution to C*[[e*]]
+
+As a consequence (C,̂ ρ)̂ ⊧c C*[[e*]], i.e., the computed
+solution satisfies all constraints
+Corollary
+Assume that (C,̂ ρ)̂ is the solution to the constraints
+C*[[e*]] computed by the algorithm, then (C,̂ ρ)̂ ⊧ e*
+Solving constraints yields a sound analysis
+
+￼
+
+￼
+
+￼
+fi
+
+fi
+
+￼
+
+201
+
+is the least
+solution of the
+constraints
+
+(C,̂ ρ)̂ is a valid
+CFA of e*
+
+===== slide 54 =====
+Correctness of the algorithm
+Proposition
+Given the input C*[[e*]], the algorithm terminates and the
+result (C,̂ ρ)̂ satisfies
+
+(C,̂ ρ)̂ = ⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+and hence it is the least solution to C*[[e*]]
+
+￼
+
+￼
+fi
+
+￼
+fi
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+Proof sketch
+Termination:
+(The steps 1,2,4 terminate. We have just to look at step 3).
+The algorithm uses a nite set of terms (Term*) and monotone updates.
+Soundness:
+If (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}: the following invariant is maintained:
+D[C(l)] ⊆ C′̂ (l) and D[r(x)] ⊆ ρ′̂ (x).
+Hence (C,̂ ρ)̂ ⊆ (C′̂ , ρ′̂ ).
+We must prove that (C,̂ ρ)̂ ⊧c C*[[e*]]. 202
+
+===== slide 55 =====
+Correctness of the algorithm
+Proposition
+Given the input C*[[e*]], the algorithm terminates and the
+result (C,̂ ρ)̂ satisfies
+
+(C,̂ ρ)̂ = ⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+and hence it is the least solution to C*[[e*]]
+
+Proof sketch (cont.)
+Soundness (cont.):
+Assume by contradiction that some constraint cc ∈ C*[[e*]] is not satisfied by
+(C,̂ ρ)̂ . According to the algorithm this could not be true.
+The computed solution satisfies all cc ∈ C*[[e*]], i.e., (C,̂ ρ)̂ ⊧c cc.
+Minimality:
+The result is included in every solution
+
+￼
+
+￼
+
+￼
+
+fi
+
+fi
+
+￼
+
+203
+￼
+
+￼
+
+￼
+
+￼
+
+⊓ {(C′̂ , ρ′̂ ) | (C′̂ , ρ′̂ ) ⊧c C*[[e*]]}
+
+it is the least solution, computed as
+
+===== slide 56 =====
+Computation vs check of acceptability
+Goal: Compute a solution vs check that a solution is acceptable
+There are applications where the ability to check (C,̂ ρ)̂ ⊧ e* is more important
+than computing the solution
+Scenario
+Open system e0 that uses resources of an unspeci ed library e*
+Analyses and optimizations of e0 therefore rely on an abstraction (C,̂ ρ)̂
+expressing the relevant properties about the library e*, meaning that
+
+(C,̂ ρ)̂ ⊧ e*
+
+Idea:
+Use (C,̂ ρ)̂ as a specification of the library e*
+Guarantee
+Any other library e′* such that (C,̂ ρ)̂ ⊧ e′* can safely replace e*, since the
+specification (C,̂ ρ)̂ still guarantees all required properties about the library e′*
+
+fi
+
+￼
+fi
+
+￼
+
+￼
+
+204
+
+===== slide 57 =====
+Adding Data Flow Analysis
+
+205
+
+===== slide 58 =====
+CFA + DFA
+We extend Control Flow Analysis with data- ow information
+Abstract values = functions + data- ow properties
+
+v̂ ∈ Vald ̂ = ℘(Term ∪ Data)
+
+Abstract values
+Now contain
+• possible functions (as before) and
+• abstract data- ow properties,(i.e., properties of booleans and integers, such
+as sign, constantness, or ranges of values)
+The data- ow component can be:
+• a powerset (e.g., sets of possible values)
+• a complete lattice (e.g., intervals, signs, constants)
+
+fl
+
+fl
+
+fl
+
+206
+
+===== slide 59 =====
+Abstract domains
+v̂ ∈ Vald ̂ = ℘(Term ∪ Data)
+
+Constants
+Each constant c ∈ Const is mapped to an element dc ∈ Data specifying
+the abstract property of c:
+dc can be thought as α(c) for a suitable abstraction α
+
+Operators are lifted from concrete data to abstract values, i.e., they operate
+on abstract properties instead of concrete values
+
+op̂ : Vald ̂ × Vald ̂ → Vald ̂ telling how op operates on abstract properties
+To each operator op ∈ Op, corresponds a total function
+
+Abstract operators over-approximate concrete operations
+207
+
+===== slide 60 =====
+Abstract operators
+op̂ : Vald ̂ × Vald ̂ → Vald ̂
+
+We apply the operator to all combinations of abstract data values
+Typically, op̂ has a definition of the form
+
+v1̂ op̂ v1̂ =
+
+⋃
+
+{dop(d1, d2) | d1 ∈ v1̂ ∩ Data, d2 ∈ v2̂ ∩ Data}
+
+for some function op : Data × Data → ℘(Data) specifying how the
+operator computes with the abstract properties of integers and booleans
+This over-approximates all possible concrete computations
+
+fi
+
+208
+
+===== slide 61 =====
+Example: signs analysis
+Data
+
+= { , , − ,0,+}
+
+Each constant is mapped to a sign: dtrue =
+Take, e.g., +̂ as
+
+This defines the
+abstract
+semantics of +
+
+v1̂ +̂ v2̂ =
+
+⋃
+
+d1∈v1̂ ,d2∈v2̂
+
+Abstract
+addition
+on signs
+
+and d7 = + ,...
+
+{d+(d1, d2)}
+For instance, if
+v1̂ = {−,0} and v2̂ = { + }
+then
+
+v1̂ +̂ v2̂ =
+d+( − , + ) ∪ d+(0,+) = {−,0,+}
+
+fi
+
+f
+
+f
+
+t
+
+t
+
+t
+
+t
+
+n
+
+g
+
+i
+
+s
+
+209
+
+===== slide 62 =====
+Acceptability relation
+The acceptability relation of the combined analysis has the form
+
+(C,̂ ρ)̂ ⊧d e
+Each rule over-approximates both control- ow and data- ow
+The rules are as before, but operate on enriched abstract values
+Key clauses:
+• [con]: maps constants to abstract data values
+• [if]: uses abstract boolean information to select possible branches
+• [op]: uses abstract operators on data
+Data- ow information is propagated through the evaluation of expressions
+
+fl
+
+210
+
+===== slide 63 =====
+Clause for constants
+[con] (C,̂ ρ)̂ ⊧d c l
+
+̂
+{dc} ⊆ C(l)
+
+We now track data values: the CFA records that dc is a possible value of c
+Constants introduce abstract data into the analysis
+NEW: constants contribute data (not functions)
+Example
+
+c l = 7l
+CFA:
+
+̂
+C(l)
+=∅
+CFA+DFA:
+
+f
+
+f
+
+211
+i
+
+̂
+C(l)
+={+}
+
+===== slide 64 =====
+[if ] (C,̂ ρ)̂ ⊧d ( t0l0
+
+Is ow sensitive: sensitive: can
+t1l1
+t2l2)l
+determine whether true or false
+branches can be taken
+l0
+̂
+(C, ρ)̂ ⊧d t0 ∧
+l1
+̂
+̂
+̂ 1) ⊆ C(l)))
+̂
+̂
+(dtrue ∈ Cl0 ⇒ ((C, ρ) ⊧d t1 ∧ C(l
+∧
+̂ 2) ⊆ C(l)))
+̂
+(dfalse ∈ Ĉl0 ⇒ ((C,̂ ρ)̂ ⊧d t2l2 ∧ C(l
+
+• Increased precision: we analyze only those branches consistent with the
+abstract value of the condition, which now is trackable
+• control- ow is now ltered by data- ow
+Example
+e ≜ (if (31> 02)3 then (fn y => y4)5 else (fn z => z6)7)8
+
+̂
+̂ ⊆ C(8)
+̂ ...δ
+⊑ C(3)
+⇒ C(5)
+
+̂
+⋢ C(3)
+⇒
+
+s
+
+l
+
+n
+
+e
+
+h
+
+e
+
+fl
+
+fi
+
+f
+
+i
+fl
+
+t
+
+212
+
+e
+
+e
+
+s
+
+l
+
+u
+
+a
+
+r
+
+t
+
+fl
+
+f
+
+f
+
+δ
+f
+
+i
+
+Clause for conditional
+
+===== slide 65 =====
+Clause for binary operation
+l1
+̂
+[op] (C, ρ)̂ ⊧d (t1
+
+l2 l
+t2 )
+
+l1
+l2
+̂
+̂
+(C, ρ)̂ ⊧d t1 ∧ (C, ρ)̂ ⊧d t2 ∧
+̂ 1) op̂ C(l
+̂ 2) ⊆ C(l)
+̂
+C(l
+
+NOW: we do track data values
+This rule applies abstract operators to propagate data- ow information
+Data- ow is computed locally using abstract operators
+Example
+
+e ≜ (71 + 42)3
+CFA:
+
+̂ = ∅...
+C(3)
+CFA +DFA:
+
+̂
+̂ ⊆ C(3)
+̂ if C(1)
+̂ and C(2)
+̂ contain { + } then C(3)
+̂ contains { + }
+C(1)
++̂ C(2)
+
+fl
+
+f
+
+f
+
+i
+
+p
+
+o
+
+213
+
+===== slide 66 =====
+To recap
+• [con]: introduces data (abstract values)
+• [if]: uses abstract values to guide control- ow
+• [op]: computes data- ow using abstract values
+
+fl
+
+214
+
+===== slide 67 =====
+CFA with abstract values as powersets
+
+215
+
+===== slide 68 =====
+Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+Pure 0-CFA:
+it cannot determine that the else branch is unreachable
+CFA + Sign Analysis:
+• since x ∈ {+}, the condition x > 0 is always true
+• else branch is unreachable
+
+• C(̂ 12) = { fn y => y4}, i.e., only fn y => y4 ows to label 12
+216
+
+===== slide 69 =====
+Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+
+At label 12:
+• Pure CFA: C(̂ 12) = {fn y => y4, fn z => 256 }
+
+• With signs: C(̂ 12) = {fn y => y4}
+Note, in particular, that
+• x is always positive: ρ(̂ x) = { + }
+
+̂ ={ }
+• condition is always true: C(3)
+̂ =∅
+• else branch is unreachable: C(7)
+• e will evaluate to a value with property {0}
+t
+
+t
+
+217
+
+Pure CFA
+
+CFA + Sign Analysis
+
+===== slide 70 =====
+Observation
+The combined analysis does not directly yield a valid 0-CFA solution
+Reason
+data- ow information restricts the control ow
+Intuition
+If the condition is known to be false (or true), some branches are not
+analyzed at all
+Even if we restrict to terms:
+
+̂ ∩ Term and
+• C′̂ (l) = C(l)
+̂ ∩ Term
+• ρ′̂ (x) = ρ(x)
+
+this does not guarantee a valid CFA solution, i.e.,
+
+(C,̂ ρ)̂ ⊧d e does not guarantee that (C′̂ , ρ′̂ ) ⊧ e
+￼
+fl
+
+￼
+
+￼
+
+￼
+
+218

@@ -1,0 +1,3352 @@
+# ProgramAnalysis-16-LCL
+# auto-extracted from ProgramAnalysis-16-LCL.pdf (63 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #16
+Local completeness logic
+
+===== slide 2 =====
+Recap
+
+2
+
+===== slide 3 =====
+Galois insertion as closures
+C
+
+The abstract domain
+can just be seen as
+a subset of the concrete domain
+
+A
+
+We write A( ⋅ )
+as a shorthand for γ ∘ α
+
+A(C) is the set of
+
+expressible elements
+The map A : C → C is a closure operator
+(monotone, extensive, idempotent)
+3
+
+===== slide 4 =====
+Completeness, revisited
+#
+
+∀P . A([[c]]P) = [[c]] A(P)
+⊆
+
+⊆
+
+[[ ⋅ ]] is the semantics
+A
+[[ ⋅ ]] is the bca
+#
+[[ ⋅ ]] is the abstract semantics
+#
+[[ ⋅ ]]A is also the abstract semantics
+
+A([[c]]A(P))
+
+Completeness equation: ∀P . A([[c]]P) = A([[c]]A(P))
+A
+
+#
+
+If the bca [[c]] is not complete, then [[c]] is not complete
+
+===== slide 5 =====
++
+Sign and Sign
+
+Sign
+
++
+
+Sign
+Z
+
+Z<0
+
+Z>0
+∅
+
+Z
+
+Z0
+
+Z<0
+
+Z 0
+
+Z<0
+
+Z=0
+
+Z>0
+
+ú
+
+===== slide 6 =====
+Correct or incorrect?
+
+===== slide 7 =====
+Verification problem
+Is it true that, with the given input,
+the program will not compute unintended output?
+?
+
+JcKP ✓ Spec , Q ✓ Spec
+<latexit sha1_base64="DRsbcwVzBNr02l1JpFnLSyvAJUM=">AAAC+HicjVHLbhMxFHWGVwmvFJZsLCIkVtFMhYANUiU2XbBIBWkrxVHk8dxJrdqeqX2dKljTb2GH2PIbfAGfwRY2OJNZ0AcSd3V07rn33EdeK+kwTX/0khs3b92+s3W3f+/+g4ePBtuPD1zlrYCJqFRlj3LuQEkDE5So4Ki2wHWu4DA/ebfOHy7BOlmZj7iqYab5wshSCo6Rmg+AKZVbLk4AA9Mcj10ZRNMwazuWjilzPneAcEpbhcTwoQbR9M/ZeyjRysUxcmurs/P+/j+k88EwHaVt0Ksg68CQdDGeb/cCKyrhNRgUijs3zdIaZ4FblEJB02feQR0H5AuYRmi4BjcL7T0a+tw7jhWtwVKpaEvC3xWBa+dWOo/KduXLuTV5XW7qsXwzC9LUHsGItRFKBa2RE1bGQwMtpAVEvp4cqDRUcMsRwUrKhYikj5e/YOhQc7uyRVzKwJmotOamiOtDCafN5ikWVGC5l6qIiLJlPIOV3CyiN6uiKw1vm+a6ei+X/92CbeSxT3xXdvk5V8HBzih7NdrZfznc3eset0WekmfkBcnIa7JL9siYTIgg38lP8ov8Tj4ln5MvydeNNOl1NU/IhUi+/QHHQPqE</latexit>
+
+===== slide 8 =====
+Verification problem
+<latexit sha1_base64="6Jv4AV8qHP7Ccfz4J8IckOiUYGE=">AAACtHicjVFNbxMxEHW2fJTwlZYjF0OEVC7RbkGFS6UiLj0WQdpK2Sia9U6CVdu72OOgyNpzf02v8Fv4N3i3OZC2B+b09ObjzbwpaiUdpemfXrJ17/6Dh9uP+o+fPH32fLCze+oqbwWORaUqe16AQyUNjkmSwvPaIuhC4Vlx8bnNny3ROlmZb7SqcaphYeRcCqBIzQavPu3lGui7pPC1RtG85Ye8v8HMBsN0lHbBb4NsDYZsHSeznV7Iy0p4jYaEAucmWVrTNIAlKRQ2/dw7rEFcwAInERrQ6Kahu6Xhb7wDqniNlkvFOxL/7QignVvpIla2W7qbuZa8KzfxNP84DdLUntCIVoikwk7ICSujSchLaZEI2s2RS8MFWCBCKzkIEUkfXdsQdKTBrmwZjzL4U1Ragynj+TjHH03ofLSoQl54qcqIeL6MNlgJZhG18yqq8nDYNHf1e7n87xH5dXmcE9+V3XzObXC6P8oORu++vB8eHa8ft81estdsj2XsAztix+yEjZlgl+yK/WK/k4MkT0SC16VJb93zgm1EYv4C+7nbpw==</latexit>
+
+A(Spec) = Spec
+JcKP
+<latexit sha1_base64="SfXD/pKfDpFWBJ4GDeZyHrVXYWs=">AAACtXicjVFLb9NAEN64PEp5pXDksmqExCmyK0S5IFXi0mOQSFspa0Xj9Tisurs2u+OgaOU7v4Yr/BX+TTeOD/RxYE6fvnl8M98UjVae0vTvKNl78PDR4/0nB0+fPX/xcnz46tzXrZM4l7Wu3WUBHrWyOCdFGi8bh2AKjRfF1edt/mKNzqvafqVNg7mBlVWVkkCRWo6PhNaFA3mFFIQB+uarILtOODewfLYcT9Jp2ge/C7IBTNgQs+XhKIiylq1BS1KD94ssbSgP4EhJjd2BaD02cTqscBGhBYM+D/0xHX/beqCaN+i40rwn8d+OAMb7jSliZb/v7dyWvC+3aKn6mAdlm5bQyq0QKY29kJdORZeQl8ohEWw3R64sl+CACJ3iIGUk22jbDUFPBtzGlfEoiz9kbQzYMp6PFX7vdo461EEUrdJlRFysow1OgV1FbVFHVR4+dd19/a1a//cIsSuPc+K7stvPuQvOj6fZh+nxl/eT07PhcfvsDTti71jGTtgpO2MzNmeS/WS/2G/2JzlJ8qRMql1pMhp6XrMbkdTXe27dmQ==</latexit>
+
+P
+<latexit sha1_base64="7M/zo8prenwhiULY4h1FW5bBZ18=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPS+ICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkzoZXu/10kC5D3gfZCvTFKoZXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg7PD/vHp6nEb4q3YF+9FJj6IY3EqhmIklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4Dvj3OoA==</latexit>
+
+?
+
+JcKP ✓ Spec , Q ✓ Spec
+<latexit sha1_base64="DRsbcwVzBNr02l1JpFnLSyvAJUM=">AAAC+HicjVHLbhMxFHWGVwmvFJZsLCIkVtFMhYANUiU2XbBIBWkrxVHk8dxJrdqeqX2dKljTb2GH2PIbfAGfwRY2OJNZ0AcSd3V07rn33EdeK+kwTX/0khs3b92+s3W3f+/+g4ePBtuPD1zlrYCJqFRlj3LuQEkDE5So4Ki2wHWu4DA/ebfOHy7BOlmZj7iqYab5wshSCo6Rmg+AKZVbLk4AA9Mcj10ZRNMwazuWjilzPneAcEpbhcTwoQbR9M/ZeyjRysUxcmurs/P+/j+k88EwHaVt0Ksg68CQdDGeb/cCKyrhNRgUijs3zdIaZ4FblEJB02feQR0H5AuYRmi4BjcL7T0a+tw7jhWtwVKpaEvC3xWBa+dWOo/KduXLuTV5XW7qsXwzC9LUHsGItRFKBa2RE1bGQwMtpAVEvp4cqDRUcMsRwUrKhYikj5e/YOhQc7uyRVzKwJmotOamiOtDCafN5ikWVGC5l6qIiLJlPIOV3CyiN6uiKw1vm+a6ei+X/92CbeSxT3xXdvk5V8HBzih7NdrZfznc3eset0WekmfkBcnIa7JL9siYTIgg38lP8ov8Tj4ln5MvydeNNOl1NU/IhUi+/QHHQPqE</latexit>
+
+===== slide 9 =====
+An Axiomatic Bas is for
+Compute r Programming
+
+of a xio m s it is p o s s ib le to d e d u c e s u c h s im p le th e o re m s a s :
+
+x =x +y X O
+y <r
+
+~r
+
+Over vs Under
+
++y
+
+X q = ( r-
+
+y ) +y
+
+X (1 + q )
+
+Th e p ro o f of th e s e c o n d of th e s e is :
+
+C. A. R . HOARE
+
+The Que e n's Unive rs ity of Be lfas t,* Northe rn Ire land
+
+A5
+
+( r- - y ) + y X ( l+ q )
+
+= ( r- - y ) +
+
+= ( r - - y) + (y + y
+
+A3
+
+= ( ( r- - y ) +y ) +y X q
+
+A6
+
+= r + y X q
+
+X q)
+
+p r o v id e d y < r
+
+Th e a xio m s A1 to A9 a re , of c o u rs e , tru e o f th e tra d itio n a l in fin ite s e t of in te g e rs in m a th e m a tic s . Ho we ve r,
+th e y a re a ls o tru e of th e fin ite s e ts of "in te g e rs " wh ic h a re
+m a n ip u la te d b y c o m p u te rs p ro vid e d th a t th e y a re c o n fin e d to nonne gative n u m b e rs . Th e ir tru th is in d e p e n d e n t
+o f th e s ize of th e s e t; fu rth e rm o re , it is la rg e ly in d e p e n d e n t
+of th e c h o ic e o f te c h n iq u e a p p lie d in th e e ve n t o f "o ve rflo w"; fo r e xa m p le :
+(1 ) S tric t in te rp re ta tio n : th e re s u lt of a n o ve rflo win g
+o p e ra tio n d o e s n o t e xis t; wh e n o ve rflo w o c c u rs , th e o ffe n d in g p ro g ra m n e ve r c o m p le te s its o p e ra tio n . No te th a t in
+th is ca s e , th e e q u a litie s of A1 to A9 a re s tric t, in th e s e ns e
+th a t b o th s ide s e xis t o r fa il to e xis t to g e th e r.
+(2 ) F irm b o u n d a ry: th e re s u lt of a n o ve rflo win g o p e ra tio n is ta ke n a s th e m a xim u m va lu e re p re s e n te d .
+(3 ) Mo d u lo a rith m e tic : th e re s u lt o f a n o ve rflo win g
+o p e ra tio nis c o m p u te d m o d u lo th e s ize o f th e s e t o f in te g e rs
+re p re s e n te d .
+Th e s e th re e te c h n iq u e s a re illu s tra te d in Ta b le II b y
+a d d itio n a n d m u ltip lic a tio n ta b le s fo r a trivia lly s m a ll
+m o d e l in wh ic h 0, 1, 2, a n d 3 a re th e o n ly in te g e rs re p re s e n te d .
+It is in te re s tin gto n o te th a t th e d iffe re n t s ys te m ss a tis fyin g a xio m s A1 to A9 m a y b e rig o ro u s ly d is tin g u is h e dfro m
+e a c h o th e r b y c h o o s in ga p a rtic u la r o n e o f a s e t of m u tu a lly
+e xc lu s ive s u p p le m e n ta ry a xio m s . F o r e xa m p le , in fin ite
+a rith m e tic s a tis fie s th e a xio m :
+
+{P } c {Q}
+<latexit sha1_base64="STnxcbAh5cF4AlV/Gjys+LA/0oE=">AAACqXicjVFLixNBEO6Mr3V9ZRW8eGkMgiCEmWVRL8KClz0mYHaD6RBqeiqx2e6esbs6Etrxx3jVP+S/sTObg/s4WKePrx5f1Vdlo5WnPP/Ty27dvnP33t79/QcPHz1+0j94eurr4CROZK1rNy3Bo1YWJ6RI47RxCKbUeFaef9zmz9bovKrtJ9o0ODewsmqpJFCiFv3nIo5E+0MYoC9+GWWCcSzaRX+QD/Mu+HVQ7MCA7WK0OOhFUdUyGLQkNXg/K/KG5hEcKamx3RfBYwPyHFY4S9CCQT+P3QEtfxU8UM0bdFxp3pH4b0cE4/3GlKmyW/RqbkvelJsFWr6fR2WbQGjlVoiUxk7IS6eSM8gr5ZAItpsjV5ZLcECETnGQMpEhWXVJ0JMBt3FVOsriN1kbA7ZK5+MSv7axs9KhjqIMSlcJcbFONjgFdpW0RZ1UefzQtjf1B7X+7xHiojzNSe8qrj7nOjg9HBZvh4fjo8Hxye5xe+wFe8les4K9Y8fshI3YhEn2nf1kv9jv7E02zqbZ54vSrLfrecYuRSb/Aipl2Io=</latexit>
+
+Intro duc tio n
+
+[P ] c [Q]
+
+C o m p u te r p ro g ra m m in g is a n e xa c t s cie nce in th a t a ll
+th e p ro p e rtie s of a p ro g ra m a n d a ll th e c o n s e q u e n c e sof
+e xe c u tin g it in a n y g ive n e n viro n m e n t ca n, in p rin c ip le ,
+b e fo u n d o u t fro m th e te xt of th e p ro g ra m its e lf b y m e a n s
+of p u re ly d e d u c tive re a s o n in g . De d u c tive re a s o n in g invo lve s th e a p p lic a tio n o f va lid ru le s o f in fe re n c e to s e ts o f
+va lid a xio m s . It is th e re fo re d e s ira b le a n d in te re s tin g to
+e lu c id a te th e a xio m s a n d ru le s of in fe re n c e wh ic h u n d e rlie
+o u r re a s o n in g a b o u t c o m p u te rp ro g ra m s . Th e e xa c t c h o ic e
+of a xio m s will to s o m e e xte n t d e p e n d o n th e c h o ic e of
+p ro g ra m m in g la n g u a g e . F o r illu s tra tive p u rp o s e s , th is
+p a p e r is c o n fin e d to a ve ry s im p le la n g u a g e ,wh ic h is e ffe cIncorrectness Logic
+tive ly a s u b s e t o f a ll e u rre n t p ro c e d u re -o rie n te dla n g u a g e s .
+
+Q
+
+✓
+
+1.
+
+<latexit sha1_base64="dWFNhYuyH5NaVq3ShOUKpzBPTDg=">AAACpXicjVFLb9NAEN6YVymvtBy5rIgQnCK7qoALUiUuvSClUpNWsq1ovJ6EVXfXZnc2EK3cn8IV/hL/ho2bA30cmNOnbx7fzDdVq6SjNP0zSO7df/Dw0c7j3SdPnz1/Mdzbn7nGW4FT0ajGnlfgUEmDU5Kk8Ly1CLpSeFZdfN7kz1ZonWzMKa1bLDUsjVxIARSp+XA/n5SXhQb66hZBdJf5STkfjtJx2ge/DbItGLFtTOZ7g1DUjfAaDQkFzuVZ2lIZwJIUCrvdwjtsQVzAEvMIDWh0ZeiX7/gb74Aa3qLlUvGexH87Amjn1rqKlf2aN3Mb8q5c7mnxsQzStJ7QiI0QSYW9kBNWRleQ19IiEWw2Ry4NF2CBCK3kIEQkfbTpmqAjDXZt63iUwe+i0RpMHc/HBX7rQm+kRRWKyktVR8SLVbTBSjDLqF00UZWHT113V7+Xq/8eUVyVxznxXdnN59wGs4Nx9n58cHI4OjrePm6HvWKv2TuWsQ/siB2zCZsywX6wn+wX+528Tb4kp8nsqjQZbHtesmuRzP8CNw/Wcg==</latexit>
+
+A10z
+
+~3xVy
+
+JcKP
+<latexit sha1_base64="SfXD/pKfDpFWBJ4GDeZyHrVXYWs=">AAACtXicjVFLb9NAEN64PEp5pXDksmqExCmyK0S5IFXi0mOQSFspa0Xj9Tisurs2u+OgaOU7v4Yr/BX+TTeOD/RxYE6fvnl8M98UjVae0vTvKNl78PDR4/0nB0+fPX/xcnz46tzXrZM4l7Wu3WUBHrWyOCdFGi8bh2AKjRfF1edt/mKNzqvafqVNg7mBlVWVkkCRWo6PhNaFA3mFFIQB+uarILtOODewfLYcT9Jp2ge/C7IBTNgQs+XhKIiylq1BS1KD94ssbSgP4EhJjd2BaD02cTqscBGhBYM+D/0xHX/beqCaN+i40rwn8d+OAMb7jSliZb/v7dyWvC+3aKn6mAdlm5bQyq0QKY29kJdORZeQl8ohEWw3R64sl+CACJ3iIGUk22jbDUFPBtzGlfEoiz9kbQzYMp6PFX7vdo461EEUrdJlRFysow1OgV1FbVFHVR4+dd19/a1a//cIsSuPc+K7stvPuQvOj6fZh+nxl/eT07PhcfvsDTti71jGTtgpO2MzNmeS/WS/2G/2JzlJ8qRMql1pMhp6XrMbkdTXe27dmQ==</latexit>
+
+<latexit sha1_base64="6CqUA4P13yzKhQSoum6EK9y7umQ=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPbOICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkhsOr3X46SJch74NsBfpiFWdXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg+Fh//h09bgN8Vbsi/ciEx/EsTgVZ2IklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4DwGvOoQ==</latexit>
+
+<latexit sha1_base64="6CqUA4P13yzKhQSoum6EK9y7umQ=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPbOICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkhsOr3X46SJch74NsBfpiFWdXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg+Fh//h09bgN8Vbsi/ciEx/EsTgVZ2IklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4DwGvOoQ==</latexit>
+
+<latexit sha1_base64="ROwjC3l7hHoSdvAiDfmYJ6nvmtE=">AAACmnicjVFNTxRBEO0dQRBRQY966LAh4bSZIUa5mBC9YLxgwgJmZ0NqemrXCt09Q3f1ms1kfoVX+WH8G3uWPcjHwTq9vPp4r6qKWpPnNL3pJU9WVp+urT/beL754uWrre3Xp74KTuFQVbpy5wV41GRxyMQaz2uHYAqNZ8Xlly5/NkPnqbInPK9xbGBqaUIKOFI/ch8Kj4xXF1v9dJAuQj4E2RL0xTKOL7Z7TV5WKhi0rDR4P8rSmscNOCalsd3Ig8ca1CVMcRShBYN+3Cwct3I3eOBK1ugkabkg8d+OBoz3c1PESgP809/PdeRjuVHgycG4IVsHRqs6ISaNCyGvHMVToCzJITN0zlGSlQocMKMjCUpFMsTb3BH0bMDNXRmXsvhLVcaALeP6OMGrtsk7Fw51kxeBdBmRzGfxDI7ATqN2XkVV2Xxq28f6A83+e0R+Wx7nxHdl95/zEJzuD7IPg/3v7/uHR8vHrYu3YkfsiUx8FIfiSByLoVDCiN/ij7hO3iWfk6/Jt9vSpLfseSPuRHLyF4nx0mg=</latexit>
+
+P
+<latexit sha1_base64="7M/zo8prenwhiULY4h1FW5bBZ18=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPS+ICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkzoZXu/10kC5D3gfZCvTFKoZXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg7PD/vHp6nEb4q3YF+9FJj6IY3EqhmIklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4Dvj3OoA==</latexit>
+
+(y < x ),
+
+wh e re a ll fin ite a rith m e tic s s a tis fy:
+A10~
+
+Vx
+
+?
+
+correctness
+
+<latexit sha1_base64="ROwjC3l7hHoSdvAiDfmYJ6nvmtE=">AAACmnicjVFNTxRBEO0dQRBRQY966LAh4bSZIUa5mBC9YLxgwgJmZ0NqemrXCt09Q3f1ms1kfoVX+WH8G3uWPcjHwTq9vPp4r6qKWpPnNL3pJU9WVp+urT/beL754uWrre3Xp74KTuFQVbpy5wV41GRxyMQaz2uHYAqNZ8Xlly5/NkPnqbInPK9xbGBqaUIKOFI/ch8Kj4xXF1v9dJAuQj4E2RL0xTKOL7Z7TV5WKhi0rDR4P8rSmscNOCalsd3Ig8ca1CVMcRShBYN+3Cwct3I3eOBK1ugkabkg8d+OBoz3c1PESgP809/PdeRjuVHgycG4IVsHRqs6ISaNCyGvHMVToCzJITN0zlGSlQocMKMjCUpFMsTb3BH0bMDNXRmXsvhLVcaALeP6OMGrtsk7Fw51kxeBdBmRzGfxDI7ATqN2XkVV2Xxq28f6A83+e0R+Wx7nxHdl95/zEJzuD7IPg/3v7/uHR8vHrYu3YkfsiUx8FIfiSByLoVDCiN/ij7hO3iWfk6/Jt9vSpLfseSPuRHLyF4nx0mg=</latexit>
+
+KEY WORDS AND PHRASES: axiomatic method, theory of programming'
+proofs of programs, formal language definition, programming language
+design, machine-independent programming, program documentation
+CR CATEGORY: 4.0, 4.21,4.22, 5.20, 5.21,5.23, 5.24
+
+A9
+
+✓
+
+In this paper an attempt is made to explore the logical foundations of computer programming by use of techniques which
+were first applied in the study of geometry and have later
+been extended to other branches of mathematics. This involves the elucidation of sets of axioms and rules of inference
+which can be used in proofs of the properties of computer
+programs. Examples are given of such axioms and rules, and
+a formal proof o f a simple theorem is displayed. Finally, it is
+argued that important advantages, both theoretical and practical, may follow from a pursuance of these topics.
+
+( y X l+y X q )
+
+(x < m a x)
+
+2.
+Co mpute
+r Arithme
+tic and University College London, UK
+PETER
+W. O’HEARN,
+Facebook
+wh e re "m a x " d e n o te s th e la rg e s t in te g e r re p re s e n te d .
+Th
+e
+firs
+t
+re
+q
+u
+ire
+m
+e
+n
+t
+in
+va
+lid
+re
+a
+s
+o
+n
+in
+g
+a
+b
+o
+u
+t
+a
+p
+ro
+Program correctness and incorrectness are two sides of the same coin. As a programmer,
+eventh
+if eyouthwould
+S im ila rly,
+re e tre a10
+tm e n ts o f o ve rflo w m a y b e
+glike
+ra m
+to kn
+o w th e pyou
+ro pmight
+e rtiefind
+sof th
+e e le m
+e n ta rymost
+o p e ra
+tio n stime reasoning about incorrectness.
+toishave
+correctness,
+yourself
+spending
+of your
+d is tin g u is h e d b y a c h o ic e o f o n e o f th e fo llo win g a Moms
+This
+informal
+donwhile
+about their code, as well as that
+wh
+icincludes
+h it in vo
+ke s , foreasoning
+r e xa m pthat
+le ,people
+a d d itio
+a n d looking
+m u ltipatlicora thinking
+tio n
+re la
+tin g tologic
+th eforvaprogram
+lu e of m a x + 1:
+supported
+paper
+a simple
+of
+in te g e by
+rs .automated
+Un fo rtu ntesting
+a te ly,and
+in static
+s e veanalysis
+ra l re stools.
+p e c tsThis
+com
+p u tedescribes
+r
+ofm
+the
+coinfatomHoare’s
+correctness.
+~ 3 x (x = m a x + 1)
+(s tric t in te rp re ta tio n )
+aincorrectness
+rith m e tic iswhich
+n o tis,thinea ssense,
+a m ethe
+a s other
+th e side
+a rith
+e tic
+ilia r tologic ofAlls
+CCS
+• Theory
+Programming
+m
+a thConcepts:
+e m a tic ia
+n s ,a n dofit computation
+is n e c e s s a→
+ryto
+e xe rc is e s ologic.
+m e c a re
+
+?
+
+incorrectness
+
+===== slide 10 =====
+ABSTRACT
+
+: ‘A UNIFIED
+
+INTERPRETATION
+
+OF PROGRAMS
+
+BY CONSTRUCTION
+Patrick
+
+Cousot*and
+
+Laboratoire
+
+LATTICE
+
+Grenoble
+
+FOR
+
+OR APPROXIMATION
+Radhia
+
+d’Informatique,
+38041
+
+MODEL
+
+STATIC
+
+The idea
+
+ANALYSIS
+
+OF FIXPOINTS
+
+Cousot**
+
+U.S.M.G.,
+cedex,
+
+BP.
+
+Local completeness
+
+53
+
+France
+
+A(Q) ✓ Spec
+<latexit sha1_base64="OBCCJhZikWaVP+fMIo/buEs6Gbw=">AAACrnicjVFLb9NAEN6YVymvFI69rIiQyiWyAUEvSEVcemwFSSvFVjReT9JVd9fu7myqaOUDv4Yr/Bz+DWs3B/o4MKdP3zy+mW/KRklHafpnkNy7/+Dho63H20+ePnv+YrjzcupqbwVORK1qe1qCQyUNTkiSwtPGIuhS4Ul5/rXLn6zQOlmb77RusNCwNHIhBVCk5sPdL3vHb3PnS4eEFzzXQGeSwrcGRTsfjtJx2ge/DbINGLFNHM13BiGvauE1GhIKnJtlaUNFAEtSKGy3c++wAXEOS5xFaECjK0J/RcvfeAdU8wYtl4r3JP7bEUA7t9ZlrOy2dDdzHXlXbuZpsV8EaRpPaEQnRFJhL+SEldEe5JW0SATd5sil4QIsEKGVHISIpI9+XRN0pMGubRWPMngpaq3BVPF8XOBFG3ofLaqQl16qKiKer6INVoJZRu28jqo8fG7bu/q9XP33iPyqPM6J78puPuc2mL4bZx/H748/jA4ON4/bYrvsNdtjGfvEDtghO2ITJtgP9pP9Yr+TNJkmRTK/Kk0Gm55X7FokZ38BJHnZtw==</latexit>
+
+program
+
+computations
+
+in
+
+interpretation
+
+[[c]]P ⊆ A(Q)
+A(Spec) = Spec
+
+at
+
+some
+of
+
+denotation
+
+to
+
+universe
+
+of
+
+of
+
+abstract
+
+on the
+
+actual
+
+universe
+
+of
+
+semilattice,
+
+programs
+
+gram
+
+con–
+
+describe
+
+a
+
+compu–
+
+abstract
+
+program
+
+objects,
+
+execution
+
+system
+
+of
+
+give
+
+computations.
+
+An
+
+<latexit sha1_base64="6Jv4AV8qHP7Ccfz4J8IckOiUYGE=">AAACtHicjVFNbxMxEHW2fJTwlZYjF0OEVC7RbkGFS6UiLj0WQdpK2Sia9U6CVdu72OOgyNpzf02v8Fv4N3i3OZC2B+b09ObjzbwpaiUdpemfXrJ17/6Dh9uP+o+fPH32fLCze+oqbwWORaUqe16AQyUNjkmSwvPaIuhC4Vlx8bnNny3ROlmZb7SqcaphYeRcCqBIzQavPu3lGui7pPC1RtG85Ye8v8HMBsN0lHbBb4NsDYZsHSeznV7Iy0p4jYaEAucmWVrTNIAlKRQ2/dw7rEFcwAInERrQ6Kahu6Xhb7wDqniNlkvFOxL/7QignVvpIla2W7qbuZa8KzfxNP84DdLUntCIVoikwk7ICSujSchLaZEI2s2RS8MFWCBCKzkIEUkfXdsQdKTBrmwZjzL4U1Ragynj+TjHH03ofLSoQl54qcqIeL6MNlgJZhG18yqq8nDYNHf1e7n87xH5dXmcE9+V3XzObXC6P8oORu++vB8eHa8ft81estdsj2XsAztix+yEjZlgl+yK/WK/k4MkT0SC16VJb93zgm1EYv4C+7nbpw==</latexit>
+
+the
+
+abstraction
+
+abstract
+
+to
+
+computations
+
+with
+
+where
+
+on
+
+the
+
+tent
+
+the
+
+se-
+
+pretation
+
+are
+
+by
+
+order
+
+used
+
+to
+
+with
+
+a program.
+
+then
+
+of
+
+Pro-
+
+associate
+
+defined
+
+that
+
+The
+
+as
+
+system,
+
+process
+
+that
+
+the
+
+is
+
+defined
+
+program
+
+properties
+
+interpretation
+those
+of
+
+of
+
+obtained
+
+that
+
+in
+
+one
+
+Tarski
+
+[55].
+
+by
+
+program.
+
+section
+
+6.
+
+obtained
+
+by
+
+a program
+
+a more
+In
+
+are
+
+It
+
+consis–
+
+refined
+
+inter–
+
+particular,
+
+an
+
+,
+<latexit sha1_base64="90JsLMsksBwB1Boj8k3nt4jLRtw=">AAAConicjVHJbhNBEG0PWxKWOOSYSwuDxMmaiSLgghSJS4Q4JAInkdyWVdNTdlrpZeiudmSN5ku4wkfxN/Q4PmQ7UKenV8t7VVXWWgXK87+97NHjJ0+fbWxuPX/x8tV2f+f1aXDRSxxJp50/LyGgVhZHpEjjee0RTKnxrLz80uXPFuiDcvYHLWucGJhbNVMSKFHT/rb4hjPyan5B4L27mvYH+TBfBb8PijUYsHUcT3d6jaicjAYtSQ0hjIu8pkkDnpTU2G6JGLAGeQlzHCdowWCYNCvnLX8XA5DjNXquNF+ReLOjARPC0pSp0gBdhLu5jnwoN440+zRplK0joZWdECmNK6EgvUonQV4pj0TQOUeuLJfggQi94iBlImO60S3BQAb80ldpKYtX0hkDtkrr4wx/to3oXHjUjSij0lVCXCzSGbwCO0/awiVV3nxu24f6o1r89whxXZ7mpHcVd59zH5zuD4sPw/2Tg8Hh0fpxG2yPvWHvWcE+skN2xI7ZiEkW2S/2m/3J3mZfs5Ps+3Vp1lv37LJbkYl/UbjVPQ==</latexit>
+
+JcKP ✓ Spec , Q ✓
+<latexit sha1_base64="DRsbcwVzBNr02l1JpFnLSyvAJUM=">AAAC+HicjVHLbhMxFHWGVwmvFJZsLCIkVtFMhYANUiU2XbBIBWkrxVHk8dxJrdqeqX2dKljTb2GH2PIbfAGfwRY2OJNZ0AcSd3V07rn33EdeK+kwTX/0khs3b92+s3W3f+/+g4ePBtuPD1zlrYCJqFRlj3LuQEkDE5So4Ki2wHWu4DA/ebfOHy7BOlmZj7iqYab5wshSCo6Rmg+AKZVbLk4AA9Mcj10ZRNMwazuWjilzPneAcEpbhcTwoQbR9M/ZeyjRysUxcmurs/P+/j+k88EwHaVt0Ksg68CQdDGeb/cCKyrhNRgUijs3zdIaZ4FblEJB02feQR0H5AuYRmi4BjcL7T0a+tw7jhWtwVKpaEvC3xWBa+dWOo/KduXLuTV5XW7qsXwzC9LUHsGItRFKBa2RE1bGQwMtpAVEvp4cqDRUcMsRwUrKhYikj5e/YOhQc7uyRVzKwJmotOamiOtDCafN5ikWVGC5l6qIiLJlPIOV3CyiN6uiKw1vm+a6ei+X/92CbeSxT3xXdvk5V8HBzih7NdrZfznc3eset0WekmfkBcnIa7JL9siYTIgg38lP8ov8Tj4ln5MvydeNNOl1NU/IhUi+/QHHQPqE</latexit>
+
+The
+an
+
+are
+
+equations
+
+fifixpoints
+
+shown
+
+(~)}
+
+recursive
+
+extreme
+
+is
+
+(-),
+
+of
+
+a com–
+
+A(Q)
+
+interpreted
+
+which
+
+properties
+
+borrow
+from
+Sintzoff
+The text
+‘1515*
+17
+
+{(+),
+
+functions
+
+by
+
+Elementary
+
+locally
+
+global
+
+(which
+we
+of
+signs.
+denote
+
+are
+
+modeled
+
+<latexit sha1_base64="etWVOJShfgJM4aU7P1p/OvRSKOI=">AAAB9nicbVC7TsNAEDzzDOEVoKQ5ESGFJrIBAWWAhjKRyENKrOh82SSnnM/W3RoRWfkFWqjoEC2/Q8G/YBsXkDDVaGZXOzteKIVB2/60lpZXVtfWCxvFza3tnd3S3n7LBJHm0OSBDHTHYwakUNBEgRI6oQbmexLa3uQ29dsPoI0I1D1OQ3B9NlJiKDjDVLquNE76pbJdtTPQReLkpExy1Pulr94g4JEPCrlkxnQdO0Q3ZhoFlzAr9iIDIeMTNoJuQhXzwbhxlnVGjyPDMKAhaCokzUT4vREz35ip7yWTPsOxmfdS8T+vG+Hwyo2FCiMExdNDKCRkhwzXIikB6EBoQGRpcqBCUc40QwQtKOM8EaOklWLShzP//SJpnVadi+pZ47xcu8mbKZBDckQqxCGXpEbuSJ00CSdj8kSeyYv1aL1ab9b7z+iSle8ckD+wPr4BoDCSEg==</latexit>
+
+Birkhoff[611.
+
+constructs
+
+preserving
+
+are
+
+✓
+
+plete
+
+properties
+
+<latexit sha1_base64="ROwjC3l7hHoSdvAiDfmYJ6nvmtE=">AAACmnicjVFNTxRBEO0dQRBRQY966LAh4bSZIUa5mBC9YLxgwgJmZ0NqemrXCt09Q3f1ms1kfoVX+WH8G3uWPcjHwTq9vPp4r6qKWpPnNL3pJU9WVp+urT/beL754uWrre3Xp74KTuFQVbpy5wV41GRxyMQaz2uHYAqNZ8Xlly5/NkPnqbInPK9xbGBqaUIKOFI/ch8Kj4xXF1v9dJAuQj4E2RL0xTKOL7Z7TV5WKhi0rDR4P8rSmscNOCalsd3Ig8ca1CVMcRShBYN+3Cwct3I3eOBK1ugkabkg8d+OBoz3c1PESgP809/PdeRjuVHgycG4IVsHRqs6ISaNCyGvHMVToCzJITN0zlGSlQocMKMjCUpFMsTb3BH0bMDNXRmXsvhLVcaALeP6OMGrtsk7Fw51kxeBdBmRzGfxDI7ATqN2XkVV2Xxq28f6A83+e0R+Wx7nxHdl95/zEJzuD7IPg/3v7/uHR8vHrYu3YkfsiUx8FIfiSByLoVDCiN/ij7hO3iWfk6/Jt9vSpLfseSPuRHLyF4nx0mg=</latexit>
+
+Q ⊆ [[c]]P
+
+Abstract
+
+ab–
+
+,
+<latexit sha1_base64="90JsLMsksBwB1Boj8k3nt4jLRtw=">AAAConicjVHJbhNBEG0PWxKWOOSYSwuDxMmaiSLgghSJS4Q4JAInkdyWVdNTdlrpZeiudmSN5ku4wkfxN/Q4PmQ7UKenV8t7VVXWWgXK87+97NHjJ0+fbWxuPX/x8tV2f+f1aXDRSxxJp50/LyGgVhZHpEjjee0RTKnxrLz80uXPFuiDcvYHLWucGJhbNVMSKFHT/rb4hjPyan5B4L27mvYH+TBfBb8PijUYsHUcT3d6jaicjAYtSQ0hjIu8pkkDnpTU2G6JGLAGeQlzHCdowWCYNCvnLX8XA5DjNXquNF+ReLOjARPC0pSp0gBdhLu5jnwoN440+zRplK0joZWdECmNK6EgvUonQV4pj0TQOUeuLJfggQi94iBlImO60S3BQAb80ldpKYtX0hkDtkrr4wx/to3oXHjUjSij0lVCXCzSGbwCO0/awiVV3nxu24f6o1r89whxXZ7mpHcVd59zH5zuD4sPw/2Tg8Hh0fpxG2yPvWHvWcE+skN2xI7ZiEkW2S/2m/3J3mZfs5Ps+3Vp1lv37LJbkYl/UbjVPQ==</latexit>
+
+he
+
+abstract
+(–) * (+)
+
+gative
+
+is
+
+execution
+=>
+(–),
+
+number.
+
+by
+
+actual
+
+summary
+–1515+17
+
+its
+
+abstract
+
+ot
+
+to
+
+full
+
+knowled~e
+
+tolerate
+
+ectness
+
+an
+
+which
+
+are
+
+about
+
+the
+
+4
+
+flow.
+
+This
+
+te
+on
+
+of
+the
+5 gives
+
+interpretations
+
+that
+
+classical
+
+answer,
+
+trate
+
+type
+
+checking,
+
+pro-
+
+unified
+
+carried
+
+in
+
+the
+
+mathematical
+is
+
+model
+
+it
+
+ignores
+
+model
+
+is
+
+taken
+
+abstract
+interpretatiOns
+the
+formal
+definition
+of
+
+the
+
+language.
+
+Levels
+
+by
+
+showing
+
+gives
+
+that
+a lattice
+
+JcKP
+
+a constructive
+of
+
+of
+
+con-
+
+<latexit sha1_base64="SfXD/pKfDpFWBJ4GDeZyHrVXYWs=">AAACtXicjVFLb9NAEN64PEp5pXDksmqExCmyK0S5IFXi0mOQSFspa0Xj9Tisurs2u+OgaOU7v4Yr/BX+TTeOD/RxYE6fvnl8M98UjVae0vTvKNl78PDR4/0nB0+fPX/xcnz46tzXrZM4l7Wu3WUBHrWyOCdFGi8bh2AKjRfF1edt/mKNzqvafqVNg7mBlVWVkkCRWo6PhNaFA3mFFIQB+uarILtOODewfLYcT9Jp2ge/C7IBTNgQs+XhKIiylq1BS1KD94ssbSgP4EhJjd2BaD02cTqscBGhBYM+D/0xHX/beqCaN+i40rwn8d+OAMb7jSliZb/v7dyWvC+3aKn6mAdlm5bQyq0QKY29kJdORZeQl8ohEWw3R64sl+CACJ3iIGUk22jbDUFPBtzGlfEoiz9kbQzYMp6PFX7vdo461EEUrdJlRFysow1OgV1FbVFHVR4+dd19/a1a//cIsSuPc+K7stvPuQvOj6fZh+nxl/eT07PhcfvsDTti71jGTtgpO2MzNmeS/WS/2G/2JzlJ8qRMql1pMhp6XrMbkdTXe27dmQ==</latexit>
+
+defi–
+
+programs
+
+fifixpoints.
+
+based
+
+It
+
+are
+
+various
+
+abstract
+
+approach
+
+3’. Syntax
+
+and
+
+to
+
+be
+
+consistent
+
+Practical
+The
+
+interpretation
+
+Q
+
+apparently
+
+with
+
+examples
+
+sections.
+to
+
+techniques.
+
+approximation
+methods
+are
+infinite,
+
+shown
+
+process.
+
+analysis
+
+a program.
+
+Semantics
+
+We will
+
+use
+
+pendent
+
+representation
+
+3.1
+
+finite
+
+of
+
+Syntax
+
+illus–
+
+conclusion
+of
+
+<latexit sha1_base64="6CqUA4P13yzKhQSoum6EK9y7umQ=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPbOICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkhsOr3X46SJch74NsBfpiFWdXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg+Fh//h09bgN8Vbsi/ciEx/EsTgVZ2IklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4DwGvOoQ==</latexit>
+
+points
+
+programs
+
+unrelated
+
+is
+
+program
+
+of
+
+programs
+
+flowcharts
+
+as
+
+of
+
+progrems.
+
+a
+
+language
+
+inde–
+
+a Progrwn
+
+of
+
+the
+
+A program
+to
+
+has
+
+is
+
+successor
+
+n–succ,
+
+n–pred
+
+on
+
+shows
+
+. . .).
+
+abstract
+
+that
+
+They
+
+`A [P ] c [Q]
+that
+
+consistent
+
+form
+
+finite
+fifixpoint
+when
+Kleene’ssequences
+
+abstraction
+the
+
+of
+
+to
+
+algorithms
+such
+as Kildall
+compute
+program
+properties
+as
+sequences.
+Section
+Kleene[52]’s
+
+Wegbreit[751
+of
+finite
+
+the
+
+be
+
+properties
+
+definitions
+
+program
+<latexit sha1_base64="1HvcBa8kjIx1Vxk/CAbRQkaD+G0=">AAACBnicbVA9TwJBEN3DL8QvxNJmIzGxIndq1BK1sYREwOS4kLllhA17H9mdIxICtb/CVis7Y+vfsPC/eCCFgq96eW8m8+b5sZKGbPvTyiwtr6yuZddzG5tb2zv53ULdRIkWWBORivSdDwaVDLFGkhTexRoh8BU2/N71xG/0URsZhbc0iNELoBPKeymAUqmVLzT7bTDd1iV3K95YjN2q18oX7ZI9BV8kzowU2QyVVv6r2Y5EEmBIQoExrmPH5A1BkxQKR7lmYjAG0YMOuikNIUDjDafZR/wwMUARj1FzqfhUxN8bQwiMGQR+OhkAdc28NxH/89yE7i+8oQzjhDAUk0MkFU4PGaFlWgryttRIBJPkyGXIBWggQi05CJGKSdpSLu3Dmf9+kdSPS85Z6aR6WixfzZrJsn12wI6Yw85Zmd2wCqsxwR7YE3tmL9aj9Wq9We8/oxlrtrPH/sD6+AZMiZiO</latexit>
+
+8
+
+abstract
+
+Cousot[761.
+
+shown
+
+interpretations
+Section
+
+various
+
+be
+
+formalized
+
+constructive
+
+out
+
+a more
+
+trol
+
+7).
+
+ignO-
+
+and
+
+in
+
+(section
+
+ques–
+of
+
+feasibility,
+
+programs,
+
+abstract
+of
+
+semantics
+are
+
+sistent
+
+programs
+
+their
+
+built
+
+abstraction
+
+may
+
+formal
+
+allows
+
+flowchart
+language,
+Scott
+This
+mathematical
+semantics
+
+to
+
+of
+
+of
+
+not
+
+syntax
+
+the
+
+9 introduces
+to be used
+
+answer
+
+proofs
+problems,
+
+mple
+
+in-
+
+imprecise
+
+with
+
+[731,
+limits
+
+but
+
+fundamentally
+
+compiler
+
+of
+
+a program.
+
+interpretation
+
+need
+
+ch
+
+of
+
+interpretation
+
+nition
+
+of computations
+gives
+a summary
+
+simple
+to obtain
+=>
+–(+)+(+)
+‘>
+
+Despite
+the
+
+interpre–
+
+underlying
+
+executions
+is
+
+stract
+
+the
+
+-1515*
+17
+proves
+that
+
+a particular
+
+usual
+universe
+example).
+It
+
+e
+
+by
+
+Abstract
+
+P
+<latexit sha1_base64="7M/zo8prenwhiULY4h1FW5bBZ18=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPS+ICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkzoZXu/10kC5D3gfZCvTFKoZXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg7PD/vHp6nEb4q3YF+9FJj6IY3EqhmIklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4Dvj3OoA==</latexit>
+
+defined
+
+✓
+
+operators
+
+<latexit sha1_base64="ROwjC3l7hHoSdvAiDfmYJ6nvmtE=">AAACmnicjVFNTxRBEO0dQRBRQY966LAh4bSZIUa5mBC9YLxgwgJmZ0NqemrXCt09Q3f1ms1kfoVX+WH8G3uWPcjHwTq9vPp4r6qKWpPnNL3pJU9WVp+urT/beL754uWrre3Xp74KTuFQVbpy5wV41GRxyMQaz2uHYAqNZ8Xlly5/NkPnqbInPK9xbGBqaUIKOFI/ch8Kj4xXF1v9dJAuQj4E2RL0xTKOL7Z7TV5WKhi0rDR4P8rSmscNOCalsd3Ig8ca1CVMcRShBYN+3Cwct3I3eOBK1ugkabkg8d+OBoz3c1PESgP809/PdeRjuVHgycG4IVsHRqs6ISaNCyGvHMVToCzJITN0zlGSlQocMKMjCUpFMsTb3BH0bMDNXRmXsvhLVcaALeP6OMGrtsk7Fw51kxeBdBmRzGfxDI7ATqN2XkVV2Xxq28f6A83+e0R+Wx7nxHdl95/zEJzuD7IPg/3v7/uHR8vHrYu3YkfsiUx8FIfiSByLoVDCiN/ij7hO3iWfk6/Jt9vSpLfseSPuRHLyF4nx0mg=</latexit>
+
+c
+
+built
+
+from
+
+and
+:
+
+a
+
+set
+
+predecessor
+Nodes+
+
+2 Nodesl
+
+“Nodes”.
+nodes
+
+Each
+
+node
+
+:
+
+(men-succ(n))
+<=>(ne
+
+n-pred(m))
+
+a
+
+JcKP ✓ Spec , Q ✓ Spec
+<latexit sha1_base64="DRsbcwVzBNr02l1JpFnLSyvAJUM=">AAAC+HicjVHLbhMxFHWGVwmvFJZsLCIkVtFMhYANUiU2XbBIBWkrxVHk8dxJrdqeqX2dKljTb2GH2PIbfAGfwRY2OJNZ0AcSd3V07rn33EdeK+kwTX/0khs3b92+s3W3f+/+g4ePBtuPD1zlrYCJqFRlj3LuQEkDE5So4Ki2wHWu4DA/ebfOHy7BOlmZj7iqYab5wshSCo6Rmg+AKZVbLk4AA9Mcj10ZRNMwazuWjilzPneAcEpbhcTwoQbR9M/ZeyjRysUxcmurs/P+/j+k88EwHaVt0Ksg68CQdDGeb/cCKyrhNRgUijs3zdIaZ4FblEJB02feQR0H5AuYRmi4BjcL7T0a+tw7jhWtwVKpaEvC3xWBa+dWOo/KduXLuTV5XW7qsXwzC9LUHsGItRFKBa2RE1bGQwMtpAVEvp4cqDRUcMsRwUrKhYikj5e/YOhQc7uyRVzKwJmotOamiOtDCafN5ikWVGC5l6qIiLJlPIOV3CyiN6uiKw1vm+a6ei+X/92CbeSxT3xXdvk5V8HBzih7NdrZfznc3eset0WekmfkBcnIa7JL9siYTIgg38lP8ov8Tj4ln5MvydeNNOl1NU/IhUi+/QHHQPqE</latexit>
+
+===== slide 11 =====
+LICS 2021 + JACM
+
+2021 36th Annual ACM/IEEE Symposium on Logic in Computer Science (LICS) | 978-1-6654-4895-6/20/$31.00 ©2021 IEEE | DOI: 10.1109/LICS52264.2021.9470608
+
+A Logic for
+Locally Complete Abstract Interpretations
+Roberto Bruni⇤ , Roberto Giacobazzi‡ , Roberta Gori⇤ , Francesco Ranzato§
+⇤ University of Pisa, Italy
+
+‡ University of Verona, Italy
+
+§ University of Padova, Italy
+
+In loving memory of Anna Maria De Paolis and Dina Gorini
+Abstract—We introduce the notion of local completeness in correctness specification Spec, the aim of a static verification
+abstract interpretation and define a logic for proving both the is either to prove that the behaviour of c satisfies Spec or to
+correctness and incorrectness of some program specification. raise some alerts that point out which circumstances may cause
+Abstract interpretation is extensively used to design sound-byconstruction program analyses that over-approximate program a violation of Spec. The conditional is needed because, starting
+behaviours. Completeness of an abstract interpretation A for with the fundamental works by Hoare [18], program verifiers
+all possible programs and inputs would be an ideal situation tend to over-approximate the program behaviour: this is an
+ROBERTO BRUNI, University of Pisa, Italy
+for verifying correctness specifications, because the analysis can unavoidable consequence of the will to solve an otherwise unbeROBERTO
+done compositionally
+and no false alert
+will arise.ofOur
+first Italy
+GIACOBAZZI,
+University
+Verona,
+decidable analysis problem. As any alerting system, program
+result shows that the class of programs whose abstract analysis
+ROBERTA
+GORI,
+University
+of
+Pisa,
+Italy
+on A is complete for all inputs has a severely limited expres- analysis turns out to be credible, when few, ideally zero, false
+alerts are reported to the user [9]. The dual perspective has
+siveness.
+A novel notionRANZATO,
+of local completeness
+weakensofthe
+above Italy
+FRANCESCO
+University
+Padova,
+requirements by considering only some specific, rather than all, been recently tackled by incorrectness logic [24]: exploiting
+program inputs and thus finds wider applicability. In fact, our under-approximations, any violation exposed by the analysis is
+main contribution is the design of a proof system, parameterized a true alert. This makes IL a credible support for code-review,
+byAbstract
+an abstraction
+A, that, for is
+thea first
+time, combines
+and
+interpretation
+well-known
+and overextensively
+used method to extract over-approximate program
+under-approximations of program behaviours. Thanks to local but Spec may be violated even when no alert is reported.
+invariants
+by
+a
+sound
+program
+analysis
+algorithm.
+Soundness
+means
+that no program
+are lost and frameit is,
+Abstract
+interpretation
+[6]–[8] iserrors
+a well-established
+completeness, in a provable triple `A [P ] c [Q], the assertion
+guaranteed by
+Completenesswork
+means
+the abstract
+interpreter reports
+no false
+Q in
+is principle,
+an under-approximation
+of construction.
+the strongest post-condition
+for that
+designing
+sound-by-construction
+over-approximapost[c](P
+)
+such
+that
+the
+abstractions
+in
+A
+of
+Q
+and
+post[c](P
+)
+tions
+of
+the
+program
+behaviour.
+Given
+an
+abstraction
+alarms for all possible inputs, but this is extremely rare because it needs a very precise analysis. We introduceA,
+coincide. This means that Q is never too coarse, namely, under instead of verifying whether the strongest post-condition
+a weaker
+notion
+completeness,
+called
+completeness,
+which requires that no false alarms are produced
+mild
+assumptions,
+theof
+abstract
+interpretation
+of c local
+does not
+yield
+program c and a pre-condition P (also written
+false
+alerts
+for the input
+P iff Q
+has no
+alert. Thus,
+`A [PBased
+] c [Q]on post[c](P
+only
+relatively
+to some
+fixed
+program
+inputs.
+this idea,) for
+weaintroduce
+a program logic, called Local
+JcKP
+)
+satisfies
+a
+correctness specification Spec, a (sound) abnot only ensures that all the alerts raised in Q are true ones, but
+Completeness Logic for an abstract domain A, for proving
+both
+the correctness A(post[c](P
+and incorrectness
+of program
+also that if Q does not raise alerts then c is correct.
+stract
+over-approximation
+)) is considered.
+While
+
+A Correctness and Incorrectness Program Logic
+
+any locally complete under approximation
+either proves the program correct or
+incorrect (without false positives)
+
+specifications. Our proof system, which is parameterizedit by
+abstract
+A, combines
+over-Spec
+and underis an
+obvious
+thatdomain
+if A(post[c](P
+)) satisfies
+then the
+I. I NTRODUCTION
+[q], c isisa correct,
+program,
+q
+is
+an
+under-approximation
+of
+approximating reasoning.
+In a provable triple ⊢A [p] cprogram
+it may happen that A(post[c](P )) does
+Technology,
+you
+can’t
+live
+without.
+But
+any
+coin
+has
+two
+not satisfy
+Spec even
+the program
+correct,
+the strongest post-condition of c on input p such that their
+abstractions
+in Aifcoincide.
+This ismeans
+thatbecause
+q is
+sides and software failures are increasingly more frequent and A introduced false alerts. Once the specification Spec and
+never too coarse, namely, under some mild assumptions, the abstract interpretation of c does not yield false
+their consequences are more disruptive in the Digital Age than its abstract approximation in A coincide, the ideal program
+alarms
+forQuoting
+the input
+p iff q has
+no alarm.
+Therefore,
+⊢A [p] c [q] not only ensures that all the alarms
+ever
+before.
+Dijkstra’s
+speech
+at the Turing
+Awardproving
+analysis is achieved by assuring that a sound analysis is also
+raised[11],
+in q the
+are only
+true effective
+ones, butway
+alsotothat
+if qthe
+does
+not raise alarms,
+then c is correct. We also prove that if A is the
+lecture
+raise
+confidence
+complete, so that no false alert is ever raised.
+straightforward
+abstractionismaking
+program properties
+equivalent,inthen
+our program
+logic coincides
+level
+of a program significantly
+to give all
+a convincing
+proof
+Technically,
+a domain
+A of abstract
+program with
+stores,
+of O’Hearn’s
+its correctness.
+Since
+correctness
+proof
+attempts
+may
+fail
+incorrectness logic, while for any other abstraction,
+contrary and
+to the
+case of incorrectness
+logic, our
+with abstraction
+concretization
+maps ↵ and
+resp.,
+even
+when
+is correct,
+also
+incorrectness proofs any store property P is, in general, over-approximated by
+logic
+canthe
+alsoprogram
+establish
+program
+correctness.
+
+would be needed to catch actual bugs, because you can’t fix A(P ) = ↵(P ) ◆ P . Assuming that Spec is expressible
+what
+can’t see.• Theory
+Code-review
+processes and test-driven
+CCSyou
+Concepts:
+of computation
+→ Logic and
+Abstraction;
+Programming
+logic;in
+in verification;
+A means that Spec
+= A(Spec)
+holds. For instance,
+development
+are
+widely
+adopted
+best
+practices
+in
+software
+Semantics and reasoning; Program analysis; Hoarethe
+logic;
+Axiomatic
+Program
+abstract
+domainsemantics;
+of intervalsAbstraction;
+Int (see Example
+III.5) the
+companies.
+Nevertheless, the problem is far from being solved property x 0 is expressible by the infinite interval [0, +1].
+reasoning;
+and static reasoning should be extended to bug catching, as By contrast, x 6= 0 is not expressible in Int, since the least
+advocated
+by O’Hearn’s
+incorrectness
+logic
+(IL) [24].
+Additional
+Key Words
+and Phrases:
+Abstract
+interpretation,
+abstract domain,
+program
+analysis,
+over-approximating
+interval
+is Int(x
+6= 0) =program
+Z ) Z rver{0}.
+Static program
+analysis
+been
+investigated and
+ification,
+program
+logic,has
+local
+completeness,
+best used
+correctAnapproximation,
+incorrectness
+logic
+abstract semantics associates with each program c a
+for over half century and is a major methodology to help computable function post [c] : A ! A on the abstraction A
+A
+ACM Reference
+format:
+programmers
+and software
+engineers in producing reliable (also written JcK] ). By soundness of abstract interpretation, if
+A
+code
+[4], [12],
+[15],Roberto
+[18], [23],
+[27], [28].Roberta
+Static analysis
+is Francesco
+Roberto
+Bruni,
+Giacobazzi,
+Gori, and
+Ranzato.
+2023.then
+A Correctness
+(postA [c]↵(P
+)) ✓ Spec
+{P } c {Spec}and
+is aIncorrectvalid Hoare
+based
+symbolic
+reasoning
+techniques
+to prove
+program 2023),
+nesson
+Program
+Logic.
+J. ACM
+70, 2, Article
+15 (March
+45However,
+pages. when (postA [c]↵(P )) 6✓ Spec we cannot
+triple.
+properties without running them. Given a program c and a conclude that {P } c {Spec} is not valid, because any witness
+
+https://doi.org/10.1145/3582267
+
+978-1-6654-4895-6/21/$31.00
+
+c 2021 IEEE
+
+in
+
+(postA [c]↵(P )) r Spec is just a potentially false alert.
+
+The authors
+have
+been
+the Italian
+under
+the PRIN2017
+no. from
+201784YSZ5
+PRogram
+Authorized
+licensed
+usefunded
+limited to:by
+University
+of Pisa. MIUR,
+Downloaded
+on February
+28,2024 atproject
+10:24:30 UTC
+IEEE Xplore.“AnalysiS
+Restrictionsof
+apply.
+Analyses (ASPRA)” and by a Meta research gift. Roberto Giacobazzi and Francesco Ranzato have been partially funded
+by Facebook Research, under a “Probability and Programming Research Award,” by an Amazon Research Award for “AWS
+Automated Reasoning,” and by a WhatsApp Research Award on “Privacy-aware Program Analysis.”
+Authors’ addresses: R. Bruni and R. Gori, University of Pisa, Pisa, Italy; emails: bruni@di.unipi.it, gori@di.unipi.it; R. Giacobazzi, University of Verona, Verona, Italy; email: roberto.giacobazzi@univr.it; F. Ranzato, University of Padova, Padova,
+Italy; email: ranzato@math.unipd.it.
+Permission to make digital or hard copies of part or all of this work for personal or classroom use is granted without fee
+provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and
+the full citation on the first page. Copyrights for third-party components of this work must be honored. For all other uses,
+contact the owner/author(s).
+© 2023 Copyright held by the owner/author(s).
+0004-5411/2023/03-ART15 $15.00
+https://doi.org/10.1145/3582267
+Journal of the ACM, Vol. 70, No. 2, Article 15. Publication date: March 2023.
+
+15
+
+===== slide 12 =====
+Local completeness
+
+===== slide 13 =====
+Expressible specifications
+Assume A(Spec) = Spec
+Take a post Q ∈ C
+If Q ⊆ Spec
+
+A(Spec)
+=
+Spec
+Q
+<latexit sha1_base64="6Jv4AV8qHP7Ccfz4J8IckOiUYGE=">AAACtHicjVFNbxMxEHW2fJTwlZYjF0OEVC7RbkGFS6UiLj0WQdpK2Sia9U6CVdu72OOgyNpzf02v8Fv4N3i3OZC2B+b09ObjzbwpaiUdpemfXrJ17/6Dh9uP+o+fPH32fLCze+oqbwWORaUqe16AQyUNjkmSwvPaIuhC4Vlx8bnNny3ROlmZb7SqcaphYeRcCqBIzQavPu3lGui7pPC1RtG85Ye8v8HMBsN0lHbBb4NsDYZsHSeznV7Iy0p4jYaEAucmWVrTNIAlKRQ2/dw7rEFcwAInERrQ6Kahu6Xhb7wDqniNlkvFOxL/7QignVvpIla2W7qbuZa8KzfxNP84DdLUntCIVoikwk7ICSujSchLaZEI2s2RS8MFWCBCKzkIEUkfXdsQdKTBrmwZjzL4U1Ragynj+TjHH03ofLSoQl54qcqIeL6MNlgJZhG18yqq8nDYNHf1e7n87xH5dXmcE9+V3XzObXC6P8oORu++vB8eHa8ft81estdsj2XsAztix+yEjZlgl+yK/WK/k4MkT0SC16VJb93zgm1EYv4C+7nbpw==</latexit>
+
+then A(Q) ⊆ A(Spec) = Spec
+If Q ⊈ Spec
+
+then Q ⊆ A(Q) ⊈ Spec
+
+Q ⊆ Spec ⇔ A(Q) ⊆ Spec
+
+Q
+
+===== slide 14 =====
+Example
+Int(x ≥ 0) = [0,∞] = (x ≥ 0)
+If Q1 ≜ (x > 0 ∧ x % 5 = 0)
+then Int(Q1) = [5,∞] ⊆ (x ≥ 0)
+If Q2 ≜ ( | x | = 5)
+
+then Int(Q2) = [−5,5] ⊈ (x ≥ 0)
+
+Q ⊆ Spec ⇔ A(Q) ⊆ Spec
+
+expressible specification
+
+Q1
+
+x≥0
+
+Q2
+
+===== slide 15 =====
+The role of completeness
+correctness of AI
+
+#
+if [[c]]A A(P) ⊆ Spec
+
+then [[c]]P ⊆ Spec
+
+#
+[[c]]P ⊆ A([[c]]P) ⊆ [[c]]A A(P) ⊆ Spec
+
+expressible specification
+
+Spec = A(Spec)
+
+if completeness holds
+#
+if [[c]]A A(P) ⊈ Spec
+then [[c]]P ⊈ Spec
+
+#
+A([[c]]P) = [[c]]A A(P) ⊈ Spec
+
+⇔ [[c]]P ⊈ Spec
+
+#
+[[c]]P ⊆ Spec ⇔ [[c]]A A(P) ⊆ Spec
+
+===== slide 16 =====
+Example
++, × complete in Int
+c ≜ x := 3x ; x := x + 2
+P ≜ (x ∈ {1,3,6})
+#
+#
+[[c]]IntInt(P) = [[c]]Int[1,6] =
+
+[5,20]⊈ (x ≤ 15)
+⇔
+[[c]]P ⊈ (x ≤ 15)
+
+However, not all elements in
+[16,20] are true positives!
+
+expressible specification
+
+x ≤ 15
+
+===== slide 17 =====
+Sources of incompleteness
+Completeness is preserved by ; , ∪ and fix
+Incompleteness can only be introduced by atomic commands e
+
+?
+
+assignments: settled for many domains
+guards: troublesome
+A
+
+#
+is incomplete, then any (sound) [[e]]A is incomplete
+
+if the bca [[e]]
+i.e., incompleteness is an intrinsic property of a domain
+
+===== slide 18 =====
+Completeness for guards
+Completeness equation: ∀P . A([[e]]P) = A([[e]]A(P))
+
+must be a strict
+domain
+
+Lemma. [a necessary condition for complete guards]
+If a test b is complete in A, then b and ¬b are expressible in A
+Proof. Assume b not expressible, take P = b and show ¬b is not complete.
+
+===== slide 19 =====
+Examples
+Int: the test (x = 0) is not complete (x ≠ 0 not expressible)
+[6, + ∞] and [−∞,5] are both expressible
+
+Int: the test (x > 5) might be complete (but it is not)
+not expressible
+
+Sign: the test (x > 5) is not complete
+Z>0 and Z≤0 are both expressible
+
++
+
+Z
+
+Sign
+Z<0
+
+Z>0
+
+1:2
+
+50
+
+∅
+
+Sign+
+
+Z
+
+51
+
+Sign : the test (x > 0) might be complete (and it is indeed)
+52
+53
+54
+55
+56
+57
+58
+
+Z0
+
+Z<0
+
+Z 0
+
+Z<0
+
+Z=0
+
+Z>0
+
+ú
+
+Fig. 1. Abstract Domain for Sign
+
+===== slide 20 =====
+Completeness for guards
+Th. [a necessary and sufficient condition for complete guards]
+Let b and ¬b be expressible in A.
+The test b is complete in A
+iff
+the join of any two abstract points below b and ¬b is expressible.
+
+===== slide 21 =====
+Completeness illustrated
+⊤
+
+¬b
+
+A
+a1 ∪ a2
+
+b
+
+a2
+
+a1
+⊥
+
+C
+
+does a1 ∪ a2 ∈ A ?
+
+===== slide 22 =====
+Example
+⊤
+
+℘(Z)
+Sign
+
+≤0
+≠0
+≥0
+<0
+
+>0
+
+=0
+⊥
+
++
+
+≠ 0 ∈ Sign
+
++
+
+===== slide 23 =====
+Example
+⊤
+
+℘(Z)
+Int {0,1,10,11} ∉ Int
+
+[−∞,5]
+{0,1,10,11}
+[6,∞]
+[0,1]
+
+[10,11]
+
+⊥
+
+===== slide 24 =====
+Incompleteness everywhere
+Unfortunately, common tests are incomplete in most domains
+One possibility:
+take the most abstract domain Ab (called complete shell) that:
+1) refines A, and
+2) is complete for the test b
+
+ok, but:
+may cause a blow up (abstract domains are closed under meet)
+operations that where complete in A may be incomplete in Ab
+
+===== slide 25 =====
+Completeness, revisited
+#
+
+∀P . A([[c]]P) = [[c]] A(P)
+⊆
+
+⊆
+
+A([[c]]A(P))
+Completeness equation: ∀P . A([[c]]P) = A([[c]]A(P))
+
+===== slide 26 =====
+Local completeness
+A
+#
+CP(c) ≜ A([[c]]P) = [[c]] A(P)
+
+⊆
+
+⊆
+
+A([[c]]A(P))
+Local completeness equation: A([[c]]P) = A([[c]]A(P))
+
+===== slide 27 =====
+Local completeness
+We don’t need completeness for all inputs:
+e.g., b ≜ (x > 0) is complete in Int for P ≜ {−10,0,1,10}
+Local completeness equation: ∀P . A([[e]]P) = A([[e]]A(P))
+We say that e is locally complete in A for input P and write
+A
+CP(e)
+
+Idea: we focus on completeness along traversed states
+(which can be collected as underapproximation)
+
+===== slide 28 =====
+Local Completeness Logic
+(LCL)
+
+===== slide 29 =====
+O’Hearn’s triples
+pre
+condition
+
+LCL triples
+pre
+condition
+
+⊢A [P] c [Q]
+
+[P] c [Q]
+post
+condition
+
+any output matching the postcondition
+can be reached by executing the command
+on some input matching the precondition
+
+[[c]]P ⊇ Q
+under
+approximation!
+
+any output matching the postcondition
+can be reached by executing the command
+on some input matching the precondition
++
+for any input matching the precondition executing the
+command establishes the abstraction of the postcondition
+
+can include non
+reachable states
+includes just
+reachable states
+
+post
+condition
+
+abstract
+domain
+
+A(Q) ⊇ [[c]]P ⊇ Q
+
+over
+approximation!
+
+under
+approximation!
+
+includes just
+reachable states
+
+===== slide 30 =====
+Combining under and over
+approximations
+A(Q)
+Q
+
+===== slide 31 =====
+Atomic commands
+local
+completeness
+requirement
+
+A([[e]]P) = A([[e]]A(P))
+
+A
+CP(e)
+
+⊢A [P] e [[[e]]P]
+Floyd’s rule
+for assignments
+
+[transfer]
+
+A
+CP(a)
+
+⊢A [P] x := a [ ∃x′ . P[x′/x] ∧ x = a[x′/x]]
+IL rule
+for tests
+
+A
+CP(b)
+
+⊢A [P] b? [P ∧ b]
+
+===== slide 32 =====
+Atomic commands
+Floyd’s rule
+for assignments
+
+A
+CP(a)
+
+⊢A [P] x := a [ ∃x′ . P[x′/x] ∧ x = a[x′/x]]
+
+sum and product
+are complete in Int
+
+⊢Int [x ∈ {−7,7}] x := 3x + 1 [x ∈ {−20,22}] ?
+
+===== slide 33 =====
+Atomic commands
+IL rule
+for tests
+
+A
+CP(b)
+
+⊢A [P] b? [P ∧ b]
+locally
+incomplete in Int !
+
+⊢Int [x ∈ {−7,7}] x > 0? [x ∈ {7}] ?
+Int([[x > 0?]]{−7,7}) = Int({7}) = [7,7] ≠ [1,7] = Int([1,7]) = Int([[x > 0?]][−7,7]) = Int([[x > 0?]]Int({−7,7}))
+Int([[x > 0?]]{−7,1,7}) = Int({1,7}) = [1,7] = Int([1,7]) = Int([[x > 0?]][−7,7]) = Int([[x > 0?]]Int({−7,1,7}))
+
+⊢Int [x ∈ {−7,1,7}] x > 0? [x ∈ {1,7}] ?
+
+===== slide 34 =====
+Consequence rule?
+P′ ⇒ P
+IL style
+(reversed Hoare)
+
+⊢A [P′] c [Q′]
+⊢A [P] c [Q]
+
+we can weaken the pre and
+shrink the post,
+(scalable bug detection)
+but not too much!
+
+Q ⇒ Q′
+
+===== slide 35 =====
+Convexity
+Lemma. [convexity]
+A
+A
+If CP(e) and P ⇒ R ⇒ A(P) then CR(e)
+Proof.
+Assume A([[e]]P) = A([[e]]A(P))
+we want to prove A([[e]]R) = A([[e]]A(R))
+
+A([[e]]P) ≤ A([[e]]R) ≤ A([[e]]A(R)) = A([[e]]A(P)) = A([[e]]P)
+
+===== slide 36 =====
+Consequence rule...
+P′ ⇒ P ⇒ A(P′) ⊢A [P′] c [Q′] Q ⇒ Q′ ⇒ A(Q)
+[relax]
+⊢
+[P]
+c
+[Q]
+A
+IL style
+(reversed Hoare)
+
+===== slide 37 =====
+Consequence rule
+preserve
+abstraction
+
+preserve
+abstraction
+
+P′ ⇒ P ⇒ A(P′) ⊢A [P′] c [Q′] Q ⇒ Q′ ⇒ A(Q)
+[relax]
+⊢
+[P]
+c
+[Q]
+A
+IL style
+(reversed Hoare)
+
+A(Q) = A(Q′)
+
+A(P′) = A(P)
+
+P
+P′
+
+⊢AA [P′
+[P]] c [Q]
+⊢
+[Q′]
+
+Q
+Q′
+
+===== slide 38 =====
+Consequence rule
+preserve
+abstraction
+
+preserve
+abstraction
+
+P′ ⇒ P ⇒ A(P′) ⊢A [P′] c [Q′] Q ⇒ Q′ ⇒ A(Q)
+[relax]
+⊢
+[P]
+c
+[Q]
+A
+IL style
+(reversed Hoare)
+
+⊢Int [x ∈ {−7,0,7}] c [x ∈ {−5, − 2,8}]
+⊢Int [x ∈ {−7,0,3,7}] c [x ∈ {−5,8}]
+
+===== slide 39 =====
+Consequence rule
+preserve
+abstraction
+
+preserve
+abstraction
+
+P′ ⇒ P ⇒ A(P′) ⊢A [P′] c [Q′] Q ⇒ Q′ ⇒ A(Q)
+[relax]
+⊢
+[P]
+c
+[Q]
+A
+IL style
+(reversed Hoare)
+
+⊢Int [x ∈ {−7,0,7}] c [x ∈ {−5, − 2,8}]
+⊢Int [x ∈ {−7,0,7,9}] c [x ∈ {−2,8}]
+
+===== slide 40 =====
+sfer)
+
+Fig. 3: The Proof System LCLA .
+`Int [P ] r1 [{0, 998}]
+
+Fifixpoint acceleration
+`Int [P ] r1
+r2 [{0, 2, 998,
+
+Int
+CP (Je2 K)
+
+(transfer)
+Int
+Int
+Int
+`Int [P ] e2
+[{2,
+1000}]
+CP
+(Jb
+?K)
+C
+(Jb2 ?K)
+C
+(Je
+K)
+(?)
+1
+1
+P
+abstract
+{1,999,1000}
+1
+1
+(seq) (transfer)
+(iterate)
+one-step
+(transfer)
+(transfer)
+r2 [{2,`1000}]
+`Int [{0,
+1,[{1,
+999,999,
+1000}]
+r [{0,
+1,[{0,
+2, 998,
+999,
+1000}]
+fifixpoint!
+[P
+]
+b
+?
+[{1,
+999,
+1000}]
+`
+1000}]
+e
+?
+998,
+999}]
+`
+[P
+]
+b
+?
+[{0,
+1,
+999}]
+`Int [
+1
+1
+1
+1
+2
+Int
+Int
+Int
+unroll
+(join)
+(seq) (relax)
+[{0,
+1, 999}]
+2, 998, 999, 1000}] r [{0, 2, 1000}]
+`Int [P1 ] r`
+[{0,
+998,
+`Int [P1 ] r2 [{1, 2, 1
+1Int
+(rec)
+`Int [P ] r [{0, 2, 1000}]
+`Int [P1 ] r1
+r2 [{0, 1, 2, 998, 999, 1000}]
+(iterate)
+(?)
+
+⋆
+
+⊢A [P] c [R] ⊢A [P ∨ R] c [Q]
+{1, 999}] r [{0, 2, 1000}] for Example V.2.
+⋆
+[rec]
+⊢A [P] c [Q]
+Int
+CP (Jb1 ?K)
+
+Int
+CP (Je1 K)
+
+(transfer)
+
+Int
+CP (Jb2 ?K)
+
+(transfer)
+
+⊢A [P] c [Q] Q ⇒ A(P)
+⋆
+Fig.
+4:⊢Derivation
+of
+[iterate]
+[P]
+c
+[P
+∨
+Q]
+A
+
+(transfer)
+
+Int
+CP (Je2 K)
+
+(transfer)
+
+`Int [P ] b1 ? [P ]
+`Int [P ] e1 [{0, 998}]
+`Int [P ] b2 ? [P ]
+`Int [P ] e2 [{2, 1000}]
+(Jx := x ⇤ 10K)
+(seq)
+(seq)
+}
+`Int [P ] r1 [{0, 998}]
+`Int [P ] r2 [{2, 1000}]
+(transfer)
+(join)
+:= x ⇤ 10 [{ 100, 10}]
+`Int [P ] r1
+r2 [{0, 2, 998, 1000}]
+(seq)
+10} ✓ Sign(P ) = Z6=0
+`Int [P ] r [{0, 2, 1000}]
+(iterate)
+Sign
+C
+(J0 < x?K)
+, 10, 1, 100} ✓ Sign({ 100, 100}) = Z6=0
+{ 100,100}
+(relax)
+Int
+(transfer)
+100}]
+`Sign [{ 100, 100}] 0 < x? [{100}]
+(seq)
++
+Sign
+`Sign [P ] c [{100}]
+Sign+
+C
+(Jx := x ⇤ 10K)
+C
+(Jx  0?K)
+{
+10,
+1}
+P
+(transfer)
+(transfer)
+`Sign+ [P ] x  0? [{ 10, 1}]
+`Sign+ [{ 10, 1}] x := x ⇤ 10 [{ 100, 10}]
+(seq)
++
+`Sign+ [P ] x  0?; x := x ⇤ 10 [{ 100, 10}] { 100, 10} ✓ Sign(P ) = Z6=0
+
+`Int [{0, 1, 999, 10
+
+`Int [{0, 1, 2, 99
+
+locally completeCSign
+under-approximation!
+(Jx  0?K)
+P
+Fig.
+4:
+Derivation
+of
+`
+[P
+=
+{1,
+999}]
+r
+[{0,
+2,
+1000}]
+for
+Example
+scalable bug detection
+(transfer)
+`Sign [P ] x  0? [{
+
+10,
+
+1}]
+
+{ 10, 1, 100}] c [{100}] for Example
+V.3. [P ] x  0?; x := x ⇤ 10 [{
+`Sign
+
+`Sign
+
+100,
+(iterate)
+
+1
+
+100, 10, 1, 100} ✓ Sign({ 100, 100}) = Z6=0
+⇤
+`Sign+ [P ] (x  0?; x := x ⇤ 10) ⇤ [{ 100, 10, 1, 100}] { (relax)
+100
+pre- Example V.3 Let us `consider
+the pre-con0?; x domain
+:= x ⇤ 10) Sign,
+[{ 100, 100}]
+`
+Sign [P ] (x  the
+4
+`Sign [P ] c [{100}]
+where dition P = { 10, 1, 100} and the Imp program
+`Sign [P ] (x  0?; x := x
+`Sign [P ] (x  0?; x := x ⇤ 10)
+
+⇤
+
+[{
+
+100,
+
+10,
+
+1, 100}]
+
+{
+
+100, 100} ✓ {
+
+===== slide 41 =====
+Sequential composition
+⊢A [P] c1 [R] ⊢A [R] c2 [Q]
+[seq]
+⊢A [P] c1; c2 [Q]
+
+[x ∈ [−∞, − 1]]
+⊢Int [true] x < 0? ; x := − x [x ∈ [1,∞]]
+
+===== slide 42 =====
+Choice
+⊢A [P] c1 [Q1] ⊢A [P] c2 [Q2]
+[join]
+⊢A [P] c1 + c2 [Q1 ∨ Q2]
+
+Z<0
+
+Z>0
+
+Z≥0
+⊢Sign [true] if x < 0 then x := − x else skip [x ∈ {0,42}]
+[x = − 42]
+
+[x = 42]
+
+[x ∈ {0,100}]
+Z≥0
+
+[x ∈ {0,100}]
+Z≥0
+
+===== slide 43 =====
+Validity, soundness,
+completeness
+
+===== slide 44 =====
+Spec = x < 10, even if the loop
+c diverges
+because,
+in the on
+attempt to derive the triple `Sign [P ] e1 [Je1 KP
+Sign
+10, 1}. The derivation in Fig. by
+5 proves
+the
+triple
+rule (transfer), the proof obligation CP (Je1 K) fails
+] c [{100}]. As the post-condition ↵(Je
+{100}KP
+is )an=underZ>0 6= Z 0 = ↵(Z 0 ) = ↵(Je1 KSign(P )). Note
+1
+mation of JrKP (cf. Theorem V.4 (1)),
+we
+conclude
+that
+that
+the
+rule
+(relax)
+cannot
+help.
+In
+fact,
+let
+us
+assume
+tha
+A
+0
+0
+0
+0
+0
+0
+0
+0
+0
+pec
+is
+a
+true
+alert.
+Observe
+that
+all
+proof
+obligations
+)
+CP (e)
+P  P  A(P ) P 0`
+[P ] rA(P
+[Q ]0) Q`A[P
+Q ]r [Q
+A(Q)
+]0 Q  Q
+AP
+there exists some P such that P ✓ P ✓ Sign(P ) (relax)
+and the
+(transfer)
+(transfer)
+cal
+completeness
+due
+to
+rule
+(transfer)
+are
+satisfied,
+0
+0 ] r [Q]
+JeKP ] `A4 [P ] e [JeKP ] Sign
+`
+[P
+`
+[P
+]
+r
+[Q]
+A
+A
+triple
+`
+[P
+]
+e
+[Je
+KP
+]
+is
+provable
+by
+(transfer).
+Then
+Sign
+1
+1
+letting b = x  0, for CP (Jb?K), we have0
+0
+Sign(P
+)
+=
+Sign(P
+)
+=
+Z
+and
+P
+✓
+P
+=
+Z
+imply
+>0
+2
+``AA[R]
+`A [P ] r1 [Q1 ] `A [P ] r12 [Q12] `A [P ] r2 [Q2 ]
+[P ]r2r1[Q]
+[R] `A [R] r2 [Q]
+0
+0
+(seq)
+(join)
+(seq)
+?KSign(P
+))
+=
+Sign(Jb?KZ
+)
+=
+Sign(Z
+)
+=
+Z
+that
+Je
+KP
+✓
+Z
+.
+Hence,
+we
+would
+have
+that
+↵(Je
+KP
+)
+
+=
+6
+0
+<0
+<0
+1
+1
+1
+`A [P ] r1 r2 [Q`1A_[P
+Q0 ]2 ]r1 r2 [Q1 _ Q2 ]
+1 ; r2 [Q] `A [P ] r1 ; r2 [Q]
+↵(Z 1})
+=Z<0
+Z>0
+while ↵(Je1 KSign(P )) = ↵(Je1 KZ>0 ) =
+1) =
+Sign(Jb?KP
+)
+=
+Sign({
+10,
+.
+⇤
+⇤
+Sign
+`A`A
+[P[P
+_]R]
+r [Q]`A [P _ R] r [Q]
+`
+[P
+]
+r
+[Q]
+Q
+
+A(P
+)
+r [R]
+`
+[P
+]
+r
+[Q]
+Q
+
+A(P
+)
+A
+A
+Z
+.
+Thus,
+C
+(Je
+K)
+does
+not
+hold,
+contradicting
+the
+hy0
+0
+1
+P
+(rec)
+(iterate)
+(rec)
+(ite
+⇤ let us point out⇤ that some additional valid rules
+⇤
+⇤
+0
+0
+urse,
+] r [Q] `A [P ] r [Q]
+`A ][Pe1] r[Je[P
+_
+Q]
+`
+[P
+]
+r
+[P
+_
+Q]
+pothesis that `Sign [P
+KP
+]
+is
+provable.
+A
+1
+added to our proof system, for example the following
+Fig.
+3:
+The
+Proof
+System
+LCL
+.
+Fig.
+3:
+The
+Proof
+System
+LCL
+.
+A
+A
+s can be easily proved to be valid: For a result of logical completeness for LCLA , we need:
+Auxiliary
+rules
+Int
+Int
+Int
+Int
+Int
+Int
+Int
+C
+(Jb
+?K)
+CP (Jb1 ?K)
+C
+(Jb
+?K)
+C{1,999,1000} (Je1 K)
+C
+(Je
+K)
+C
+(Je
+K)
+C
+2
+2 (limit)
+2
+1
+P1
+P
+(1)
+to
+add
+the
+sound,
+infinitary
+rule
+for
+Kleene
+star:
+{0,1,999}
+{1,999,1000}
+{0,1,99
+1
+1
+`
+[P
+]
+r
+[Q]
+Q
+
+P
+A
+(transfer)
+(transfer)
+(transfer)
+(transfe
+(transfer)
+(transfer)
+(transfer)
+0}]
+`Int999,
+[{1,
+999, 1000}] e1 ? [{0,
+998,
+`Int 998,
+[P1 ]999}]
+b2 ? [{0, 1, 999}]`Int [P1 ] b2`
+[{0,
+1, 999}] e2 [{1, 2,
+`
+1000}]
+`Int
+[{1,999}]
+999, 1000}] e1 ? [{0,
+? Int
+[{0,
+1, 999}]
+`1000}]
+(invariant)
+Int [P1 ] b1 ? [{1,
+Int [{0, 1, 999}
+⇤
+(seq)
+(seq)
+(seq)
+`
+[P
+]
+r
+[P
+]
+8n
+2
+N.
+`
+[P
+]
+r
+[P
+]
+`Int [P1 ] r1 [{0,A
+998, 999}]
+`IntA[P1 ] rn
+`Int [P1 ] r1 [{0, 998, 999}]
+n+1`Int [P1 ] r2 [{1, 2, 1000}]
+2 [{1, 2, 1000}]
+
+The rules of LCL
+
+W
+`Int [P1 ] r1
+r2 [{0, 1, 2,`998,
+999,
+1000}]
+r2 [{0, 1, 2, 998, 999,
+⇤ 1000}]
+1 ] r1
+Int [P
+`(iterate)
+Pi ]
+`A [P ] r [Q] A(P ) = A(Q)
+A [P0 ] r [ i2N (iterate)
+
+nt Int
+CP
+(Je1 K)
+1 ?K)
+P (Jb
+
+⇤
+
+`A [P ] r Int[Q]
+Int
+
+(transfer)
+(transfer)
+
+CP C
+(Je
+K) 2 ?K)
+P 1(Jb
+
+(?)
+(abs-fix)
+
+(limit)
+
+(join)
+
+(join
+
+(?)
+
+Int
+Int
+Int
+CP
+(Je
+K)
+CPassume
+(Jb
+?K)
+C
+(Je2 K) transfer expressions occurring
+(2)
+to
+that
+all
+the
+basic
+2
+2
+P
+(transfer)
+(transfer)
+(transfer) (transfer)
+(transfer)
+
+===== slide 45 =====
+Validity
+A LCL triple ⊢A [P] c [Q] is valid if Q ⊆ [[c]]P ⊆ A(Q)
+Is ⊢Int [x > 0] x := 10x [x ≥ 10] valid?
+Is ⊢Int [x > 0,y ≥ 0] x := yx [x ≥ 0] valid?
+Is ⊢Sign [x > 0,y > 0] x := yx [x = 42,y = 7] valid?
+⋆
+
+Is ⊢Sign [x > 0] (x := x + 1)
+
+[x > 0] valid?
+
+===== slide 46 =====
+Logical correctness
+Th.
+#
+If ⊢A [P] c [Q] then Q ⊆ [[c]]P ⊆ A(Q) = [[c]]A A(P)
+Proof.
+By induction on the derivation.
+
+===== slide 47 =====
+Verification
+Th.
+!
+g
+n
+i
+⊢
+[P]
+c
+[Q]
+If A(Spec) = Spec, then any provable
+triple
+d
+n
+A
+fi
+g
+u
+b
++
+Q
+⊆
+Spec
+either shows the program
+correct
+(
+)
+s
+s
+e
+n
+t
+c
+e
+r
+r
+o
+c
+or exposes some true positives (Q∖Spec ≠ ∅)
+Proof.
+
+[[c]]P ⊆ Spec ⇔ A[[c]]P ⊆ Spec
+⇔ A(Q) ⊆ Spec
+⇔ Q ⊆ Spec
+
+===== slide 48 =====
+Logical completeness
+Th.
+If A is complete for any atomic command in c,
+then any valid triple ⊢A [P] c [Q] can be derived
+Proof.
+We first derive ⊢A [P] c [[[c]]P],
+then use [relax] with Q ⊆ [[c]]P
+
+===== slide 49 =====
+Intrinsic logical incompleteness
+Th.
+For any Turing complete language and any non-trivial
+abstraction A, there are valid triples that cannot be proved
+Proof.
+See full version of LICS 2001 paper in JACM
+
+===== slide 50 =====
+Over vs Under
+correctness
+
+HL
+{P } c {Q}
+
+?
+
+<latexit sha1_base64="STnxcbAh5cF4AlV/Gjys+LA/0oE=">AAACqXicjVFLixNBEO6Mr3V9ZRW8eGkMgiCEmWVRL8KClz0mYHaD6RBqeiqx2e6esbs6Etrxx3jVP+S/sTObg/s4WKePrx5f1Vdlo5WnPP/Ty27dvnP33t79/QcPHz1+0j94eurr4CROZK1rNy3Bo1YWJ6RI47RxCKbUeFaef9zmz9bovKrtJ9o0ODewsmqpJFCiFv3nIo5E+0MYoC9+GWWCcSzaRX+QD/Mu+HVQ7MCA7WK0OOhFUdUyGLQkNXg/K/KG5hEcKamx3RfBYwPyHFY4S9CCQT+P3QEtfxU8UM0bdFxp3pH4b0cE4/3GlKmyW/RqbkvelJsFWr6fR2WbQGjlVoiUxk7IS6eSM8gr5ZAItpsjV5ZLcECETnGQMpEhWXVJ0JMBt3FVOsriN1kbA7ZK5+MSv7axs9KhjqIMSlcJcbFONjgFdpW0RZ1UefzQtjf1B7X+7xHiojzNSe8qrj7nOjg9HBZvh4fjo8Hxye5xe+wFe8les4K9Y8fshI3YhEn2nf1kv9jv7E02zqbZ54vSrLfrecYuRSb/Aipl2Io=</latexit>
+
+P
+<latexit sha1_base64="7M/zo8prenwhiULY4h1FW5bBZ18=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPS+ICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkzoZXu/10kC5D3gfZCvTFKoZXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg7PD/vHp6nEb4q3YF+9FJj6IY3EqhmIklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4Dvj3OoA==</latexit>
+
+logically complete
+
+Q
+<latexit sha1_base64="6CqUA4P13yzKhQSoum6EK9y7umQ=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPbOICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkhsOr3X46SJch74NsBfpiFWdXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg+Fh//h09bgN8Vbsi/ciEx/EsTgVZ2IklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4DwGvOoQ==</latexit>
+
+?
+
+IL
+
+incorrectness
+
+<latexit sha1_base64="dWFNhYuyH5NaVq3ShOUKpzBPTDg=">AAACpXicjVFLb9NAEN6YVymvtBy5rIgQnCK7qoALUiUuvSClUpNWsq1ovJ6EVXfXZnc2EK3cn8IV/hL/ho2bA30cmNOnbx7fzDdVq6SjNP0zSO7df/Dw0c7j3SdPnz1/Mdzbn7nGW4FT0ajGnlfgUEmDU5Kk8Ly1CLpSeFZdfN7kz1ZonWzMKa1bLDUsjVxIARSp+XA/n5SXhQb66hZBdJf5STkfjtJx2ge/DbItGLFtTOZ7g1DUjfAaDQkFzuVZ2lIZwJIUCrvdwjtsQVzAEvMIDWh0ZeiX7/gb74Aa3qLlUvGexH87Amjn1rqKlf2aN3Mb8q5c7mnxsQzStJ7QiI0QSYW9kBNWRleQ19IiEWw2Ry4NF2CBCK3kIEQkfbTpmqAjDXZt63iUwe+i0RpMHc/HBX7rQm+kRRWKyktVR8SLVbTBSjDLqF00UZWHT113V7+Xq/8eUVyVxznxXdnN59wGs4Nx9n58cHI4OjrePm6HvWKv2TuWsQ/siB2zCZsywX6wn+wX+528Tb4kp8nsqjQZbHtesmuRzP8CNw/Wcg==</latexit>
+
+[P ] c [Q]
+
+P
+<latexit sha1_base64="7M/zo8prenwhiULY4h1FW5bBZ18=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPS+ICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkzoZXu/10kC5D3gfZCvTFKoZXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg7PD/vHp6nEb4q3YF+9FJj6IY3EqhmIklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4Dvj3OoA==</latexit>
+
+Q
+<latexit sha1_base64="6CqUA4P13yzKhQSoum6EK9y7umQ=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPbOICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkhsOr3X46SJch74NsBfpiFWdXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg+Fh//h09bgN8Vbsi/ciEx/EsTgVZ2IklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4DwGvOoQ==</latexit>
+
+logically complete
+
+correctness
+
+LCL
+`A [P ] c [Q]
+A(Spec) = Spec
+<latexit sha1_base64="1HvcBa8kjIx1Vxk/CAbRQkaD+G0=">AAACBnicbVA9TwJBEN3DL8QvxNJmIzGxIndq1BK1sYREwOS4kLllhA17H9mdIxICtb/CVis7Y+vfsPC/eCCFgq96eW8m8+b5sZKGbPvTyiwtr6yuZddzG5tb2zv53ULdRIkWWBORivSdDwaVDLFGkhTexRoh8BU2/N71xG/0URsZhbc0iNELoBPKeymAUqmVLzT7bTDd1iV3K95YjN2q18oX7ZI9BV8kzowU2QyVVv6r2Y5EEmBIQoExrmPH5A1BkxQKR7lmYjAG0YMOuikNIUDjDafZR/wwMUARj1FzqfhUxN8bQwiMGQR+OhkAdc28NxH/89yE7i+8oQzjhDAUk0MkFU4PGaFlWgryttRIBJPkyGXIBWggQi05CJGKSdpSLu3Dmf9+kdSPS85Z6aR6WixfzZrJsn12wI6Yw85Zmd2wCqsxwR7YE3tmL9aj9Wq9We8/oxlrtrPH/sD6+AZMiZiO</latexit>
+
+P
+<latexit sha1_base64="7M/zo8prenwhiULY4h1FW5bBZ18=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPS+ICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkzoZXu/10kC5D3gfZCvTFKoZXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg7PD/vHp6nEb4q3YF+9FJj6IY3EqhmIklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4Dvj3OoA==</latexit>
+
+<latexit sha1_base64="6Jv4AV8qHP7Ccfz4J8IckOiUYGE=">AAACtHicjVFNbxMxEHW2fJTwlZYjF0OEVC7RbkGFS6UiLj0WQdpK2Sia9U6CVdu72OOgyNpzf02v8Fv4N3i3OZC2B+b09ObjzbwpaiUdpemfXrJ17/6Dh9uP+o+fPH32fLCze+oqbwWORaUqe16AQyUNjkmSwvPaIuhC4Vlx8bnNny3ROlmZb7SqcaphYeRcCqBIzQavPu3lGui7pPC1RtG85Ye8v8HMBsN0lHbBb4NsDYZsHSeznV7Iy0p4jYaEAucmWVrTNIAlKRQ2/dw7rEFcwAInERrQ6Kahu6Xhb7wDqniNlkvFOxL/7QignVvpIla2W7qbuZa8KzfxNP84DdLUntCIVoikwk7ICSujSchLaZEI2s2RS8MFWCBCKzkIEUkfXdsQdKTBrmwZjzL4U1Ragynj+TjHH03ofLSoQl54qcqIeL6MNlgJZhG18yqq8nDYNHf1e7n87xH5dXmcE9+V3XzObXC6P8oORu++vB8eHa8ft81estdsj2XsAztix+yEjZlgl+yK/WK/k4MkT0SC16VJb93zgm1EYv4C+7nbpw==</latexit>
+
+logically incomplete
+
+Q
+<latexit sha1_base64="6CqUA4P13yzKhQSoum6EK9y7umQ=">AAACknicjVFNTxRBEO0dQRFQQL156bAx8bSZIQSNiQmGCwcPbOICyc6G1PTUrhW6e8bu6jWbyfwCr/rj/Df2LHuQjwN1enn18V5VFbUmz2n6t5c8WVt/+mzj+ebW9ouXO7t7r859FZzCkap05S4L8KjJ4oiJNV7WDsEUGi+K65MufzFH56my33hR48TAzNKUFHCkhsOr3X46SJch74NsBfpiFWdXe70mLysVDFpWGrwfZ2nNkwYck9LYbubBYw3qGmY4jtCCQT9plk5b+S544ErW6CRpuSTx/44GjPcLU8RKA/zd38115EO5ceDpx0lDtg6MVnVCTBqXQl45iidAWZJDZuicoyQrFThgRkcSlIpkiDe5JejZgFu4Mi5l8aeqjAFbxvVxij/aJu9cONRNXgTSZUQyn8czOAI7i9p5FVVl87ltH+oPNH/0iPymPM6J78ruPuc+OD8YZEeDg+Fh//h09bgN8Vbsi/ciEx/EsTgVZ2IklEDxS/wWf5I3yafkS3JyU5r0Vj2vxa1Ivv4DwGvOoQ==</latexit>
+
+incorrectness
+
+===== slide 51 =====
+Int
+
+1
+
+2
+
+Int
+
+What can go wrong?
+
+(rec)
+
+`Int [? ] r [{0, 2, 1000}]
+
+Legenda:
+
+b1 , 0 < G
+
+e1 , G := G
+
+1
+
+b2 , G < 1000
+
+e2 , G := G + 1
+
+? 1 , {0, 1, 999, 1000}
+
+local
+local
+Fig. 5. Derivation of `Int [? = {1,completeness
+999} ] r [ {0, 2, 1000} ] for Example 5.2, where the label (tr.) stands for (transfer).
+completeness
+requirement
+requirement
++
+Sign
+C? (G  0?)
+
+(transfer)
+
++
+Sign
+C
+(G := G ⇤ 10)
+{ 10, 1}
+
+(transfer)
+
+`Sign+ [? ] G  0? [{ 10, 1}]
+`Sign+ [{ 10, 1}] G := G ⇤ 10 [{ 100, 10}]
+(seq)
++
++
+`Sign [? ] G  0?; G := G ⇤ 10 [{ 100, 10}] { 100, 10} ✓ Sign(? ) = Z<0
++
+⇤
++
+`Sign [? ] (G  0?; G := G ⇤ 10) [{ 100, 10, 1, 100}] { 100, 100} ✓ { 100, 10, 1, 100} ✓ Sign({ 100, 100}) = Z<0
+`Sign+ [? ] (G  0?; G := G ⇤ 10) ⇤ [{ 100, 100}]
+`Sign+ [? ] c [{100}]
+
+local
+completeness
+requirement
+(iterate)
+(relax)
+
++
+Sign
+C
+(0 < G ?)
+{ 100,100}
+
+`Sign+ [{ 100, 100}] 0 < G ? [{100}]
+
+(transfer)
+(seq)
+
+Fig. 6. Derivation of `Sign [? = { 10, 1, 100} ] c [ {100} ] for Example 5.3.
+
+local-completeness proof obligations can fail!
+any non-trivial abstract domain A introduces some imprecision!
+
+Of course, for no-ops, Boolean guards and assignments, the rule (transfer) can be equivalently stated in symbolic form
+as follows:
+
+` [?] skip [?]
+
+(skip)
+
+C? (b?)
+
+` [?] b? [? ^ b]
+
+(assume)
+
+===== slide 52 =====
+Exercises
+
+===== slide 53 =====
+Validity
+Which LCL triples are valid for any c and P ?
+
+⊢{⊤} [P] c [false]
+⊢{⊤} [P] c [true]
+⊢Sign [x > 10] c [false]
+⊢{⊤} [wlp(r, P)] c [P]
+
+===== slide 54 =====
+Validity
+Which LCL triples are valid for any c and P ?
+
+⊢{⊤} [P] c [false]
+⊢{⊤} [P] c [true]
+⊢Sign [x > 10] c [false]
+⊢{⊤} [wlp(r, P)] c [P]
+
+===== slide 55 =====
+Reasoning
+Find a derivation for the IL triple
+
+⊢Oct [x < 10,y > 20] if x ≥ y then z := x else z := y [x < 10,y > 20,z = max(x, y)]
+[x < 10,y > 20]
+if x ≥ y then
+[false]
+z := x
+[false]
+else
+[x < 10,y > 20]
+z := y
+[x < 10,z = y > 20] ≡ [x < 10,y > 20,z = max(x, y)]
+[x < 10,y > 20,z = max(x, y)]
+
+===== slide 56 =====
+Reasoning
+Find a derivation for the IL triple
+
+⊢Oct [x < 10,y > 20] if x ≥ y then z := x else z := y [x < 10,y > 20,z = max(x, y)]
+[x < 10,y > 20]
+if x ≥ y then
+[false]
+z := x
+[false]
+else
+[x < 10,y > 20]
+z := y
+[x < 10,z = y > 20] ≡ [x < 10,y > 20,z = max(x, y)]
+[x < 10,y > 20,z = max(x, y)]
+
+===== slide 57 =====
+Soundness
+Are these “mixed” HL+LCL inference rules valid ?
+
+⊢A [P] c [Q]
+{P} c {A(Q)}
+
+⊢A [P] c [Q]
+{A(P)} c {A(Q)}
+
+===== slide 58 =====
+Soundness
+Are these “mixed” HL+LCL inference rules valid ?
+
+⊢A [P] c [Q]
+{P} c {A(Q)}
+
+⊢A [P] c [Q]
+{A(P)} c {A(Q)}
+
+If ⊢A [P] c [Q] then [[c]]P ⊆ A(Q), hence {P} c {A(Q)} is valid
+#
+
+If ⊢A [P] c [Q] then [[c]]A(P) ⊆ [[c]] A(P) = A(Q), hence
+{A(P)} c {A(Q)} is valid
+
+===== slide 59 =====
+Unsoundness 1
+Prove that [conj] is unsound for LCL
+
+⊢A[P1] c [Q1] ⊢A[P2] c [Q2]
+⊢A [P1 ∧ P2] c [Q1 ∧ Q2]
+
+[conj]
+
+===== slide 60 =====
+Unsoundness 1
+Prove that [conj] is unsound for LCL
+
+⊢A[P1] c [Q1] ⊢A[P2] c [Q2]
+⊢A [P1 ∧ P2] c [Q1 ∧ Q2]
+
+[conj]
+
+Consider ⊢{⊤} [x = 0] x := 1 [x = 1]
+and ⊢{⊤} [x = 1] x := 1 [x = 1]
+
+By rule [conj] we could derive ⊢{⊤} [false] x := 1 [x = 1]
+which is not sound!
+
+===== slide 61 =====
+Unsoundness 2
+Show that the following rule is not sound
+
+⊢A [P] x := nondet() [P[v/x]]
+arbitrary
+value
+
+===== slide 62 =====
+Unsoundness 2
+Show that the following rule is not sound
+
+⊢A [P] x := nondet() [P[v/x]]
+arbitrary
+value
+
+Consider ⊢Id [x = 0] x := nondet( ) [1 = 0] ≡ [false]
+which is not sound because Id(false) = ⊥ and
+
+Id([[x := nondet( )]](x = 0)) = ⊤
+
+===== slide 63 =====
+Take home message
+In theory, we prove
+correctness.
+In practice, we approximate
+our own mistakes.

@@ -1,0 +1,1953 @@
+# ProgramAnalysis-15-AbstractAnalysis
+# auto-extracted from ProgramAnalysis-15-AbstractAnalysis.pdf (78 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #15
+Abstract analysis
+
+===== slide 2 =====
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+HAL Id: hal-01657536
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+Chapter 4:
+Non-relational abstract domains
+constant
+constant set
+intervals
+one more: congruence
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+2
+
+===== slide 3 =====
+4.8. THE CONGRUENCE DOMAIN
+
+Congruence domain
+
+ ̆
+element, meaning “no information” and a widening can default to € if no meaningful
+
+inductive invariant could be inferred.
+
+4.8
+
+The Congruence Domain
+
+The last non-relational abstract domain we present is a congruence domain, specific to
+integers, introduced by Granger [1989]. We thus assume I = Z, and infer value abstractions
+of the form X œ aZ + b, meaning that X equals some multiple of a plus b. This domain is
+particularly useful to track pointer offsets in arrays and data-structures, prove alignment
+properties, or infer array access patterns. We set as abstract values:
+ ̆ def
+
+3
+
+B = { (aZ + b) | a œ N, b œ Z } fi { ‹ }
+ ̆
+
+(4.15)
+
+===== slide 4 =====
+Congruence domain
+abstract elements of the form aZ + b
+(with a ∈ N, b ∈ Z)
+
+γ( ⊥ ) = ∅
+γ(aZ+b) = {ak+b ∣ k ∈ Z}multiples of a
+with offset b
+e.g.
+
+γ(2Z+0) = set of even numbers
+γ(2Z+1) = set of odd numbers
+γ(0Z+42) = {42}
+4
+
+===== slide 5 =====
+Congruence: concretization
+γ is not injective
+γ(2Z + 1) = γ(2Z + 3) = γ(2Z − 1)
+γ(aZ + b) = γ(aZ + (b + ak)) for any k ∈ Z
+sometimes is assumed 0 ≤ b < a (when a ≠ 0)
+then γ becomes injective
+5
+
+===== slide 6 =====
+Congruence domain
+• the greatest element is 1Z + 0
+• precise on singletons:
+singleton {c} is represented as 0Z + c
+• aZ + b ⊑ a′Z + b′ iff γ(aZ + b) ⊆ γ(a′Z + b′)
+
+• the bottom element is explictly added
+
+6
+
+===== slide 7 =====
+<latexit sha1_base64="Jyy1EDjTC3fkO+FqR/poRCvFYeM=">AAADNnicbVJNb9NAEF2br2K+UjhyGRGBE4GipIfCpVIFFw4cikTaimyIxut1sqq96+6uWyLLv4oLv4NbLxxAiCs/gbVjqjZlpJVmZ968eTO7UZ4KY4fDM8+/dv3GzVsbt4M7d+/df9DZfLhvVKEZHzOVKn0YoeGpkHxshU35Ya45ZlHKD6KjN3X+4IRrI5T8YJc5n2Y4lyIRDK0LzTa9d3QS9JBmaBdRVH6s4DlEfaDmmGH+iXahh+HlZNiHnYBGfC5kyVxnU7mbsvAMqOWfbSkSqCACKpWl/LgQJ64EaJ6puKRzFvfwBYb9CigNMFynDs9ZlF1wfSoMd+xcxuedpoHTu4KcOgR3vRwN7EDDpLMyZVm16tEyAcrYoYKavY0YN7xJBDdQrU3SgFrVrWhstF5M/BsHw3Vxs053OBg2BledUet0SWt7s843GitWZFxalqIxk9Ewt9MStRUsrWcvDM+RHeGcT5wrMeNmWjbPXsFTF4khUdodaaGJXqwoMTNmmUUOWS/HrOfq4P9yk8Imr6alkHlhuWSrRkmRglVQ/yGIhebMpkvnINPCaQW2QI3Mup8WuCWM1ke+6uxvDUbbg+33W93d1+06Nshj8oT0yIi8JLvkLdkjY8K8L96Z98P76X/1v/u//N8rqO+1NY/IJfP//AVuHQAo</latexit>
+
+0
+
+#
+
+0
+
+(aZ + b) u (a Z + b ) =
+
+Meet
+(
+?
+00
+00
+a Z+b
+
+Precise!
+
+0
+
+00
+
+0
+
+if b 6⌘ b (mod gcd(a, a ))
+otherwise
+greatest common divisor
+
+least common multiple
+
+00
+
+0
+
+where a = lcm(a, a ) and b satisfies
+
+(
+
+00
+
+b ⌘ b (mod a)
+00
+0
+0
+b ⌘ b (mod a )
+
+#
+
+e.g. 4Z + 1 ⊓ 6Z + 3
+
+a′′ = lcm(4,6) = 12
+
+gcd(4,6) = 2
+
+1 ≡ 3 mod 2
+
+Compatible!
+
+b′′ ≡ 1 mod 4
+b′′ ≡ 3 mod 6
+
+b′′ = 9
+
+12Z + 9
+
+7
+
+===== slide 8 =====
+Join
+<latexit sha1_base64="o+w83N6FV2lfwafck9oi0+isDrE=">AAACgHicbVFNb9NAEF2br2K+Ahy5jLBQXJEGu4e2QqpUwYVjkUhbkTXR7HqSrOqv7q4LkZXfwf/ixo9BYp3kQFpGWunpvTczOzOizpWxcfzb8+/cvXf/wc7D4NHjJ0+f9Z6/ODNVoyWNZJVX+kKgoVyVNLLK5nRRa8JC5HQuLj92+vk1aaOq8otd1JQWOCvVVEm0jpr0fvJxECEv0M6FaL8u4S2IXeDmSjb1Nx5ChP1tsb8Lx0G2xemAp4Grwy39sO33OWmCJWRwDHwmswgHgP0BCNhbZa9dgGXmTBo4XTXq2qm8LqqszZZdsSCY9MJ4GK8CboNkA0K2idNJ7xfPKtkUVFqZozHjJK5t2qK2SubkqjaGapSXOKOxgyUWZNJ2tcAlvHFMBtNKu1daWLH/ZrRYGLMohHN2g5ubWkf+Txs3dnqUtqqsG0ulXDeaNjnYCrprQKY0SZsvHECplfsryDlqlNbdrFtCcnPk2+Bsf5gcDA8+74cnHzbr2GGv2GsWsYQdshP2iZ2yEZPsjxd6A2/P9/3If+cna6vvbXJesq3w3/8F9qG5tg==</latexit>
+
+#
+
+0
+
+0
+
+(aZ + b) t (a Z + b ) = dZ + r
+0
+
+0
+
+b ) and r ⌘ b
+
+where d = gcd(a, a , b
+
+(mod d)
+
+#
+
+e.g. 4Z + 1 ⊔ 4Z + 3
+
+d = gcd(4,4,2), r = 1 mod 2
+8
+
+2Z + 1
+
+===== slide 9 =====
+Congruence domain structure
+γ( ⊥ ) = ∅
+γ(aZ + b) = {ak + b ∣ k ∈ Z}
+#
+α(X) = ⊔x∈X 0Z + x
+Although the domain has an infinite height, there is no infinite strictly increasing chain!
+Why?
+• moving up in the lattice = losing modular constraints
+• losing constraints = the modulus a decreases
+• but it cannot decrease indefinitely
+
+6Z ⊏ 3Z ⊏ 1Z
+
+9
+
+===== slide 10 =====
+BCAs
+#
+
+− (aZ + b) = (aZ + (−b))
+
+When we sum (aZ + b) and (cZ + d) we have
+
+b + d + ka + lc
+= b + d + k(k1 gcd(a, c)) + l(l1 gcd(a, c))
+
+#
+
+(aZ + b) + (cZ + d) = (gcd(a, c)Z + (b + d))
+#
+
+(aZ + b) − (cZ + d) = (gcd(a, c)Z + (b − d))
+#
+
+(aZ + b) × (cZ + d) = (gcd(ac, ad, bc)Z + bd)
+10
+
+===== slide 11 =====
+(aZ + b) Mb (a Z + b ) =
+
+aZ + b
+
+otherwise
+
+Example
+i.e., we only refine the left argument when it is the greatest value, 1Z + 0.
+Example 4.11 (Congruence analysis). Consider the program:
+
+X is even
+
+X Ω 0; Y Ω 2;
+X ∈ (2Z + 0)
+while X < 40 do inferred loop invariant:
+Y
+∈
+(6Z
++
+2)
+X Ω X + 2;
+if X < 5 then Y Ω Y + 18 endif ;
+gcd(18,30)
+if X > 8 then Y Ω Y ≠ 30 endif
+Y can be incremented by 18
+done
+or decremented by 30 at any iteration
+
+Note that, except when an abstract value represents a constant, any test of the form X < 40
+or X > 8 is abstracted as the identity. Our static analysis will infer, as loop invariant,
+X œ 2Z + 0, i.e., X is even, and Y œ 6Z + 2, where 6 is the gcd of 18 and 30 as, at any
+loop iteration, Y may be incremented by 18 or decremented by 30.
+⌥
+Rational congruences. The congruence domain can be extended to rationals, instead
+of integers, as proposed by Granger [1997].11 For this domain, I = Q, and we have the
+
+===== slide 12 =====
+esign of an effective static analyzer by Abstract Interpretation
+Summary
+pter. We restricted ourselves to non-relational domains, which
+e values of each variable independently from the other variable
+wing table sums up the different domains we proposed, and th
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+HAL Id: hal-01657536
+
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+signs
+constants
+constant sets
+intervals
+congruences
+
+0, (Ø 0), (> 0), (Æ 0), (< 0), (”= 0)
+c œZ
+I
+C œ Pfinite (I)
+Z
+[a, b]
+aZ + b
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+Sect. 4.2
+Sect. 4.3
+Sect. 4.4
+Sect. 4.5
+Sect. 4.8
+
+structures and algorithms for these domains are largely inde
+12
+
+===== slide 13 =====
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+Overview of Chapter 5:
+Relational abstract domains
+
+HAL Id: hal-01657536
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+13
+
+===== slide 14 =====
+Convex Polyhedra domain
+sets of numerical constraints of the form
+
+c1x + c2y ≤ c
+
+(at most two variables per constraint, with coefficients)
+is a relational domain, can be used
+when intervals are not expressive enough
+
+14
+
+===== slide 15 =====
+Example
+x, y ∈ [0,5]
+1x + 0y ≤ 5
+−1x + 0y ≤ 0
+0x + 1y ≤ 5
+0x + −1y ≤ 0
+
+x=y
+1x + −1y ≤ 0
+−1x + 1y ≤ 0
+
+15
+
+0≤x<y≤5
+−1x + 0y ≤ 0
+−1x + 1y ≤ 1
+0x + 1y ≤ 5
+
+===== slide 16 =====
+Example
+x, y ∈ [0,5]
+1x + 0y ≤ 5
+−1x + 0y ≤ 0
+0x + 1y ≤ 5
+0x + −1y ≤ 0
+
+x=y
+1x + −1y ≤ 0
+−1x + 1y ≤ 0
+
+16
+
+0≤x<y≤5
+−1x + 0y ≤ 0
+−1x + 1y ≤ 1
+0x + 1y ≤ 5
+
+===== slide 17 =====
+No best approximation
+Computing the best approximation is not always possible
+
+In practice we can use abstractions
+as precise as possible, but maybe not the best
+(still best abstractions can exist for some sets of states)
+17
+
+===== slide 18 =====
+Why is the Polyhedra Domain Expensive?
+Combinatorial explosion
+• number of constraints can be exponential
+• H-representation V-representation is costly
+Expensive operations
+• Join (convex hull) → may generate many constraints
+• Projection → exponential blow-up (Fourier–Motzkin)
+Costly normalization
+• removing redundant constraints
+• requires linear programming
+Inclusion checks
+• need to solve LP problems
+
+===== slide 19 =====
+Octagons domain
+sets of numerical constraints of the form
+
+±x ± y ≤ c
+
+(at most two variables per constraint, with unit coefficients)
+is a relational domain, can be used
+when intervals are not expressive enough
+and polyhedra are more costly
+(allow trading precision for efficiency)
+19
+
+===== slide 20 =====
+Example
+x, y ∈ [0,5]
+1x + 0y ≤ 5
+−1x + 0y ≤ 0
+0x + 1y ≤ 5
+0x + −1y ≤ 0
+
+x=y
+1x + −1y ≤ 0
+−1x + 1y ≤ 0
+
+20
+
+0≤x<y≤5
+−1x + 0y ≤ 0
+−1x + 1y ≤ 1
+0x + 1y ≤ 5
+
+===== slide 21 =====
+, they differ significantly in the algorithms they use and the associat
+Higher-Order Symb Comput (2006) 19:31–100
+33
+gn exploited a variety of algorithms: Gauss elimination, Chernikova’s
+gramming, Fourier-Motzkin elimination, shortest-path closure. We sum
+n the table below, together with the invariants they infer and their cos
+er of their expressiveness:
+
+Summary
+
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+HAL Id: hal-01657536
+
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+1 The same set
+of points • abstracted in the interval,
+the octagon, and the
+polyhedron domain.
+Spuriouscost
+domain Fig.
+invariants
+memory
+cost
+time
+points caused by the approximation are denoted by the × symbol
+q
+2
+3
+affine equalities
+–
+V
+=
+—
+O(|V|
+)
+O(|V|
+)
+i
+i
+The more preciseithe domain is, the fewer spurious points there are. We see that the octagon
+domain has a precision between that of the interval domain
+2 and the polyhedron domain. 3
+zones
+Vj ≠ V i Æ c
+O(|V| )
+O(|V| )
+1.1. The need for relational domains
+2
+3
+octagons
+±Vj ± Vi Æ c O(|V| )
+O(|V| )
+fixed
+A relationalq
+domain is a domain that is able to discover relationships between variables. For
+instance, the polyhedron
+domain
+is—
+relationalO(m)
+while the interval domain is non-relational.
+In
+template coefficients
+–
+V
+Ø
+polynomial
+i i
+i
+order to motivate
+the necessity for low-cost relational numerical abstract domains, consider
+q
+the following code fragment where the variable Y is incremented at most eleven times within
+polyhedra a loop with loop counter
+–
+V
+Ø
+—
+exponential
+exponential
+i
+i
+i
+X:
+
+affine inequalities
+X := 10
+
+21
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+Sect.
+5.2
+5.4
+5.4.5
+5.5
+5.3
+
+===== slide 22 =====
+Exercises
+
+22
+
+===== slide 23 =====
+Classification
+signs
+parity
+
+relational
+or
+non relational?
+
+intervals around 0 ([−l, r])
+equalities (c1x = c2y)
+
+inequalities (c1x ≠ c2y)
+
+23
+
+===== slide 24 =====
+Deriving new lattices
+
+24
+
+===== slide 25 =====
+Section 5.1:
+Construction of abstract domains
+
+25
+
+===== slide 26 =====
+Composition
+(A0, ⊑0 )
+
+γ1
+
+α1
+
+(A1, ⊑1 )
+
+(A1, ⊑1 )
+
+γ2
+
+α2
+
+the composition of two GCs is a GC
+
+(A0, ⊑0 )
+
+γ
+
+(A2, ⊑2 )
+
+α
+γ = γ1 ∘ γ2
+α = α2 ∘ α1
+26
+
+(A2, ⊑2 )
+
+===== slide 27 =====
+Conjoint analysis:
+product domains
+
+27
+
+===== slide 28 =====
+Conjunctive properties
+program verification often requires the use
+of logical predicates that correspond to the
+conjunction of several basic predicates
+concrete domain = powerset of integers
+abstract domain = product domain:
+intervals abstraction × congruence abstraction
+28
+
+===== slide 29 =====
+Cartesian product
+
+Given the (complete) lattices ( Li , ⊑i , ⊔i , ⊓i , ⊥i , ⊤i ) for i = 1,2
+We derive their cartesian product lattice ( L, ⊑, ⊔, ⊓, ⊥, ⊤ ) by taking:
+
+• L ≜ L1 × L2 ;
+• (a1, a2) ⊑ (b1, b2) iff a1 ⊑1 b1 and a2 ⊑2 b2 ;
+• (a1, a2) ⊔ (b1, b2) ≜ ( a1 ⊔1 b1 , a2 ⊔2 b2 ) ;
+• (a1, a2) ⊓ (b1, b2) ≜ ( a1 ⊓1 b1 , a2 ⊓2 b2 ) ;
+• ⊥ ≜ ( ⊥1 , ⊥ 2 ) ;
+• ⊤ ≜ ( ⊤1 , ⊤ 2 ) .
+
+29
+
+===== slide 30 =====
+Cartesian product domain
+(C, ≤ )
+
+γ1
+
+α1
+
+(A1, ⊑1 )
+
+(C, ≤ )
+
+γ2
+
+α2
+
+the product of two GCs is a GC
+
+(C, ≤ )
+
+γ
+α
+
+(A1 × A2, ⊑ )
+
+γ(a1, a2) = γ1(a1) ∧ γ2(a2)
+30
+
+(A2, ⊑2 )
+
+===== slide 31 =====
+Conjunctive properties
+e.g. the abstract state ( [0,100] , 2Z )
+describes the set
+
+γ( [0,100] , 2Z )
+= {0,...,100} ∩ { . . . , − 2,0,2,...}
+= {0,2,4,...,100}
+all even values between 0 and 100
+31
+
+===== slide 32 =====
+Problem: non injective γ
+consider ( [1,5] , 2Z ) ≠ ( [2,4] , 2Z )
+
+both represent the same concrete set {2,4}!
+consider ( ⊥ , 2Z ), ( [2,4] , ⊥ ) and ( ⊥ , ⊥ )
+they all represent the same concrete set ∅!
+solution: reduced product!
+32
+
+===== slide 33 =====
+Reduced product domain
+(C, ≤ )
+
+γ1
+
+α1
+
+(A1, ⊑1 )
+
+(C, ≤ )
+
+γ2
+
+α2
+
+(A2, ⊑2 )
+
+the reduced product of two GCs is a GC
+
+(C, ≤ )
+
+γ
+α
+
+((A1 × A2)≡, ⊑ )
+
+(a1, a2) ≡ (b1, b2) ⇔ γ(a1, a2) = γ(b1, b2)
+γ([a1, a2]≡) = γ1(a1) ∩ γ2(a2)
+33
+
+take the equivalence
+classes
+
+===== slide 34 =====
+Reduced product domain
+(C, ≤ )
+
+γ
+
+((A1 × A2)≡, ⊑ )
+
+α
+take the equivalence
+classes
+(a1, a2) ≡ (b1, b2) ⇔ γ(a1, a2) = γ(b1, b2)
+on this domain ( [1,5] , 2Z ) ≡ ( [2,4] , 2Z )
+both represent the same concrete set {2,4}!
+
+on this domain ( ⊥ , 2Z ) ≡ ( [2,4] , ⊥ ) ≡ ( ⊥ , ⊥ )
+all represent the same concrete set ∅!
+34
+
+===== slide 35 =====
+Point-wise lifting
+
+35
+
+===== slide 36 =====
+Point-wise lifting
+
+Given the (complete) lattice ( L1 , ⊑1 , ⊔1 , ⊓1 , ⊥1 , ⊤1 ) and a set X
+We derive its pointwise lifting lattice ( L, ⊑, ⊔, ⊓, ⊥, ⊤ ) by taking:
+x, y ∈ X, l ∈ L ∖{ ⊥ } we can have {x ↦ ⊥ , y ↦ l}
+• L ≜ X → L1 ;
+• f ⊑ g iff ∀x ∈ X : f(x) ⊑1 g(x) ;
+1
+
+L1
+
+L1
+
+• ( f ⊔ g) ≜ λx . f(x) ⊔1 g(x) ;
+• ( f ⊓ g) ≜ λx . f(x) ⊓1 g(x) ;
+• ⊥ ≜ λx . ⊥1 ;
+• ⊤ ≜ λx . ⊤1 .
+
+36
+
+===== slide 37 =====
+Smashed point-wise lifting
+Given the (complete) lattice ( L1 , ⊑1 , ⊔1 , ⊓1 , ⊥1 , ⊤1 ) and a set X
+We derive its smashed pointwise lifting lattice ( L, ⊑, ⊔, ⊓, ⊥, ⊤ ) by taking:
+⋅
+
+• L = X L1 ≜ (X → (L1∖{ ⊥1 })) ⊎ {λx . ⊥1 } ;
+• f ⊑ g iff ∀x ∈ X : f(x) ⊑1 g(x) ;
+
+x, y ∈ X, we can only have {x ↦ ⊥L1 , y ↦ ⊥L1 }
+
+• ( f ⊔ g) ≜ λx . f(x) ⊔1 g(x) ;
+• ( f ⊓ g) ≜ λx . f(x) ⊓1 g(x) ;
+• ⊥ ≜ λx . ⊥1 ;
+• ⊤ ≜ λx . ⊤1 .
+37
+
+===== slide 38 =====
+Smashed point-wise lifting domain
+(C, ≤ )
+(X → C, ≤ )
+
+γ1
+
+α1
+γ
+α
+
+(A1, ⊑1 )
+(X
+
+γ( f ) = λx . γ1( f(x))
+38
+
+⋅
+
+A1, ⊑ )
+smashed
+
+===== slide 39 =====
+Example
+(℘(Z), ⊆ )
+(X → ℘(Z), ⊆ )
+
+γ1
+
+α1
+γ
+α
+
+(Int, ⊑1 )
+(X
+
+γ( f ) = λx . γ1( f(x))
+39
+
+⋅
+
+Int, ⊑ )
+non-empty intervals for all variables
+or
+the empty interval for all variabkles
+
+===== slide 40 =====
+Abstract stores
+
+40
+
+===== slide 41 =====
+Abstract stores
+let Σ ≜ {σ : X → Z} be the set of stores
+
+concrete domain = powerset of store ℘(Σ)
+
+(℘(Z), ⊆ )
+
+γ1
+
+α1
+
+(A1, ⊑1 )
+
+first: (smashed) point-wise abstraction (cartesian abstraction)
+from ℘(Σ) to {ρ : X → ℘(Z)} (looses relational info!)
+second: lifting the abstraction A1
+
+from {ρ : X → ℘(Z)} to {ρ
+41
+
+#
+
+: X → A1}
+
+===== slide 42 =====
+First: Cartesian abstraction
+from ℘(X → Z) to X → ℘(Z) (looses all relational info!)
+
+γ(ρ) = { σ : X → Z ∣ ∀x ∈ X . σ(x) ∈ ρ(x) }
+e.g., suppose ρ = [x ↦ {0,5}, y ↦ {0,3}]
+
+γ(ρ) = { [x ↦ 0,y ↦ 0], [x ↦ 0,y ↦ 3], [x ↦ 5,y ↦ 0], [x ↦ 5,y ↦ 3] }
+α({[x ↦ 0,y ↦ 0], [x ↦ 5,y ↦ 3]}) = ρ
+42
+
+===== slide 43 =====
+Second: lifting abstraction
+(℘(Z), ⊆ )
+
+γ1
+
+α1
+
+from X → ℘(Z) to {ρ
+
+(A1, ⊑1 )
+#
+
+: X → A1}
+
+#
+
+#
+
+γ(ρ ) = { ρ : X → ℘(Z) ∣ ∀x ∈ X . ρ(x) = γ1(ρ (x)) }
+e.g., suppose ρ
+
+#
+
+= [x ↦ [0,5], y ↦ [0,3]]
+#
+γ(ρ ) = [x ↦ {0,1,2,...,5}, y ↦ {0,1,2,3}]
+α([x ↦ {0,5}, y ↦ {0,3}]) = ρ
+43
+
+#
+
+===== slide 44 =====
+Abstract denotational
+semantics
+
+44
+
+===== slide 45 =====
+Abstract interpreter
+#
+
+A
+
+[[e]] ≜ [[e]] (when possible)
+
+[[e]] ≜ ...
+
+#
+
+#
+
+#
+
+[[c1; c2]] ≜ [[c2]] ∘ [[c1]]
+
+[[c1; c2]] ≜ [[c2]] ∘ [[c1]]
+
+[[c1 + c2]] ≜ [[c1]] ∪ [[c2]]
+
+#
+#
+#
+[[c1 + c2]] ≜ [[c1]] ⊔ [[c2]]
+∞
+# k
+⋆ #
+
+⋆
+
+[[c ]] ≜
+
+∞
+
+⋃
+
+[[c]]
+
+k
+
+[[c ]] ≜
+
+k=0
+
+k=0
+
+or equivalently
+⋆
+[[c ]] ≜ λS . lfp λX . S ∪ [[c]]X
+
+⨆
+
+([[c]] )
+
+or, not equivalently,
+⋆ #
+#
+#
+#
+# #
+[[c ]] ≜ λS . lfp λX . S ⊔ [[c]] X
+45
+
+===== slide 46 =====
+Accelerated abstract interpreter
+#
+
+A
+
+[[e]] ≜ [[e]] (when possible)
+
+[[e]] ≜ ...
+
+#
+
+#
+
+#
+
+[[c1; c2]] ≜ [[c2]] ∘ [[c1]]
+
+[[c1; c2]] ≜ [[c2]] ∘ [[c1]]
+
+[[c1 + c2]] ≜ [[c1]] ∪ [[c2]]
+
+#
+#
+#
+[[c1 + c2]] ≜ [[c1]] ⊔ [[c2]]
+∞
+# k
+⋆ #
+
+⋆
+
+[[c ]] ≜
+
+∞
+
+⋃
+
+[[c]]
+
+k
+
+[[c ]] ≜
+
+k=0
+
+k=0
+
+or equivalently
+⋆
+[[c ]] ≜ λS . lfp λX . S ∪ [[c]]X
+
+⨆
+
+([[c]] )
+
+or using widening (precision loss)
+⋆ #
+#
+#
+#
+# #
+[[c ]] ≜ λS . lfp λX . S ∇[[c]] X
+46
+
+===== slide 47 =====
+Take home message
+The abstract
+interpreter is induced by
+atomic operations
+
+47
+
+===== slide 48 =====
+Completeness
+
+48
+
+===== slide 49 =====
+Correctness
+#
+
+#
+
+The abstract operations + and × are correct on the domain Sign:
+
+>
+<latexit sha1_base64="p0120q1pgn1F8aeg6j2EKIvVRE4=">AAAB7nicbVDLSgNBEOz1GeMr6tHLYiJ4CrtRfNyCXjxGMA9IljA7mU2GzM4MM7NCWPIRXjwo4tXv8ebfOJssosaChqKqm+6uUDKqjed9OkvLK6tr64WN4ubW9s5uaW+/pUWiMGliwYTqhEgTRjlpGmoY6UhFUBwy0g7HN5nffiBKU8HvzUSSIEZDTiOKkbFSu9IzQlaK/VLZq3ozuIvEz0kZcjT6pY/eQOAkJtxghrTu+p40QYqUoZiRabGXaCIRHqMh6VrKUUx0kM7OnbrHVhm4kVC2uHFn6s+JFMVaT+LQdsbIjPRfLxP/87qJiS6DlHKZGMLxfFGUMNcIN/vdHVBFsGETSxBW1N7q4hFSCBub0DyEqwzn3y8vklat6p9Wz+5q5fp1HkcBDuEITsCHC6jDLTSgCRjG8AjP8OJI58l5dd7mrUtOPnMAv+C8fwE2zo73</latexit>
+
+#
+
+∀n, m ∈ C . α(n) + α(m) ⊒ α(n + m)
+
+>0
+
+<0
+
+?
+<latexit sha1_base64="eB8JxR6dQwmmWN7JykdXjUXAlik=">AAAB7nicbVDLSgNBEOz1GeMr6tHLYCJ4CrtRfNyCXjxGMA9IljA7mU2GzM4sM7NCWPIRXjwo4tXv8ebfOJssosaChqKqm+6uIOZMG9f9dJaWV1bX1gsbxc2t7Z3d0t5+S8tEEdokkkvVCbCmnAnaNMxw2okVxVHAaTsY32R++4EqzaS4N5OY+hEeChYygo2V2pVeIE2l2C+V3ao7A1okXk7KkKPRL330BpIkERWGcKx113Nj46dYGUY4nRZ7iaYxJmM8pF1LBY6o9tPZuVN0bJUBCqWyJQyaqT8nUhxpPYkC2xlhM9J/vUz8z+smJrz0UybixFBB5ovChCMjUfY7GjBFieETSzBRzN6KyAgrTIxNaB7CVYbz75cXSatW9U6rZ3e1cv06j6MAh3AEJ+DBBdThFhrQBAJjeIRneHFi58l5dd7mrUtOPnMAv+C8fwEhVo7p</latexit>
+
+#
+
+F is correct on an abstract domain A whenever it returns a correct
+
+approximation of the result of the concrete computation:
+
+#
+
+F ⊒α∘F∘γ=F
+49
+
+A
+
+===== slide 50 =====
+Completeness
+#
+
+The abstract operation × has a very nice property on the domain Sign:
+
+>
+<latexit sha1_base64="p0120q1pgn1F8aeg6j2EKIvVRE4=">AAAB7nicbVDLSgNBEOz1GeMr6tHLYiJ4CrtRfNyCXjxGMA9IljA7mU2GzM4MM7NCWPIRXjwo4tXv8ebfOJssosaChqKqm+6uUDKqjed9OkvLK6tr64WN4ubW9s5uaW+/pUWiMGliwYTqhEgTRjlpGmoY6UhFUBwy0g7HN5nffiBKU8HvzUSSIEZDTiOKkbFSu9IzQlaK/VLZq3ozuIvEz0kZcjT6pY/eQOAkJtxghrTu+p40QYqUoZiRabGXaCIRHqMh6VrKUUx0kM7OnbrHVhm4kVC2uHFn6s+JFMVaT+LQdsbIjPRfLxP/87qJiS6DlHKZGMLxfFGUMNcIN/vdHVBFsGETSxBW1N7q4hFSCBub0DyEqwzn3y8vklat6p9Wz+5q5fp1HkcBDuEITsCHC6jDLTSgCRjG8AjP8OJI58l5dd7mrUtOPnMAv+C8fwE2zo73</latexit>
+
+#
+
+⊐
+
+∀n, m ∈ C . α(n) × α(m) = α(n × m)
+
+>0
+
+<0
+
+?
+<latexit sha1_base64="eB8JxR6dQwmmWN7JykdXjUXAlik=">AAAB7nicbVDLSgNBEOz1GeMr6tHLYCJ4CrtRfNyCXjxGMA9IljA7mU2GzM4sM7NCWPIRXjwo4tXv8ebfOJssosaChqKqm+6uIOZMG9f9dJaWV1bX1gsbxc2t7Z3d0t5+S8tEEdokkkvVCbCmnAnaNMxw2okVxVHAaTsY32R++4EqzaS4N5OY+hEeChYygo2V2pVeIE2l2C+V3ao7A1okXk7KkKPRL330BpIkERWGcKx113Nj46dYGUY4nRZ7iaYxJmM8pF1LBY6o9tPZuVN0bJUBCqWyJQyaqT8nUhxpPYkC2xlhM9J/vUz8z+smJrz0UybixFBB5ovChCMjUfY7GjBFieETSzBRzN6KyAgrTIxNaB7CVYbz75cXSatW9U6rZ3e1cv06j6MAh3AEJ+DBBdThFhrQBAJjeIRneHFi58l5dd7mrUtOPnMAv+C8fwEhVo7p</latexit>
+
+#
+
+F is complete on an abstract domain A whenever it returns the best
+
+abstraction of the result of the concrete computation:
+#
+
+F ∘α=α∘F
+50
+
+===== slide 51 =====
+Completeness and bcas
+#
+
+F is complete
+
+α∘F=F
+
+#
+
+#
+
+F =F
+
+⟹
+
+⟹
+F
+∘α
+
+A
+
+#
+
+A
+
+= αFγ = F ∘ α ∘ γ = F
+
+51
+
+#
+
+===== slide 52 =====
+A
+
+A
+
++ and × are complete on Int
+A
+
+[n, m] + [p, r] = [n + p, m + r]
+A
+
+[n, m] × [p, r] = [n × p, m × r]
+if all positives,
+otherwise pay
+attention
+
+[1,6]
+
+[−3,1]
+
+[−2,7]
+
+Precise result!
+
+{1,4,6} + {−3,1} = {−2,1,2,3,5,7}
+52
+
+===== slide 53 =====
+| ⋅ | is not complete on Int
+A
+
+| [a, b] | =
+
+[−6,1]
+
+[a, b]
+if a ≥ 0
+[−b, − a]
+if b ≤ 0
+[0, max(−a, b)] if a < 0 < b
+
+[0,6]
+Imprecise result!
+
+| {−6, − 4,1} | = {1,4,6}
+
+[−6, − 1]
+
+Precise result!
+
+[1,6]
+
+| {−6, − 4, − 1} | = {1,4,6}
+53
+
+===== slide 54 =====
+Fifixpoint computation approximation
+#
+
+If F monotone and F correct
+#
+
+lfp(F )
+
+(C, ⊆ ) lfp(F)
+
+(A, ⊑ )
+
+↵
+<latexit sha1_base64="/nE6liJQLR0QIQv5sfLEkHMOx7A=">AAAB8HicbVDLSsNAFJ3UV62vqks3g63gqiRVfOyKblxWsA9pQ7mZTtqhM0mYmQgl9CvcuFDErZ/jzr9xkgZR64ELh3Pu5d57vIgzpW370yosLa+srhXXSxubW9s75d29tgpjSWiLhDyUXQ8U5SygLc00p91IUhAepx1vcp36nQcqFQuDOz2NqCtgFDCfEdBGuq/2gUdjqOJBuWLX7Ax4kTg5qaAczUH5oz8MSSxooAkHpXqOHWk3AakZ4XRW6seKRkAmMKI9QwMQVLlJdvAMHxlliP1Qmgo0ztSfEwkIpabCM50C9Fj99VLxP68Xa//CTVgQxZoGZL7IjznWIU6/x0MmKdF8aggQycytmIxBAtEmo1IWwmWKs++XF0m7XnNOaqe39UrjKo+jiA7QITpGDjpHDXSDmqiFCBLoET2jF0taT9ar9TZvLVj5zD76Bev9C7aCj9Q=</latexit>
+
+F
+
+F
+
+#
+
+↵
+<latexit sha1_base64="/nE6liJQLR0QIQv5sfLEkHMOx7A=">AAAB8HicbVDLSsNAFJ3UV62vqks3g63gqiRVfOyKblxWsA9pQ7mZTtqhM0mYmQgl9CvcuFDErZ/jzr9xkgZR64ELh3Pu5d57vIgzpW370yosLa+srhXXSxubW9s75d29tgpjSWiLhDyUXQ8U5SygLc00p91IUhAepx1vcp36nQcqFQuDOz2NqCtgFDCfEdBGuq/2gUdjqOJBuWLX7Ax4kTg5qaAczUH5oz8MSSxooAkHpXqOHWk3AakZ4XRW6seKRkAmMKI9QwMQVLlJdvAMHxlliP1Qmgo0ztSfEwkIpabCM50C9Fj99VLxP68Xa//CTVgQxZoGZL7IjznWIU6/x0MmKdF8aggQycytmIxBAtEmo1IWwmWKs++XF0m7XnNOaqe39UrjKo+jiA7QITpGDjpHDXSDmqiFCBLoET2jF0taT9ar9TZvLVj5zD76Bev9C7aCj9Q=</latexit>
+
+#
+
+lfp(F ) is a correct over approximation of lfp(F)
+54
+
+===== slide 55 =====
+Fifixpoint computation approximation
+A
+
+If F monotone and F is complete
+
+(C, ⊆ )
+
+A
+
+lfp(F )
+
+lfp(F)
+↵
+<latexit sha1_base64="/nE6liJQLR0QIQv5sfLEkHMOx7A=">AAAB8HicbVDLSsNAFJ3UV62vqks3g63gqiRVfOyKblxWsA9pQ7mZTtqhM0mYmQgl9CvcuFDErZ/jzr9xkgZR64ELh3Pu5d57vIgzpW370yosLa+srhXXSxubW9s75d29tgpjSWiLhDyUXQ8U5SygLc00p91IUhAepx1vcp36nQcqFQuDOz2NqCtgFDCfEdBGuq/2gUdjqOJBuWLX7Ax4kTg5qaAczUH5oz8MSSxooAkHpXqOHWk3AakZ4XRW6seKRkAmMKI9QwMQVLlJdvAMHxlliP1Qmgo0ztSfEwkIpabCM50C9Fj99VLxP68Xa//CTVgQxZoGZL7IjznWIU6/x0MmKdF8aggQycytmIxBAtEmo1IWwmWKs++XF0m7XnNOaqe39UrjKo+jiA7QITpGDjpHDXSDmqiFCBLoET2jF0taT9ar9TZvLVj5zD76Bev9C7aCj9Q=</latexit>
+
+F
+
+F
+↵
+<latexit sha1_base64="/nE6liJQLR0QIQv5sfLEkHMOx7A=">AAAB8HicbVDLSsNAFJ3UV62vqks3g63gqiRVfOyKblxWsA9pQ7mZTtqhM0mYmQgl9CvcuFDErZ/jzr9xkgZR64ELh3Pu5d57vIgzpW370yosLa+srhXXSxubW9s75d29tgpjSWiLhDyUXQ8U5SygLc00p91IUhAepx1vcp36nQcqFQuDOz2NqCtgFDCfEdBGuq/2gUdjqOJBuWLX7Ax4kTg5qaAczUH5oz8MSSxooAkHpXqOHWk3AakZ4XRW6seKRkAmMKI9QwMQVLlJdvAMHxlliP1Qmgo0ztSfEwkIpabCM50C9Fj99VLxP68Xa//CTVgQxZoGZL7IjznWIU6/x0MmKdF8aggQycytmIxBAtEmo1IWwmWKs++XF0m7XnNOaqe39UrjKo+jiA7QITpGDjpHDXSDmqiFCBLoET2jF0taT9ar9TZvLVj5zD76Bev9C7aCj9Q=</latexit>
+
+55
+
+A
+
+(A, ⊑ )
+
+===== slide 56 =====
+Let us analyse a code fragment
+on Int
+[x ↦ ⊤ , y ↦ ⊤ ]
+
+if (x>7) {
+y := x-7
+} else {
+y := 7-x
+} { y ≥ 0 }?
+
+(x > 7)?;
+
+[x ↦ [8,∞], y ↦ ⊤ ]
+
+y := x − 7
+
+[x ↦ [8,∞], y ↦ [1,∞] ]
+
++ (x ≤ 7)?;
+
+[x ↦ [−∞,7], y ↦ ⊤ ]
+
+y := 7 − x
+
+[x ↦ [−∞,7], y ↦ [0, + ∞] ]
+[x ↦ ⊤ , y ↦ [0, + ∞] ]
+56
+
+===== slide 57 =====
+Example on Interval
+[x ↦ ⊤ ]
+
+(x
+:=
+10);
+!
+e
+t
+e
+l
+p
+10
+9
+8
+0
+↦
+[
+,10]
+[x
+]
+m
+<latexit sha1_base64="IG+dVfOfblLGo1ZdjVz2ml49uDg=">AAACV3icbVBdT9swFHXDgJINaNkjL9bKpBaJKuEBEBUf2l547CRKOzWlcpzbYuE4wXZQoyi/bb+DH4D2tv2E4bR5GJQrWzo+59x7rePHnCntOE8Va+XD6tp6dcP++Glza7tW37lRUSIp9GjEIznwiQLOBPQ00xwGsQQS+hz6/v33Qu8/glQsEtc6jWEUkqlgE0aJNtS49nPP82HKREakJGme8dxuzk7PXKfVwZ5nm9Nszs6x07pYvIw2O3Bbt/udxbswzDwOD4XF9kAE5aS9ca3htJ154WXglqCByuqOa7+9IKJJCEJTTpQauk6sR2acZpRDbnuJgpjQezKFoYGChKBG2TyCHH81TIAnkTRXaDxn/+/ISKhUGvrGGRJ9p95qBfmeNkz05GSUMREnGgRdLJokHOsIF3nigEmgmqcGECqZ+Sumd0QSqk3qr7YoHRKZyiA3ybhvc1gGN4dt96h99OOwcfmtzKiKdtEX1EQuOkaX6Ap1UQ9R9As9oz/ob+Wp8s9as6oLq1Upez6jV2XVXwBjvrEj</latexit>
+
+c1
+
+o
+C
+
+x := 10;
+while (x>0) {
+x := x-1
+}; { x = 0 }?
+
+((x > 0)?
+
+9 ,10]]
+8
+1
+[x ↦ [10
+⇤
+
+x := x
+
+1) ;
+
+[x ↦ [ 7
+9,9]]
+8
+0
+[x ↦ [0,10]]
+
+(x  0)?
+
+[x ↦ [0,0]]
+
+57
+
+Abstract loop invariant
+
+===== slide 58 =====
+Example on Interval
+[x ↦ ⊤ ]
+<latexit sha1_base64="4w62VWZ2qqwZufDNGGm2h13bJAI=">AAACV3icbVBdb9MwFHUDjC58rB2Pe7HokFokqqQPZVoFq+CFxyLRD9SUynFuO6uOk9kOahTlt/E7+gOmvY2fAE6bB9ZyZUvH55x7r3X8mDOlHWdTsR49fnL0tHpsP3v+4uVJrX46UlEiKQxpxCM58YkCzgQMNdMcJrEEEvocxv7qc6GPf4JULBLfdBrDLCRLwRaMEm2oee37uefDkomMSEnSPOO53VxffnCdVg97nm1Os7n+iN3W1e5ltPW7TuvH297uXRjWHoebwmJ7IIJy0vm81nDazrbwIXBL0EBlDea1Oy+IaBKC0JQTpaauE+uZGacZ5ZDbXqIgJnRFljA1UJAQ1CzbRpDjN4YJ8CKS5gqNt+y/HRkJlUpD3zhDoq/VvlaQ/9OmiV5czDIm4kSDoLtFi4RjHeEiTxwwCVTz1ABCJTN/xfSaSEK1Sf3BFqVDIlMZ5CYZdz+HQzDqtN1uu/u10+h/KjOqojP0GjWRi96jPvqCBmiIKPqFbtE9+l3ZVP5YR1Z1Z7UqZc8r9KCs+l9o7rEm</latexit>
+
+(x := 10);
+
+c2
+l
+p
+m
+o
+x := 10;
+c
+n
+I
+while (x>1) {
+x := x-2
+}; { x = 0 }?
+
+!
+e
+et
+
+[x ↦ [ 10
+8 ,10]]
+0
+6
+
+((x > 1)?
+
+[x ↦ [10
+8 ,10]]
+6
+2
+
+x := x
+
+(x  1)?
+
+[x ↦ [0,1]]
+
+58
+
+⇤
+
+2) ;
+
+8 ,8]]
+6
+0
+[x ↦ [ 4
+
+[x ↦ [0,10]]
+
+Abstract loop invariant
+
+===== slide 59 =====
+Concrete and abstract equivalences
+Concrete Equivalence
+
+c1 ≈ c2
+
+Abstract Equivalence
+
+c1 ∼ c2
+
+≈:
+
+They compute the same function
+
+∼:
+
+They compute the same abstract function
+
+∀S ∈ ℘(Σ) . [[c1]]S = [[c2]]S
+
+#
+
+#
+
+∀a : X → A . [[c1]] a = [[c2]] a
+
+59
+
+===== slide 60 =====
+Concrete equivalence does
+not imply Abstract equivalence
+!
+c1
+
+p
+om
+
+x := 10; C
+while (x>0) {
+x := x-1
+};
+
+<latexit sha1_base64="JsXZnnyhz4wd0deM4c5Ch12ukpI=">AAACInicbVC7TsMwFHV4lvIKMLK4tEhMVdKhwFCpgoWxqPQhJVHkuE5r1XnIdhBV1G9h4VdYGEDAhMTH4LQZoOVIlo7OuVe+53gxo0Iaxpe2srq2vrFZ2Cpu7+zu7esHh10RJRyTDo5YxPseEoTRkHQklYz0Y05Q4DHS88bXmd+7J1zQKLyTk5g4ARqG1KcYSSW5+mUF2n7EEWOwXbXskgWxa0LHLjmw3YDQerADFAsZQcNp5HYtc9sVVy8bVWMGuEzMnJRBjparf9iDCCcBCSVmSAjLNGLppIhLihmZFu1EkBjhMRoSS9EQBUQ46SziFJ4qZQDVpeqFEs7U3xspCoSYBJ6aDJAciUUvE//zrET6F05KwziRJMTzj/yEQRU56wsOKCdYsokiCHOqboV4hDjCUrVaVCWYi5GXSbdWNevV+m2t3LzK6yiAY3ACzoAJzkET3IAW6AAMHsEzeAVv2pP2or1rn/PRFS3fOQJ/oH3/AFj4n94=</latexit>
+
+!
+e
+t
+e
+l
+
+c2
+
+≈
+≁
+
+e
+t
+e
+l
+p
+
+m
+o
+nc
+
+x := 10;
+I
+while (x>1) {
+x := x-2
+};
+
+8S.[[c1 ]]S = [x 7! 0] = [[c2 ]]S
+but
+
+<latexit sha1_base64="dLpZ55Nbq3jQ7Z684Nbsy9a3vmQ=">AAACTHicbVC7SgQxFM2s7/G1amlzdRUsZJnZQm0E0cZSwVVhJi53slkNZjJDkhGXYT/QxsLOr7CxUEQw+yh8HQgczjmXm3uSXApjg+DZq4yNT0xOTc/4s3PzC4vVpeVzkxWa8SbLZKYvEzRcCsWbVljJL3PNMU0kv0huj/r+xR3XRmTqzHZzTlO8VqIjGFontapsA+JOplFKwHoUr0XAWiHQeI1elXGtB7gP0X2cYm5sBlGwHVAKscqsk4fhxrcs7IP/Ix1SuuH7rWotqAcDwF8SjkiNjHDSqj7F7YwVKVeWSTQmCoPc0hK1FUzynh8XhufIbvGaR44qTLmh5aCMHmw6pQ3uJveUhYH6faLE1JhumrhkivbG/Pb64n9eVNjOHi2FygvLFRsu6hQS3Kn9ZqEtNGdWdh1BpoX7K7Ab1Mis679fQvj75L/kvFEPd+o7p43aweGojmmyStbJFgnJLjkgx+SENAkjD+SFvJF379F79T68z2G04o1mVsgPVCa/ACiarXg=</latexit>
+
+#
+
+#
+
+8a.[[c1 ]] a = [x 7! [0, 0]] 6= [[c2 ]] a = [x 7! [0, 1]]
+60
+
+===== slide 61 =====
+Abstract equivalence does
+not imply Concrete equivalence
+c3
+
+[x →
+− 9]]
+↦ [−9,
+[−9,1]]
+
+x := -9;
+while (x<0) {
+x := x+2
+}; x → [0,1]
+
+c4
+
+∼
+
+[x
+[x →
+→ [10,10]]
+[0,10]]
+x := 10;
+while (x>1) {
+x := x-2
+}; x → [0,1]
+
+≉
+
+#
+
+<latexit sha1_base64="mDC2zwx8MWFyp49nPLArXpoFAyc=">AAACNXicbVC7SgNBFJ2NrxhfUUubiYlgIWE3SrQJBG0sLCKYB+yu4e5kEgdnH8zMimHJT9n4H1ZaWChi6y84eQgxemDgcM65zL3HiziTyjRfjNTc/MLiUno5s7K6tr6R3dxqyDAWhNZJyEPR8kBSzgJaV0xx2ooEBd/jtOndng395h0VkoXBlepH1PWhF7AuI6C01M5eFJxuKIBzDEVsOzkbk/Yhdp2ce504+QGGCrbvHR8iqUJsmweW6+LKT/BoKocLmUw7mzeL5gj4L7EmJI8mqLWzT04nJLFPA0U4SGlbZqTcBIRihNNBxokljYDcQo/amgbgU+kmo6sHeE8rHay31y9QeKROTyTgS9n3PZ30Qd3IWW8o/ufZseqeuAkLoljRgIw/6sYc6waGFeIOE5Qo3tcEiGB6V0xuQABRuuhhCdbsyX9Jo1S0ysXyZSlfPZ3UkUY7aBftIwsdoyo6RzVURwQ9oGf0ht6NR+PV+DA+x9GUMZnZRr9gfH0D14+l/Q==</latexit>
+
+#
+
+8a.[[c3 ]] a = [x 7! [0, 1]] = [[c4 ]] a
+but
+
+<latexit sha1_base64="8P8A9g7aIg1G0I/qTq47J+qVG34=">AAACNXicbVDLTgIxFO3gC/E16tJNEUxckRk06IaE6MaFCwzySGYmpFMKNHQ6k7ZjJISfcuN/uNKFC41x6y9YYBIVPEmTk3POTe89fsSoVJb1YqSWlldW19LrmY3Nre0dc3evIcNYYFLHIQtFy0eSMMpJXVHFSCsSBAU+I01/cDnxm3dESBryWzWMiBegHqddipHSUtu8zkO3GwrEGKwVHDfrQNw+gZ6b9WCtDKFz7wYokiqEtufyUMFykjmdRHTiJ2B5+baZswrWFHCR2AnJgQTVtvnkdkIcB4QrzJCUjm1FyhshoShmZJxxY0kihAeoRxxNOQqI9EbTq8fwSCsdqJfXjys4VX9PjFAg5TDwdTJAqi/nvYn4n+fEqnvujSiPYkU4nn3UjRnUR04qhB0qCFZsqAnCgupdIe4jgbDSRWd0Cfb8yYukUSzYpULpppirXCR1pMEBOATHwAZnoAKuQBXUAQYP4Bm8gXfj0Xg1PozPWTRlJDP74A+Mr2+zOac7</latexit>
+
+8S.[[c3 ]]S = [x 7! 1] 6= [[c4 ]]S = [x 7! 0]
+61
+
+===== slide 62 =====
+Abstract property A is Intensional!!!
+The precision depends on the way the program is written
+
+!
+e
+et
+
+l
+p
+om
+
+C
+c1
+
+Non
+Extensional
+
+x := 10;
+while (x>0) {
+x := x-1
+}; { x = 0 }
+
+c
+n
+I
+c2
+
+!
+e
+t
+e
+l
+
+p
+om
+
+x := 10;
+while (x>1) {
+x := x-2
+}; { x = 0 }
+
+x ∈ [0,1]
+
+x ∈ [0,0]
+62
+
+===== slide 63 =====
+Abstract analysis
+
+63
+
+===== slide 64 =====
+Three staged approach: 1
+Selection of the semantics and properties of interest
+define a concrete domain (C, ⊆ )
+define program behaviour [[ ⋅ ]]
+fix the goal of the analysis
+describe properties to be verified
+
+64
+
+===== slide 65 =====
+Three staged approach: 2
+Choice of the abstraction
+
+We need the ability to
+• compare abstract elements for inclusion
+• compute (possibly best) abstract representations
+• compute the union/widening of abstract elements
+• apply sound transformations to abstract elements
+
+fix the abstract domain (A, ⊑ )
+must express all properties of interest
+(must express useful invariants)
+#
+
+define abstract interpreter [[ ⋅ ]]
+
+65
+
+===== slide 66 =====
+Abstract domain
+We need the ability to
+compare abstract elements for inclusion
+abstract
+domain
+
+concrete
+domain
+
+γ: A → C
+
+(A, ⊑ )
+concretization
+function
+
+a ⊑ b ⇒ γ(a) ⊆ γ(b)
+66
+
+===== slide 67 =====
+Abstract domain
+We need the ability to
+compute (possibly best) abstract representations
+abstract
+domain
+
+α: C → A
+abstraction
+function
+
+sound
+abstraction
+
+concrete
+domain
+
+γ: A → C
+concretization
+function
+
+c ⊆ γ(a)
+
+best sound
+abstraction
+
+c ⊆ γ(a) ⇒ γ(α(c)) ⊆ γ(a)
+67
+
+===== slide 68 =====
+Abstract domain
+We need the ability to
+compute the union/widening of abstract elements
+union
+
+a1, a2 ⊑ a1 ⊔ a2
+a1 ⊔ a2 ⊑ a1 ∇a2
+
+68
+
+widening
+
+===== slide 69 =====
+Abstract domain
+We need the ability to
+apply sound transformations to abstract elements
+abstract
+function
+
+concrete
+function
+
+f: C → C
+sound
+abstraction
+
+f∘γ⊆γ∘f
+
+#
+
+f :A→A
+
+abstract
+analysis
+
+f
+
+a
+#
+
+γ
+concretization γ(a)
+69
+
+f
+
+#
+
+#
+
+f (a)
+γ
+#
+f(γ(a)) ⊆ γ( f (a))
+
+===== slide 70 =====
+Three staged approach: 3
+Derivation of the analysis algorithm
+follow the choices made in first two phases
+the analysis closely follows the semantics
+
+70
+
+===== slide 71 =====
+Concrete analysis
+R, S ← ⊥
+repeat
+R←R∪S
+S ← F(S)
+until S ⊆ R
+label-wise
+return R checkinclusion
+
+S←⊥
+repeat
+typically equivalent
+R←S
+S ← S ∪ F(S)
+until S ⊆ R
+check label-wise
+return R
+inclusion
+71
+
+===== slide 72 =====
+Abstract analysis
+#
+
+#
+
+#
+
+R ,S ← ⊥
+repeat
+#
+#
+#
+R ←R ⊔S
+#
+# #
+S ← F (S )
+#
+#
+until S ⊑ R
+# check label-wise
+return R
+inclusion
+
+S ←⊥
+repeat
+typically over#
+#
+approximate
+R ←S
+#
+#
+# #
+S ← S ⊔ F (S )
+#
+#
+until S ⊑ R
+# check label-wise
+return R
+inclusion
+72
+
+===== slide 73 =====
+Accelerated abstract analysis
+#
+
+#
+
+#
+
+R ,S ← ⊥
+repeat
+#
+#
+#
+R ←R ⊔S
+#
+# #
+S ← F (S )
+#
+#
+until S ⊑ R
+# check label-wise
+return R
+inclusion
+
+S ←⊥
+repeat
+over-approximate to
+#
+#
+accelerate convergence
+R ←S
+#
+#
+# #
+S ← S ∇F (S )
+#
+#
+until S ⊑ R
+# check label-wise
+return R
+inclusion
+73
+
+===== slide 74 =====
+Plan B
+What if analysis fails (imprecision, scalability matters)?
+check if property of interest can be expressed
+check if abstraction preserves properties of interest
+identify abstract operations responsible of failure
+(loss of precision discarding necessary information)
+improve analysis parameters/settings if needed
+74
+
+===== slide 75 =====
+Exercises
+
+75
+
+===== slide 76 =====
+Completeness 1
+Let P ≜ (x ∈ {−7,5}) and c ≜ (x < 0)?; x := − x .
+#
+1. Compute the abstract semantics [[c]]Sign on αSign(P)
+2. Check if the result is the same as αSign([[c]]P)
+
+>
+<latexit sha1_base64="p0120q1pgn1F8aeg6j2EKIvVRE4=">AAAB7nicbVDLSgNBEOz1GeMr6tHLYiJ4CrtRfNyCXjxGMA9IljA7mU2GzM4MM7NCWPIRXjwo4tXv8ebfOJssosaChqKqm+6uUDKqjed9OkvLK6tr64WN4ubW9s5uaW+/pUWiMGliwYTqhEgTRjlpGmoY6UhFUBwy0g7HN5nffiBKU8HvzUSSIEZDTiOKkbFSu9IzQlaK/VLZq3ozuIvEz0kZcjT6pY/eQOAkJtxghrTu+p40QYqUoZiRabGXaCIRHqMh6VrKUUx0kM7OnbrHVhm4kVC2uHFn6s+JFMVaT+LQdsbIjPRfLxP/87qJiS6DlHKZGMLxfFGUMNcIN/vdHVBFsGETSxBW1N7q4hFSCBub0DyEqwzn3y8vklat6p9Wz+5q5fp1HkcBDuEITsCHC6jDLTSgCRjG8AjP8OJI58l5dd7mrUtOPnMAv+C8fwE2zo73</latexit>
+
+>0
+
+<0
+
+?
+<latexit sha1_base64="eB8JxR6dQwmmWN7JykdXjUXAlik=">AAAB7nicbVDLSgNBEOz1GeMr6tHLYCJ4CrtRfNyCXjxGMA9IljA7mU2GzM4sM7NCWPIRXjwo4tXv8ebfOJssosaChqKqm+6uIOZMG9f9dJaWV1bX1gsbxc2t7Z3d0t5+S8tEEdokkkvVCbCmnAnaNMxw2okVxVHAaTsY32R++4EqzaS4N5OY+hEeChYygo2V2pVeIE2l2C+V3ao7A1okXk7KkKPRL330BpIkERWGcKx113Nj46dYGUY4nRZ7iaYxJmM8pF1LBY6o9tPZuVN0bJUBCqWyJQyaqT8nUhxpPYkC2xlhM9J/vUz8z+smJrz0UybixFBB5ovChCMjUfY7GjBFieETSzBRzN6KyAgrTIxNaB7CVYbz75cXSatW9U6rZ3e1cv06j6MAh3AEJ+DBBdThFhrQBAJjeIRneHFi58l5dd7mrUtOPnMAv+C8fwEhVo7p</latexit>
+
+76
+
+===== slide 77 =====
+Completeness 2
+Is the bca of f : Z → Z below complete on the Interval domain?
+f(x) =
+
+x
+
+if x ≤ 10
+
+10
+
+Otherwise
+
+78
+
+===== slide 78 =====
+Completeness 3
+Sign′
+
+⊤
+
+Consider the abstract domain Sign′ in the figure
+<0
+
+1. Define the corresponding γ and α.
+
+≥0
+
+2. Does it admit a complete abstract multiplication?
+⊥
+
+80

@@ -1,0 +1,2070 @@
+# ProgramAnalysis-17-CFA
+# auto-extracted from ProgramAnalysis-17-CFA.pdf (64 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #23
+Control Flow Analysis
+
+===== slide 2 =====
+Program Analysis
+
+✓
+
+✓
+✓
+
+===== slide 3 =====
+Control Flow Analysis
+Flow information is essential for the specification of Data Flow Analyses (e.g.,
+Monotone Framework over Control Flow Graphs)
+Simple imperative languages: ow information can be extracted directly from
+the program text: procedure calls are performed by explicitly mentioning the
+name of a procedure
+But what if functions are values?
+Now we have a problem: we often do not know at compile time which function
+is called
+Control Flow Analysis (CFA) statically approximates which functions may be
+called at each call site
+
+fl
+
+3
+
+===== slide 4 =====
+Control Flow Analysis
+Control ow describes the rules underlying the evolution of the program
+• implicit in the program code and in the Abstract Syntax Tree (AST)
+• explicit in Control Flow Graph (CFG), which captures the order of
+execution and possible paths (assuming the targets of calls are known)
+The purpose of Control Flow Analysis (CFA) is to determine which
+blocks may lead to which other blocks
+But in modern languages, even building the CFG is not trivial
+
+fl
+
+4
+
+===== slide 5 =====
+AST and CFG
+CFG → captures the possible
+execution paths
+Start
+
+if x > 0 {
+then { y = 1; }
+else { y = -1; }
+}
+AST → captures the syntactic
+structure of the program
+IfStatement
+y=1
+
+x>0?
+y=-1
+
+Condition ThenBranch ElseBranch
+End
+x>0
+
+y=1
+
+y=-1
+How the program may execute
+
+What the program looks like
+
+To build the CFG, we must know how control may ow at runtime
+5
+
+===== slide 6 =====
+Analyzing CFGs
+So far looked in previous
+courses
+
+• intraprocedural analysis: → analyze a single function
+• interprocedural analysis: → analyze the whole program with
+function calls
+Until now, all targets were known statically
+
+6
+
+===== slide 7 =====
+Interprocedural analysis
+
+• Construct a CFG for each function
+• Glue them together via function calls and returns
+
+7
+
+===== slide 8 =====
+Interprocedural analysis
+Interprocedural analysis:
+tractable when the program has a simple structure
+→ calls have statically known targets
+
+8
+
+===== slide 9 =====
+Simple imperative language with
+higher-order functions
+Higher-order functions complicate CFG construction:
+• several functions may be invoked at a call site
+• this depends on the data ow
+• but data ow analysis rst requires a CFG
+
+fl
+
+fi
+
+fl
+
+9
+
+===== slide 10 =====
+Simple imperative language with
+higher-order functions
+A control ow analysis
+approximates the call graph
+What is f?
+
+⟦f⟧ = {inc, dec, ide}
+
+Example by A. Møller & M. I. Schwartzbach
+
+fl
+
+10
+
+===== slide 11 =====
+Control- ow (CFG) + data “ owing” through it
+→ no longer works
+Why?
+• The boundary between control and data becomes unclear
+• Everything is both data and control
+Functions are higher-order: they can be at the same time:
+• code to be executed and
+• data, i.e., arguments or results of other function
+No clear separation between control- ow and data- ow
+When the program decides “at runtime” which function to call, the control
+ow is no longer explicit
+
+fl
+
+fl
+
+11
+
+fl
+
+fl
+
+Functional languages
+
+===== slide 12 =====
+Dynamic Dispatch Problem
+Consider the following program fragment
+
+let
+f = fn x => x 1;
+g = fn y => y + 2;
+h = fn z => z + 3
+in
+(f g) + (f h)
+
+variables can denote functions and
+which procedure/function gets invoked
+depends on runtime values
+
+• What does this program do?
+• For each function application,
+which functions may be applied?
+
+• x is a function variable
+• at runtime: x∈{g,h}
+So call x 1 may target g or h (from calls (f g)and (f h))
+Here it is clear which functions are actually called, but in general it is not
+12
+
+===== slide 13 =====
+Dynamic Dispatch Problem
+Consider the following program fragment
+
+let
+f = fn x => x 1;
+g = fn y => y + 2;
+h = fn z => z + 3
+in
+(f g) + (f h)
+
+We cannot know the exact target of a call
+So we compute a safe approximation
+
+fl
+
+Solution: static analysis
+→ over-approximate the possible targets of each call
+Control Flow Analysis (CFA):
+→ For each function application (call site), compute a safe approximation
+How? By solving a system of constraints, where constraints describe how
+values ow between variables
+13
+
+===== slide 14 =====
+Control Flow Analysis
+
+14
+
+===== slide 15 =====
+Control Flow Analysis: historically
+• Reynolds: early analyses of LISP programs
+• Jones: rst to study lambda expressions → introduced control- ow analysis
+• Shivers: formalized CFA for Scheme → basis for constraint-based approaches
+•...
+• Today: constraint-based CFA for higher-order programs
+
+fi
+
+15
+15
+
+===== slide 16 =====
+The Constraint Based Approach
+We adopt the approach illustrated in Principles of Program Analysis by
+Flemming Nielson, Hanne Riis Nielson, Chris Hankin [Chapter 3]
+
+16
+
+===== slide 17 =====
+e
+
+s
+
+l
+
+e
+
+n
+
+i
+
+n
+
+e
+
+h
+
+t
+
+f
+
+p
+
+o
+
+n
+
+Each label l in Lab corresponds to a program point where CFA computes
+information
+17
+t
+
+n
+
+u
+
+f
+
+t ::= c // constant in Const
+expression
+| x // variable in Var
+(labelled term)
+in Exp
+x ⇒ e0 // function definition (abstraction)
+|
+x ⇒ e0 // recursive function definition
+|
+| e1 e2 // function application
+e ::= t l
+e0
+e1
+e2 // conditional
+|
+Label:
+needed for the CFA
+x = e1 e2 // local definition
+|
+identify program
+points (e.g., call sites)
+| e1
+e2 // binary operation (op in Op)
+e
+
+f
+
+f
+
+i
+
+l
+
+FUN: syntax
+
+term in Term
+
+===== slide 18 =====
+CFA of FUN
+valid
+The goal
+Associate for each variable x and each expression e, a safe over-approximation
+of the set of functions that they may evaluate to at runtime
+
+This determines the possible targets of function applications
+Example of function application
+( if e then ((*) 2) else ((+) 1) ) 10
+• e evaluates to either ((*) 2) or ((+) 1)
+• the call may target {(*),(+)}
+18
+
+===== slide 19 =====
+Example 1: labelling
+Consider the following expression and label it
+
+((fn x => x1)(fn y => y3))5
+((fn x => x1)22 (fn y => y3)4)5
+
+(fn x => x1 )2
+x
+
+(fn y => y33)4
+
+x1
+
+y
+
+19
+
+y3
+
+===== slide 20 =====
+x
+
+Example 1
+Consider the following expression
+
+((fn x => x1)2 (fn y => y3)4)5
+Let us look at what happens at runtime: ((λx . x)(λy . y)) → x{(λy . y)/x} ≡ (λy . y)
+• is bound to (fn y => y3)
+• the subexpression at label 1 evaluates to that function
+• the overall expression at label 5 evaluates to that function
+
+CFA will compute a safe approximation of these results
+20
+
+in λ-calculus
+
+===== slide 21 =====
+Example 2
+local name of g
+
+Consider the following expression
+
+formal parameter of g
+
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5
+in (g6 (fn z => z7)8)9)10
+g is a recursive function applied to the identity function (fn z => z7) that
+• ignores its actual parameter and
+• calls itself recursively with the argument (fn y => y2)
+• so the program loops
+possible recursive ow of function values:
+CFA must approximate this recursive behavior
+
+fl
+
+21
+
+===== slide 22 =====
+The Control Flow Analysis
+
+22
+
+===== slide 23 =====
+CFA as a Constraint Based Analysis
+
+• A 0-CFA is a Constraint Based Analysis
+• it is defined via inference rules that generate constraints over the possible
+data ow values for each variable or labeled location; those
+• constraints are then solved
+
+fi
+
+fl
+
+23
+
+===== slide 24 =====
+CFA with Flow Logic
+Flow Logic is a declarative approach to program analysis that mainly
+separates the specification from the actual computation
+acceptability
+relation
+
+• specification: describes when the analysis results are acceptable
+• computation: solving the constraints derived by the specification
+constraint
+satisfaction
+problem
+
+fi
+
+fi
+
+24
+
+===== slide 25 =====
+CFA: overview
+We define our CFA in several steps:
+• Speci cation: define which sets of functions are acceptable (acceptability
+relation)
+• Syntax-directed rules: re ne the acceptability relation to be syntax
+directed
+• Constraint generation: turn the specification into a nite set of
+constraints
+• Constraint solving: compute the least solution of the constraints (the
+analysis result)
+
+fi
+
+fi
+
+fi
+
+fi
+
+25
+
+===== slide 26 =====
+Abstract domains: informally
+the simplest
+form of CFA
+
+The result of a 0-CFA analysis is a pair (C,̂ ρ)̂ :
+• Ĉ: l ↦ set of function abstractions the subexpression labelled l may
+evaluate to
+• ρ:̂ x ↦ set of function abstractions, x may be bound to
+These are abstract values
+
+Goal:
+l l
+For each (t 1t 2)l determine the possible functions for t1 from the set of
+1 2
+
+function abstractions t2 may evaluate to
+
+0-CFA means that no context information is considered, e.g., same
+function set at all call sites
+26
+
+===== slide 27 =====
+Abstract domains: formally
+The result of a CFA analysis is a pair (C,̂ ρ)̂ :
+
+Ĉ ∈ Cachê : Lab → Val ̂
+ρ ̂ ∈ Env ̂ : Var → Val ̂
+v̂ ∈ Val ̂ = ℘(Term)
+
+• An abstract value abstracts a set of functions:,
+i.e., terms in the form
+x ⇒ e0 or
+x ⇒ e0
+• An abstract cache Ĉ associates abstract values
+with each labelled program point
+• An abstract environment ρ ̂ associates abstract
+values with each variable
+
+We assume that all variables and labels are distinct
+f
+
+n
+
+n
+
+u
+
+f
+
+f
+
+27
+
+n
+
+f
+
+Only functions,
+no constants
+(no DFA component):
+pure CFA
+
+x ⇒ e0 abstracts the
+
+corresponding function
+in all contexts
+
+===== slide 28 =====
+Back to Example 1
+Consider the following 0-CFA guess
+
+((fn x => x1)2 (fn y => y3)4)5
+
+Ĉe
+
+We want to know which
+functions may be bound to variables or
+labels (terms)
+
+ρê
+
+The variable yis never evaluated
+
+Does (Ĉe, ρê ) safely over-approximate the runtime behavior? Is it an
+acceptable guess?
+28
+
+===== slide 29 =====
+Back to Example 1
+Consider also the following 0-CFA guesses
+
+((fn x => x1)2 (fn y => y3)4)5
+
+false
+negative
+
+Are they acceptable? Conservative (over-approximating) guesses are
+acceptable, incomplete ones are not 29
+
+===== slide 30 =====
+The specification of a solution
+Given a guess (C,̂ ρ)̂ , we determine whether it is an acceptable CFA
+A guess is acceptable if it safely over-approximates the runtime behavior
+
+(C,̂ ρ)̂ ⊧ e
+
+⊧: Cachê × Env ̂ × Exp → {
+relation
+
+,
+
+}
+
+It means that the guess is acceptable for expression e
+Correct prediction
+̂
+• If t l evaluates to a function, then it must be included in C(l)
+̂
+• If x is bound to a function, then it must be included in ρ(x)
+
+fi
+
+e
+
+s
+
+l
+
+a
+
+f
+
+e
+
+u
+
+r
+
+t
+
+30
+
+===== slide 31 =====
+Acceptability relation
+(C,̂ ρ)̂ ⊧ e
+To define acceptability, we specify correctness rules for each syntactic
+category in FUN
+Each rule ensures that the guess includes all possible ows
+
+fi
+
+31
+
+===== slide 32 =====
+Clause for constants
+[con] (C,̂ ρ)̂ ⊧ c l
+that can be reformulated as
+
+[con] (C,̂ ρ)̂ ⊧ c l
+
+̂
+∅ ⊆ C(l)
+
+̂ : constants do not evaluate to functions
+No demands on C(l)
+In pure 0-CFA, we do not track data values
+
+(no functions
+can ow here)
+
+Example
+
+fl
+
+7
+
+s
+
+y
+
+a
+
+w
+
+f
+
+l
+
+f
+
+a
+
+32
+i
+
+e≜ 1
+̂ =∅
+C(1)
+
+===== slide 33 =====
+Clause for variables
+[var] (C,̂ ρ)̂ ⊧ x l
+
+̂
+̂ ⊆ C(l)
+ρ(x)
+
+Everything the variable x can be evaluated to must be included in what is
+observed at program point l
+This propagates information from variables to program points: the ow
+goes from ρ ̂ to Ĉ (we get the value from the variable into the program)
+Example
+e = x1
+
+̂ ⊇ ρ(̂ ) ⊇ {(fn y => y3)} [See example 1]
+C(1)
+x
+
+f
+
+f
+
+i
+
+33
+
+===== slide 34 =====
+[ fn] (C,̂ ρ)̂ ⊧ (
+
+x ⇒ e0)l
+
+{
+
+̂
+x ⇒ e0} ⊆ C(l)
+functions are
+abstract
+values
+
+̂
+x ⇒ e0 must be included in C(l)
+The functional term
+This means that it may occur as part of a closure at program point l during
+evaluation
+No checks on the body e0: the clause for application will handle the body
+Example
+e ≜ (fn x => x1)2
+̂ ⊇ {(fn x => x1)} ...
+C(2)
+
+f
+
+f
+
+f
+
+i
+
+n
+
+34
+f
+
+n
+
+f
+
+Clause for functions
+
+===== slide 35 =====
+[ fun] (C,̂ ρ)̂ ⊧ (
+
+x ⇒ e0)l
+
+̂
+x ⇒ e0} ⊆ C(l)
+
+{
+
+functions are
+abstract
+values
+
+̂
+x ⇒ e0 must be included in C(l)
+The functional term
+This means that it may occur as part of a closure at program point l during
+evaluation
+No checks on the body e0: the clause for application will handle the body
+Example
+e ≜ (fun f x => (f1 (fn y => y2)3)4)5
+̂ ⊇ {fun f x => (f1 (fn y => y2)3)4} ...
+C(5)
+
+i
+
+f
+
+n
+
+u
+
+f
+
+35
+
+n
+
+f
+
+Clause for recursive functions
+
+===== slide 36 =====
+[if ] (C,̂ ρ)̂ ⊧ ( t0l0
+
+t1l1
+
+t2l2)l
+
+(C,̂ ρ)̂ ⊧ t0l0
+̂ 1) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t1l1 ∧ C(l
+̂ 2) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t2l2 ∧ C(l
+
+e
+
+s
+
+l
+
+e
+
+n
+
+e
+
+h
+
+t
+
+f
+
+i
+
+f
+
+36
+f
+
+i
+
+Clause for conditional
+
+===== slide 37 =====
+Clause for conditional
+[if ] (C,̂ ρ)̂ ⊧ ( t0l0
+
+t1l1
+
+t2l2)l
+
+This clause
+• requires checking the sub-expressions:
+hence it uses “recursive calls” (C,̂ ρ)̂ ⊧ tili
+
+(C,̂ ρ)̂ ⊧ t0l0
+̂ 1) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t1l1 ∧ C(l
+̂ 2) ⊆ C(l)
+̂
+∧ (C,̂ ρ)̂ ⊧ t2l2 ∧ C(l
+
+̂ i) to the
+• propagates the values produced by sub-expression C(l
+̂
+overall expression C(l)
+
+Condition is ignored:
+over-approximation
+
+This corresponds to merging the possible values from both branches
+Example
+e ≜ (if (x1> 02)3 then (fn y => y4)5 else (fn z => z6)7)8
+8
+
+7
+
+e
+
+s
+
+l
+
+e
+
+n
+
+e
+
+h
+
+t
+
+37
+f
+
+i
+
+̂ ⊆ C(8)
+̂ and C(̂ ) ⊆ C(̂ ) ...
+C(5)
+
+===== slide 38 =====
+Clause for binary operation
+l1
+̂
+̂
+[op] (C, ρ) ⊧ (t1
+
+l2 l
+t2 )
+
+l1
+l2
+̂
+̂
+̂
+̂
+(C, ρ) ⊧ t1 ∧ (C, ρ) ⊧ t2
+
+This clause simply
+• requires checking the sub-expressions: hence it uses “recursive calls”
+
+(C,̂ ρ)̂ ⊧ tili
+
+̂
+No demands on C(l)
+In pure 0-CFA, we do not track data values
+
+f
+
+f
+
+i
+
+p
+
+38
+o
+
+Example
+e ≜ (71 + 42)3
+̂ =∅...
+C(3)
+
+===== slide 39 =====
+Clause for the let binding
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+̂ 1) ⊆ ρ(x)
+̂ 2) ⊆ C(l)
+̂
+̂ ∧ C(l
+C(l
+
+t2l2)l
+
+n
+
+i
+
+t
+
+39
+e
+
+x = t1l1
+
+l
+
+[let] (C,̂ ρ)̂ ⊧ (
+
+===== slide 40 =====
+Clause for the let binding
+[let] (C,̂ ρ)̂ ⊧ (
+
+x = t1l1
+
+t2l2)l
+
+This clause
+• requires checking the sub-expressions:
+hence it uses “recursive calls” (C,̂ ρ)̂ ⊧ tili
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+̂ 1) ⊆ ρ(x)
+̂ 2) ⊆ C(l)
+̂
+̂ ∧ C(l
+C(l
+the value of x must be
+used when analysing t2
+
+Double ow: propagation of the values
+̂ 1) to ρ(x)
+̂
+[binding]
+• from C(l
+̂ 2) to C(l)
+̂
+[evaluation]
+• from C(l
+
+Example
+e ≜ (let f = (fn x => x1)2 in (f3 34)5)6
+
+̂ ⊆ ρ(̂ ) and C(5)
+̂ ⊆ C(6)
+̂ ...
+C(2)
+
+fl
+
+x
+
+n
+
+i
+
+t
+
+e
+
+l
+
+40
+
+===== slide 41 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+lls C(l
+̂
+̂
+̂
+a
+c
+̂
+)
+⊆
+ρ(x)
+∧
+C(l
+)
+⊆
+C(l))
+∧
+n
+o
+2
+0
+i
+t
+c
+n
+u
+f
+E
+e
+l
+l0
+S
+b
+i
+U
+̂
+s
+A
+s
+L
+o
+(
+∀(
+x
+⇒
+t
+)
+∈
+C(l
+):
+p
+C
+l
+1
+l
+Y
+a
+0
+E
+K
+tes
+a
+l
+l0
+u
+̂
+m
+i
+s
+̂
+(
+C,
+ρ)
+⊧
+t
+∧
+t
+I
+0
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+41
+
+===== slide 42 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+This clause requires checking
+the sub-expressions: hence it
+uses “recursive calls”
+
+(C,̂ ρ)̂ ⊧ tili
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2 ∧
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+l0
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+42
+
+===== slide 43 =====
+Clause for function application
+for each function
+l2 be applied
+the can
+
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2
+l0
+̂ 1) :
+l
+( ∀( x ⇒ t0 ) ∈ C(l
+For each term ( x ⇒ t0 ) that
+may reach l1 it requires that
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+• the body can be analysed
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+• the actual parameter (with label
+l2) is linked to the formal
+l0
+̂ 1) :
+(
+∀(
+x
+⇒
+t
+)
+∈
+C(l
+the argument “ ows
+0
+What comes out the
+parameter x
+into” the variable l0
+evaluation of the body
+• the result of the function
+(C,̂ ρ)̂ ⊧ t0 ∧
+comes out also from the
+application
+evaluation (with label l0) is linked
+̂
+̂
+̂
+̂
+C(l
+)
+⊆
+ρ(x)
+∧
+C(l
+)
+⊆
+C(l))
+∧
+to the result of the application
+2
+0
+0
+
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+itself (with label l)
+
+fl
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+n
+
+f
+
+f
+
+43
+
+===== slide 44 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+̂ ρ)̂ ⊧ t l0 ∧
+(
+C,
+0
+x ⇒ t0l )
+For each term (
+̂
+̂
+̂
+̂
+C(l
+)
+⊆
+ρ(x)
+∧
+C(l
+)
+⊆
+C(l))
+∧
+that may reach l1 it requires that
+2
+0
+l0
+• ... same as before and
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+• the term must be included in
+l0
+̂
+̂
+(
+C,
+ρ)
+⊧
+t
+∧
+ρ(̂ f ) to re ect the recursive
+0
+nature of the construct
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+0
+
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+fl
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+f
+
+n
+
+u
+
+n
+
+u
+
+f
+
+f
+
+44
+
+===== slide 45 =====
+Clause for function application
+[app] (C,̂ ρ)̂ ⊧ (t1l1t2l2)l
+Application = simulate all
+possible calls
+
+̂ 1)
+For each function in C(l
+(the function position):
+l
+• analyze body (t0 0)
+̂ )
+• bind argument (via ρ(x)
+• propagate results
+̂
+Results are merged in C(l)
+
+(C,̂ ρ)̂ ⊧ t1l1 ∧ (C,̂ ρ)̂ ⊧ t2l2
+l0
+̂ 1) :
+( ∀( x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+l0
+̂ 1) :
+( ∀(
+x ⇒ t0 ) ∈ C(l
+(C,̂ ρ)̂ ⊧ t0l0 ∧
+̂ 2) ⊆ ρ(x)
+̂ 0) ⊆ C(l))
+̂
+̂ ∧ C(l
+C(l
+∧
+x ⇒ e0} ⊆ ρ(̂ f ))
+
+{
+
+f
+
+f
+
+i
+
+f
+
+n
+
+f
+
+n
+
+u
+
+f
+
+f
+
+n
+
+u
+
+f
+
+45
+
+===== slide 46 =====
+Clause for function application (recap)
+
+Application clause
+• combines function and argument
+• drives propagation
+
+See the more complete Example 1 next
+46
+
+===== slide 47 =====
+(Ĉe, ρê ) is an acceptable guess for ((fn x => x1)2 (fn y => y3)4)5
+(Ĉe, ρê ) ⊧ ((fn x => x1)2 (fn y => y3)4)5
+(Ĉe, ρê ) ⊧ (fn x => x1)2
+{fn x => x1} ⊆ Ĉe(2)
+
+{
+
+{
+
+(Ĉe, ρê ) ⊧ (fn y => y3)4
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+{fn y => y3} ⊆ Ĉe(4)
+
+Since (fn x => x1) = Ĉe(2) so we must also check
+
+(Ĉe, ρê ) ⊧ x1
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+
+̂
+Ĉe(4) ⊆ ρ(x)
+
+Ĉe(1) ⊆ Ĉe(5)
+
+The analysis generates constraints
+f
+
+i
+
+i
+
+i
+
+i
+
+Back to Example 1
+
+47
+
+===== slide 48 =====
+Back to Example 1
+(Ĉe, ρê ) is an acceptable guess for ((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+48
+
+✓
+✓
+✓
+✓
+✓
+
+===== slide 49 =====
+(C′̂e, ρ′ê ) is non acceptable for ((fn x => x1)2 (fn y => y3)4)5
+(C′̂e, ρ′ê ) ⊧ ((fn x => x1)2 (fn y => y3)4)5
+(C′̂e, ρ′ê ) ⊧ (fn x => x1)2
+{fn x => x1} ⊆ C′̂e(2)
+
+{
+
+{
+
+(C′̂e, ρ′ê ) ⊧ (fn y => y3)4
+(C′̂e, ρ′ê ) ⊧ x1
+
+C′̂e(4) ⊆ ρ′̂ (x) ✗
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+f
+
+f
+
+f
+
+f
+
+49
+
+f
+
+{fn y => y3} ⊆ C′̂e(4)
+
+Since (fn x => x1) = Ĉe(e) so we must also check
+
+ρ′̂ (x) ⊆ C′̂e(1)
+
+C′̂e(1) ⊆ C′̂e(5)
+A guess is acceptable only if all constraints hold
+f
+
+i
+
+i
+
+i
+
+i
+
+Back to Example 1
+
+missing possible
+value of x
+
+===== slide 50 =====
+Back to Example 1
+(Ĉe, ρê ) is an acceptable guess for ((fn x => x1)2 (fn y => y3)4)5
+Intuitively, we solve the constraints iteratively until reaching a x point
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3}. {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+50
+
+===== slide 51 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3}. {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+51
+
+===== slide 52 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+
+{fn x => x1} ⊆ Ĉe(2)
+{fn y => y3} ⊆ Ĉe(4)
+
+̂ ⊆ Ĉe(1)
+ρ(x)
+̂
+Ĉe(4) ⊆ ρ(x)
+Ĉe(1) ⊆ Ĉe(5)
+
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3} {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+52
+
+===== slide 53 =====
+Back to Example 1
+((fn x => x1)2 (fn y => y3)4)5
+Ĉe(1) ∅ {fn x => x1} {fn x => x1}
+Ĉe(2) ∅
+∅
+{fn x => x1}
+Ĉe(3) ∅
+∅
+∅
+Ĉe(4) ∅ {fn y => y3} ... {fn y => y3}
+Ĉe(5) ∅
+∅
+{fn x => x1}
+̂
+ρ(x)
+∅
+∅
+{fn y => y3}
+̂
+ρ(y)
+∅
+∅
+∅
+53
+
+===== slide 54 =====
+CFA
+
+54
+
+===== slide 55 =====
+Inclusions
+Note that the clauses contain a number of inclusions of the form
+
+lhs ⊆ rhs
+
+where:
+̂
+̂ {t} where t is a function abstraction
+| ρ(x),
+• lhs ::= C(l)
+̂
+̂
+| ρ(x)
+• rhs := C(l)
+These express how functions may ow through the program, e.g.,
+
+̂
+̂
+C(l)
+⊆ ρ(x)
+
+fl
+
+55
+
+===== slide 56 =====
+Observation 1
+[ fn] (and [ fun]) do not
+recursively analyze
+subexpressions
+
+[app] does the job (is responsible
+for analyzing function bodies)
+
+the analysis is
+driven by
+reachability
+
+In this way, we analyse the body of a function only if the function may be
+applied somewhere
+Unreachable functions are not analysed
+56
+
+===== slide 57 =====
+Observation 2
+t0l0 is not a subexpression
+
+The relation ⊨ is not syntax-directed (due to the application clause)
+So we cannot define ⊨ by structural induction on expressions
+Instead, define ⊨ coinductively
+
+fi
+
+fi
+
+57
+
+===== slide 58 =====
+loop ≜ (let g = (fun f x => (f1 (fn y => y2)3)4)5
+in (g6 (fn z => z7)8)9)10
+Here is an acceptable guess
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+̂ ( ) = { } re ects that
+• ρlp
+
+will be evaluated to a closure constructed from
+
+that abstraction
+
+̂ ( ) = { y,
+• ρlp
+
+z}re ects that
+
+will be bound to closures constructed from
+both abstractions in the course of evaluation
+
+• Ĉlp(10) = ∅ (no function value can be produced at this point) re ects that
+
+fl
+
+d
+
+fl
+
+i
+
+d
+
+f
+
+i
+
+g
+
+the evaluation of loop never terminates
+58
+x
+
+g
+
+x
+
+Back to Example 2
+
+===== slide 59 =====
+Back to Example 2
+f ≜ fun f x => (f1 (fn y => y2)3)4
+idy ≜ fn y => y2
+idz ≜ fn z => z7
+
+from [fun]
+
+̂ )⊧
+(Ĉlp, ρlp
+using [app] and
+̂ ={}
+that C(6)
+
+̂ ) ⊧ 5 ∧ (Ĉlp, ρlp
+̂ ) ⊧ g6 (fn z => z7)8
+(Ĉlp, ρlp
+̂ (g) ∧ Ĉlp(9) ⊆ Ĉlp(10) ✓
+∧ Ĉlp(5) ⊆ ρlp
+immediate
+̂ ) ⊧ g6 ∧ (Ĉlp, ρlp
+̂ ) ⊧ (fn z => z7)8 ∧ (Ĉlp, ρlp
+̂ ) ⊧ (f1(fn y => y2)3)4
+(Ĉlp, ρlp
+̂ ( ) ∧ Ĉlp(4) ⊆ Ĉlp(9) ∧ ∈ ρlp
+̂ ()
+∧ Ĉlp(8) ⊆ ρlp
+immediate
+
+✓
+
+Immediate
+
+3
+̂ ) ⊧ 1 ∧ (Ĉlp, ρlp
+̂ ) ⊧(fn y => y2)∧
+(Ĉlp, ρlp
+̂ ) ⊧ (f1(fn y => y2)3)4
+(Ĉlp, ρlp
+
+̂ (x) ∧ Ĉlp(4) ⊆ Ĉlp(4) ∧ ∈ ρlp
+̂ ()
+∧ Ĉlp(3) ⊆ ρlp
+
+✓
+
+Circular dependency => coinduction: assume it holds and verify it is preserved
+f
+f
+
+f
+
+f
+
+f
+
+i
+
+p
+
+o
+
+o
+
+l
+f
+
+f
+
+x
+
+59
+
+===== slide 60 =====
+Coinductive nature of the CFA
+loose: includes
+many solutions
+
+The specification (⊨) is coinductive
+
+• It defines all acceptable solutions
+• A solution is accepted by default: it is rejected only if it violates a
+constraint
+Semantically this is a greatest fixed point
+Computation
+Among all acceptable solutions, we are interested in the smallest
+We compute the least solution satisfying the specification
+Algorithmically, this is a least fixed point
+
+most precise safe
+approximation
+
+fi
+
+fi
+
+fi
+
+fi
+
+60
+
+===== slide 61 =====
+This is a 0-CFA analysis,
+characterised as:
+
+let x = 0 in
+let x = 1 in
+x
+
+Flow-sensitive → x = 1
+Flow-insensitive → x ∈ {0, 1}
+
+• ow-insensitive: it computes a single abstract value for each variable (or
+expression) that over-approximates all values it may take during execution,
+without distinguishing between di erent program points or execution
+orders
+• context-insensitive: the same function is analyzed in the same way at all
+call sites
+let f = fn x => x in
+let y = f 1 in
+let z = f 2 in
+...
+
+0-CFA analyzes f once
+merging all calls
+
+no information
+about calling
+context is used
+
+61
+
+ff
+
+fl
+
+The nature of this CFA
+
+===== slide 62 =====
+Questions
+
+62
+
+===== slide 63 =====
+Question 1
+11 22 3 4
+3
+(y
+) )x
+(fn=>x(x=>
+(x
+Let e ≜ ((fn y => y
+22)(fn
+∗ 534∗)53
+)6)7 )8)96
+Which are the labels?
+3
+
+3
+
+Which is the ow from
+1.the program point with label 5 to program point with label 7?
+2.the program point with label 8 to variable y?
+1.No ow: constants are not tracked in 0-CFA
+2.Flow from 8 to y: {fn x => (x3 ∗ 34)5} (via application)
+Only functions ow in 0-CFA, not data
+
+fl
+
+fl
+
+fl
+
+63
+
+===== slide 64 =====
+Question 2
+Let e ≜ (let f = (fn x => x1)2 in (f3 44)5)6
+Which is the ow
+• from the program point with label 2 to f?
+• from the program point with label 4 to x?
+• from the program point with label 5 to the program point with
+label 6?
+
+fl
+
+fl
+
+fl
+
+fl
+
+• Flow from 2 to f: {fn x => x1}
+• No ow: 4 is a constant and data are not tracked
+• No ow: since no value ows to x, nothing reaches label 6

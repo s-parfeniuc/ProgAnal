@@ -1,0 +1,4697 @@
+# ProgramAnalysis-09-SL
+# auto-extracted from ProgramAnalysis-09-SL.pdf (91 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #9
+Separation logic
+
+===== slide 2 =====
+The taxonomy
+
+Over
+
+Forward
+
+Backward
+
+HL
+
+NC
+
+(P) c (Q)
+P ⊇ [[ c ]]Q
+
+{P} c {Q}
+[[c]]P ⊆ Q
+
+∀σ ∈ P . ∀δ ∈ [[c]]σ . δ ∈ Q
+
+∀δ ∈ Q . ∀σ ∈ [[ c ]]δ . σ ∈ P
+
+SIL
+
+IL
+
+Under
+
+[P] c [Q]
+[[c]]P ⊇ Q
+
+∀δ ∈ Q . ∃σ ∈ P . δ ∈ [[c]]σ
+2
+
+⟨P⟩ c ⟨Q⟩
+P ⊆ [[ c ]]Q
+
+∀σ ∈ P . ∃δ ∈ Q . δ ∈ [[c]]σ
+
+===== slide 3 =====
+Code summaries
+// function r
+
+// function MC is the McCarthy 91 function
+
+x := nondet();
+if (x=1) {
+if (y≤100) { MC }
+}
+
+while (x>0) {
+if (y>100) {
+y := y-10; x := x-1 }
+else {
+y := y+11; x := x+1 } }
+
+3
+
+===== slide 4 =====
+Code summaries
+// function r
+
+// function MC is the McCarthy 91 function
+
+x := nondet();
+while (x>0) {
+if (x=1) {
+if (y>100) {
+if (y≤100) { x := 0;
+y := y-10; x := x-1 }
+else
+{
+y := 91 }
+y := y+11; x := x+1 } }
+}
+
+4
+
+===== slide 5 =====
+Code summaries
+// function r
+
+// function MC is the McCarthy 91 function
+
+x := nondet();
+while (x>0) {
+if (x=1) {
+if (y>100) {
+if (y≤100) { x := 0;
+y := y-10; x := x-1 }
+else
+{
+y := 91 }
+y := y+11; x := x+1 } }
+}
+
+5
+
+===== slide 6 =====
+
+
+===== slide 7 =====
+Pointer analysis
+
+7
+
+===== slide 8 =====
+Back to HL, but with pointers
+Forward
+HL
+
+Over
+
+{P} c {Q}
+[[c]]P ⊆ Q
+∀σ ∈ P . ∀δ ∈ [[c]]σ . δ ∈ Q
+
+8
+
+===== slide 9 =====
+Why is pointer analysis important?
+“If the pointer is not pointing to a valid
+object or function, bad things may happen”
+E ective C:
+An Introduction
+to Professional C
+Programming
+
+ff
+
+9
+
+Robert C. Seacord
+
+===== slide 10 =====
+ChatGPT imaginery
+
+===== slide 11 =====
+p pointing to a cell whose
+content is 42
+
+p
+42
+
+p + 1 pointing to a cell whose
+
+[p] dereferences p (it is 42)
+
+21
+nil
+
+content points to a cell whose
+content is 21
+
+[p + 1] points to a cell whose
+
+c
+
+o
+
+l
+
+l
+
+a
+
+e
+
+e
+
+content is 21
+
+r
+
+f
+
+Pointer notation
+
+11
+
+e ::= skip
+| b?
+| x := a
+| x := [a] // read
+| [a1] := a2 // write
+| x :=
+()
+|
+(x)
+
+===== slide 12 =====
+The predicate "points to"
+p ↦ ⟨42,l⟩
+l ↦ ⟨21, ⟩
+
+p ↦ 42
+
+p ↦ ⟨42,l⟩
+
+p
+
+p
+
+p
+
+42
+
+42
+
+42
+
+nil
+
+l
+
+i
+
+n
+
+l
+
+21
+
+12
+
+===== slide 13 =====
+Starter example
+
+is it valid?
+
+e
+
+u
+
+r
+
+t
+
+{
+}
+[x] := 1;
+[y] := 2;
+[z] := 3;
+{z ↦ 3}
+
+13
+
+===== slide 14 =====
+Starter example
+
+valid!
+
+e
+
+u
+
+r
+
+t
+
+{
+}
+[x] := 1;
+[y] := 2;
+[z] := 3;
+{z ↦ 3}
+
+14
+
+===== slide 15 =====
+Starter example
+
+e
+
+u
+
+r
+
+t
+
+{
+}
+[x] := 1;
+[y] := 2;
+[z] := 3;
+{x ↦ 1 ∧ y ↦ 2 ∧ z ↦ 3}
+
+15
+
+is it valid?
+
+===== slide 16 =====
+Starter example
+
+x, z
+
+y
+
+3
+
+2
+
+{
+}
+[x] := 1;
+we must exclude aliasing!
+[y] := 2;
+[z] := 3;
+{x ↦ 1 ∧ y ↦ 2 ∧ z ↦ 3}
+e
+
+u
+
+r
+
+t
+
+is it valid?
+
+16
+
+===== slide 17 =====
+Starter example
+{x ≠ y ∧ x ≠ z ∧ y ≠ z}
+[x] := 1;
+[y] := 2;
+[z] := 3;
+{x ↦ 1 ∧ y ↦ 2 ∧ z ↦ 3}
+
+17
+
+valid!
+
+===== slide 18 =====
+Starter example
+{x1 ≠ x2 ∧ . . . }
+[x1] := 1;
+n(n − 1)/2
+[x2] := 2;
+conjuncts!
+
+...
+
+[xn] := n;
+{x1 ↦ 1 ∧ . . . ∧ xn ↦ n}
+18
+
+===== slide 19 =====
+Starter example
+⟨x ≠ y ∧ x ≠ z ∧ y ≠ z⟩
+[x] := 1;
+[y] := 2;
+[z] := 3;
+⟨x ↦ 1 ∧ y ↦ 2 ∧ z ↦ 3⟩
+
+19
+
+is it valid?
+
+===== slide 20 =====
+Starter example
+⟨x ≠ y ∧ x ≠ z ∧ y ≠ z⟩
+[x] := 1;
+what if x or y or z are not allocated?
+[y] := 2;
+[z] := 3;
+⟨x ↦ 1 ∧ y ↦ 2 ∧ z ↦ 3⟩
+
+20
+
+===== slide 21 =====
+ownership of heap cell at x
+
+Starter example
+separating conjunction!
+
+{x1 ↦ _ * . . . * xn ↦ _}
+[x1] := 1;
+n
+[x2] := 2;
+...
+
+[xn] := n;
+{x1 ↦ 1 * . . . * xn ↦ n}
+21
+
+conjuncts!
+
+===== slide 22 =====
+p
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+22
+
+b
+
+c
+
+===== slide 23 =====
+p
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+23
+
+q
+b
+
+c
+
+===== slide 24 =====
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+24
+
+p
+
+t
+
+a
+
+b
+
+q
+c
+
+===== slide 25 =====
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+25
+
+p
+
+t
+
+a
+
+b
+
+q
+c
+
+===== slide 26 =====
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+26
+
+qp
+
+t
+
+a
+
+b
+
+c
+
+===== slide 27 =====
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+27
+
+q
+
+pt
+
+a
+
+b
+
+c
+
+===== slide 28 =====
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+28
+
+q
+
+p
+
+t
+
+a
+
+b
+
+c
+
+===== slide 29 =====
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+29
+
+q
+
+p
+
+t
+
+a
+
+b
+
+c
+
+===== slide 30 =====
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+30
+
+qp
+
+t
+
+b
+
+c
+
+===== slide 31 =====
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+31
+
+q
+
+pt
+
+b
+
+c
+
+===== slide 32 =====
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+32
+
+q
+
+p
+
+b
+
+c
+
+t
+
+===== slide 33 =====
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+33
+
+q
+
+p
+
+b
+
+c
+
+t
+
+===== slide 34 =====
+qp
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+34
+
+b
+
+c
+
+t
+
+===== slide 35 =====
+q pt
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+35
+
+b
+
+c
+
+===== slide 36 =====
+q pt
+a
+
+o
+
+d
+
+l
+
+i
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List example
+
+36
+
+b
+
+c
+
+===== slide 37 =====
+o
+
+d
+
+l
+
+i
+
+invariant?
+
+n
+
+n
+
+e
+
+l
+
+i
+
+)
+
+l
+
+;
+p≠
+( intuitively
+q points to the already reversed list fragment β
+t := [p + 1]; p points to the list fragment α still to be reversed
+†
+[p + 1] := q; let α0 be the reverse of the original list α0
+†
+it is given by juxtaposing α (the reverse of α) with β
+q := p;
+p := t
+i
+
+q :=
+
+h
+
+w
+
+List reversal example
+
+37
+
+===== slide 38 =====
+List reversal example
+q :=
+
+part to be
+reversed
+
+already
+reversed
+
+o
+t
+
+t
+
+d
+
+s
+
+s
+
+i
+
+i
+
+l
+
+l
+
+l
+
+i
+
+n
+
+l
+t
+
+i
+s
+
+i
+
+l
+
+l
+
+i
+
+n
+
+an inductive list predicate:
+
+e
+
+l
+
+n
+
+i
+
+h
+t
+
+t
+
+s
+
+s
+
+i
+
+w
+
+)
+i
+
+l
+
+l
+
+;
+†
+†
+p≠
+( P ≜ ∃α, β . (α, p) ∧ (β, q) ∧ α0 = α ⋅ β
+t := [p + 1];
+[p + 1] := q;
+α
+α
+α
+α
+q := p; p → a → b → c → nil p → b → c → nil p → c → nil p → nil
+q → nil
+q → a → nil
+q → b → a → nil q → c → b → a → nil
+p := t
+β
+β
+β
+β
+reversal
+
+invariant?
+
+points to
+
+(ε, p) ≜ (p = )
+(v ⋅ α, p) ≜ ∃q . p ↦ ⟨v, q⟩ ∧
+38
+
+(α, q)
+
+===== slide 39 =====
+reversal
+
+invariant?
+
+P ≜ ∃α, β .
+
+(α, p) ∧
+
+o
+
+would fail if lists overlap!
+
+t
+
+d
+
+s
+
+i
+
+i
+
+l
+
+l
+
+t
+
+i
+s
+
+i
+
+n
+
+l
+
+e
+
+l
+
+i
+
+)
+
+n
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+l
+
+q :=
+
+h
+
+w
+
+List reversal example
+
+39
+
+†
+†
+(β, q) ∧ α0 = α ⋅ β
+
+===== slide 40 =====
+List reversal example
+q :=
+
+P ≜ ∃α, β .
+∧ ( ∀k .
+
+(α, p) ∧
+(p, k) ∧
+
+†
+†
+(β, q) ∧ α0 = α ⋅ β
+
+(q, k) ⇒ k =
+
+)
+
+do not overlap
+
+40
+
+l
+
+i
+
+(p, q) ≜ p = q
+∨ ∃v, t . p ↦ ⟨v, t⟩ ∧
+n
+
+h
+
+c
+
+a
+
+h
+
+e
+
+c
+
+r
+
+o
+
+a
+
+t
+
+e
+
+d
+
+s
+
+r
+
+i
+
+l
+
+l
+
+i
+
+n
+h
+
+c
+
+a
+
+l
+t
+
+i
+
+e
+
+s
+
+r
+
+i
+
+n
+
+an inductive reachability predicate:
+
+l
+
+e
+
+l
+
+i
+
+h
+
+c
+
+a
+
+e
+
+h
+
+)
+w
+r
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+
+invariant?
+
+(t, q)
+
+===== slide 41 =====
+invariant?
+
+P ≜ ∃α, β .
+∧ ( ∀k .
+
+41
+
+l
+
+i
+
+n
+
+h
+
+c
+
+a
+
+e
+
+r
+
+(α, p) ∧
+(p, k) ∧
+
+†
+†
+(β, q) ∧ α0 = α ⋅ β
+
+(q, k) ⇒ k =
+
+what if other lists share some nodes with p?
+
+o
+t
+
+d
+
+s
+
+i
+
+i
+
+l
+
+l
+
+h
+
+c
+
+a
+
+t
+
+i
+
+e
+
+s
+
+r
+
+i
+
+n
+
+l
+
+e
+
+l
+
+i
+
+)
+
+n
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+l
+
+q :=
+
+h
+
+w
+
+List reversal example
+)
+
+===== slide 42 =====
+invariant?
+
+P ≜ ∃α, β .
+∧ ( ∀k .
+∧ ( ∀k .
+
+(α, p) ∧
+(p, k) ∧
+
+(x, k) ∧ (
+
+l
+
+i
+
+42
+
+n
+
+l
+
+i
+
+n
+
+h
+
+c
+
+a
+
+e
+
+r
+
+t
+
+s
+
+i
+
+l
+
+h
+
+o
+
+h
+
+c
+
+c
+
+a
+
+d
+
+a
+
+e
+
+e
+
+r
+
+r
+
+l
+
+i
+
+t
+
+s
+
+i
+
+l
+
+h
+
+h
+
+c
+
+c
+
+i
+a
+
+a
+
+t
+
+n
+
+e
+
+e
+
+s
+
+r
+
+r
+
+i
+
+e
+
+l
+
+l
+
+i
+
+)
+
+n
+
+;
+p≠
+(
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+l
+
+q :=
+
+h
+
+w
+
+List reversal example
+†
+†
+(γ, x) ∧ α0 = α ⋅ β
+
+(β, q) ∧
+(q, k) ⇒ k =
+(p, k) ∨
+
+)
+
+(q, k)) ⇒ k =
+
+)
+
+===== slide 43 =====
+o
+t
+
+s
+
+d
+
+i
+
+i
+
+l
+
+l
+
+t
+
+s
+
+i
+i
+
+l
+
+n
+
+e
+
+l
+
+i
+
+)
+
+n
+
+;
+p≠
+( P ≜ ∃α, β . (
+t := [p + 1];
+[p + 1] := q;
+q := p;
+p := t
+l
+
+q :=
+
+h
+
+w
+
+List reversal example
+
+43
+
+separating conjunction!
+
+(α, p) *
+
+†
+†
+(β, q)) ∧ α0 = α ⋅ β
+
+the two lists speak about
+different parts of the heap
+
+===== slide 44 =====
+Heap manipulating atomic
+commands
+
+44
+
+===== slide 45 =====
+e
+::=
+skip
+atomic
+command
+| b?
+c ::= e
+| x := a
+choice
+| c1; c2
+| x := [a] // read
+| c1 + c2
+| [a1] := a2 // write
+⋆
+| c
+| x :=
+()
+Kleene
+(x)
+|
+star
+(a0, . . . , ak)
+| x :=
+s
+
+c
+
+n
+
+o
+
+l
+
+o
+
+l
+
+a
+
+c
+
+e
+
+e
+
+regular
+command
+
+r
+
+f
+
+Regular commands
+
+45
+
+===== slide 46 =====
+set of
+variables
+
+store
+
+set of
+values
+
+heap
+
+set of
+locations
+
+set of all
+stores
+
+set of all
+heaps
+
+≜ {h : N ⇀ n Z⊥}
+
+store-heap
+pair
+
+state
+
+s
+
+p
+
+a
+
+e
+
+H
+
+s
+
+e
+
+r
+
+o
+
+t
+
+S
+
+fi
+s
+
+e
+
+t
+
+s
+
+s
+
+s
+
+a
+
+t
+
+e
+
+p
+
+e
+
+r
+
+t
+
+S
+
+a
+
+o
+
+a
+
+e
+
+≜
+
+fi
+
+σ = ⟨s, h⟩
+
+set of all
+states
+
+null=-1
+special value
+(deallocated)
+
+≜ {s : X → Z}
+
+t
+
+set of
+values
+
+h : N ⇀ n Z⊥
+
+s:X→Z
+
+t
+
+S
+
+H
+
+S
+
+Stores, heaps and states
+
+×
+
+concrete
+domain
+
+46
+
+℘(
+
+)
+
+===== slide 47 =====
+( f ) is the domain of definition of a heap function
+h1 # h2 ≜
+
+(h1) ∩
+
+(h2) = ∅
+
+disjoint
+heaps
+
+h1 ∙ h2 is the union of functions with disjoint domains
+(undefined if ¬(h1 # h2) )
+
+(disjoint) heap
+composition
+
+f[x ↦ n] is the partial function like f except that x goes to n
+m
+
+o
+
+d
+
+m
+
+m
+
+fi
+
+47
+fi
+
+o
+
+update
+o
+
+d
+
+d
+
+Notation
+
+===== slide 48 =====
+Assertion language
+
+48
+
+===== slide 49 =====
+assertion
+
+P ::=
+|
+|
+|
+|
+
+a1 < a2 | a1 = a2 | ...
+¬P | P1 ∧ P2 | ∃x . P | ...
+|
+
+|
+
+empty heap
+
+a1 ↦ a2
+P1 * P2
+
+structural
+assertions
+ownership
+
+e
+
+p
+
+e
+
+s
+
+l
+
+u
+
+m
+
+a
+
+and
+separately
+
+r
+
+t
+
+f
+
+e
+
+Assertion language
+
+49
+
+Boolean and
+classical
+assertions
+
+also called
+pure assertions
+
+===== slide 50 =====
+Satisfaction: classical
+⟨s, h⟩ ⊧ P
+
+the assertion P holds
+for the given state ⟨s, h⟩
+
+⟨s, h⟩ ⊧ a1 < a2 i s ⊧ a1 < a2
+⟨s, h⟩ ⊧ P1 ∧ P2 i ⟨s, h⟩ ⊧ P1 and ⟨s, h⟩ ⊧ P2
+⟨s, h⟩ ⊧ ∀x . P
+
+i
+
+∀v ∈ Z . ⟨s[x ↦ v], h⟩ ⊧ P
+
+...
+f
+
+f
+
+f
+
+50
+
+===== slide 51 =====
+Satisfaction: structural
+⟨s, h⟩ ⊧ P
+⟨s, h⟩ ⊧ a1 ↦ a2 i
+
+(h) = {[[a1]]s} and h([[a1]]s) = [[a2]]s
+
+⟨s, h⟩ ⊧
+
+i
+
+h is the empty map [ ]
+
+⟨s, h⟩ ⊧ P1 * P2
+
+i
+
+∃h1, h2 . ⟨s, h1⟩ ⊧ P1 and ⟨s, h2⟩ ⊧ P2 and h = h1 ∙ h2
+
+p
+
+m
+
+e
+
+m
+
+o
+
+d
+
+splits the heap
+but not the store!
+
+f
+
+f
+
+51
+f
+
+the assertion P holds
+for the given state ⟨s, h⟩
+
+===== slide 52 =====
+Example
+h = h1 ∙ h2
+(h1) = {11}
+h1(11) = 42
+(h2) = {42}
+h2(42) = 11
+
+(h) = {11,42}
+s(x) = 11 h(11) = 42
+s(y) = 42 h(42) = 11
+x
+
+11
+
+42
+
+42
+
+y
+11
+
+⟨s, h⟩ ⊧
+
+?
+
+p
+
+m
+
+e
+
+m
+
+m
+
+m
+
+o
+
+o
+
+⟨s, h⟩ ⊧ x ↦ y ?
+o
+
+d
+
+d
+
+d
+
+two
+locations
+
+⟨s, h⟩ ⊧ x ↦ y * y ↦ x ?
+52
+
+⟨s, h1⟩ ⊧ x ↦ y
+⟨s, h2⟩ ⊧ y ↦ x
+
+===== slide 53 =====
+(h1) = {11}
+s(x) = 11 h1(11) = 42
+s(y) = 42
+x
+
+y
+⟨s, h1⟩ ⊧
+
+42
+
+?
+
+p
+
+m
+
+e
+
+m
+
+⟨s, h1⟩ ⊧ x ↦ y ?
+o
+
+d
+
+Example
+
+⟨s, h1⟩ ⊧ x ↦ y * y ↦ x ?
+53
+
+===== slide 54 =====
+(h2) = {42}
+s(x) = 11
+s(y) = 42 h2(42) = 11
+x
+
+y
+11
+
+⟨s, h2⟩ ⊧
+
+?
+
+p
+
+m
+
+e
+
+m
+
+⟨s, h2⟩ ⊧ y ↦ x ?
+o
+
+d
+
+Example
+
+⟨s, h2⟩ ⊧ x ↦ y * y ↦ x ?
+54
+
+===== slide 55 =====
+(h1) = {11}
+s(x) = 11 h1(11) = 42
+s(y) = 42
+x
+42
+
+y
+
+(h2) = {42}
+s(x) = 11
+s(y) = 42 h2(42) = 11
+
+h = h1 ∙ h2
+
+m
+
+m
+
+o
+
+⟨s, h⟩ ⊧ x ↦ y * y ↦ x ?
+o
+
+d
+
+d
+
+Example
+
+55
+
+x
+
+y
+11
+
+===== slide 56 =====
+any
+assertion
+
+P*
+x↦v*
+
+≡P
+
+any heap
+
+single-cell
+heap
+
+pure
+assertion
+
+≢x↦v
+
+P∧
+
+≢P
+
+x↦v*P≢x↦v∧P
+
+x↦v*x↦w≡
+
+x ↦ v ∧ x ↦ w ≡ x ↦ v ∧ (v = w)
+
+(x = y) * (x = y) ≡ (x = y)
+
+P*P≡P
+
+x↦v*y↦w⇏x↦v
+
+x↦v∧y↦w⇒x↦v
+
+x↦v⇏x↦v*y↦w
+
+x↦v⇏x↦v∧y↦w
+
+e
+
+p
+
+p
+
+e
+
+s
+
+l
+
+u
+
+m
+
+m
+
+a
+
+cannot separate
+
+r
+
+e
+
+t
+
+f
+
+e
+
+Some subtleties
+
+56
+
+===== slide 57 =====
+Example: list segments
+Let us define the following inductive predicate for list segments
+
+(a1, a2,0) ≜ a1 = a2 ∧
+(a1, a2, n + 1) ≜ a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2, n)
+(a) ≜ (a,
+
+(p)
+vn
+
+v2
+
+l
+
+i
+
+s
+
+l
+
+n
+
+p
+
+t
+
+m
+
+v1
+
+t
+
+57
+fi
+
+s
+
+s
+
+s
+
+s
+
+s
+
+i
+
+s
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+l
+
+l
+
+p
+
+i
+
+l
+
+(a1, a2) ≜ ∃n . (a1, a2, n) and
+
+and let
+
+)
+
+===== slide 58 =====
+Let us define the following inductive predicate for list segments
+
+(a1, a2,0) ≜ a1 = a2 ∧
+(a1, a2, n + 1) ≜ a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2, n)
+(a1, a2) ≜ ∃n . (a1, a2, n) and
+
+fi
+
+(a) ≜ (a,
+
+)
+
+(x, x) ?
+
+x
+
+s
+
+l
+
+fi
+
+l
+
+i
+
+s
+
+s
+
+l
+
+n
+
+l
+
+p
+
+t
+
+Does the heap in the gure satisfy
+and (x, y) * (y, x) ?
+(x) ?
+and
+and (x, y,3) ?
+and ∃l . (x, l) ?
+t
+
+m
+
+s
+
+s
+
+s
+
+s
+
+s
+
+s
+
+i
+
+s
+
+s
+
+s
+
+i
+
+and let
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+l
+
+l
+
+l
+
+l
+
+l
+
+l
+
+Example: list segments
+
+58
+
+y
+
+===== slide 59 =====
+Separation Logic (SL)
+
+59
+
+===== slide 60 =====
+CSL 2001
+Local Reasoning about Programs
+that Alter Data Structures
+
+“it should be possible for reasoning and
+specification to be con ned to the cells
+that the program actually accesses. The
+value of any other cell will automatically
+remain unchanged”
+
+Peter O’Hearn1 , John Reynolds2 , and Hongseok Yang3
+1
+
+Queen Mary, University of London
+2
+Carnegie Mellon University
+3
+University of Birmingham and University of Illinois at Urbana-Champaign
+
+Abstract. We describe an extension of Hoare’s logic for reasoning about
+programs that alter data structures. We consider a low-level storage
+model based on a heap with associated lookup, update, allocation and
+deallocation operations, and unrestricted address arithmetic. The assertion language is based on a possible worlds model of the logic of bunched
+implications, and includes spatial conjunction and implication connectives alongside those of classical logic. Heap operations are axiomatized
+using what we call the “small axioms”, each of which mentions only those
+cells accessed by a particular command. Through these and a number of
+examples we show that the formalism supports local reasoning: A specification and proof can concentrate on only those cells in memory that a
+program accesses.
+This paper builds on earlier work by Burstall, Reynolds, Ishtiaq and
+O’Hearn on reasoning about data structures.
+
+1
+
+Introduction
+
+Pointers have been a persistent trouble area in program proving. The main difficulty is not one of finding an in-principle adequate axiomatization of pointer
+operations; rather there is a mismatch between simple intuitions about the way
+that pointer operations work and the complexity of their axiomatic treatments.
+For example, pointer assignment is operationally simple, but when there is aliasing, arising from several pointers to a given cell, then an alteration to that cell
+may affect the values of many syntactically unrelated expressions. (See [20, 2, 4,
+6] for discussion and references to the literature on reasoning about pointers.)
+We suggest that the source of this mismatch is the global view of state
+taken in most formalisms for reasoning about pointers. In contrast, programmers
+reason informally in a local way. Data structure algorithms typically work by
+applying local surgeries that rearrange small parts of a data structure, such as
+rotating a small part of a tree or inserting a node into a list. Informal reasoning
+usually concentrates on the effects of these surgeries, without picturing the entire
+memory of a system. We summarize this local reasoning viewpoint as follows.
+To understand how a program works, it should be possible for reasoning
+and specification to be confined to the cells that the program actually accesses. The value of any other cell will automatically remain unchanged.
+
+60
+fi
+
+fi
+
+L. Fribourg (Ed.): CSL 2001, LNCS 2142, pp. 1–19, 2001.
+c Springer-Verlag Berlin Heidelberg 2001
+⃝
+
+===== slide 61 =====
+Separation Logic principles
+Over-approximation
+logic for proving
+correctness
+
+Separation logic = local axioms + frame rule
+
+61
+
+===== slide 62 =====
+Local axioms
+
+{P} atomic command {Q}
+minimal
+requirement
+for correct
+execution
+
+in-place reasoning
+
+62
+
+strongest
+postcondition,
+given the
+minimal
+precondition
+
+===== slide 63 =====
+in-place reasoning
+
+{P} c {Q}
+[frame]
+{P * R} c {Q * R}
+idle cells
+
+e
+
+e
+
+r
+
+f
+
+d
+
+idle cells
+
+o
+
+63
+fi
+
+m
+
+Frame rule
+variables possibly
+modi ed by c
+
+(c) ∩
+
+(R) = ∅
+
+variables
+constrained by R
+
+===== slide 64 =====
+Modi ed variables
+
+c1 c2
+
+c1
+
+c1 c2
+
+c2
+
+c
+
+fi
+
+64
+
+c1
+c
+
+c2
+
+===== slide 65 =====
+Free variables
+
+65
+
+===== slide 66 =====
+Some abbreviations
+a ↦ _ ≜ ∃v . a ↦ v
+
+(for v fresh )
+
+a1 ≐ a2 ≜ (a1 = a2) ∧
+
+p
+
+m
+
+e
+
+a ↦ ⟨a0, . . . , ak⟩ ≜ (a ↦ a0) * . . . * (a + k ↦ ak)
+66
+
+===== slide 67 =====
+Local axioms: write
+[write]
+
+{???} [a1] := a2 {???}
+
+67
+
+===== slide 68 =====
+Local axioms: write
+[write]
+
+{a1 ↦ _} [a1] := a2 {???}
+a ↦ _ ≜ ∃v . a ↦ v
+
+68
+
+===== slide 69 =====
+Local axioms: write
+[write]
+
+{a1 ↦ _} [a1] := a2 {a1 ↦ a2}
+
+{???} [x] := y {???}
+
+69
+
+===== slide 70 =====
+Local axioms: write
+[write]
+
+{a1 ↦ _} [a1] := a2 {a1 ↦ a2}
+
+{x ↦ _} [x] := y {x ↦ y}
+
+70
+
+===== slide 71 =====
+Local axioms: read
+{a ↦ v ∧ x = x′} x := [a] {x = v ∧ a[x′/x] ↦ v}
+not strictly necessary
+
+￼
+
+{y ↦ v} x := [y] {x = v ∧ y ↦ v}
+￼
+
+[read]
+
+===== slide 72 =====
+Local axioms: allocation
+{
+
+} x :=
+
+( ) {x ↦ _}
+
+c
+
+o
+
+l
+
+l
+
+a
+
+p
+
+m
+
+e
+
+[alloc]
+
+72
+
+===== slide 73 =====
+(a) {
+
+}
+
+{x ↦ _}
+
+(x) {
+
+}
+
+p
+
+{a ↦ _}
+
+p
+
+e
+
+e
+
+m
+
+m
+
+e
+
+e
+
+e
+
+e
+
+r
+
+[dispose]
+
+r
+
+f
+
+f
+
+Local axioms: dispose
+
+73
+
+===== slide 74 =====
+Local axioms: allocation
+{x ≐ x′} x :=
+
+(a1, . . . , ak) {x ↦ ⟨a1[x′/x], . . . , ak[x′/x]⟩}
+
+￼
+
+￼
+
+s
+
+￼
+
+n
+
+o
+
+c
+
+a ↦ ⟨a0, . . . , ak⟩ ≜ (a ↦ a0) * . . . * (a + k ↦ ak)
+
+74
+
+===== slide 75 =====
+Example 1
+{x ↦ _ * y ↦ _ * z ↦ _}
+{x ↦ _}
+{x ↦ _} [x] := 1 {x ↦ 1}
+[x] := 1;
+{x ↦ _ * R} [x] := 1 {x ↦ 1 * R}
+{x ↦ 1}
+with R ≡ (y ↦ _ * z ↦ _)
+{x ↦ 1 * y ↦ _ * z ↦ _}
+[y] := 2;
+[z] := 3;
+{x ↦ 1 * y ↦ 2 * z ↦ 3}
+write axiom
+
+frame rule
+
+write
+
+frame
+
+75
+
+===== slide 76 =====
+Example 1
+
+write axiom
+
+{x ↦ _ * y ↦ _ * z ↦ _}
+{x ↦ _}
+[x] := 1;
+{x ↦ 1}
+{x ↦ 1 * y ↦ _ * z ↦ _}
+{y ↦ _}
+[y] := 2;
+{y ↦ 2}
+{x ↦ 1 * y ↦ 2 * z ↦ _}
+
+idle frame
+
+write axiom
+
+Rx ≡ y ↦ _
+
+idle frame
+
+Ry ≡ x ↦ 1
+
+76
+
+===== slide 77 =====
+write axiom
+
+{x ↦ _ * y ↦ _ }
+{x ↦ _}
+[x] := 1;
+{x ↦ 1}
+{x ↦ 1 * y ↦ _}
+{y ↦ _}
+[y] := 2;
+{y ↦ 2}
+{x ↦ 1 * y ↦ 2}
+{z ↦ _}
+[z] := 3;
+{z ↦ 3}
+{x ↦ 1 * y ↦ 2 * z ↦ 3}
+
+idle frame
+
+Rx ≡ y ↦ _
+
+write axiom
+
+idle frame
+
+Ry ≡ x ↦ 1
+
+write axiom
+
+frame rule
+
+frame rule
+
+Example 1
+
+77
+
+===== slide 78 =====
+write axiom
+
+{x ↦ _ * y ↦ _}
+{x ↦ _}
+[x] := 1;
+{x ↦ 1}
+{x ↦ 1 * y ↦ _}
+{y ↦ _}
+[y] := 2;
+{y ↦ 2}
+{x ↦ 1 * y ↦ 2}
+{z ↦ _}
+[z] := 3;
+{z ↦ 3}
+{x ↦ 1 * y ↦ 2 * z ↦ 3}
+
+idle frame
+
+Rxy ≡ z ↦ _
+
+write axiom
+
+write axiom
+
+frame rule
+
+frame rule
+
+Example 1
+
+idle frame
+
+Rz ≡ x ↦ 1 * y ↦ 2
+78
+
+===== slide 79 =====
+write axiom
+
+{x ↦ _ * y ↦ _ * z ↦ _ }
+{x ↦ _}
+[x] := 1;
+{x ↦ 1}
+{x ↦ 1 * y ↦ _ * z ↦ _}
+{y ↦ _}
+[y] := 2;
+{y ↦ 2}
+{x ↦ 1 * y ↦ 2 * z ↦ _}
+{z ↦ _}
+[z] := 3;
+{z ↦ 3}
+{x ↦ 1 * y ↦ 2 * z ↦ 3}
+
+idle frame
+
+write axiom
+
+Rxy ≡ z ↦ _
+
+write axiom
+
+frame rule
+
+frame rule
+
+frame rule
+
+frame rule
+
+Example 1
+
+idle frame
+
+Rz ≡ x ↦ 1 * y ↦ 2
+79
+
+===== slide 80 =====
+Example 2
+Let us consider the following inductive predicates
+
+(a1, a2) ≜ (a1 = a2 ∧
+)
+∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+(a) ≜ (a, )
+Can we derive
+this triple?
+
+} t := [x];
+
+l
+
+i
+
+n
+
+(x) ∧ x ≠
+
+l
+
+i
+
+n
+
+t
+
+t
+
+e
+
+s
+
+s
+
+p
+
+i
+
+e
+
+i
+
+t
+
+l
+
+l
+
+r
+
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+f
+
+{
+
+80
+
+(x); {
+
+(t)}
+
+===== slide 81 =====
+Example 2
+
+l
+
+i
+
+n
+
+t
+
+t
+
+t
+
+s
+
+s
+
+s
+
+i
+
+i
+
+t
+
+i
+
+l
+
+l
+
+l
+
+s
+
+i
+
+l
+l
+
+p
+
+p
+
+i
+
+t
+
+t
+
+t
+
+n
+
+e
+
+s
+
+m
+
+m
+
+s
+
+s
+p
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+e
+
+l
+
+l
+
+t
+
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+r
+
+(x) ∧ x ≠ } ≡ {x ↦ v * (v)}
+{x ↦ v * (v)}
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{x ↦ t * (t)}
+{x ↦ t}
+(x); {
+}
+{
+* (t)} ≡ { (t)}
+{ (t)}
+f
+
+{
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+81
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 82 =====
+Example 2
+(x) ∧ x ≠ } ≡ {x ↦ v * (v)}
+{x ↦ v * (v)}
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{(x ↦ v ∧ t = v) * (v)}
+{x ↦ t}
+(x); {
+}
+{
+* (t)} ≡ { (t)}
+{ (t)}
+t
+
+t
+
+s
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+i
+
+l
+
+l
+
+i
+
+n
+
+t
+
+t
+
+s
+
+s
+
+i
+
+i
+
+t
+
+l
+
+l
+
+s
+
+i
+
+l
+l
+
+s
+
+p
+
+p
+
+i
+i
+
+n
+
+p
+
+t
+
+l
+
+t
+
+t
+
+t
+
+e
+
+s
+
+m
+
+m
+
+s
+
+s
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+e
+
+l
+
+l
+
+r
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+f
+
+frame
+
+{
+
+82
+
+idle frame
+
+R1 ≡
+
+(v)
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 83 =====
+Example 2
+(x) ∧ x ≠ } ≡ {x ↦ v * (v)}
+{x ↦ v * (v)}
+over-approximation
+(consequence rule)
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{(x ↦ v ∧ t = v) * (v)}⇒{x ↦ t * (t)}
+{x ↦ t}
+(x); {
+}
+{
+* (t)} ≡ { (t)}
+{ (t)}
+t
+
+s
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+i
+
+l
+
+l
+
+i
+
+n
+
+t
+
+t
+
+t
+
+s
+
+s
+
+s
+
+i
+
+i
+
+t
+
+i
+
+l
+
+l
+
+l
+
+s
+
+i
+
+l
+l
+
+p
+
+p
+
+i
+
+t
+
+t
+
+t
+
+n
+
+e
+
+s
+
+m
+
+m
+
+s
+
+s
+p
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+e
+
+l
+
+l
+
+t
+
+r
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+f
+
+frame
+
+{
+
+83
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 84 =====
+Example 2
+(x) ∧ x ≠ } ≡ {x ↦ v * (v)}
+{x ↦ v * (v)}
+over-approximation
+(consequence rule)
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{(x ↦ v ∧ t = v) * (v)}⇒{x ↦ t * (t)}
+idle frame
+{x ↦ t}
+(x); {
+}
+R2 ≡ (t)
+{
+* (t)} ≡ { (t)}
+{ (t)}
+t
+
+t
+
+s
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+i
+
+l
+
+l
+
+i
+
+n
+
+t
+
+t
+
+t
+
+s
+
+s
+
+s
+
+i
+
+i
+
+t
+
+i
+
+l
+
+l
+
+l
+
+s
+
+i
+
+l
+l
+
+s
+
+p
+
+p
+
+i
+i
+
+n
+
+p
+
+t
+
+l
+
+t
+
+t
+
+t
+
+e
+
+s
+
+m
+
+m
+
+s
+
+s
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+e
+
+l
+
+l
+
+r
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+f
+
+frame
+
+{
+
+84
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 85 =====
+Example 2
+
+l
+
+i
+
+n
+
+t
+
+t
+
+t
+
+s
+
+s
+
+s
+
+i
+
+i
+
+t
+
+i
+
+l
+
+l
+
+l
+
+s
+
+i
+
+l
+l
+
+p
+
+p
+
+i
+
+t
+
+t
+
+t
+
+n
+
+e
+
+s
+
+m
+
+m
+
+s
+
+s
+p
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+e
+
+l
+
+l
+
+t
+
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+r
+
+(x) ∧ x ≠ } ≡ {x ↦ v * (v)}
+{x ↦ v * (v)}
+Exist
+rule
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{x ↦ t * (t)}
+{P} c {Q}
+{x ↦ t}
+(x); {
+}
+{ ∃k . P} c { ∃k . Q}
+{
+* (t)} ≡ { (t)}
+{ (t)}
+f
+
+{
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+85
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 86 =====
+Example 2
+
+t
+
+l
+
+i
+
+s
+
+i
+
+n
+
+l
+
+t
+
+t
+
+s
+
+s
+
+i
+
+i
+
+l
+
+l
+
+t
+
+s
+
+i
+
+l
+l
+
+p
+
+i
+
+t
+
+t
+
+t
+
+n
+
+e
+
+s
+
+m
+
+s
+
+s
+p
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+l
+
+l
+
+t
+
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+r
+
+(x) ∧ x ≠ } ≡ {x ↦ v * (v)}
+{ ∃v . x ↦ v * (v)}
+Exist
+rule
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{x ↦ t * (t)}
+{P} c {Q}
+{x ↦ t}
+(x); {
+}
+{ ∃k . P} c { ∃k . Q}
+{ ∃v . (t)}≡ { (t)}
+{ (t)}
+f
+
+{
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+86
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 87 =====
+Example 2
+
+l
+
+i
+
+n
+
+t
+
+l
+
+i
+
+s
+
+i
+
+n
+
+l
+
+t
+
+s
+
+i
+
+l
+
+t
+
+l
+
+i
+
+s
+
+i
+
+n
+
+l
+l
+
+p
+
+i
+
+t
+
+t
+
+t
+
+n
+
+e
+
+s
+
+m
+
+s
+
+s
+p
+
+i
+
+s
+
+e
+
+i
+
+i
+
+l
+
+l
+
+e
+
+l
+
+l
+
+t
+
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+r
+
+(x) ∧ x ≠ } ≡ { (x, ) ∧ x ≠ }
+{ ∃v . x ↦ v * (v)}
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{x ↦ t * (t)}
+{x ↦ t}
+(x); {
+}
+{ ∃v . (t)}≡ { (t)}
+{ (t)}
+f
+
+{
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+87
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 88 =====
+Example 2
+
+l
+
+i
+
+n
+
+s
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+l
+
+l
+
+i
+
+n
+
+t
+
+s
+
+i
+
+l
+
+t
+
+s
+
+i
+
+l
+
+t
+
+l
+
+l
+
+i
+
+i
+
+s
+
+i
+
+n
+
+l
+
+n
+l
+
+p
+
+i
+
+t
+
+t
+
+n
+
+e
+
+m
+
+s
+
+s
+p
+
+s
+
+e
+
+i
+
+i
+
+l
+
+e
+
+l
+
+l
+
+t
+
+r
+m
+
+s
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+f
+
+{ (x, ) ∧ x ≠ } ≡ {x ≠ ∧ ∃v . x ↦ v * (v,
+≡ { ∃v . x ↦ v * (v)}
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{x ↦ t * (t)}
+{x ↦ t}
+(x); {
+}
+{ ∃v . (t)}≡ { (t)}
+{ (t)}
+88
+
+)}
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 89 =====
+Example 2
+
+t
+
+l
+
+i
+
+s
+
+i
+
+n
+
+l
+
+t
+
+t
+
+s
+
+s
+
+i
+
+t
+
+i
+
+l
+
+l
+
+s
+
+i
+
+l
+l
+
+p
+
+p
+
+i
+
+t
+
+t
+
+t
+
+n
+
+e
+
+frame
+
+exists
+s
+
+m
+
+m
+
+s
+
+s
+p
+
+i
+
+e
+
+i
+
+i
+
+l
+
+e
+
+e
+
+l
+
+l
+
+t
+
+r
+m
+
+s
+
+f
+
+s
+
+s
+
+i
+
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+(x) ∧ x ≠ } ≡ { ∃v . x ↦ v * (v)}
+{x ↦ v * (v)}
+{x ↦ v} t := [x]; {x ↦ v ∧ t = v}
+{x ↦ t * (t)}
+{x ↦ t}
+(x); {
+}
+{
+* (t)} ≡ { (t)}
+{ (t)}
+frame
+
+{
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+89
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 90 =====
+Example: concatenation
+{x ↦ v *
+
+(y)}
+
+t := x;
+
+Precondition
+x and y are pointers to the heads of two (singly linked) lists.
+The list pointed to by x is non-empty and each list is nite and null-terminated.
+The two lists are disjoint (no node belongs to both lists).
+
+n := [t];
+n≠
+
+(
+
+t := n;
+
+The code appends the list pointed to by y
+to the end of the non-empty list pointed to by x
+
+n := [t];
+
+)
+
+Postcondition
+A unique (singly linked) list pointed to by x.
+
+[t] := y;
+
+t
+
+s
+
+i
+
+l
+
+o
+
+d
+
+l
+
+i
+
+t
+
+s
+
+n
+
+i
+
+l
+
+90
+fi
+
+l
+
+i
+
+l
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+(x)}
+
+e
+
+n
+
+t
+
+i
+
+s
+
+p
+
+h
+
+l
+
+i
+
+t
+
+m
+
+s
+
+s
+
+s
+
+i
+
+w
+
+{
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+(v) *
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )
+
+===== slide 91 =====
+Example: concatenation
+{x ↦ v *
+
+(y)}
+
+t := x;
+n := [t];
+n≠
+
+(
+
+Try to work on the derivation for the next time...
+
+t := n;
+n := [t];
+
+)
+
+[t] := y;
+
+t
+
+s
+
+i
+
+l
+
+o
+
+d
+
+l
+
+i
+
+t
+
+s
+
+n
+
+i
+
+l
+l
+
+i
+
+l
+
+(a1, a2) ≜ (a1 = a2 ∧
+(a) ≜ (a, )
+
+(x)}
+
+e
+
+n
+
+t
+
+i
+
+s
+
+p
+
+h
+
+l
+
+i
+
+t
+
+m
+
+s
+
+s
+
+s
+
+i
+
+w
+
+{
+s
+
+l
+
+e
+
+l
+
+l
+
+l
+
+(v) *
+
+91
+
+) ∨ (a1 ≠ a2 ∧ ∃l . a1 ↦ l * (l, a2) )

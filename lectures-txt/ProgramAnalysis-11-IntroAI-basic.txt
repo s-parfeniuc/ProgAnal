@@ -1,0 +1,11495 @@
+# ProgramAnalysis-11-IntroAI-basic
+# auto-extracted from ProgramAnalysis-11-IntroAI-basic.pdf (115 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #11
+Abstract Interpretation: intro
+
+===== slide 2 =====
+2
+
+===== slide 3 =====
+Reading material
+Tutorial on Static Inference of Numeric Invariants by
+Abstract Interpretation
+Antoine Miné
+
+To cite this version:
+Antoine Miné. Tutorial on Static Inference of Numeric Invariants by Abstract Interpretation.
+Foundations and Trends in Programming Languages, Now Publishers, 2017, 4 (3-4), pp.120-372.
+�10.1561/2500000034�. �hal-01657536�
+
+HAL Id: hal-01657536
+https://hal.sorbonne-universite.fr/hal-01657536
+Submitted on 1 May 2018
+
+HAL is a multi-disciplinary open access
+archive for the deposit and dissemination of scientific research documents, whether they are published or not. The documents may come from
+teaching and research institutions in France or
+abroad, or from public or private research centers.
+
+Some slides are based on presentations by our colleagues
+Francesco Ranzato, Antoine Miné, and Patrick Cousot
+
+3
+
+L’archive ouverte pluridisciplinaire HAL, est
+destinée au dépôt et à la diffusion de documents
+scientifiques de niveau recherche, publiés ou non,
+émanant des établissements d’enseignement et de
+recherche français ou étrangers, des laboratoires
+publics ou privés.
+
+===== slide 4 =====
+Chapter 2:
+A gentle introduction to static analysis
+
+4
+
+===== slide 5 =====
+Static analysis
+c,
+c#, c++,
+java, python, ML
+....
+
+sw analyzes
+other sw
+
+buffer
+overrun,
+memory leak,
+type errors, null pointer,
+...
+
+for any source language
+and property
+takes all possibilities
+into account
+
+A general method
+for the automatic and sound approximation
+of sw run-time behaviors before the execution
+statically, without
+running the code
+5
+
+cannot be
+exact
+
+===== slide 6 =====
+Abstract interpretation
+guiding principles,
+reusability, sound by
+design
+
+can explain all static
+analyses
+
+A powerful framework
+for designing correct static analyses:
+simple and eye-opening
+apply some recipes
+
+any static analysis is
+an abstract interpretation
+
+6
+
+===== slide 7 =====
+7
+
+===== slide 8 =====
+8
+
+===== slide 9 =====
+9
+
+===== slide 10 =====
+Abstract interpretation
+• A formal technique used since almost 50 years
+(Patrick e Radhia Cousot, 1977) to systematically
+design abstractions and approximations
+
+Most cited POPL paper ever
+10
+
+===== slide 11 =====
+Back to 1977
+
+11
+
+===== slide 12 =====
+Top 8 Most Cited Articles (as of 2025)
+
+12
+
+===== slide 13 =====
+The general idea
+• The starting point is a concrete semantics that provides the
+meaning of program commands into a given computational
+domain
+• We need an abstract domain, which models some properties of
+interest of concrete computations and leaves out the remaining
+information
+• We then have an abstract semantics that allows us “to
+abstractly execute” a program on the abstract domain in order
+to compute the program properties modeled by the abstract
+domain.
+• The computation of the abstract semantics typically involves
+fifixpoint computations
+• When necessary, e.g. by efficiency reasons, one could perform
+further correct approximations of the abstract semantics
+
+13
+
+===== slide 14 =====
+Abstract Interpretation Tools
+
+14
+
+===== slide 15 =====
+C and C++
+
+15
+
+===== slide 16 =====
+C
+
+16
+
+===== slide 17 =====
+while programs with (recursive) functions
+
+17
+
+===== slide 18 =====
+18
+
+===== slide 19 =====
+19
+
+===== slide 20 =====
+https://fbinfer.com
+
+C, C++, Objective-C
+20
+
+===== slide 21 =====
+21
+
+===== slide 22 =====
+22
+
+===== slide 23 =====
+23
+
+===== slide 24 =====
+Neural Networks
+
+24
+
+===== slide 25 =====
+25
+
+===== slide 26 =====
+rosoft, https://
+
+• Why not all software developers use
+
+tracts
+
+com
+
+static analysis tools?
+
+Irresponsibility
+
+• Computer engineering is the only technology where
+
+83
+
+developers are not responsible for their errors, even
+Warranty
+the trivial ones:
+Excerpt from Microsoft software licence:
+© P. Cousot
+
+84
+
+Abstract interpretation, SAVE 16, Changsha, 10 December 2016
+
+© P. Cousot
+
+DISCLAIMER OF WARRANTIES. . . . MICROSOFT AND ITS SUPPLIERS PROVIDE
+THE SOFTWARE, AND SUPPORT SERVICES (IF ANY) AS IS AND WITH ALL
+FAULTS, AND MICROSOFT AND ITS SUPPLIERS HEREBY DISCLAIM ALL
+OTHER WARRANTIES AND CONDITIONS, WHETHER EXPRESS, IMPLIED OR
+STATUTORY, INCLUDING, BUT NOT LIMITED TO, ANY (IF ANY) IMPLIED
+WARRANTIES, DUTIES OR CONDITIONS OF MERCHANTABILITY, OF FITNESS FOR A PARTICULAR PURPOSE, OF RELIABILITY OR AVAILABILITY,
+OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OF WORKMANLIKE EFFORT, OF LACK OF VIRUSES, AND OF LACK OF NEGLIGENCE,
+ALL WITH REGARD TO THE SOFTWARE, AND THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT OR OTHER SERVICES, INFORMATION, SOFTWARE, AND RELATED CONTENT THROUGH THE SOFTWARE OR OTHERWISE ARISING OUT OF THE USE OF THE SOFTWARE. . . .
+
+You get nothing for your money either!
+26
+
+– So
+!
+– Co
+se
+
+===== slide 27 =====
+The future
+
+•
+• Computer scientists will ultimately be held responsible
+Safety and security does matter to the general public
+for their
+there errors
+
+•
+• Since this is now part of the state of the art
+• Automatic static analysis, verification, etc has a brilliant
+At least the automatically discoverable ones
+
+future.
+
+by Patrick Cousot
+Abstract interpretation, Colloquium d’informatique de l’UPMC Sorbonne Universités, 29 Septembre 2016
+
+27
+
+86
+
+© P. Cousot
+
+===== slide 28 =====
+28
+
+===== slide 29 =====
+Abstract Interpretation:
+Basic Ideas
+
+29
+
+===== slide 30 =====
+Why abstraction?
+it is not possible to terminate and
+capture all possible executions!
+
+wait, there is also 0!
+
+abstraction ≠ omission
+
+take even numbers
+
+hey, what about 2, 6, ...!
+
+take multiples of 4
+
+take { 2, 4, 6, 8, ... }
+30
+
+===== slide 31 =====
+Which values can be printed?
+repeat a random
+number of times,
+possibly none
+
+unknown guard
+
+x:=3 ; while (?) { x:=x+2 } ; x:=x-1; print(x) ;
+
+concrete executions: infinitely many values (2, 4, 6, 8, ...)
+abstract interpretation 1: integers (too coarse)
+abstract interpretation 2: positive integers (precise)
+abstract interpretation 3: even integers (precise)
+abstract interpretation 4: positive even integers (more precise)
+fi
+
+31
+
+===== slide 32 =====
+Abstraction:
+selecting a property
+
+32
+
+===== slide 33 =====
+Abstraction:
+selecting one of many properties
+
+33
+
+===== slide 34 =====
+Abstraction and correctness
+
+34
+
+===== slide 35 =====
+Abstracting a set of 2D points
+
+e.g., run-time values of two float variables
+
+35
+
+===== slide 36 =====
+Abstracting a set of 2D points
+
+36
+
+===== slide 37 =====
+Abstracting a set of 2D points
+
+37
+
+===== slide 38 =====
+Abstracting a set of 2D points
+
+38
+
+===== slide 39 =====
+Abstracting a set of 2D points
+
+w.r.t. number
+of variables
+39
+
+===== slide 40 =====
+Abstracting a set of 2D points
+
+40
+
+===== slide 41 =====
+Abstracting a set of 2D points
+
+41
+
+===== slide 42 =====
+Compositional approach
+
+42
+
+===== slide 43 =====
+A sample language
+y
+
+state: (x,y)
+a point in the Cartesian plane
+
+(2,1)
+
+p ::= e
+| p ; p
+| p + p
+| p*
+
+x
+
+43
+
+===== slide 44 =====
+A sample language
+y
+
+state: (x,y)
+a point in the Cartesian plane
+p ::= init(Region)
+| translate(u,v)
+| rotate(u,v,θ)
+| p ; p
+| {p} or {p}
+| iter{p}
+
+(2,1)
+
+x
+
+44
+
+===== slide 45 =====
+Concrete semantics
+y
+
+pick a state in the
+region [0,1]x[0,1]
+
+init([0,1]×[0,1])
+x
+
+45
+
+===== slide 46 =====
+Nondeterminism
+y
+
+pick a state in the
+region [0,1]x[0,1]
+
+init([0,1]×[0,1])
+x
+
+46
+
+===== slide 47 =====
+Concrete semantics
+y
+
+translate the current
+state by vector (1,0)
+
+translate(1,0)
+x
+
+47
+
+===== slide 48 =====
+Concrete semantics
+y
+
+rotate by center in (0,0)
+and angle 90o
+
+rotate(0,0,90o)
+x
+
+48
+
+===== slide 49 =====
+Concrete semantics
+y
+
+sequential composition
+
+translate(1,0);
+rotate(0,0,90o)
+x
+
+49
+
+===== slide 50 =====
+Concrete semantics
+y
+nondeterministic
+choice
+
+{ translate(1,1) }
+or
+{ rotate(0,0,90o)}
+
+x
+
+50
+
+===== slide 51 =====
+Concrete semantics
+y
+nondeterministic
+iteration
+
+iter {
+translate(1,0.4)
+}
+
+x
+
+51
+
+===== slide 52 =====
+Program executions
+y
+
+init([0,1]×[0,1]);
+translate(1,0);
+iter {
+{
+translate(1,0)
+} or {
+rotate(0,0,90o)
+}
+}
+
+x
+
+52
+
+===== slide 53 =====
+Program executions
+y
+
+init([0,1]×[0,1]);
+translate(1,0);
+iter {
+{
+translate(1,0)
+} or {
+rotate(0,0,90o)
+}
+}
+
+y
+
+x
+
+x
+y
+
+x
+
+53
+
+===== slide 54 =====
+Analysis goal: safety
+given a hypothetical error zone E
+analyze the set of reachable points
+to check if they can intersect E
+
+E = { (x,y) | x<0 }
+
+y
+
+x
+
+54
+
+===== slide 55 =====
+A correct execution
+y
+
+init([0,1]×[0,1]);
+translate(1,0);
+iter {
+{
+translate(1,0)
+} or {
+rotate(0,0,90o)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+55
+
+===== slide 56 =====
+An incorrect execution
+y
+
+init([0,1]×[0,1]);
+translate(1,0);
+iter {
+{
+translate(1,0)
+} or {
+rotate(0,0,90o)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+56
+
+===== slide 57 =====
+A correct execution?
+y
+
+init([0,1]×[0,1]);
+translate(1,0);
+iter {
+{
+translate(1,0)
+} or {
+rotate(0,0,90o)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+57
+
+===== slide 58 =====
+A safe program
+y
+
+init([0,1]×[0,1]);
+iter {
+{
+translate(1,0)
+} or {
+translate(0.5,0.5)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+58
+
+===== slide 59 =====
+Can static analysis prove ¬E?
+How can we check safety for every program execution?
+the set of possible
+initial states is infinite!
+the length of executions
+is unbounded!
+
+possibly infinitely many
+different choices!
+
+Enumeration of all executions does not work!
+
+fi
+
+fi
+
+59
+
+===== slide 60 =====
+Abstraction
+A set of logical properties of program states
+called abstract elements
+A set of abstract elements is called
+an abstract domain
+
+60
+
+===== slide 61 =====
+Concretization
+The concretization γ(a) of an abstract element a
+is the set of program states that satisfy it
+even
+
+γ(even)
+
+0
+
+2
+
+61
+
+4
+
+6 ...
+
+===== slide 62 =====
+Signs abstraction
+Describe a set of states by two pieces of information:
+the possible values of the sign of x
+and the possible values of the sign of y
+(positive, negative, non-negative, etc.)
+
+62
+
+===== slide 63 =====
+Signs abstraction
+y
+
+γ(a)
+a=[x≤0,y≥0]
+x
+
+63
+
+===== slide 64 =====
+Signs abstraction
+y
+
+γ(a)
+
+a=[x≥0]
+
+x
+
+64
+
+===== slide 65 =====
+Intervals abstraction
+Conjunctions of di erent pieces of information:
+the range constraints of x
+and the range constraints of y
+(expressed as inequalities:
+u ≤ x, x ≤ v, n ≤ y, y ≤ m
+we just omit infinite bound constraints)
+
+ff
+
+fi
+
+65
+
+===== slide 66 =====
+Intervals abstraction
+y
+
+γ(a)
+a=[1≤x≤4,1≤y≤3]
+x
+
+66
+
+===== slide 67 =====
+Intervals abstraction
+y
+
+γ(a)
+
+a=[1≤x≤3]
+
+x
+
+67
+
+===== slide 68 =====
+Intervals abstraction
+y
+
+γ(a)
+a=[1≤x,1≤y]
+x
+
+68
+
+===== slide 69 =====
+Intervals abstraction
+intervals are more expressive than signs:
+any abstract element of Signs abstract domain
+corresponds to an element of Intervals abstract domain
+abstract elements can be represented by
+at most two numerical constants per variable
+[min,max] with min,max ∈ Z ∪ {−∞, + ∞}
+69
+
+===== slide 70 =====
+Best abstraction
+Given a set of points (program states) S,
+can we nd an abstract element a that
+over-approximate S more closely than any other?
+
+fi
+
+70
+
+===== slide 71 =====
+Best abstraction in Signs
+y
+
+y
+
+S
+
+S
+
+x
+
+best abstraction
+
+x
+
+an abstraction
+
+71
+
+===== slide 72 =====
+Best abstraction in Intervals
+y
+
+y
+
+S
+
+S
+
+x
+
+best abstraction
+
+x
+
+an abstraction
+
+72
+
+===== slide 73 =====
+Best abstraction
+An abstract element a is the best abstraction
+of a set of points S i
+1) S ⊆ γ(a)
+
+is an overapproximation
+
+2) S ⊆ γ(b) implies b coarser than a
+
+γ(a) ⊆ γ(b)
+ff
+
+73
+
+any other overapproximation of S
+is coarser
+
+===== slide 74 =====
+Relational abstractions
+Signs and Intervals are non-relational abstractions:
+the range of x is not in uenced by the range of y
+Relational abstractions can capture
+numerical constraints over both x and y
+(e.g., x ≤ y )
+
+fl
+
+74
+
+===== slide 75 =====
+Convex Polyhedra abstraction
+Abstract elements are conjunctions
+of linear inequality constraints of the form
+
+c1x + c2y ≤ c
+(but other representations are possible,
+e.g., vertices and edges)
+75
+
+===== slide 76 =====
+Convex Polyhedra abstraction
+convex polyhedra are more expressive than intervals:
+any abstract element of Intervals abstract domain
+corresponds to an element of Convex Poly abstract domain
+
+abstract elements can be represented by
+(an unbounded number of) numerical constraints
+76
+
+===== slide 77 =====
+Best abstraction?
+y
+
+y
+
+S
+
+S
+an abstraction
+
+an abstraction
+
+x
+
+x
+
+77
+
+===== slide 78 =====
+Best: not always possible
+Computing the best abstraction can be expensive
+or sometimes not even possible
+
+In practice we can use abstractions
+as precise as possible, but maybe not the best
+(still best abstractions can exist for some sets of states)
+78
+
+===== slide 79 =====
+Convex Polyhedra abstraction
+If the region is already a convex polyhedron,
+take it as exact approximation
+Otherwise, use the interval abstraction to nd
+the best enclosing box and take it as abstraction
+(any interval element is also a convex polyhedron)
+
+fi
+
+79
+
+===== slide 80 =====
+Reachable states
+y
+
+init([0,1]×[0,1]);
+iter {
+{
+translate(1,0)
+} or {
+translate(0.5,0.5)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+80
+
+===== slide 81 =====
+Reachable states
+y
+
+init([0,1]×[0,1]);
+iter {
+{
+translate(1,0)
+} or {
+translate(0.5,0.5)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+81
+
+===== slide 82 =====
+Sign abstraction
+y
+
+init([0,1]×[0,1]);
+iter {
+{
+translate(1,0)
+} or {
+translate(0.5,0.5)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+82
+
+===== slide 83 =====
+Intervals abstraction
+y
+
+init([0,1]×[0,1]);
+iter {
+{
+translate(1,0)
+} or {
+translate(0.5,0.5)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+83
+
+===== slide 84 =====
+Convex Polyhedra abstraction
+y
+
+init([0,1]×[0,1]);
+iter {
+{
+translate(1,0)
+} or {
+translate(0.5,0.5)
+}
+}
+
+E = { (x,y) | x<0 }
+
+x
+
+84
+
+===== slide 85 =====
+Abstract semantics computation
+Compositionality principle:
+compute a sound analysis of a program
+by computing sound abstract semantics
+of program’s components
+
+85
+
+===== slide 86 =====
+Analysis function
+analysis function:
+input: a program p, an abstract element a (pre-state)
+output: an abstract element a′ (post-state)
+analysis(p, a)
+#
+
+￼
+
+[[p]] a
+86
+
+===== slide 87 =====
+Sound analysis
+a sound analysis function must capture the real executions:
+if p moves a point (x, y) to (x′, y′)
+
+then for any abstract element a s.t. (x, y) ∈ γ(a)
+
+￼
+
+￼
+
+￼
+
+￼
+
+it must be the case that (x′, y′) ∈ γ(analysis(p, a))
+
+87
+
+===== slide 88 =====
+Sound analysis
+a
+
+analyze p
+
+abstraction
+
+abstraction
+run p
+
+￼
+
+￼
+
+￼
+
+(x, y)
+
+a′
+
+analysis(p, a)
+
+88
+
+(x′, y′)
+
+===== slide 89 =====
+Sound analysis
+a′
+
+abstraction
+
+γ(a)
+{(x1, y1)⋯(xn, yn)⋯}
+
+{(x′1, y′1)⋯(x′n, y′n)⋯}
+
+run p
+
+￼
+
+￼
+
+abstraction
+
+￼
+
+￼
+
+￼
+
+a
+
+analyze p
+
+analysis(p, a)
+
+89
+
+===== slide 90 =====
+Abstract
+Semantics
+Computation:
+init(R)
+mantics
+Computation:
+Abstract
+init(R)
+Semantics
+Computatio
+Init
+
+Gentle IntroductionStatic Analysis: a Gentle Introduction Static Analysis: a Gentle Introduction
+
+Semantics
+Computation:
+init(R)
+sAbstract
+Computation:
+init(R)
+Abstract
+Semantics
+Computation: init(R)
+
+an
+abstraction
+of
+analysis(
+init
+(Region))
+=
+Region
+Select, if any,
+the region
+best abstraction
+of the
+R.
+best abstraction
+of the
+Select,
+R.
+if any,
+theregion
+best abstraction
+of the region R
+
+For
+thethe
+example
+program
+with
+the
+intervals
+or convex
+ogram
+with
+intervals
+or convex
+For
+the
+polyhedra
+example
+program
+withpolyhedra
+the intervals or con
+×
+init([0,1]
+[0,1])
+abstract
+domains,
+1] ⇥ analysis
+[0, 1]) is of init([0, 1] ⇥ [0, 1])
+analysis
+of init([0,
+1] ⇥analysis
+[0, 1])abstract
+isof init([0,
+domains,
+y
+
+y
+
+y
+sign
+
+concrete
+
+intervals
+
+x
+
+x
+90
+
+x
+
+===== slide 91 =====
+Translate
+Abstract
+Semantics
+Computation:
+Abstract
+Semantics
+Computation:
+Abstract Semantics
+Computation:
+translation(u,
+translation(u,
+translation(u,
+v) v)v)
+analysis(translate(u, v), a) =
+Static
+Analysis:
+aIntroduction
+Gentle
+Introduction
+Static
+Analysis:
+a Gentle
+Introduction
+Static Analysis:
+a Gentle
+
+Abstract
+Semantics
+Computation:
+translation(u,
+Abstract
+Semantics
+Computation:
+translation(u,
+Abstract
+Semantics
+Computation:
+translation(u,
+v) v)v)
+an abstraction that contains the translation of γ(a)
+
+y
+
+y
+
+y
+
+concrete
+
+y
+
+y
+
+y
+
+apost
+
+y y
+
+y
+
+apostapost
+
+apost
+
+apost
+apost
+
+Intervals
+
+x
+
+x
+
+x
+apre
+
+x
+apreapre
+
+x
+
+x
+
+Concrete
+seman- (b) Intervals
+Intervals
+(a) Concrete
+seman(a) (a)
+Concrete
+seman(b) (b)
+Intervals
+tics tics tics
+91
+
+Convex
+Polyhedra
+
+apre
+
+x
+apreapre
+
+x x
+
+Convex
+polyhedra
+(c) Convex
+polyhedra
+(c)(c)
+Convex
+polyhedra
+
+===== slide 92 =====
+Rotate
+Abstract
+Semantics
+Computation:
+Abstract
+Semantics
+Computation:
+Abstract Semantics Computation:
+
+Static Analysis:
+aAnalysis:
+Gentle Introduction
+Static
+a Gentle Introduction
+Static Analysis: a Gentle Introduction
+
+rotation(u,
+v,
+θ)
+rotation(u,
+v,
+θ)
+rotation(u,
+v,
+θ)
+analysis(
+rotate
+(u,
+v,
+θ),
+a)
+=
+Abstract Semantics Computation: rotation(u, v, ✓)
+
+Abstract
+Semantics
+Computation:
+rotation(u,
+v,
+✓)
+Abstract Semantics Computation: rotation(u, v, ✓)
+an abstraction that contains the rotation of γ(a)
+
+y
+
+y
+
+y
+concrete
+
+x
+
+y
+
+x
+
+y
+
+y
+
+apost apost
+
+possible
+x
+loss of
+precision
+
+apre
+
+x
+apre
+
+y
+
+y
+
+apost
+Intervals
+
+apost apost
+
+x
+
+x
+
+y
+apost
+
+Convex
+Polyhedra
+
+aprefix aprefix aprefix
+
+apre
+
+(d)semanConcrete
+(f) Convex
+polyhedra
+(e) Intervals
+Concrete
+seman- seman(f) Convex
+polyhedra
+(e) Intervals
+(d) (d)
+Concrete
+(f) Convex
+polyhedra
+(e) Intervals
+tics
+tics tics
+92
+
+===== slide 93 =====
+Sequence
+
+analysis(p0; p1, a) = analysis(p1, analysis(p0, a))
+
+93
+
+===== slide 94 =====
+Abstract
+Semantics
+Computation:
+{p}or{p}
+Abstract
+Semantics
+Computation:
+{p}or{p}
+Abstract
+Semantics
+Computation:
+{p}or{p}
+analysis({p0} {p1}, a) =
+Abstract
+Semantics
+Computation:
+{p}or{p}
+Semantics
+Computation:
+{p}or{p}
+Abstract
+Semantics
+Computation:
+{p}or{p}
+(analysis(p0, a), analysis(p1, a))
+y
+
+y concrete
+
+yy
+aa
+pre
+pre
+
+y aa
+
+post
+post
+
+yy
+
+aIntervals
+post
+
+xx
+
+x
+
+r
+
+tics
+
+y
+apost
+apost
+
+Convex
+apost Polyhedra
+
+apre
+
+possible
+loss of
+Concrete
+seman(h)
+(g) Concrete
+(h) Intervals
+precision
+Concrete
+seman- seman(h)Intervals
+Intervals
+o
+
+(g)
+(g)
+tics
+tics
+n
+
+o
+
+i
+
+xx
+
+n
+
+u
+
+Choice
+
+over-approximates
+two abstract
+Static Analysis:
+Analysis:
+GentleIntroduction
+Introduction
+elementsStatic
+aaAnalysis:
+Gentle
+Static
+a Gentle Introduction
+
+94
+
+a
+apre
+x pre
+
+apre
+
+x x
+
+x
+
+possible
+loss of
+(i)(i)Convex
+polyhedra
+(i)
+Convex
+polyhedra
+Convex
+polyhedra
+precision
+
+===== slide 95 =====
+Iteration
+
+iter {
+p
+}
+
+{ }
+or { p }
+or { p;p }
+or { p;p;p }
+or { p;p;p;p }
+or { p;p;p;p;p }
+...
+
+≈
+
+95
+
+===== slide 96 =====
+Iteration
+{ } p0
+or { p } p1
+or { p;p } p2
+or { p;p;p } p3
+or { p;p;p;p } p4
+or { p;p;p;p;p } p5
+...
+p0 ≈ { }
+pk+1 ≈ { pk }
+{ pk; p }
+
+r
+
+o
+
+iter {
+p
+}
+
+96
+
+===== slide 97 =====
+p0 ≈ { }
+pk+1 ≈ { pk }
+
+{ pk; p }
+
+analysis(pk+1, a) =
+(analysis(pk, a), analysis(p, analysis(pk, a)))
+idea: iterate the following assignment until it stabilizes
+
+(R, analysis(p, R))
+
+r
+
+n
+
+o
+
+o
+
+i
+
+n
+
+u
+
+n
+
+o
+
+i
+
+R←
+n
+
+u
+
+Iteration
+
+97
+
+===== slide 98 =====
+R←a
+analysis(
+
+{p}, a) =
+
+T←R
+R←
+R
+T
+
+n
+
+i
+
+r
+
+t
+
+e
+
+o
+
+n
+
+t
+
+n
+
+o
+
+i
+
+i
+
+n
+
+n
+
+u
+
+e
+
+r
+
+l
+
+u
+
+i
+
+t
+
+o
+
+h
+
+Analogy with
+pre- fixpoints,
+invariants
+
+e
+
+98
+fi
+
+d
+
+w
+
+r
+
+Iteration
+
+(R, analysis(p, R))
+T
+check for
+inclusion
+
+===== slide 99 =====
+26 Chapter
+Chapter 2 to
+A Gentle
+Introduction
+to Static Analysis
+2 A Gentle
+Introduction
+to Static
+Analysis
+times:
+Chapter
+2
+A
+Gentle
+Introduction
+Static
+Analysis
+A26Times.cls
+Priori
+Book
+LATE
+Style
+X Times
+Typeset
+A
+Priori
+with
+Book
+PDFLaTeX
+Style
+Typeset
+Size:
+7x9
+with
+PDFLaTeX
+February 27, Size:
+2019 7x
+2:
+}
+
+({(x,
+y)
+|
+0
+⌥
+y
+⌥
+2x
+({(x,
+and
+x
+y)
+⌥
+|
+0.5});
+0
+⌥
+y
+⌥
+2x
+and
+x
+⌥
+0
+sume that theMITPress
+analysisTimes.cls
+uses theLTconvex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+XATimes
+MITPress
+Priori
+Book
+Times.cls
+Style
+Typeset
+LT
+X 2019
+Times
+with PDFLaTeX
+A Priori
+Size:
+Style
+7x9Typeset
+February
+with2
+imes A MITPress
+Priori Book
+Times.cls
+Style Typeset
+LTEX Times
+withEPDFLaTeX
+Priori ABook
+Size:
+Style
+7x9
+Typeset
+February
+with
+27,
+2:23pm
+Size:Book
+7x9
+February
+27, 2019
+EPDFLaTeX
+ved after
+initialization and before they
+statement is shown in Figure 2.15(b). We show in
+y
+{
+{
+e 2.15(c), Figure 2.15(d)concrete
+and Figure 2.15(e) the first three iterations of the analysis algorithm x
+40
+Chapter 2 A Gentle Introduction
+Chapter
+to Static
+2 AAnalysis
+Gentle Introduction to Sta
+as sketched above. The imprecision is inherent
+in
+the
+computation
+of
+over-approximations
+(in
+(1, 0.5)
+{(x, y) ∣ x ≤ 0.5 ∧ 0 (1,
+≤ y0.5)
+≤ 2x});
+init(
+(a) Concrete semantics
+of abstract elements as in the previous examples.
+26x Chapter
+Chapter
+2 2to
+AIntroduction
+Gentle
+Introduction
+toAnalysis
+Chapter
+Static xAn
+26
+2 A Gentle
+Introduction
+to translate(1,0.5)
+Chapter
+Static
+Analysis
+2 A Gentle
+to Static
+x 26
+x
+40
+Chapter
+2
+A
+Gentle
+Introduction
+Chapter
+Static
+A
+Gentle
+Analysis
+Introductio
+iter
+{
+}
+le this process does
+not terminate, we note that}repeating it forever would yield the result
+}
+(a) Concrete semantics
+(b) Analysis of p (0 iteration)
+(c) Analysis of p (up to 1 iteration)
+(d) Analysis of p (up to 2 ite
+y
+
+y
+
+y
+
+y
+
+Iteration in Signs
+A
+
+A
+
+x
+
+y
+
+y
+
+y
+
+Ay
+
+x
+
+x
+
+x
+
+y
+y
+y
+0
+1
+y
+n in Figure 2.15(f), which also provides a sound approximation of all the
+possible
+output states 2
+Concretization
+of [x 0]
+⌥ 0, y 0]
+(b) Concretization of [x 0]
+(a) Concretization of [x ⌥ 0, y 0]
+(b)(a)
+Concretization
+of [x
+program.
+y
+y
+yy assume
+y analysis
+the
+We
+analysis
+uses
+that
+thethe
+convex
+polyhedra
+uses
+the
+abstract
+convex
+domain.
+polyhedra
+Then
+abstrac
+the
+y
+y
+y
+y y
+y
+No change. Done!
+x
+
+x
+
+Signs
+abstraction
+Signs
+abstraction
+etialization
+iterative
+algorithm
+demonstrated
+Example
+will actually
+terminate
+observed
+and
+after
+before
+initialization
+they(b)in Analysis
+and
+statement
+before
+isthe
+shown
+Figureif2.15(b)
+is sho
+y
+y alwaysinstatement
+(a) Concrete semantics
+of
+p0 2.12
+(0 iteration)
+properties
+than others.
+Furthermore,
+some
+abstractionshas
+yield a
+simpler
+computer
+representaproperties
+than others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representathe
+signs
+abstract
+domain.
+Indeed,
+this
+abstract
+domain
+finite
+number
+of
+abstract
+igure
+Figure
+2.15(d)
+2.15(c),
+and
+Figure
+Figure
+2.15(e)
+2.15(d)
+the
+and
+first
+Figure
+three
+2.15(e)
+iterations
+the
+of
+first
+the
+three
+analy
+it
+tions
+and
+less
+costly
+algorithms
+than
+others.
+In
+the
+following
+paragraphs,
+we
+will
+present
+tions y
+and
+less
+costly algorithms
+than others.
+In the
+following
+paragraphs,
+we
+will
+present
+y
+ents
+whenofthe
+iterative
+R also union(R,
+analysis(b,
+awhich
+few algorithm
+other
+examples
+ofcomputes
+abstractions,
+have a simple and
+intuitive graphical R)), the
+a few and
+other examples
+abstractions,
+also have
+a simple
+and intuitivewhich
+graphical
+above.
+that
+was
+The
+sketched
+imprecision
+above.
+is
+inherent
+The
+imprecision
+in
+the
+computation
+is
+inherent
+of
+in
+over-appro
+the
+compu
+representation.
+representation.
+of R will converge after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+x
+abstraction.
+ofxand
+Example
+Signs abstraction. The abstractionxof Signs
+Example
+2.4 treats xThe
+andabstraction
+y differently
+is very2.4 treats x and y differently and is very
+elements
+gray)
+as
+of
+abstract
+in
+the
+previous
+elements
+examples.
+as
+in
+the
+previous
+examples.
+her
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+specific
+to
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+specific
+to(c)
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f) Expected result
+3
+Analysis of p1 (up to 1 iteration)
+(d) Analysis of p2 (up to 2 iterations)
+xbecomes
+x
+x
+analysis toSimilarly,
+prove thatit ywould
+nevernot
+becomes
+it would not apply if the propanalysis to prove that y never
+negative.
+applyxifnegative.
+the prop-Similarly,
+x
+x
+x
+x
+x
+x
+x
+x
+they
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+cess
+does
+While
+not
+this
+terminate,
+process
+we
+does
+note
+not
+that
+terminate,
+repeating
+we
+it
+note
+forever
+that
+would
+repeating
+yie
+erty
+to
+prove
+was
+that
+x
+does
+not
+become
+positive.
+However,
+this
+abstraction
+generalizes
+erty to prove
+was
+that
+x
+does
+not
+become
+positive.
+However,
+this
+abstraction
+generalizes
+Figure
+2.15
+y
+y
+into
+a
+more
+expressive
+one,
+which
+describes
+a
+set
+of
+states
+using
+two
+pieces
+of
+information:
+into
+a
+more
+expressive
+one,
+which
+describes
+set
+of
+states
+using
+two
+pieces
+of
+information:
+Abstract
+iteration
+(a)
+Concrete
+semantics
+(a)
+Concrete
+(b)
+Analysis
+semantics
+of
+p
+(0
+iteration)
+(b)
+Analysis
+pof0 p(0
+(c)
+Analysis
+(up to 1 iteratio(
+setheproperty.
+Since
+the
+number
+of
+abstract
+properties
+will
+occur
+0 is finite, the latter caseof
+1 iteration)
+possible
+values
+sign
+of
+possible
+values of the sign of a
+y. For
+each varipossible
+values
+of the
+of
+x and the
+theprovides
+possible
+values of
+of the
+the
+sign
+of xy.and
+Forthe
+each
+vari- provides
+2.15(f),
+shown
+which
+insignFigure
+also
+2.15(f),
+awhich
+sound
+also
+approximation
+sound
+of
+all approximati
+the possible
+abstraction
+records
+whether
+it value
+may
+positive,
+negative,
+non-negative,
+etc. The
+able,finitely
+this abstraction
+recordstimes.
+whether
+itable,
+may this
+be positive,
+negative,
+non-negative,
+etc.be
+The
+this
+over-approximates
+the
+behaviors
+observed
+after
+any
+number
+x
+x
+ost
+many
+Therefore,
+at
+some
+point,
+the
+value
+of
+R
+stabilizes,
+and
+then
+99
+Concretization
+ofy [x 0]
+⌥
+Concretization
+(b) Concretization
+of [x 0]
+⌥of0,[xy 0]
+0]
+(b
+Concretization of [x ⌥ 0, y 0]
+(a) Concretization
+(b)(a)
+Concretization
+of [x ⌥of0,[x
+0] 0, y 0] (b)(a)
+Concretization
+of [x
+Figure 2.5
+
+Figure 2.5
+
+0 iteration
+
+concretizations
+a few2.5:
+abstract elements are shown in Figure 2.5:
+concretizations of a few abstract elements
+are shown in of
+Figure
+
+1 iteration
+
+===== slide 100 =====
+26
+
+E
+
+approach:
+
+40
+
+}
+
+26
+
+{
+
+Chapter 2 to
+A Gentle
+Introduction
+to Static Analysis
+Chapter
+2 A Gentle
+to Static
+Analysis
+Chapter
+2 Introduction
+A Gentle
+Introduction
+Static
+Analysis
+
+Chapter 2 A Gentle Introduction to Static x
+Analysis
+y
+y
+xy
+y
+40 40
+Chapter
+2 AAGentle
+Gentle
+Introduction
+Analysis
+4040
+Chapter
+2
+Introduction
+toStatic
+Static
+Analysis
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static Analysis
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Analysis
+sume40that the analysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+x
+Chapter
+2
+A
+Gentle
+Introduction
+Analysis
+(a)
+Concrete
+semantics
+y
+y
+y
+y
+x
+(a)
+Concrete
+semantics
+40
+Chapter 2Introduction
+A Gentle Introduction
+to StaticAnalysis
+Analysis
+Chapter
+2
+A
+Gentle
+to
+Static
+ved after
+initialization andy before the
+statement
+is yshown
+in Figure
+2.15(b).
+We
+show
+in
+Chapter
+2 A Gentle
+Introduction
+to(a)
+Static
+Analysis
+y
+y
+(a)
+Concrete
+semantics
+Concrete semantics
+
+(1,
+0.5)
+(1,
+0.5)
+(b)
+An
+pproach:
+(b) Ana
+(b) Anal
+sider the program
+below,
+which
+starts
+at
+a
+point
+located
+}
+(b) Analys
+}
+40
+Chapter 2 A Gentle Introduction toyStatic Analysis
+y
+Computation:
+iter{p}
+y
+y
+der
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+y
+y
+y
+e translation
+2.15(c), Figureyyay2.15(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+y concrete
+y
+y
+y
+non-deterministically
+chosen
+number
+of
+y
+y
+y
+y
+that
+the
+analysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+o
+y
+y
+asthat
+sketched
+The imprecision
+is inherent
+in
+the
+computation
+of
+over-approximations
+(in
+the above.
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+ranslation
+aanalysis
+non-deterministically
+chosen
+number
+of
+{(x,
+y)
+∣
+x
+≤
+0.5
+∧
+0
+≤
+y
+≤
+2x}
+init(
+);
+y
+y
+nvex
+Polyhedra
+th
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+of
+abstract
+elements
+as
+in
+the
+previous
+examples.
+fter
+initialization
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+s
+y
+fter
+initialization
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+sh
+y
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+t
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+PDFLaTeX
+Size: x ⌥
+2019 2:23pm iter
+x 0.5});
+x x { translate(1,0.5)
+x
+x
+}
+0etththlewith
+⌥
+y
+⌥
+2x
+and
+x
+x
+x
+this
+process
+does
+not
+terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+PDFLaTeX
+Size:
+7x9
+February
+2019
+2:23pm
+PDFLaTeX
+Size:
+27,
+2019
+2:23pm
+5(c),
+Figure
+2.15(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+alg
+⌥
+y ⌥Figure
+2x and
+x
+⌥
+0.5});
+5(c),
+2.15(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+alg
+(a) Concrete semantics
+(b) Analysis of p (0 iteration)
+(c) Analysis of p (up to 1 iteration)
+(d) Analysis of p (up to 2 ite
+n in Figure 2.15(f), which also provides a sound approximation of all the possible output states
+etched
+above.
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximati
+Concretization
+of [x 0]
+⌥ 0, y 0] in
+(b) Concretization
+of [x 0]
+(a) ConcretizationThe
+of [x ⌥ 0,imprecision
+y 0]
+(b)(a)
+Concretization
+of [x
+etched
+above.
+is
+inherent
+the
+computation
+of
+over-approximatio
+program.
+y
+y
+y
+y
+x
+x
+x
+x Done!
+No
+change.
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+x
+stract
+elements
+as
+in
+the
+previous
+examples.
+x
+(1,
+0.5)
+apter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+apter
+2
+A
+Gentle
+Introduction
+Analysis
+stract
+elements
+as
+in
+the
+previous
+examples.
+x
+0.5)
+er
+2 (1,
+Aabstraction
+Gentle
+Introduction to Static
+Analysis
+(a)
+Concrete
+semantics
+(b) Analysis
+Analysis
+ofppp (0
+(0iteration)
+iteration)
+x
+x
+r
+2
+A
+Gentle
+Introduction
+Analysis
+Signs semantics
+abstraction
+Signs
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration) terminate if
+(a)
+Concrete
+of
+e iterative
+algorithm
+demonstrated
+in
+Example
+2.12
+will
+actually
+always
+(a)
+Concrete
+semantics
+(b)
+of
+(0
+iteration)
+x
+x
+0
+(a) Concrete semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+(c)(c)
+Analysis
+ofof
+pp1(up
+(up
+to
+11iteration)
+iteration)
+(d)Analysis
+Analy
+(a) Concrete semantics
+(b) Analysis
+0 of p (0 iteration)
+Analysis
+(up
+to
+iteration)
+(d)
+(c)
+Analysis
+of
+p
+to
+1
+(d)
+Analys
+r 2Aprocess
+A Gentle
+Introduction
+to(a)Static
+Analysis
+(c) it
+Analysis
+of p1 (up towould
+1 iteration) yield
+(d) Analysis
+o
+is
+does
+not
+terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+Gentle
+Introduction
+to
+Static
+Analysis
+terminate,
+we
+note
+that
+repeating
+forever
+the
+Concrete
+semantics
+(b)
+Analysis
+of
+p (0 iteration)
+properties
+than
+others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representa(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+properties
+than
+others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representathe signs abstract
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+finite
+number
+of
+abstract
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+tions
+and
+less
+costly
+algorithms
+than
+others.
+In
+the following paragraphs,
+we will
+present
+tions
+and
+less
+costly
+algorithms
+than
+others.
+In
+the
+following
+paragraphs,
+we
+will
+present
+yyy
+y
+y
+y
+y 2.15(f), which also provides
+y
+igure
+provides
+a
+sound
+approximation
+of
+all
+the
+possible
+outpu
+y
+y
+youtput
+a
+sound
+approximation
+of
+all
+the
+possible
+Forever!
+yfew algorithm
+y also union(R,
+y
+y
+ents
+and
+when
+the
+iterative
+computes
+R
+analysis(b,
+R)),
+the
+Forever!
+a
+other
+examples
+of
+abstractions,
+which
+have
+a
+simple
+and
+intuitive
+graphical
+a
+few
+other
+examples
+of
+abstractions,
+which
+also
+have
+a
+simple
+and
+intuitive
+graphical
+ex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+2 iterations
+representation.
+representation.
+ram.
+1 iteration
+of statement
+R will
+converge
+after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+x
+x
+x
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+x
+x
+x
+xx and yin
+0
+iteration
+Signs
+abstraction.
+The
+abstraction
+of
+Example
+2.4
+treats
+differently and is very
+Signs abstraction. The abstraction of Example 2.4 treats x and y differently and is very
+. .. .. .
+her
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+specific
+to
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+specific
+to
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+2
+iterations)
+(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+ative
+algorithm
+demonstrated
+in
+Example
+2.12
+will
+actually
+always
+termi
+15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+in
+Example
+2.12
+will
+actually
+always
+termin
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+analysis toSimilarly,
+prove thatit ywould
+never
+becomes
+it would not apply if the propanalysis to prove that y never becomes negative.
+apply ifnegative.
+theof
+prop(b) not
+Analysis
+pSimilarly,
+0 (0 iteration)
+0
+they
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+ertypositive.
+to prove
+was that xthis
+does
+not become
+positive.
+However,
+this abstraction generalizes
+erty to prove
+was
+that xcomputation
+does not become
+However,
+abstraction
+generalizes
+herent
+in
+the
+of
+over-approximations
+(in
+Figure
+2.15
+y
+y
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+x
+x
+signs
+abstract
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+finite
+number
+of
+a
+x
+x
+this
+abstract
+domain
+has
+a
+finite
+number
+of
+ab
+into
+a
+more
+expressive
+one,
+which
+describes
+a
+set
+of
+states
+using
+two
+pieces
+of
+information:
+into
+a
+more
+expressive
+one,
+which
+describes
+set
+of
+states
+using
+two
+pieces
+of
+information:
+x
+Abstract
+iteration
+xof abstract
+x
+se
+property.
+Since
+the
+number
+properties
+is
+finite,
+the
+latter
+case
+will
+occur
+x
+x
+x
+x
+x
+x
+x
+x
+amples.
+x
+x
+x
+y
+the
+possible
+values
+of
+the
+sign
+of
+xy.and
+the
+possible
+values
+of the sign of y.x For each varix
+the
+possible
+values
+of
+the
+sign
+of
+x
+and
+the
+possible
+values
+of
+the
+sign
+of
+For
+each
+variy
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+2
+iterations)
+x
+examples.
+x Analysis of p (up to 2 iterations)
+x
+(c) Analysis of p (up to 1 iteration)
+(d)
+x
+b)
+Analysis
+of
+p
+(0
+iteration)
+b)able,
+Analysis
+of p (0
+iteration)
+(c)iteration)
+Analysis
+ofitppable,
+(upof
+top1positive,
+1algorithm
+iteration)
+(d)non-negative,
+Analysis
+of
+p (up
+(up
+top22value
+iterations)
+and
+when
+iterative
+algorithm
+computes
+union(R,
+analysis(b,
+R
+this
+abstraction
+whether
+itof
+may
+be
+positive,
+non-negative,
+The
+this
+abstraction
+records
+whether
+may
+be
+The
+(c)
+Analysis
+(up
+to
+iteration)
+(d)
+Analysis
+petc.
+to
+iterations)
+(c) Analysis
+(up
+to 1negative,
+iteration)
+(d)
+of
+(up
+2 iterations)
+(b)
+Analysis
+of
+p the
+(0
+thisAnalysis
+value
+over-approximates
+the
+behaviors
+observed
+after any number
+xof
+xthe
+(e)
+ofetc.
+p (up
+to
+3 iterations)
+(f)
+ost
+finitely
+many
+times.
+Therefore,
+atrecords
+some
+point,
+ofunion(R,
+R Analysis
+stabilizes,
+and
+then
+computes
+RRtonegative,
+analysis(b,
+R)
+
+cs Computation:
+iter{p}
+Iteration in Convex Poly
+onvex Polyhedra
+0
+
+1
+
+2
+
+Figure 2.5
+
+Figure 2.5
+
+0
+00
+0
+
+0
+
+0
+
+1
+
+0
+0
+
+0
+
+3
+
+2
+
+11
+
+11
+
+22
+2 to 2 iterations)
+(e) Analysis of p3 3(up to 3 iterations)
+100 22 of p2 (up
+(d) Analysis
+
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+(d)
+Analysis
+(up
+2 iterations)
+2(e)
+of p (up to 3 iterations)
+(c)areAnalysis
+pa few
+(up2.5:
+to
+1 iteration)
+(d)shown
+Analysis
+of of
+p p
+(up
+toAnalysis
+2to
+iterations)
+concretizations
+abstract
+elements are
+in Figure
+2.5:
+concretizations of a few abstract elements
+shown inofof
+Figure
+1
+1
+0
+(c)
+Analysis
+of p11 (up to 1 iteration)
+(b) Analysis of p0 (0 iteration)
+(c) Analysis of p1 (up to 1 iteration)
+
+(f) E
+
+(
+
+===== slide 101 =====
+}
+tract
+Semantics
+Computation:
+iter{p}
+act iteration) We consider
+the program below, which
+starts at a point located
+sumea that
+thegeometric
+analysis uses
+the convexapolyhedra
+abstract domain.
+Then number
+the set ofof
+states
+ates
+basic
+translation
+non-deterministically
+chosen
+Example:
+Convex
+Polyhedra
+ved after
+initialization
+and before they
+statement
+is shown in Figure Poly
+2.15(b). We show in
+y
+Iteration
+in
+Convex
+26
+
+26
+
+y
+
+Chapter 2 to
+A Gentle
+Introduction
+to Static Analysis
+Chapter
+2 A Gentle
+to Static
+Analysis
+Chapter
+2 Introduction
+A Gentle
+Introduction
+Static
+Analysis
+
+y
+
+y
+
+y
+
+y
+
+y
+
+y
+
+y
+
+ori Book Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:23pm
+
+e 2.15(c), Figure
+2.15(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+concrete
+({(x, y) | 0 ⌥ y ⌥ 2x and x ⌥ 0.5});
+as sketched above. The imprecision is inherent
+in
+the
+computation
+of
+over-approximations
+(in
+{(x,
+y)
+∣
+x
+≤
+0.5
+∧
+0
+≤
+y
+≤
+2x}
+init(
+);
+{
+of abstract elements as in the previous examples.
+x x
+x x { translate(1,0.5)
+x
+x
+iter
+}
+x
+x
+le this process does not terminate,
+we note that repeating it forever would yield the result
+(1, 0.5)
+x semantics
+x
+(a) Concrete
+(b) Analysis of p0 (0 iteration)
+(c) Analysis of p1 (up to 1 iteration)
+(d) Analysis of p2 (up to 2 ite
+n in Figure 2.15(f), which
+also
+provides
+aIntroduction
+sound approximation
+of all the possible output states
+Chapter
+2
+A
+Gentle
+to
+Static
+Analysis
+} (a) Concretization of [x ⌥ 0, y 0]
+Concretization
+of [x 0]
+⌥ 0, y 0]
+(b) Concretization of [x 0]
+(b)(a)
+Concretization
+of [x
+program.
+y to this state in
+y
+ysis
+of py1 (up to 1 iteration)
+(d) Analysis
+of p2 (up
+to 2 iterations)
+y We want
+to converge
+No change. Done!
+x
+
+x
+
+Figure
+2.5
+Figure 2.5
+nalysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+finite
+time!
+Signs abstraction
+abstraction algorithm demonstrated
+e Signs
+iterative
+in
+Example
+2.12
+will
+actually
+always
+terminate
+if
+(a) Concrete semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+0
+y
+ation
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+y
+properties
+than others.
+Furthermore,
+some
+abstractionshas
+yield a
+simpler
+computer
+representaproperties
+than others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representathe
+signs
+abstract
+domain.
+Indeed,
+this
+abstract
+domain
+finite
+number
+of abstract
+tions and
+less
+costly
+algorithms
+In the following
+we will
+present
+tions y
+and less and
+costly algorithms
+others.
+In the
+following
+paragraphs,
+weothers.
+will present
+2.15(d)
+Figurethan2.15(e)
+the
+threethaniterations
+of theparagraphs,
+analysis
+algorithm
+yfirst
+ents
+whenofthe
+iterative
+R also union(R,
+analysis(b,
+awhich
+few algorithm
+other
+examples
+ofcomputes
+abstractions,
+have a simple and
+intuitive graphical R)), the
+a few and
+other examples
+abstractions,
+also have
+a simple
+and intuitivewhich
+graphical
+ve.
+The imprecision is inherent
+representation. in the computation of over-approximations (in
+representation.
+of R will converge after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+x
+ents
+in theTheprevious
+Signs
+abstraction.
+ofxand
+Example
+Signs as
+abstraction.
+abstractionxofexamples.
+Example
+2.4 treats xThe
+andabstraction
+y differently
+is very2.4 treats x and y differently and is very
+her
+theto(c)the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+specific
+to
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+specific
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f) Expected result
+3
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+2
+iterations)
+1
+2
+does
+not
+terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+analysis toSimilarly,
+prove thatit ywould
+nevernot
+becomes
+analysis to prove that y never becomes negative.
+apply ifnegative.
+the prop-Similarly, it would not apply if the propthey
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+to proveHowever,
+that xthis
+does
+not become
+positive.
+this abstraction
+generalizes
+to prove
+that xprovides
+does not become
+abstraction
+generalizes
+Figure
+2.15all However,
+),ertywhich
+also
+aertypositive.
+sound
+approximation
+of
+the possible
+output
+states
+y was
+ywas
+into
+a
+more
+expressive
+one,
+which
+describes
+a
+set
+of
+states
+using
+two
+pieces
+of
+information:
+into
+a
+more
+expressive
+one,
+which
+describes
+set
+of
+states
+using
+two
+pieces
+of
+information:
+Abstract
+iteration
+setheproperty.
+Since
+the
+number
+of
+abstract
+properties
+is
+finite,
+the
+latter
+case
+will
+occur
+possible
+possible values of the sign of x and the
+the possible
+possible values
+values of
+of the
+the sign
+sign of
+of xy.and
+Forthe
+each
+vari- values of the sign of y. For each varixx itable,
+x
+x many
+x point,
+abstraction
+whether
+it
+may
+be
+positive,
+negative,
+etc. The
+able,finitely
+this abstraction
+recordstimes.
+whether
+may this
+be positive,
+negative,
+non-negative,
+etc.
+The
+this
+value
+over-approximates
+behaviors
+observed
+after any number
+x
+ost
+Therefore,
+atrecords
+some
+the
+value
+of non-negative,
+R the
+stabilizes,
+and then
+101
+
+concretizations
+a few2.5:
+abstract elements are shown in Figure 2.5:
+concretizations of a few abstract elements
+are shown in of
+Figure
+
+===== slide 102 =====
+Widening
+To enforce termination of the analysis
+we need to enforce convergence of iterations
+(not necessary if nitely many abstract elements are traversed)
+widening amounts to over-approximate
+the union of two abstract elements and
+further loose precision to gain convergence
+
+fi
+
+102
+
+===== slide 103 =====
+Widening Convex Poly
+Abstract element = nitely many inequalities
+Make sure the number of inequalities
+is decreased at each iteration!
+
+fi
+
+103
+
+===== slide 104 =====
+Times.cls
+LT
+Book Style
+Typeset with
+PDFLaTeX Size:
+February 27, 2019
+26 union(R,
+Chapter
+2MITPress
+A Gentle
+Introduction
+to Static
+Analysis
+40
+Chapter
+2 7x9
+A Gentle
+Intr
+Chapter
+2 analysis(b,
+AasGentle
+Introduction
+to Static
+Analysis
+EX Times A Priori
+R
+R))
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+Moreover,
+shown
+above
+any
+execution
+of
+p
+can
+be
+characterized
+by
+the
+number
+of
+times
+}
+y
+it iteratesyMITPress
+over the
+loop. Thus, any execution
+y is ultimately covered by repeating this
+y iteraTimes.cls LTEX Times A Priori Booky
+Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:23pm
+y
+Moreover, as shown above any execution of p can be characterized by the number of times
+sumeit iterates
+that the
+analysis
+uses
+the
+convex
+abstract
+domain.
+Then
+the
+set
+of
+states
+tive
+abstract
+computation.
+y
+y
+y polyhedra
+40y
+Chapter 2 A Gentle Introduction to Static Analysis
+over the loop. Thus, any execution is ultimately covered by repeating this iteray
+y
+The
+following
+example
+illustrates
+this
+approach:
+ved after
+initialization
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+ytive abstract computation.
+y 40
+Chapter 2 A Gentle Introduction
+to Static Analysis
+y
+y
+Abstract
+Semantics
+Computation:
+iter{p}
+Example
+2.12 (Abstract iteration) We consider the program below, which starts at a point located
+The
+following
+example
+illustrates
+this
+approach:
+e 2.15(c), Figure 2.15(d)concrete
+and Figure 2.15(e) the first three iterations of the analysis algorithm
+
+26
+
+act Semantics Computation: iter{p}
+Widening Convex Poly
+Example:
+Convex
+Polyhedra
+Example:
+Convex
+Polyhedra
+iterates
+a
+basic
+geometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+Abstract
+Semantics
+Computation:
+iter{p}
+as sketched
+above. The imprecision
+is inherent Polyhedra
+in the computation of over-approximations (in
+Example:
+Convex
+
+example illustrates this approach:
+iteration) We consider the program below, which starts at a point located
+bstract
+Semantics
+Computation:
+iter{p}
+Abstract
+iteration)
+We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+a basic geometric translation a non-deterministically chosen number of
+A
+
+in a triangle and iterates ay basic geometric translation
+a non-deterministically chosen number of
+y
+Example 2.12 (Abstract iteration) We
+consider
+the Times.cls
+program
+below,
+which
+starts
+atwitha PDFLaTeX
+point located
+times:
+A
+MITPress
+L
+T
+X
+Times
+A
+Priori
+Book
+Style
+Typeset
+Size:Size:
+7x9
+February
+2019 2:23pm
+MITPress
+Times.cls
+L
+T
+X
+Times
+A
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+7x9 27,
+February
+27, 2019 2:23pm
+E
+Times A Priori Book Style Typeset with PDFLaTeX
+Size: 7x9 February 27, 2019
+2:23pm
+E
+in a triangle and iterates a basic geometric translation a non-deterministically
+({(x, y) | chosen
+0 ⌥ y ⌥number
+2x and of
+x ⌥ 0.5});
+AT XBook
+mes.cls
+L
+Times
+AStyle
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x92019February
+27,
+2019 2:23pm
+of
+abstract
+elements
+as
+in
+examples.
+A
+Priori
+Typeset
+with
+PDFLaTeX
+7x9
+February
+27, 2019
+2:23pm
+times:
+MITPress
+Times.cls
+LTEXBook
+Times
+AStyle
+Priori the
+Book
+Styleprevious
+Typeset
+with
+PDFLaTeX
+Size:Size:
+7x9 February
+2019 Size:
+2:23pm
+ress Times.clsE LATEX
+Times
+A Priori
+Typeset
+with
+PDFLaTeX
+7x9 27,
+February
+27,
+2:23pm
+{
+x
+x
+x ({(x,
+x
+y)
+|
+0
+⌥
+y
+⌥
+2x
+and
+x
+⌥
+0.5});
+x
+x
+40
+Chapter 2 A Gentle Introduction to Static Analysisx
+x
+x
+x
+(a) Concrete semantics
+(b) Analysis
+of p0 (0 iteration)
+le this process does not terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+(1,
+0.5)
+{
+x
+x
+40
+Chapter
+2
+A
+Gentle
+Introduction
+to Static
+Analysis
+(a) Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+(c)
+Analysis
+of
+p
+to 1 iteration)
+y (d) Analysis of p2 (up to 2 ite
+1y (up
+y Static 0
+y
+}
+40
+Chapter 2 A Gentle Introduction to
+Analysis
+n in Figure 2.15(f), which also provides
+a sound approximation
+of all
+output states
+(a) Concrete semantics
+(b) Analysis
+of p0 (0the
+iteration) possible
+x
+(1, 0.5)
+assume
+that
+the
+analysis
+uses
+the
+convexAnalysis
+polyhedra
+abstract
+Then the set of states
+(a)
+Concretization
+ofy [x 0]
+⌥
+0,
+y to
+0]
+(b)
+Concretization
+of [x domain.
+0]
+(a) Concretization of [x ⌥ 0,Chapter
+y 0] We
+(b)
+Concretization
+of [x
+x
+40
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+y
+2
+A
+Gentle
+Introduction
+Static
+y
+y y
+}
+program.
+y
+y
+y
+observed
+after
+initialization
+before theyxto Static
+shown
+in Figure
+2.15(b). We show
+y
+Chapter
+2 A Gentleand
+Introduction
+Analysis
+(a)statement
+Concrete
+semantics
+(b) in
+Analysis of p0 (0
+Noischange.
+Done!
+x
+theFigure
+convex
+polyhedra
+abstract
+Then
+the set
+states
+(a)
+Concrete
+semantics
+(b) Analysis of p0 (
+2.5 2.15(c),
+FigureWe
+2.5 assume that the analysis usesFigure
+Figure
+2.15(d)domain.
+and Figure
+2.15(e)
+theoffirst
+three
+iterations
+of the analysis algorithm
+Signsthat
+abstraction
+Signs abstraction
+observed after
+initialization and before
+thewas
+statement
+is shown
+in Figure
+2.15(b).
+We in
+show
+in
+y
+y
+x
+x computation
+sketched
+above.
+The
+imprecision
+is
+inherent
+the
+of over-approximations
+(in x
+x
+(a) ConcreteChapter
+semantics 2 A Gentle
+(b) Analysis
+of
+p
+(0
+iteration)
+0 of the
+Introduction
+to
+Static
+Analysis
+Figure 2.15(c), Figure 2.15(d) and Chapter
+Figure
+2.15(e)
+the
+first
+three
+iterations
+analysis
+algorithm
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+y
+y of p2 (up to 2 iterations)
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+gray) of abstract
+elements
+as in the
+previous examples.
+(c) Analysis
+of p1 (up to 1 iteration)
+(d) Analysis y
+y
+y
+y sketched
+yothers.
+properties
+than
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representaproperties
+than
+others. Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representax
+x computation
+that was
+above. The imprecision
+is
+inherent
+in
+the
+of
+over-approximations
+(in
+y
+y
+x
+x
+While this process does not terminate, we note that repeating
+it forever would yield
+the result
+y
+y
+(a) Concrete
+semantics and
+(b) costly
+Analysis of palgorithms
+(0paragraphs,
+iteration)
+less
+than
+In the
+following
+weythe
+willpossible
+present output states
+tions y
+and
+costly algorithms
+than
+In
+the
+following
+weofothers.
+0 Analysis
+approximation
+y of p2paragraphs,
+gray)less
+of abstract
+elements as
+in others.
+thetions
+previous
+examples.
+0
+(c) Analysis
+pwill
+(up topresent
+1 iteration)
+(d)
+(up to 2 iterations)
+y 2.15(f), which
+1provides
+shown in Figure
+also
+a sound
+of
+all
+y
+y have
+Whileexamples
+this process
+does
+not terminate,
+we
+note
+that
+repeating
+it forever
+would
+the
+result and intuitive
+awhich
+few
+other
+examples
+of abstractions,
+which
+alsoyield
+have
+a2xsimple
+a few other
+of abstractions,
+also
+a simple
+andy intuitive
+graphical
+yy 
+y  2x graphical
+of the program.
+0 approximation
+y
+x of
+x
+0
+shown in Figure 2.15(f), which also
+provides a sound
+allythe possible output
+states
+representation.
+representation.
+x  1.5
+x  0.5
+The iterative
+algorithm
+demonstrated
+in Analysis
+Example
+will actually
+always
+terminate if
+y (a)2x
+y  2x
+Concrete semantics
+(b)
+of p0 2.12
+(0 iteration)
+of the program.
+y
+
+0.5x
++
+1
+x
+x
+x
+y
+xand
+xxof Signs
+xdifferently
+abstraction.
+The
+abstraction
+of
+Example
+2.4
+treats
+x
+and
+y
+differently
+and
+is
+very
+Signs abstraction. The abstraction
+Example
+2.4
+treats
+x
+and
+y
+is
+very
+x
+
+1.5
+using the signs
+abstract
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+finite
+number
+of abstract
+x  0.5
+y 0.5x 1 x
+(c) Analysis of p (up to 1 iteration)
+(d) Analysis of p (up to 2 iterations)
+x
+demonstrated
+in
+Example
+will
+actually
+always
+terminate
+if p3 (up
+yproperty
+y
+(a) algorithm
+Concrete
+semantics
+(b)
+Analysis
+of
+p0 2.12
+(0 iteration)
+specific
+to
+the
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+specific The
+to(c)
+theiterative
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+(e)
+Analysis
+of
+to
+3
+iterations)
+(f)
+Expected
+result
+y
+
+0.5x
++
+1
+Analysis of p1 (up to 1 iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+2
+iterations)
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+xelements and when
+x the
+union(R,
+analysis(b, R)), the
+3
+y 2iterative algorithm
+y computes R
+using
+the signs
+domain.
+Indeed,
+this
+abstract
+has
+finite
+of abstract
+analysis
+prove
+that
+never
+becomes
+it would notx apply if the propanalysis
+to prove
+that yabstract
+never (c)becomes
+negative.
+Similarly,
+would
+apply
+ifnegative.
+the 1number
+propy a 0.5x
+Analysis of p (up
+to
+1 iteration) to
+(d)
+Analysis
+of
+p it
+(up y
+to 2domain
+iterations)not
+x Similarly,
+Figure
+2.15
+value
+whenever
+it updates R, the new value
+y
+y of R will converge after finitely many steps:
+(e)
+Analysis
+of p3generalizes
+(upanalysis(b,
+topositive.
+3 iterations)
+(f)Abstract
+Expected
+result
+erty
+to
+prove
+was
+that
+x
+does
+not
+become
+However,
+this
+abstraction generalizes
+erty toelements
+prove
+was
+that
+x
+does
+become
+positive.
+this
+abstraction
+iteration
+and
+when
+the
+iterative
+algorithm
+computes
+R
+union(R,
+R)),
+the
+Figure
+2.15
+ynot
+y However,
+x
+x
+y
+y
+is
+either
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+x
+x
+x
+into
+a more
+one,
+a set
+two
+piecesxof information:
+into a value
+more expressive
+which after
+describes
+setmany
+of expressive
+states
+using
+two
+piecesdescribes
+information:
+Abstract
+iteration
+Figure
+2.15which
+this
+value
+over-approximates
+the behaviors observed after any number of iterations. As a
+of R will one,
+converge
+finitely
+steps:
+whenever
+itofupdates
+R, of
+thestates
+newusing
+value
+Abstract iteration
+since
+they
+are
+computed
+using
+the
+same
+formula),
+orthe
+thesign
+new
+value
+denotes
+a isstrictly
+less
+(a)of Concrete
+semantics
+(b) of
+Analysis
+ofof
+px
+(0
+iteration)
+consequence,
+the termination
+of
+signs analysis
+guaranteed.
+0
+the
+possible
+values
+the
+sign
+and
+the
+possible
+values
+of
+of
+y.
+For
+each
+varithe possible
+values
+the
+sign
+of
+x
+and
+the
+possible
+values
+of
+the
+sign
+of
+y.
+For
+each
+varieither the
+same as the previous one
+(and
+then of
+sopwill
+be
+all
+the
+other
+subsequent
+values
+(c)
+Analysis
+of
+(up
+to 1Asthe
+iteration)
+of p
+(up
+(a) is
+Concrete
+semantics
+(b)
+Analysis
+(0
+iteration)
+x
+x wephave
+However,
+not solved
+issue of termination(d)
+in theAnalysis
+general case yet.
+The
+iter1
+2
+0
+this
+value
+over-approximates
+the
+behaviors
+observed
+after
+any
+number
+of
+iterations.
+a
+precise
+property.
+Since
+the
+number
+of
+abstract
+properties
+is
+finite,
+the
+latter
+case
+will
+occur
+able,
+this
+abstraction
+records
+whether
+it
+may
+be
+positive,
+negative,
+non-negative,
+etc.
+The
+able, this
+abstraction
+records
+whether
+it
+may
+be
+positive,
+negative,
+non-negative,
+etc.
+The
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+this
+value
+over-approximates
+the
+behaviors
+observed
+after
+any
+number
+x
+x
+ation
+technique
+used
+in
+Example
+2.12
+will
+obviously
+not
+allow
+for a terminating
+analysis
+ofvalue
+p (up
+to 3 iterations)
+(f) Expected result
+104
+1
+2
+since they are computed using the same formula),consequence,
+or the(e) Analysis
+new
+denotes
+a
+strictly
+less
+the termination of signs analysis is guaranteed.
+y of a few abstract elements
+yof
+with the
+convex
+polyhedraof
+abstraction
+or with the interval
+x Therefore,
+xthe value
+at most
+many
+times.
+at some
+point,
+R stabilizes,
+and abstraction.
+then
+concretizations
+a few
+abstract
+elements
+are shown
+in Figure
+2.5:
+concretizations
+are
+shownfinitely
+in
+Figure
+2.5:
+
+ook Style Typeset with PDFLaTeX init(
+Size: 7x9
+February
+27, ∧
+2019
+2:23pm
+{(x,
+y)
+∣
+x
+≤
+0.5
+0
+≤
+y
+≤
+2x}
+);
+Example: Convex Polyhedra
+A
+
+({(x, y) | 0 ⌥ y ⌥ 2x and
+x
+⌥
+0.5});
+iter
+{
+translate(1,0.5)
+}
+({(x, y) | 0 ⌥ y ⌥ 2x and x ⌥ 0.5});
+{
+{
+(1, 0.5)
+(1, 0.5)
+A
+
+e iterative algorithm demonstrated in Example 2.12 will actually always terminate if
+}
+} domain. Indeed, this abstract domain has a finite number of abstract
+the signs abstract
+ents
+and
+when
+the
+iterative
+algorithm
+computes
+R
+union(R,
+analysis(b,
+R)),
+the
+ysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+he analysis uses the convex polyhedra abstract domain. Then the setofofstates
+states
+of
+R
+will
+converge
+after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+tialization
+and before
+statement
+is shown
+in Figure
+2.15(b).We
+Weshow
+showin
+in
+on
+and before
+they the statement
+is shown
+in Figure
+2.15(b).
+her
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+gure
+2.15(d)
+and Figure
+2.15(e)
+the three
+first three
+iterations
+of the
+analysisalgorithm
+algorithm
+5(d)
+and
+Figure
+2.15(e)
+the
+first
+iterations
+of
+the
+analysis
+they are computed using the same formula), or the new value denotes a strictly less
+above.
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+se property. Since the number of abstract properties is finite, the latter case will occur
+elements
+as
+in
+the
+previous
+examples.
+in themany
+previous
+ostasfinitely
+times. examples.
+Therefore, at some point, the value of R stabilizes, and then
+0
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+0
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="j+WCCYUQBxT0MlgJ1rkR//7iP+U=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/EK591iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/iBj84=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="Bmt22cLc23lkUcPXFgVW9BD5VjA=">AAAB+HicbVDLSsNAFL2pr1ofjbp0M1gEQQiJ+FoW3bisYB/QhjKZTtqhk0mcmYix9EvcuFDErZ/izr9x2mahrQcuHM65l3vvCRLOlHbdb6uwtLyyulZcL21sbm2X7Z3dhopTSWidxDyWrQArypmgdc00p61EUhwFnDaD4fXEbz5QqVgs7nSWUD/CfcFCRrA2UtcuZ6jD6T1ynbNHdIy8rl1xHXcKtEi8nFQgR61rf3V6MUkjKjThWKm25ybaH2GpGeF0XOqkiiaYDHGftg0VOKLKH00PH6NDo/RQGEtTQqOp+ntihCOlsigwnRHWAzXvTcT/vHaqw0t/xESSairIbFGYcqRjNEkB9ZikRPPMEEwkM7ciMsASE22yKpkQvPmXF0njxPHOHe/2tFK9yuMowj4cwBF4cAFVuIEa1IFACs/wCm/Wk/VivVsfs9aClc/swR9Ynz/c5JFF</latexit>
+
+<latexit sha1_base64="j+WCCYUQBxT0MlgJ1rkR//7iP+U=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/EK591iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/iBj84=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="Pzc/IHZN4S/KZa0edHJfVDLblKw=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCG0MivpZFNy4r2Ae0oUymN+3QySTOTMQa+iVuXCji1k9x5984bbPQ1gMXDufcy733BAlnSrvut1VYWl5ZXSuulzY2t7bL9s5uQ8WppFCnMY9lKyAKOBNQ10xzaCUSSBRwaAbD64nffACpWCzu9CgBPyJ9wUJGiTZS1y6PcKcP99h1zh7xMfa6dsV13CnwIvFyUkE5al37q9OLaRqB0JQTpdqem2g/I1IzymFc6qQKEkKHpA9tQwWJQPnZ9PAxPjRKD4exNCU0nqq/JzISKTWKAtMZET1Q895E/M9rpzq89DMmklSDoLNFYcqxjvEkBdxjEqjmI0MIlczciumASEK1yapkQvDmX14kjRPHO3e829NK9SqPo4j20QE6Qh66QFV0g2qojihK0TN6RW/Wk/VivVsfs9aClc/soT+wPn8A2CWRQg==</latexit>
+
+1
+
+<latexit sha1_base64="Bmt22cLc23lkUcPXFgVW9BD5VjA=">AAAB+HicbVDLSsNAFL2pr1ofjbp0M1gEQQiJ+FoW3bisYB/QhjKZTtqhk0mcmYix9EvcuFDErZ/izr9x2mahrQcuHM65l3vvCRLOlHbdb6uwtLyyulZcL21sbm2X7Z3dhopTSWidxDyWrQArypmgdc00p61EUhwFnDaD4fXEbz5QqVgs7nSWUD/CfcFCRrA2UtcuZ6jD6T1ynbNHdIy8rl1xHXcKtEi8nFQgR61rf3V6MUkjKjThWKm25ybaH2GpGeF0XOqkiiaYDHGftg0VOKLKH00PH6NDo/RQGEtTQqOp+ntihCOlsigwnRHWAzXvTcT/vHaqw0t/xESSairIbFGYcqRjNEkB9ZikRPPMEEwkM7ciMsASE22yKpkQvPmXF0njxPHOHe/2tFK9yuMowj4cwBF4cAFVuIEa1IFACs/wCm/Wk/VivVsfs9aClc/swR9Ynz/c5JFF</latexit>
+
+<latexit sha1_base64="Pzc/IHZN4S/KZa0edHJfVDLblKw=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCG0MivpZFNy4r2Ae0oUymN+3QySTOTMQa+iVuXCji1k9x5984bbPQ1gMXDufcy733BAlnSrvut1VYWl5ZXSuulzY2t7bL9s5uQ8WppFCnMY9lKyAKOBNQ10xzaCUSSBRwaAbD64nffACpWCzu9CgBPyJ9wUJGiTZS1y6PcKcP99h1zh7xMfa6dsV13CnwIvFyUkE5al37q9OLaRqB0JQTpdqem2g/I1IzymFc6qQKEkKHpA9tQwWJQPnZ9PAxPjRKD4exNCU0nqq/JzISKTWKAtMZET1Q895E/M9rpzq89DMmklSDoLNFYcqxjvEkBdxjEqjmI0MIlczciumASEK1yapkQvDmX14kjRPHO3e829NK9SqPo4j20QE6Qh66QFV0g2qojihK0TN6RW/Wk/VivVsfs9aClc/soT+wPn8A2CWRQg==</latexit>
+
+1
+
+2
+
+3
+
+2
+
+===== slide 105 =====
+Chapter 2MITPress
+A Gentle
+Introduction
+to Static
+Analysis
+Chapter
+2 7x9
+A Gentle
+Intr
+Chapter
+2 analysis(b,
+A Gentle
+Introduction
+to Static
+Analysis
+Times.cls
+LT
+Book Style
+Typeset with
+PDFLaTeX Size:
+February 27, 2019
+R 26 union(R,
+R))40
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+EX Times A Priori
+Moreover,
+as
+shown
+above
+any
+execution
+of
+p
+can
+be
+characterized
+by
+the
+number
+of
+times
+}
+y
+y over the loop. Thus, any execution
+y with
+y iterait
+iterates
+is
+ultimately
+by
+repeating
+this
+MITPress Times.cls LTEX Times A Priori Book Style Typeset
+PDFLaTeX Size: covered
+7x9 February 27,
+2019
+2:23pm
+y number of times
+y
+Moreover, as shown above any execution of p can be characterized by the
+sumeit iterates
+that the
+analysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+tive
+abstract
+computation.
+y
+y
+y
+y
+Chapter 2 A Gentle Introduction to Static Analysis
+over the loop. Thus, any execution is ultimately covered by repeating this40iteray
+y
+The
+following
+example
+illustrates
+this
+approach:
+ved after
+initialization
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+ytive abstract computation.
+y 40
+Chapter 2 A Gentle Introduction to Static Analysis
+y
+y
+Semantics
+Computation:
+iter{p}
+Example
+2.12 Abstract
+(Abstract iteration)
+We consider
+the program below, which
+starts at a point located
+The
+following
+example
+illustrates
+this
+approach:
+e 2.15(c), Figure 2.15(d)concrete
+and Figure 2.15(e) the first three iterations of the analysis
+algorithm
+26
+
+A
+
+act Semantics Computation: iter{p}
+Widening Convex Poly
+Example:
+Convex
+Polyhedra
+iterates
+a
+basic
+geometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+Example:
+Convex
+Polyhedra
+Abstract
+Semantics
+Computation:
+iter{p}
+as sketched
+above. The imprecision
+is inherent Polyhedra
+in the computation of over-approximations (in
+Example:
+Convex
+
+example illustrates this approach:
+iteration) We consider the program below, which starts at a point located
+bstract
+Semantics
+Computation:
+iter{p}
+Abstract
+iteration)
+We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+a basic geometric translation a non-deterministically chosen number of
+A
+
+in a triangle and iterates ay basic geometric translation
+a non-deterministically chosen number of
+y
+Example 2.12 (Abstract iteration) We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+times:PDFLaTeX
+MITPress
+Times.cls
+LTEXBook
+Times 7x9
+AStyle
+Priori Book
+Style Typeset
+PDFLaTeX
+Size:Size:
+7x9
+February
+2019 2:23pm
+MITPress
+Times.cls
+LATEX
+Times
+A Priori
+Typeset
+withwith
+PDFLaTeX
+7x9 27,
+February
+27, 2019 2:23pm
+Times in
+A aPriori
+Book
+Style
+Typeset
+with
+Size:
+February
+27,
+2019
+2:23pm
+triangle and iterates a basic geometric translation a non-deterministically
+({(x, y) | chosen
+0 ⌥ y ⌥number
+2x and of
+x ⌥ 0.5});
+AT XBook
+mes.cls
+L
+AStyle
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x92019February
+27,
+2019 2:23pm
+of
+abstract
+elements
+as
+in
+examples.
+times:
+A
+Priori
+Typeset
+with
+PDFLaTeX
+7x9
+February
+27,
+2019
+2:23pm
+MITPress
+Times.cls
+LTEXBook
+Times
+AStyle
+Priori the
+Book
+Styleprevious
+Typeset
+with
+PDFLaTeX
+Size:Size:
+7x9 February
+27,
+2019 Size:
+2:23pm
+ress Times.clsE LATTimes
+X
+Times
+A
+Priori
+Typeset
+with
+PDFLaTeX
+7x9
+February
+27,
+2:23pm
+E
+{
+x
+x
+x ({(x,
+x
+y)
+|
+0
+⌥
+y
+⌥
+2x
+and
+x
+⌥
+0.5});
+x
+x
+40
+Chapter 2 A Gentle Introduction to Static Analysisx
+x
+x
+x
+(a) Concrete semantics
+(b) Analysis
+of p0 (0 iteration)
+le this process does not terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+(1,
+0.5)
+{
+x
+x
+(a) Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+(c)
+Analysis
+of
+p
+to 1 iteration)
+40
+Chapter
+2
+A
+Gentle
+Introduction
+to Static
+Analysis
+y
+y (d) Analysis of p2 (up to 2 ite
+1 (up
+40
+Chapter 2 A Gentle Introduction to
+Analysis
+y Static 0
+y
+}
+n in Figure 2.15(f), which also provides
+a sound approximation
+of all
+output states
+(a) Concrete semantics
+(b) Analysis
+of p0 (0the
+iteration) possible
+x
+(1, 0.5)
+Concretization
+ofy [x 0]
+⌥
+0,
+y to
+0]
+(b) yConcretization
+of [x domain.
+0]
+(a) Concretization of [x ⌥ 0,Chapter
+y 0] We
+(b)
+Concretization
+of [x
+xThen the set of states
+assume
+the
+analysis
+uses
+the
+convexAnalysis
+polyhedra
+abstract
+40
+Chapter
+2 (a)
+Athat
+Gentle
+Introduction
+to
+Static
+Analysis
+2
+A
+Gentle
+Introduction
+Static
+y
+y
+}
+program.
+y
+y
+y
+y
+Chapter
+2 A Gentleand
+Introduction
+Analysis
+observed
+after
+initialization
+before theyxto Static
+shown
+in Figure
+2.15(b). We show
+y
+(a)statement
+Concrete
+semantics
+(b) in
+Analysis of p0 (0
+Noischange.
+Done!
+x
+theFigure
+convex
+polyhedra
+abstract
+Then
+the set
+states
+(a)
+Concrete
+semantics
+(b) Analysis of p0 (
+2.5 2.15(c),
+FigureWe
+2.5 assume that the analysis usesFigure
+Figure
+2.15(d)domain.
+and Figure
+2.15(e)
+theoffirst
+three
+iterations
+of the analysis algorithm
+observed after
+initialization and before
+thewas
+statement
+is shown
+in Figure
+2.15(b).
+Wein
+show
+in
+Signs abstraction
+Signs abstraction
+y
+y
+x
+x
+that
+sketched
+above.
+The
+imprecision
+is
+inherent
+the
+computation
+of
+over-approximations
+(in
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+x
+x
+0
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+Figure 2.15(c), Figure 2.15(d) and Chapter
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+y
+y of p2 (up to 2 iterations)
+(a) Concrete
+semantics
+(b) Analysis
+ofto
+p (0 iteration)
+2
+A
+Gentle
+Introduction
+Static
+Analysis
+gray)
+of
+abstract
+elements
+as
+in
+the
+previous
+examples.
+y
+(c) Analysis
+of p1 (up to 1 iteration)
+(d) Analysis y
+y
+y sketched
+properties
+thanyothers.
+Furthermore,
+some
+abstractions
+yield simpler
+computer representaproperties
+than
+others. Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representax
+x computation
+that was
+above. The imprecision
+is
+inherent
+in
+the
+of
+over-approximations
+(in
+x
+x
+y
+y
+While (b)
+this
+process does not terminate, we note that repeating
+it forever would yield
+the result
+y
+y
+(a) Concrete semantics
+Analysis of p (0 iteration)
+and
+less
+costly
+algorithms
+than
+In
+the
+following
+we
+will
+present
+tions y
+and
+costly algorithms
+than
+In
+the
+following
+paragraphs,
+we
+present
+gray)less
+of abstract
+elements as
+in others.
+thetions
+previous
+examples.
+Remained
+(c) Analysis
+ofothers.
+pwill
+(d)
+Analysis
+of p2paragraphs,
+(up to 2 iterations)
+0
+
+y
+y
+0
+
+y
+1 (up to 1 iteration)
+shown in Figure 2.15(f), which also provides a sound approximation of all the possible output states
+y
+y have
+Whileexamples
+this process
+does
+not terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+awhich
+few
+other
+examples
+of
+abstractions,
+which
+also
+have
+a
+simple
+and intuitive
+graphical
+a few other
+of abstractions,
+also
+a
+simple
+and
+intuitive
+graphical
+y
+
+2x
+y
+
+2x
+y
+y
+of
+the
+program.
+Remained
+0 approximation
+y
+0
+x of
+x
+shown
+in
+Figure
+2.15(f),
+which
+also
+provides a sound
+allythe possible output
+states
+representation.
+representation.
+x  1.5
+x  0.5
+y (a)2x
+y  2x
+The iterative
+algorithm
+demonstrated
+in Analysis
+Example
+will actually
+always
+terminate if
+of the program.
+Concrete semantics
+(b)
+of p0 2.12
+(0 iteration)
+x
+Modified
+y
+
+0.5x
++
+1
+y2.4 treats
+xand
+xxof Signs
+xdifferently
+x
+x
+abstraction.
+The
+abstraction
+of
+Example
+2.4
+treats
+x
+and
+y differently and is very
+Signs abstraction. The abstraction
+Example
+x
+and
+y
+is
+very
+x
+
+1.5
+x
+
+0.5
+using
+the
+signs
+abstract
+Indeed,
+this
+abstract
+has
+a
+finite
+number
+of
+abstract
+y
+0.5x
+1
+(c) domain.
+Analysis of p (up to
+1 iteration)
+(d) Analysis
+of p (up to 2domain
+iterations)
+x
+x
+The
+iterative
+algorithm
+demonstrated
+in
+Example
+2.12
+will
+actually
+always
+terminate
+if
+(a) Concrete
+semantics
+Analysis
+of
+p0 work
+(0 iteration)
+yproperty
+y
+specific
+to(b)It
+the
+D
+defined
+Section
+2.1.
+It
+not of
+work
+if we
+wanted
+a static
+specific to(c)
+theAnalysis
+property
+in
+Section
+2.1.
+would
+not
+if(up
+weyin
+wanted
+(e)would
+Analysis
+p(e)
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+Modified
+2
+0.5x
++a 1static
+3
+ofDpdefined
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+to
+iterations)
+x
+x
+Analysis of p3 (upanalysis(b,
+to 3 iterations)
+(f) Expected
+result
+1
+elements
+and
+when
+the
+union(R,
+R)),
+the
+y 2iterative algorithm
+y computes R
+using
+the signs
+domain.
+Indeed,
+this
+abstract
+has
+finite
+of abstract
+analysis
+prove
+that
+never
+becomes
+it would notx apply if the propanalysis
+to prove
+that yabstract
+never (c)becomes
+negative.
+Similarly,
+would
+apply
+ifnegative.
+the 1number
+propy a 0.5x
+Analysis of p (up
+to
+1 iteration) to
+(d)
+Analysis
+of
+p it
+(up y
+to 2domain
+iterations)not
+x Similarly,
+y
+y of R will converge after finitely many steps:
+Figure
+2.15
+value
+whenever
+it
+updates
+R,
+the
+new
+value
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+theynotiterative
+algorithm
+computes
+R abstraction
+union(R,
+R)),
+the
+to prove
+was
+that xthis
+does
+not
+become
+positive.
+However,
+this
+abstraction generalizes
+erty toelements
+prove
+thatwhen
+x does
+become
+positive.
+3generalizes
+y However,
+Abstract
+iteration
+Figure
+2.15
+x erty
+x analysis(b,
+y wasand
+y
+is
+either
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+x
+x
+x
+into
+a
+more
+expressive
+one,
+which
+describes
+a
+set
+of
+states
+using
+two
+pieces
+of
+information:
+into a value
+more expressive
+one,
+which
+describes
+set
+of
+states
+using
+two
+pieces
+of
+information:
+Figure
+2.15
+of R will converge after finitely many steps:
+whenever
+it updates
+R, the newthis
+value
+Abstract
+iteration
+value over-approximates
+the behaviors observed after any number of iterations. As a
+x
+Abstract iteration
+(a)
+Concrete
+semantics
+(b)
+Analysis
+ofof
+px
+(0
+iteration)
+since
+they
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+consequence,
+the termination
+of
+signs analysis
+is
+guaranteed.
+0
+the
+possible
+values
+of
+the
+sign
+and
+the
+possible
+values
+of
+the
+sign
+of
+y.
+For
+each
+varithe possible
+values
+of
+the
+sign
+of
+x
+and
+the
+possible
+values
+of
+the
+sign
+of
+y.
+For
+each
+varieither the
+same as the previous one
+then of
+sopwill
+be
+all
+the
+other
+subsequent
+values
+(c)
+Analysis
+of
+(up
+to 1Asthe
+iteration)
+of p
+(up
+(a) is
+Concrete
+semantics
+(b) (and
+Analysis
+(0
+iteration)
+x
+x wephave
+However,
+not solved
+issue of termination(d)
+in theAnalysis
+general case yet.
+The
+iter1
+2
+0
+this
+value
+over-approximates
+the
+behaviors
+observed
+after
+any
+number
+of
+iterations.
+a
+precise
+property.
+Since
+the
+number
+of
+abstract
+properties
+is
+finite,
+the
+latter
+case
+will
+occur
+able,
+this
+abstraction
+records
+whether
+it
+may
+be
+positive,
+negative,
+non-negative,
+etc.
+The
+able, this
+abstraction
+records
+whether
+it
+may
+be
+positive,
+negative,
+non-negative,
+etc.
+The
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of number
+p2analysis
+(up to
+this
+value
+over-approximates
+the
+behaviors
+observed
+after
+any
+x
+x
+ation
+technique
+used
+in
+Example
+2.12
+will
+obviously
+not
+allow
+for a terminating
+105
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+since they are computed using the same formula),consequence,
+or the new
+value ofdenotes
+a isstrictly
+less
+1
+the termination
+signs analysis
+guaranteed.
+y of a few abstract elements
+yof
+with the
+convex
+polyhedraof
+abstraction
+or with the interval
+x Therefore,
+xthe value
+at most
+many
+times.
+at some
+point,
+R stabilizes,
+and abstraction.
+then
+concretizations
+a few
+abstract
+elements
+are shown
+in Figure
+2.5:
+concretizations
+are
+shownfinitely
+in
+Figure
+2.5:
+
+ook Style Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+{(x,
+y)
+∣
+x
+≤
+0.5
+∧
+0
+≤
+y
+≤
+2x}
+init(
+);
+Example: Convex Polyhedra
+A
+
+({(x, y) | 0 ⌥ y ⌥ 2x and
+x
+⌥
+0.5});
+iter
+{
+translate(1,0.5)
+}
+({(x, y) | 0 ⌥ y ⌥ 2x and x ⌥ 0.5});
+{
+{
+(1, 0.5)
+(1, 0.5)
+A
+
+e iterative algorithm demonstrated in Example 2.12 will actually always terminate if
+}
+} domain. Indeed, this abstract domain has a finite number of abstract
+the signs abstract
+ents
+and
+when
+the
+iterative
+algorithm
+computes
+R
+union(R,
+analysis(b,
+R)),
+the
+ysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+he analysis uses the convex polyhedra abstract domain. Then the setofofstates
+states
+of
+R
+will
+converge
+after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+tialization
+and before
+statement
+is shown
+in Figure
+2.15(b).We
+Weshow
+showin
+in
+on
+and before
+they the statement
+is shown
+in Figure
+2.15(b).
+her
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+gure
+2.15(d)
+and Figure
+2.15(e)
+the three
+first three
+iterations
+of the
+analysisalgorithm
+algorithm
+5(d)
+and
+Figure
+2.15(e)
+the
+first
+iterations
+of
+the
+analysis
+they are computed using the same formula), or the new value denotes a strictly less
+above.
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+se property. Since the number of abstract properties is finite, the latter case will occur
+elements
+as
+in
+the
+previous
+examples.
+in themany
+previous
+ostasfinitely
+times. examples.
+Therefore, at some point, the value of R stabilizes, and then
+0
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+0
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="j+WCCYUQBxT0MlgJ1rkR//7iP+U=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/EK591iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/iBj84=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="Bmt22cLc23lkUcPXFgVW9BD5VjA=">AAAB+HicbVDLSsNAFL2pr1ofjbp0M1gEQQiJ+FoW3bisYB/QhjKZTtqhk0mcmYix9EvcuFDErZ/izr9x2mahrQcuHM65l3vvCRLOlHbdb6uwtLyyulZcL21sbm2X7Z3dhopTSWidxDyWrQArypmgdc00p61EUhwFnDaD4fXEbz5QqVgs7nSWUD/CfcFCRrA2UtcuZ6jD6T1ynbNHdIy8rl1xHXcKtEi8nFQgR61rf3V6MUkjKjThWKm25ybaH2GpGeF0XOqkiiaYDHGftg0VOKLKH00PH6NDo/RQGEtTQqOp+ntihCOlsigwnRHWAzXvTcT/vHaqw0t/xESSairIbFGYcqRjNEkB9ZikRPPMEEwkM7ciMsASE22yKpkQvPmXF0njxPHOHe/2tFK9yuMowj4cwBF4cAFVuIEa1IFACs/wCm/Wk/VivVsfs9aClc/swR9Ynz/c5JFF</latexit>
+
+<latexit sha1_base64="j+WCCYUQBxT0MlgJ1rkR//7iP+U=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/EK591iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/iBj84=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="Pzc/IHZN4S/KZa0edHJfVDLblKw=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCG0MivpZFNy4r2Ae0oUymN+3QySTOTMQa+iVuXCji1k9x5984bbPQ1gMXDufcy733BAlnSrvut1VYWl5ZXSuulzY2t7bL9s5uQ8WppFCnMY9lKyAKOBNQ10xzaCUSSBRwaAbD64nffACpWCzu9CgBPyJ9wUJGiTZS1y6PcKcP99h1zh7xMfa6dsV13CnwIvFyUkE5al37q9OLaRqB0JQTpdqem2g/I1IzymFc6qQKEkKHpA9tQwWJQPnZ9PAxPjRKD4exNCU0nqq/JzISKTWKAtMZET1Q895E/M9rpzq89DMmklSDoLNFYcqxjvEkBdxjEqjmI0MIlczciumASEK1yapkQvDmX14kjRPHO3e829NK9SqPo4j20QE6Qh66QFV0g2qojihK0TN6RW/Wk/VivVsfs9aClc/soT+wPn8A2CWRQg==</latexit>
+
+<latexit sha1_base64="Bmt22cLc23lkUcPXFgVW9BD5VjA=">AAAB+HicbVDLSsNAFL2pr1ofjbp0M1gEQQiJ+FoW3bisYB/QhjKZTtqhk0mcmYix9EvcuFDErZ/izr9x2mahrQcuHM65l3vvCRLOlHbdb6uwtLyyulZcL21sbm2X7Z3dhopTSWidxDyWrQArypmgdc00p61EUhwFnDaD4fXEbz5QqVgs7nSWUD/CfcFCRrA2UtcuZ6jD6T1ynbNHdIy8rl1xHXcKtEi8nFQgR61rf3V6MUkjKjThWKm25ybaH2GpGeF0XOqkiiaYDHGftg0VOKLKH00PH6NDo/RQGEtTQqOp+ntihCOlsigwnRHWAzXvTcT/vHaqw0t/xESSairIbFGYcqRjNEkB9ZikRPPMEEwkM7ciMsASE22yKpkQvPmXF0njxPHOHe/2tFK9yuMowj4cwBF4cAFVuIEa1IFACs/wCm/Wk/VivVsfs9aClc/swR9Ynz/c5JFF</latexit>
+
+1
+
+<latexit sha1_base64="Pzc/IHZN4S/KZa0edHJfVDLblKw=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCG0MivpZFNy4r2Ae0oUymN+3QySTOTMQa+iVuXCji1k9x5984bbPQ1gMXDufcy733BAlnSrvut1VYWl5ZXSuulzY2t7bL9s5uQ8WppFCnMY9lKyAKOBNQ10xzaCUSSBRwaAbD64nffACpWCzu9CgBPyJ9wUJGiTZS1y6PcKcP99h1zh7xMfa6dsV13CnwIvFyUkE5al37q9OLaRqB0JQTpdqem2g/I1IzymFc6qQKEkKHpA9tQwWJQPnZ9PAxPjRKD4exNCU0nqq/JzISKTWKAtMZET1Q895E/M9rpzq89DMmklSDoLNFYcqxjvEkBdxjEqjmI0MIlczciumASEK1yapkQvDmX14kjRPHO3e829NK9SqPo4j20QE6Qh66QFV0g2qojihK0TN6RW/Wk/VivVsfs9aClc/soT+wPn8A2CWRQg==</latexit>
+
+1
+
+2
+
+3
+
+2
+
+===== slide 106 =====
+Chapter 2MITPress
+A Gentle
+Introduction
+to Static
+Analysis
+Chapter
+2 7x9
+A Gentle
+Intr
+Chapter
+2 analysis(b,
+A Gentle
+Introduction
+to Static
+Analysis
+Times.cls
+LT
+Book Style
+Typeset with
+PDFLaTeX Size:
+February 27, 2019
+R 26 union(R,
+R))40
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+EX Times A Priori
+Moreover,
+as
+shown
+above
+any
+execution
+of
+p
+can
+be
+characterized
+by
+the
+number
+of
+times
+}
+y
+y over the loop. Thus, any execution
+y is ultimately covered by repeating this
+y iterait
+iterates
+y number of times
+y
+Moreover, as shown above any execution of p can be characterized by the
+sumeit iterates
+that the
+analysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+tive
+abstract
+computation.
+y
+y
+y
+y
+Chapter 2 A Gentle Introduction to Static Analysis
+over the loop. Thus, any execution is ultimately covered by repeating this40iteray
+y
+The
+following
+example
+illustrates
+this
+approach:
+ved after
+initialization
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+ytive abstract computation.
+y
+y
+y
+Semantics
+Computation:
+iter{p}
+Example
+2.12 Abstract
+(Abstract iteration)
+We consider
+the program below, which
+starts at a point located
+The
+following
+example
+illustrates
+this
+approach:
+e 2.15(c), Figure 2.15(d)concrete
+and Figure 2.15(e) the first three iterations of the analysis
+algorithm
+26
+
+A
+
+act Semantics Computation: iter{p}
+Widening Convex Poly
+Example:
+Convex
+Polyhedra
+iterates
+a
+basic
+geometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+Example:
+Convex
+Polyhedra
+Abstract
+Semantics
+Computation:
+iter{p}
+as sketched
+above. The imprecision
+is inherent Polyhedra
+in the computation of over-approximations (in
+Example:
+Convex
+
+example illustrates this approach:
+iteration) We consider the program below, which starts at a point located
+bstract
+Semantics
+Computation:
+iter{p}
+Abstract
+iteration)
+We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+a basic geometric translation a non-deterministically chosen number of
+
+in a triangle and iterates a basic geometric translation a non-deterministically chosen number of
+Example 2.12 (Abstract iteration) We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+times:PDFLaTeX
+MITPress
+Times.cls
+LTEXBook
+Times 7x9
+AStyle
+Priori Book
+Style Typeset
+PDFLaTeX
+Size:Size:
+7x9
+February
+2019 2:23pm
+MITPress
+Times.cls
+LATEX
+Times
+A Priori
+Typeset
+withwith
+PDFLaTeX
+7x9 27,
+February
+27, 2019 2:23pm
+Times in
+A aPriori
+Book
+Style
+Typeset
+with
+Size:
+February
+27,
+2019
+2:23pm
+triangle and iterates a basic geometric translation a non-deterministically
+({(x, y) | chosen
+0 ⌥ y ⌥number
+2x and of
+x ⌥ 0.5});
+AT XBook
+mes.cls
+L
+AStyle
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x92019February
+27,
+2019 2:23pm
+of
+abstract
+elements
+as
+in
+examples.
+times:
+A
+Priori
+Typeset
+with
+PDFLaTeX
+7x9
+February
+27,
+2019
+2:23pm
+MITPress
+Times.cls
+LTEXBook
+Times
+AStyle
+Priori the
+Book
+Styleprevious
+Typeset
+with
+PDFLaTeX
+Size:Size:
+7x9 February
+27,
+2019 Size:
+2:23pm
+ress Times.clsE LATTimes
+X
+Times
+A
+Priori
+Typeset
+with
+PDFLaTeX
+7x9
+February
+27,
+2:23pm
+E
+{
+x
+x
+x ({(x,
+x
+y)
+|
+0
+⌥
+y
+⌥
+2x
+and
+x
+⌥
+0.5});
+x
+x
+40
+Chapter 2 A Gentle Introduction to Static Analysisx
+x
+x
+x
+(a) Concrete semantics
+(b) Analysis
+of p0 (0 iteration)
+le this process does not terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+(1,
+0.5)
+{
+(a) Concrete
+semantics 40
+(b) Analysisyof
+p}Analysis
+(0 iteration)
+Analysis
+of py1 (up
+to 1 iteration)
+Chapter y2 (c)
+A Gentle
+Introduction
+to Static
+Analysis
+y (d) Analysis of p2 (up to 2 ite
+40
+Chapter 2 A Gentle Introduction to
+Static 0
+n in Figure 2.15(f), which also provides
+a sound approximation of all the possible
+output states
+x
+(1, 0.5)
+Concretization
+of [x 0]
+⌥uses
+0,
+y to
+0]
+(b) Concretization
+of [x domain.
+0]
+(a) Concretization of [x ⌥ 0,Chapter
+y 0] We
+(b)
+Concretization
+of [x
+xThen the set of states
+assume
+the
+analysis
+the
+convexAnalysis
+polyhedra
+abstract
+40
+Chapter
+2 (a)
+Athat
+Gentle
+Introduction
+to
+Static
+Analysis
+2
+A
+Gentle
+Introduction
+Static
+y
+y
+}
+program.
+y
+y
+y
+y
+Chapter
+2 A Gentleand
+Introduction
+Analysis
+observed
+after
+initialization
+before theyxto Static
+shown
+in Figure
+2.15(b). We show
+y
+(a)statement
+Concrete
+semantics
+(b) in
+Analysis of p0 (0
+Noischange.
+Done!
+x
+theFigure
+convex
+polyhedra
+abstract
+Then
+the set
+states
+(a)
+Concrete
+semantics
+(b) Analysis of p0 (
+2.5 2.15(c),
+FigureWe
+2.5 assume that the analysis usesFigure
+Figure
+2.15(d)domain.
+and Figure
+2.15(e)
+theoffirst
+three
+iterations
+of the analysis algorithm
+observed after
+initialization and before
+theywas sketched
+statement
+is shown
+in Figure
+2.15(b).
+We in
+show
+in
+Signs abstraction
+y
+Signs abstraction
+x
+x
+that
+above.
+The
+imprecision
+is
+inherent
+the
+computation
+of
+over-approximations
+(in
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+x
+x
+0
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+Figure 2.15(c), Figure 2.15(d) and Chapter
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+y
+y of p2 (up to 2 iterations)
+(a) Concrete
+semantics
+(b) Analysis
+ofto
+p (0 iteration)
+2
+A
+Gentle
+Introduction
+Static
+Analysis
+gray)
+of
+abstract
+elements
+as
+in
+the
+previous
+examples.
+y
+(c) Analysis
+of p1 (up to 1 iteration)
+(d) Analysis y
+y
+y sketched
+properties
+thanyothers.
+Furthermore,
+some
+abstractions
+yield simpler
+computer representaproperties
+than
+others. Furthermore,
+some
+yield
+simpler
+computer
+representaxabstractions
+x computation
+that was
+above. The imprecision
+is
+inherent
+in
+the
+of
+over-approximations
+(in
+y
+y
+While (b)
+this
+process does not terminate, we note that repeating
+it forever would yield
+the result
+y
+y
+(a) Concrete semantics
+Analysis of p (0 iteration)
+tions
+and
+less
+costly
+algorithms
+than
+others.
+In
+the
+following
+paragraphs,
+we
+will
+present
+tions y
+and
+costly algorithms
+than
+others.
+In
+the
+following
+paragraphs,
+we
+will
+present
+gray)less
+of abstract
+elements as
+in the
+previous
+examples.
+Remained
+0
+
+y
+y
+0
+
+y
+shown in Figure 2.15(f), which also provides a sound approximation of all the possible output states
+y
+y have
+Whileexamples
+this process
+does
+not terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+awhich
+few
+other
+examples
+of
+abstractions,
+which
+also
+have
+a
+simple
+and intuitive
+a few other
+of abstractions,
+also
+a
+simple
+and
+intuitive
+graphical
+y
+
+2x
+y  2x graphical
+of the program.
+0 approximation
+y
+x of all the possible output statesx
+shown in Figure 2.15(f), which also
+provides a sound
+representation.
+representation.
+x  1.5
+x  0.5
+y (a)2x
+The iterative
+algorithm
+demonstrated
+in Analysis
+Example
+will actually
+always
+terminate if
+of the program.
+Concrete semantics
+(b)
+of p0 2.12
+(0 iteration)
+x
+Modified
+y
+
+0.5x
++
+1
+y2.4 treats
+xand
+xxof Signs
+xdifferently
+x
+x
+abstraction.
+The
+abstraction
+of
+Example
+2.4
+treats
+x
+and
+y differently and is very
+Signs abstraction. The abstraction
+Example
+x
+and
+y
+is
+very
+x
+
+0.5
+using
+the
+signs
+abstract
+Indeed,
+this
+abstract
+has
+a
+finite
+number
+of
+abstract
+y
+0.5x
+1
+(c) domain.
+Analysis of p (up to
+1 iteration)
+(d) Analysis
+of p (up to 2domain
+iterations)
+x
+x
+Discard
+this
+The
+iterative
+algorithm
+demonstrated
+in
+Example
+2.12
+will
+actually
+always
+terminate
+if
+(a) Concrete
+semantics
+Analysis
+of
+p0 work
+(0 iteration)
+yproperty
+y
+specific
+to(b)It
+the
+D
+defined
+Section
+2.1.
+It
+not of
+work
+if we
+wanted
+a static
+specific to(c)
+theAnalysis
+property
+in
+Section
+2.1.
+would
+not
+if(up
+wein
+wanted
+a static
+(e)would
+Analysis
+p(e)
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+3
+ofDpdefined
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+to
+2
+iterations)
+x
+x
+Analysis of p3 (upanalysis(b,
+to 3 iterations)
+(f) Expected
+result
+1
+elements
+and
+when
+the
+union(R,
+R)),
+the
+y 2iterative algorithm
+y computes R
+using
+the signs
+domain.
+Indeed,
+this
+abstract
+has
+a finite
+of abstract
+analysis
+prove
+that
+never
+becomes
+it would not apply if the propanalysis
+to prove
+that yabstract
+never (c)becomes
+negative.
+Similarly,
+would
+apply
+ifnegative.
+the number
+prop-Similarly,
+Analysis of p (up
+to
+1 iteration) to
+(d)
+Analysis
+of
+p it
+(up y
+to
+2domain
+iterations)not
+y
+y of R will converge after finitely many steps:
+Figure
+2.15
+value
+whenever
+it
+updates
+R,
+the
+new
+value
+and
+theynot
+iterative
+algorithm
+computes
+R abstraction
+union(R,
+R)),
+the
+to prove
+was
+that xthis
+does
+not
+become
+positive.
+However,
+this
+abstraction generalizes
+erty toelements
+prove
+thatwhen
+x does
+become
+positive.
+generalizes
+y However,
+Abstract
+iteration
+Figure
+2.15
+x erty
+x analysis(b,
+y was
+y
+is
+either
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+x
+x
+x
+into
+a
+more
+expressive
+one,
+which
+describes
+a
+set
+of
+states
+using
+two
+pieces
+of
+information:
+into a value
+more expressive
+one,
+which
+describes
+set
+of
+states
+using
+two
+pieces
+of
+information:
+of R will converge after finitely many steps: whenever Abstract
+it updates
+R, the newthis
+value
+iteration
+value over-approximates
+x the behaviors observed after any number of iterations. As a
+(a)of Concrete
+semantics
+(b) of
+Analysis
+ofof
+px
+(0
+iteration)
+since
+they
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+consequence,
+the termination
+of
+signs analysis
+is
+guaranteed.
+0
+the
+possible
+values
+the
+sign
+and
+the
+possible
+values
+of
+the
+sign
+of
+y.
+For
+each
+varithe possible
+values
+the
+sign
+of
+x
+and
+the
+possible
+values
+of
+the
+sign
+of
+y.
+For
+each
+varieither the
+same as the previous one
+then of
+sopwill
+be
+all
+the
+other
+subsequent
+values
+(c)
+Analysis
+of
+(up
+to 1 the
+iteration)
+of p
+(up
+(a) isConcrete
+semantics
+(b) (and
+Analysis
+(0
+iteration)
+x
+x wephave
+However,
+not solved
+issue of termination(d)
+in theAnalysis
+general case yet.
+The
+iter1
+2
+0
+precise
+property.
+Since
+the
+number
+of
+abstract
+properties
+is
+finite,
+the
+latter
+case
+will
+occur
+able,
+this
+abstraction
+records
+whether
+it
+may
+be
+positive,
+negative,
+non-negative,
+etc.
+The
+able, this
+abstraction
+records
+whether
+it
+may
+be
+positive,
+negative,
+non-negative,
+etc.
+The
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of number
+p2analysis
+(up to
+this
+value
+over-approximates
+the
+behaviors
+observed
+after
+any
+x
+x
+ation
+technique
+used
+in
+Example
+2.12
+will
+obviously
+not
+allow
+for a terminating
+106
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+since they are computed using the same formula), or the new value denotes a strictly less
+1
+y of a few abstract elements
+yof
+with the
+convex
+polyhedraof
+abstraction
+or with the interval
+x Therefore,
+xthe value
+at most
+many
+times.
+at some
+point,
+R stabilizes,
+and abstraction.
+then
+concretizations
+a few
+abstract
+elements
+are shown
+in Figure
+2.5:
+concretizations
+are
+shownfinitely
+in
+Figure
+2.5:
+
+ook Style Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+{(x,
+y)
+∣
+x
+≤
+0.5
+∧
+0
+≤
+y
+≤
+2x}
+init(
+);
+Example: Convex Polyhedra
+A
+
+({(x, y) | 0 ⌥ y ⌥ 2x and
+x
+⌥
+0.5});
+iter
+{
+translate(1,0.5)
+}
+({(x, y) | 0 ⌥ y ⌥ 2x and x ⌥ 0.5});
+{
+{
+(1, 0.5)
+(1, 0.5)
+A
+
+e iterative algorithm demonstrated in Example 2.12 will actually always terminate if
+}
+} domain. Indeed, this abstract domain has a finite number of abstract
+the signs abstract
+ents
+and
+when
+the
+iterative
+algorithm
+computes
+R
+union(R,
+analysis(b,
+R)),
+the
+ysis
+uses
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+he analysis uses the convex polyhedra abstract domain. Then the setofofstates
+states
+of
+R
+will
+converge
+after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+tialization
+and before
+statement
+is shown
+in Figure
+2.15(b).We
+Weshow
+showin
+in
+on
+and before
+they the statement
+is shown
+in Figure
+2.15(b).
+her
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+gure
+2.15(d)
+and Figure
+2.15(e)
+the three
+first three
+iterations
+of the
+analysisalgorithm
+algorithm
+5(d)
+and
+Figure
+2.15(e)
+the
+first
+iterations
+of
+the
+analysis
+they are computed using the same formula), or the new value denotes a strictly less
+above.
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+se property. Since the number of abstract properties is finite, the latter case will occur
+elements
+as
+in
+the
+previous
+examples.
+in themany
+previous
+ostasfinitely
+times. examples.
+Therefore, at some point, the value of R stabilizes, and then
+0
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+0
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="j+WCCYUQBxT0MlgJ1rkR//7iP+U=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/EK591iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/iBj84=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="Bmt22cLc23lkUcPXFgVW9BD5VjA=">AAAB+HicbVDLSsNAFL2pr1ofjbp0M1gEQQiJ+FoW3bisYB/QhjKZTtqhk0mcmYix9EvcuFDErZ/izr9x2mahrQcuHM65l3vvCRLOlHbdb6uwtLyyulZcL21sbm2X7Z3dhopTSWidxDyWrQArypmgdc00p61EUhwFnDaD4fXEbz5QqVgs7nSWUD/CfcFCRrA2UtcuZ6jD6T1ynbNHdIy8rl1xHXcKtEi8nFQgR61rf3V6MUkjKjThWKm25ybaH2GpGeF0XOqkiiaYDHGftg0VOKLKH00PH6NDo/RQGEtTQqOp+ntihCOlsigwnRHWAzXvTcT/vHaqw0t/xESSairIbFGYcqRjNEkB9ZikRPPMEEwkM7ciMsASE22yKpkQvPmXF0njxPHOHe/2tFK9yuMowj4cwBF4cAFVuIEa1IFACs/wCm/Wk/VivVsfs9aClc/swR9Ynz/c5JFF</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="Pzc/IHZN4S/KZa0edHJfVDLblKw=">AAAB+HicbVDLSsNAFJ3UV62PRl26GSyCG0MivpZFNy4r2Ae0oUymN+3QySTOTMQa+iVuXCji1k9x5984bbPQ1gMXDufcy733BAlnSrvut1VYWl5ZXSuulzY2t7bL9s5uQ8WppFCnMY9lKyAKOBNQ10xzaCUSSBRwaAbD64nffACpWCzu9CgBPyJ9wUJGiTZS1y6PcKcP99h1zh7xMfa6dsV13CnwIvFyUkE5al37q9OLaRqB0JQTpdqem2g/I1IzymFc6qQKEkKHpA9tQwWJQPnZ9PAxPjRKD4exNCU0nqq/JzISKTWKAtMZET1Q895E/M9rpzq89DMmklSDoLNFYcqxjvEkBdxjEqjmI0MIlczciumASEK1yapkQvDmX14kjRPHO3e829NK9SqPo4j20QE6Qh66QFV0g2qojihK0TN6RW/Wk/VivVsfs9aClc/soT+wPn8A2CWRQg==</latexit>
+
+1
+
+1
+
+2
+
+3
+
+2
+
+===== slide 107 =====
+Chapter 2 to
+A Gentle
+Introduction
+to Static Analysis
+Chapter
+2 analysis(b,
+A Gentle
+Introduction
+Analysis
+R 26 union(R,
+R)) to Static
+Chapter
+2
+A
+Gentle
+Introduction
+Static
+Analysis
+}
+y
+Moreover,yas shown above any execution of pycan be characterized by the number of
+y times
+y number of times
+y
+Moreover, as shown above any execution of p can be characterized by the
+it iterates
+over the
+loop.
+Thus, any abstract
+execution is domain.
+ultimately
+covered
+by the
+repeating
+this
+iterasumeit iterates
+that the
+analysis
+uses
+the
+convex
+polyhedra
+Then
+set
+of
+states
+y
+y
+y
+y
+over the loop. Thus, any execution is ultimately covered by repeating this iterative
+abstract
+computation.
+ved after
+initialization
+and
+before
+the
+statement is shown in Figure 2.15(b). We show in
+ytive abstract computation.
+y
+The following example illustrates this approach:
+The following
+example
+illustrates
+this approach:
+eAbstract
+2.15(c),
+Figure
+2.15(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+concrete
+Semantics
+Computation:
+iter{p}
+iteration) Example 2.12 Abstract
+(Abstract iteration)
+We consider
+the program below, which
+starts at a point located
+26
+
+mputation.
+iteration)
+We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+g example illustrates this approach:
+
+act Semantics Computation: iter{p}
+Widening
+Convex
+Poly
+a basic geometric translation a non-deterministically chosen number of
+Example:
+Convex
+Polyhedra
+Abstract
+Semantics
+Computation:
+iter{p}
+We
+consider
+the
+program
+below,
+which
+starts
+at
+a
+point
+located
+Abstract
+Semantics
+Computation:
+iter{p}
+as sketched above. The imprecision is inherent in the computation of over-approximations (in
+
+{(x,
+y)
+∣
+x
+≤
+0.5
+∧
+0
+≤
+y
+≤
+2x}
+init(
+);
+dof iterates
+a
+basic
+geometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+MITPress Times.cls LTEX Times A Priori Book Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:23pm
+abstract elements as in the previous examples.
+
+Example 2.12 (Abstract iteration) We consider the program below, which
+at LaATEpoint
+MITPressstarts
+Times.cls
+X Timeslocated
+A Priori Book Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:23pm
+
+in
+aPDFLaTeX
+triangle
+andAiterates
+aSize:
+basic
+geometric
+translation
+a non-deterministically
+chosen
+number of
+Times
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+ookinAStyle
+Typeset
+with
+7x9
+February
+27,
+2019
+2:23pm
+Example:
+Polyhedra
+Times.cls
+LTEX
+Times
+A PrioriConvex
+Book
+Style
+Typeset
+with PDFLaTeX Size: 7x9 February 27
+a triangle and iterates MITPress
+a basic geometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+times:
+Example:
+Convex
+Polyhedra
+A MITPress Times.cls
+LT X Times A Priori Book Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:23pm
+
+times:
+ress Times.cls
+
+Example:
+Polyhedra
+({(x, y) | 0 ⌥Convex
+y ⌥ 2x and
+x
+⌥
+0.5});
+iter { translate(1,0.5) }
+A
+
+E
+MITPress
+Times.cls
+LATEXBook
+Times AStyle
+Priori Book
+Style Typeset
+PDFLaTeX Size:Size:
+7x9 February
+2019 2:23pm
+LAT X
+Times
+A Priori
+Typeset
+withwith
+PDFLaTeX
+7x9 27,
+February
+27, 2019
+
+({(x, y) | 0 ⌥ y2:23pm
+⌥ 2x and x ⌥ 0.5});
+xStyle
+x7x9
+({(x,
+y) | 0 ⌥ with
+y ⌥ 2x
+and x ⌥ 0.5});
+x
+x
+A
+Times.cls
+L
+T
+X
+Times
+A
+Priori
+Book
+Typeset
+PDFLaTeX
+Size:
+February
+27,
+2019
+2:23pm
+x
+x
+x
+x
+sleA this
+Priori
+Typeset
+with PDFLaTeX
+Size:
+February
+27,
+2019
+2:23pm
+42 7x9
+Chapter
+2yield
+A Gentle
+Introduction
+to Static Analysis
+E Book Style
+{repeating
+process
+does not
+terminate,
+we
+note
+that
+it
+forever
+would
+the
+result
+{
+40
+Chapter 2 A Gentle Introduction to Static Analysis
+(a) Concrete
+semantics
+(b) Analysis of p Analysis
+(0 iteration)
+(c)
+Analysis of p1 (up to 1 iteration)
+(d) Analysis of p2 (up to 2 ite
+(1,
+0.5)
+40
+Chapter 2 A Gentle Introduction to Static 0
+n in Figure 2.15(f), which also
+provides
+a
+sound
+approximation
+of
+all
+the
+possible
+output
+states
+x
+(1,
+0.5)
+y
+y
+y
+40
+Chapter y2 A Gentle Introduction to Static Analysis
+y
+}
+Concretization
+of [x 0]
+⌥ 0,
+y to0]
+(b) Concretization of [x 0]
+(a) Concretization of [x ⌥ 0,Chapter
+y 0] Chapter
+(b)
+Concretization
+of [x
+40
+2 (a)
+A Gentle
+Introduction
+to
+Static
+Analysis
+2
+A
+Gentle
+Introduction
+Static
+Analysis
+y
+y
+}
+program.
+y
+y
+42
+Chapter 2 A Gentle Introduction
+to Static Ana
+y
+y
+We assume that the analysis uses the convex
+polyhedra
+abstract
+domain.Done!
+Then the set of states
+(a) Concrete
+semantics
+(b) Analysis of p0 (0
+No
+change.
+x
+x
+We assume that the analysis usesFigure
+the
+convex
+polyhedra
+abstract
+domain.
+Then
+the
+set
+of
+states
+2.5
+0Figure 2.5
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+observed after
+initialization and before they
+statement is shown in Figure 2.15(b). We show in
+y
+observed after
+initialization and before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+Signs abstraction
+y
+y
+Signs abstraction
+Figure 2.15(c), Figure
+2.15(d) and
+Figure
+2.15(e) the first three iterations of the analysis algorithm
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+0
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+Figure 2.15(c), Figure 2.15(d) and Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+y
+y
+x
+x computation of over-approximations (in
+ythat was sketched
+above.
+The
+imprecision
+is
+inherent
+in
+the
+x
+x
+x
+y
+y
+y
+properties
+than
+others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representaproperties
+thansketched
+others. Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representax
+x
+that was
+above. The imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+Chapter
+2
+A
+Gentle
+Introduction
+to
+Analysis
+(a) Concrete
+semantics
+(b) Analysis
+of p Static
+(0 iteration)
+gray)
+of
+abstract
+elements
+as
+in
+the
+previous
+examples.
+y
+yAnalysis of p (0 iteration)
+(a) Iteration 0
+(b) Iteration 1
+(c) Iteration 2 and limit
+(a) Concrete semantics
+(b)
+tions
+and
+less
+costly
+algorithms
+than
+others.
+In
+the
+following
+paragraphs,
+we
+will
+present
+tions y
+and
+costly algorithms
+than
+others.
+In the
+following
+paragraphs,
+we
+will
+present
+gray)less
+of abstract
+elements as
+in the
+previous
+examples.
+y
+y
+While this process
+does
+not terminate, wey note that repeating it forever would yield the result
+y
+y have
+Figurealso
+2.16
+Whileexamples
+this process
+does
+not terminate,
+we
+note
+that
+repeating
+it
+forever
+would
+yield
+the
+result
+awhich
+few
+other
+examples
+of
+abstractions,
+which
+have
+a
+simple
+andofintuitive
+graphical
+a few other
+of abstractions,
+also
+a
+simple
+and
+intuitive
+graphical
+0
+
+y
+0
+
+y
+shown in Figure
+2.15(f),
+which
+also
+provides
+a
+sound
+approximation
+all
+the
+possible
+output states
+Abstract iteration with widening
+0
+
+y
+shown in Figure 2.15(f), which also
+provides
+a
+sound
+approximation
+of
+all
+the
+possible
+output
+states
+representation.
+representation.
+y
+
+2x
+y  2x
+of the program.
+y  2x
+x
+x over-approximates all the abstract elements produced by
+after finitely many iterates) also
+of the program.
+x
+x
+
+0.5
+x
+x
+x
+x
+abstraction.
+The
+abstraction
+of
+Example
+2.4
+treats
+and
+y
+differently
+and
+very
+the
+sequence
+of
+iteratesx2.12
+without
+widening
+and, thus,
+theis
+states
+that
+the programifmay reach.
+Signs abstraction. The abstraction of Signs
+Example
+2.4 treats
+x
+and
+y
+differently
+and
+is
+very
+y
+The
+iterative
+demonstrated
+in
+Example
+will
+actually
+always
+terminate
+x(a)
+algorithm
+0.5
+Concrete semantics
+(b) Analysis of p0 (0 iteration)
+Discard
+this
+The
+following
+example
+its we
+use inwanted
+practice: a static
+x
+x illustrates
+demonstrated
+in
+Example
+will
+actually
+always
+terminate
+if p (up
+(a) algorithm
+Concrete
+semantics
+(b)
+Analysis
+of
+p0 2.12
+(0 iteration)
+specific
+to
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+specific The
+to(c)
+theiterative
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+(e)
+Analysis
+of
+to
+3
+iterations)
+(f) Expected result
+3
+Analysis of p1 (up to 1 iteration)
+Analysis
+p
+(up
+to
+2
+iterations)
+x
+x of
+using
+the(d)
+signs
+abstract
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+finite
+number
+of
+abstract
+2 of p (up to 1 iteration)
+(c) Analysis
+(d) Analysis
+of p (up to 2 iteration
+iterations) with widening) We consider the same program as in ExamExample
+2.13 (Abstract
+using
+the signs
+domain.
+Indeed,
+this
+abstract
+has
+a finite
+of
+abstract
+yAnalysis
+ynumber
+analysis
+prove
+that
+never
+becomes
+Similarly,
+it would
+notofapply
+ifiterates
+the propanalysis
+to prove
+that yabstract
+never (c)becomes
+negative.
+Similarly,
+would
+apply
+ifnegative.
+the
+propAnalysis of p (up
+to
+1 iteration) to
+(d)
+of
+p it
+(up y
+to
+2domain
+iterations)not
+ple
+2.12.
+Figure
+2.15
+shows
+the
+sequence
+abstract
+using the widening
+technique. This
+elements
+and when they iterative algorithm
+union(R,
+analysis(b,
+R)),
+the
+y
+y
+y computes R
+sequence converges
+after
+only
+two iterations
+and produces
+a (rather coarse) over-approximation of
+and
+when
+the
+iterative
+algorithm
+computes
+R
+union(R,
+analysis(b,
+R)),
+the
+erty
+to
+prove
+was
+that
+x
+does
+not
+become
+positive.
+However,
+this
+abstraction
+generalizes
+erty toelements
+prove
+was
+that
+x
+does
+become
+positive.
+this
+abstraction
+generalizes
+ynot
+y However,
+Figure
+2.15
+y
+ywill converge after finitely
+the many
+reachable steps:
+states of thewhenever
+program (shownit
+in Figure
+2.15(a)).
+mostnew
+interesting
+point is the comx
+x
+value
+of
+R
+updates
+R,Thethe
+value
+x
+x
+into
+a more
+a set
+states
+of
+information:
+into a value
+more expressive
+which after
+describes
+setmany
+of expressive
+states
+usingone,
+twowhich
+piecesdescribes
+information:
+x putation
+x from the two triangles obtained in the first
+x
+the
+abstract
+element
+shownpieces
+in Figure
+2.16(b)
+of R will one,
+converge
+finitely
+steps:
+whenever
+itofupdates
+R, ofof
+the
+newusing
+valuetwo
+Abstract
+iteration
+x
+is
+either
+the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+two
+iterations:
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+possible
+values
+of
+sign
+of
+and
+the
+possible
+values
+of
+the
+sign
+of y.asFor
+each
+varithe possible
+values
+of the as
+signthe
+of previous
+x and the
+the one
+possible
+values
+of the
+the
+sign
+of
+y.the
+Forother
+each
+vari0 x
+is
+either
+the
+same
+(and
+then
+so
+will
+be
+all
+subsequent
+values
+the
+constraints
+0
+⌥
+y
+and
+y
+⌥
+2x
+are
+stable
+they
+are
+satisfied
+in the translated triangle; thus,
+(a) Concrete semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+0
+(a)
+Iteration
+0
+(b)
+Iteration
+1
+(c)
+Iteration
+2
+and
+limit
+since
+they
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+they
+are
+preserved;
+this
+abstraction
+records
+whether
+it value
+may
+be
+positive,
+negative,
+non-negative,
+etc. The
+able, this
+abstraction
+whether
+maysame
+be positive,
+negative,
+etc.
+The
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+this
+over-approximates
+the
+behaviors
+observed
+after
+any
+number
+x itable,
+x
+107
+since
+they are records
+computed
+using
+the
+formula),
+or thenon-negative,
+new
+value
+denotes
+a
+strictly
+less
+1
+2
+x
+the constraint x ⌥ 0.5 is notxpreserved; thus, it is discarded.
+y of a few abstract elements
+yin of
+precise
+property.
+Since
+the number
+abstract
+properties
+is finite, the latter case will occur
+concretizations
+a few
+abstract
+elementsofare
+shown in
+Figure 2.5:
+concretizations
+are shown
+Figure
+2.5:
+E
+
+({(x, y) | 0 ⌥ y ⌥ 2x and x ⌥ 0.5});
+{
+(1, 0.5)
+e iterative algorithm demonstrated in
+(1,Example
+0.5) 2.12 will actually always terminate if
+}
+the signs abstract
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+finite
+number
+of
+abstract
+}
+
+{
+
+0
+
+0
+
+ents
+and
+when
+theconvex
+iterative polyhedra
+algorithm computes
+R domain.
+union(R, analysis(b,
+R)),
+the
+ysis
+uses
+the
+abstract
+Then
+the
+set
+of
+states
+the analysis uses the convex polyhedra abstract domain. Then the set of states
+of
+R
+will
+converge
+after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+on
+and
+before
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+y
+nitialization and before the
+statement is shown in Figure 2.15(b). We show in
+her the same as the previous one (and then so will be all the other subsequent values
+5(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+analysis
+algorithm
+Figure
+2.15(d)
+and Figure
+2.15(e)
+the first
+three
+iterationsof
+of the analysis
+algorithm
+they are computed using the same formula), or the new value denotes a strictly less
+d above.
+The imprecision
+is inherent
+in the
+computationofof over-approximations
+over-approximations (in (in
+The
+imprecision
+is
+inherent
+in
+the
+computation
+se property. Since the number of abstract properties is finite, the latter case will occur
+t as
+elements
+as
+in
+the
+previous
+examples.
+in themany
+previous
+ost finitely
+times. examples.
+Therefore, at some point, the value of R stabilizes, and then
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="gq36ol2mSRE4spXUGIQLWJlTc8o=">AAAB73icbVBNS8NAEJ3Ur1q/qh69LBbBU0lE1GPRi8cK9gPaUDbbSbt0s0l3N0IJ/RNePCji1b/jzX/jts1BWx8MPN6bYWZekAiujet+O4W19Y3NreJ2aWd3b/+gfHjU1HGqGDZYLGLVDqhGwSU2DDcC24lCGgUCW8Hobua3nlBpHstHM0nQj+hA8pAzaqzUdklX4JhMeuWKW3XnIKvEy0kFctR75a9uP2ZphNIwQbXueG5i/Iwqw5nAaambakwoG9EBdiyVNELtZ/N7p+TMKn0SxsqWNGSu/p7IaKT1JApsZ0TNUC97M/E/r5Oa8MbPuExSg5ItFoWpICYms+dJnytkRkwsoUxxeythQ6ooMzaikg3BW355lTQvqt5V1Xu4rNRu8ziKcAKncA4eXEMN7qEODWAg4Ble4c0ZOy/Ou/OxaC04+cwx/IHz+QMRW49X</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="dOG5+2U2+Fr0+8z/DyXMZuggxd4=">AAAB8HicbVBNSwMxEM3Wr1q/qh69BIvgqewWUY9FLx4r2A9pl5JNZ9vQJLsmWXFZ+iu8eFDEqz/Hm//GtN2Dtj4YeLw3w8y8IOZMG9f9dgorq2vrG8XN0tb2zu5eef+gpaNEUWjSiEeqExANnEloGmY4dGIFRAQc2sH4euq3H0FpFsk7k8bgCzKULGSUGCvdp7jH4QHXnvrlilt1Z8DLxMtJBeVo9MtfvUFEEwHSUE607npubPyMKMMoh0mpl2iICR2TIXQtlUSA9rPZwRN8YpUBDiNlSxo8U39PZERonYrAdgpiRnrRm4r/ed3EhJd+xmScGJB0vihMODYRnn6PB0wBNTy1hFDF7K2Yjogi1NiMSjYEb/HlZdKqVb3zqnd7Vqlf5XEU0RE6RqfIQxeojm5QAzURRQI9o1f05ijnxXl3PuatBSefOUR/4Hz+APO9j9s=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+<latexit sha1_base64="rGSAQXd6XHXw78BIc9OREz9pqTo=">AAAB8XicbVDLTgJBEOzFF+IL9ehlIjHxRHaNryPRi0dM5BFhQ2aHBibMzq4zs0ay4S+8eNAYr/6NN//GAfagYCWdVKq6090VxIJr47rfTm5peWV1Lb9e2Njc2t4p7u7VdZQohjUWiUg1A6pRcIk1w43AZqyQhoHARjC8nviNR1SaR/LOjGL0Q9qXvMcZNVa6fyJtgQ/ELZ91iiW37E5BFomXkRJkqHaKX+1uxJIQpWGCat3y3Nj4KVWGM4HjQjvRGFM2pH1sWSppiNpPpxePyZFVuqQXKVvSkKn6eyKlodajMLCdITUDPe9NxP+8VmJ6l37KZZwYlGy2qJcIYiIyeZ90uUJmxMgSyhS3txI2oIoyY0Mq2BC8+ZcXSf2k7J2XvdvTUuUqiyMPB3AIx+DBBVTgBqpQAwYSnuEV3hztvDjvzsesNedkM/vwB87nD/b7j80=</latexit>
+
+1
+
+1
+
+2
+
+2
+
+•
+
+•
+
+===== slide 108 =====
+26
+
+}
+
+26
+
+Chapter 2 to
+A Gentle
+Introduction
+to Static Analysis
+Chapter
+2 A Gentle
+to Static
+Analysis
+Chapter
+2 Introduction
+A Gentle
+Introduction
+Static
+Analysis
+
+antics Computation: iter{p}
+Widening Convex Poly
+e:
+ConvexComputation:
+Polyhedra iter{p}
+Semantics
+y
+
+y
+
+{
+sumeconsider
+that the analysis
+uses the convex
+abstract
+domain.
+Then
+the
+set
+of
+states
+y which
+y a point
+ythe program
+y40 polyhedra
+We
+below,
+starts
+at
+located
+Chapter 2 A Gentle Introduction to Static Analysis
+lustrates
+this
+approach:
+(1, 0.5)
+ved after
+initialization and before they
+statement is shown in Figure 2.15(b).
+We show in
+y
+ometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+y
+y to Stat
+40 concrete
+Chapter
+2
+A
+Gentle
+Introduction
+eation)
+2.15(c),We
+Figure
+2.15(d)
+and
+Figure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+y
+}starts at a point ylocated
+consider the program below, which
+as sketched
+above.
+The
+imprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+tyle
+Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+A
+peset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+{(x,
+y)
+∣
+x
+≤
+0.5
+∧
+0
+≤
+y
+≤
+2x}
+init(
+);
+MITPress
+Times.cls
+LTEX Times
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+2:23pm
+ATA
+asic
+geometric
+translation
+a
+non-deterministically
+chosen
+number
+of
+MITPress
+Times.cls
+L
+X
+Times
+A
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019doma
+2:23p
+E
+We
+assume
+that
+the
+analysis
+uses
+the
+convex
+polyhedra
+abstract
+of abstract
+elements
+the previous
+examples.
+x,
+y) | 0 ⌥
+y ⌥ as
+2xinx and
+x ⌥ 0.5});
+x2:23pm
+x
+x
+iter
+{
+translate(1,0.5)
+}
+Priori
+Book
+Style
+Typeset
+with
+PDFLaTeX
+Size:
+7x9
+February
+27,
+2019
+x
+x
+x
+x
+observed
+after
+and
+before
+they would statement
+is shown in F
+Style
+Size:
+7x9
+27, 2019
+2:23pm
+y weinitialization
+le thisTypeset
+processwith
+doesPDFLaTeX
+not terminate,
+noteFebruary
+that repeating
+it forever
+yield the result
+(a) Concrete
+semantics
+(b)⌥
+Analysis
+of p0 (0 iteration)
+(c) Analysis of p1 (up to 1 iteration)
+(d) Analysis of p2 (up to 2 ite
+({(x,
+y)
+|
+0
+⌥
+y
+⌥
+2x
+and
+x
+0.5});
+n in Figure 2.15(f), which
+also 2.15(c),
+provides aFigure
+sound 2.15(d)
+approximation
+of all the
+possible
+Figure
+and
+Figure
+2.15(e)
+theoutput
+first states
+three
+iteration
+x
+x
+(a)
+Concretization
+of [x 0]
+⌥ 0, y 0]
+(b) Concretization of [x 0]
+(a) Concretization
+of [x ⌥ 0,Introduction
+y 0]
+(b)
+Concretization
+of [x
+Chapter
+2
+A
+Gentle
+to
+Static
+Analysis
+program.
+yA Gentle
+yStatic
+Chapter
+2Chapter
+Introduction
+to Static
+Analysis
+y
+x
+x
+{ y 42 (1, 0.5)
+that
+was
+sketched
+above.
+The
+imprecision
+is
+inherent
+in
+the
+computation
+42
+2
+A
+Gentle
+Introduction
+to
+Analysis
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+No
+change.
+Done!
+x
+x
+x
+0
+Figure
+2.5
+Figure 2.5
+Chapter 2 A Gentle
+Introduction
+to Static Analysis
+(a) Concrete semantics
+(b) Analysis of p (0 iteration)
+of
+abstract
+elements
+as
+in
+the
+previous
+examples.
+Signs
+abstraction
+abstraction algorithmgray)
+(a) Iteration
+0
+(b) I
+e Signs
+iterative
+demonstrated
+in
+Example
+2.12
+will
+actually
+always
+terminate
+if
+(1,
+0.5)
+(a)
+Concrete
+semantics
+(b)
+Analysis
+of
+p
+(0
+iteration)
+2
+iterations:
+Chapter y2 A Gentle Introduction
+to Static0Analysis
+y
+y y
+y
+convergence!
+y
+y
+y
+While
+this
+process
+does
+not
+terminate,
+we
+note
+that
+repeating
+it fore
+y
+y
+y
+properties
+than
+others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representaproperties
+than
+others.
+Furthermore,
+some
+abstractions
+yield
+simpler
+computer
+representa2
+A
+Gentle
+Introduction
+to
+Static
+Analysis
+the signsChapter
+abstract
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+finite
+number
+of
+abstract
+y
+Figure 2.16
+tions and
+less
+costly
+algorithms
+than
+others.
+In
+the
+following
+paragraphs,
+we will present
+tions y
+and less costly algorithms than others.
+In the
+following
+paragraphs,
+we
+will
+present
+y
+shown
+in
+Figure
+2.15(f),
+which
+also
+provides
+a
+sound
+approximation
+of
+a
+Abstract
+iteration
+with
+widening
+and
+when
+iterative
+algorithm
+computes
+R Then
+analysis(b,
+R)), the
+awhich
+few
+other
+examples
+of
+abstractions,
+also union(R,
+have1 aiteration
+simple and
+intuitive
+graphical
+a few
+other examples
+ofthe
+abstractions,
+also have
+a simple
+and intuitivewhich
+graphical
+eents
+convex
+polyhedra
+abstract
+domain.
+the
+set
+of
+states
+uses
+the convex polyhedra
+abstract domain. Then the set of states
+representation.
+representation.
+of
+the
+program.
+of
+R
+will
+converge
+after
+finitely
+many
+steps:
+whenever
+it
+updates
+R,
+the
+new
+value
+0
+iteration
+x
+x
+after
+finitely
+many
+iterates)
+also
+over-appro
+x
+x
+x
+re
+the
+statement
+is
+shown
+in
+Figure
+2.15(b).
+We
+show
+in
+y
+abstraction.
+of and
+Example
+treats x and yWe
+differently
+and is
+very
+abstraction.
+of Signs
+Example
+2.4 treats
+xThe
+andabstraction
+y differently
+is very2.4
+ndSigns
+before
+theyThe abstractionstatement
+is shown
+in Figure
+2.15(b).
+show
+in
+the
+sequence
+of
+iterates
+without
+widening
+a
+her
+theto(c)the
+same
+as
+the
+previous
+one
+(and
+then
+so
+will
+be
+all
+the
+other
+subsequent
+values
+specific
+to
+the
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+specific
+property
+D
+defined
+in
+Section
+2.1.
+It
+would
+not
+work
+if
+we
+wanted
+a
+static
+(e)
+Analysis
+of
+p
+(up
+to
+3
+iterations)
+(f)
+Expected
+result
+3
+iterative
+algorithm
+demonstrated
+in
+Example
+2.12
+will
+actu
+Analysis of p1 (up to 1The
+iteration)
+(d) Analysis
+of p2 (up tosemantics
+2 iterations)
+(a)
+Concrete
+(b)
+Analysis
+of
+p
+(0
+iteration)
+0
+gure
+2.15(e)
+the
+first
+three
+iterations
+of
+the
+analysis
+algorithm
+and
+thenegative.
+first
+three
+of
+analysis
+algorithm
+analysis
+toSimilarly,
+prove
+thatit iterations
+ywould
+nevernot
+becomes
+negative.
+Similarly,
+it
+would
+not
+apply
+if
+the
+propanalysisFigure
+to
+prove that2.15(e)
+y never
+becomes
+apply if
+the propThe
+following
+example
+x
+x illustrates its use
+they
+are
+computed
+using
+the
+same
+formula),
+or
+the
+new
+value
+denotes
+a
+strictly
+less
+ertypositive.
+to prove
+was thatabstract
+xthis
+does
+not become
+positive.
+However,
+this abstraction
+generalizes
+erty to prove
+was that x does not
+become
+However,
+abstraction
+generalizes
+Figure
+2.15
+using
+the
+signs
+domain.
+Indeed,
+this
+abstract
+domain
+has
+a
+y
+y
+x
+x
+(c)
+Analysis
+of
+p
+(up
+to
+1
+iteration)
+(d)
+Analysis
+of
+p
+(up
+to
+2
+iterations)
+mprecision
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+Example
+2.13
+(Abstract
+iteration
+with widen
+xa more
+sion
+is
+inherent
+in
+the
+computation
+of
+over-approximations
+(in
+x
+x
+x
+into
+expressive
+one,
+which
+describes
+a
+set
+of
+states
+using
+two
+pieces
+of
+information:
+into
+a
+more
+expressive
+one,
+which
+describes
+set
+of
+states
+using
+two
+pieces
+of
+information:
+x
+x
+x
+Abstract iteration
+xis finite, the
+x
+yof abstract properties
+y
+se
+property.
+Since
+the
+number
+latter
+case
+will
+occur
+ple
+2.12.
+Figure
+2.15
+shows
+the
+sequence
+of
+a
+ncrete
+semantics
+(b)ofelements
+Analysis
+of possible
+ppossible
+(0 iteration)
+the
+values
+of
+the
+sign
+of
+x
+and
+the
+possible
+values
+of
+the
+sign
+of
+y.
+For
+each
+varithe
+possible
+values
+of
+the
+sign
+x
+and
+the
+values
+of
+the
+sign
+of
+y.
+For
+each
+variand
+when
+the
+iterative
+algorithm
+computes
+R
+union(
+nevious
+examples.
+y
+y
+cs the previous
+(b) Analysis
+of(a)p0Iteration
+(0 iteration)
+(a)0 Iteration 0
+(b)1Iteration 1
+(c)
+Iteration
+2 and only
+limit two iterations an
+(b)
+Iteration
+(c)
+Iteration
+2
+and
+limit
+sequence
+converges
+after
+examples.
+abstraction
+records
+whether
+it(up
+may
+positive,
+negative,
+non-negative,
+etc.
+able,finitely
+this abstraction
+recordstimes.
+whether
+may this
+be positive,
+negative,
+non-negative,
+etc.
+The
+(c)
+Analysis
+of point,
+p1108
+tobe
+1over-approximates
+iteration)
+Analysis
+of pThe
+(up
+to 2then
+iterations)
+this
+value
+behaviors
+after any number
+x itable,
+xthe
+ost
+many
+Therefore,
+at
+some
+value
+of(d)
+R the
+stabilizes,
+and
+2observed
+y
+
+y
+
+y
+
+42y
+
+ample: Convex Polyhedra
+
+0
+
+1
+
+2
+
+0
+
+y
+the reachable states of the program (shown in Fi
+concretizations
+a few2.5:
+abstract elements are shown in Figure 2.5:
+concretizations of a few abstract
+elements
+are shown in of
+Figure
+
+===== slide 109 =====
+R←a
+T←R
+R←
+R
+T
+
+n
+
+i
+
+r
+
+t
+
+e
+
+{p}, a) =
+
+o
+
+n
+
+t
+
+n
+
+o
+
+i
+
+i
+
+n
+
+n
+
+u
+
+e
+
+r
+
+l
+
+u
+
+i
+
+t
+
+o
+
+h
+
+analysis(
+
+e
+
+d
+
+w
+
+r
+
+Iteration without widening
+
+109
+
+(R, analysis(p, R))
+T
+
+===== slide 110 =====
+R←a
+T←R
+R←
+R
+T
+
+n
+
+i
+
+r
+
+t
+
+e
+
+{p}, a) =
+
+o
+
+n
+
+t
+
+n
+
+e
+
+i
+
+d
+
+i
+
+n
+
+w
+
+e
+
+r
+
+l
+
+u
+
+i
+
+t
+
+o
+
+h
+
+analysis(
+
+e
+
+d
+
+w
+
+r
+
+Iteration with widening
+
+110
+
+(R, analysis(p, R))
+T
+
+===== slide 111 =====
+a positive,
+number
+oncrete
+semantics decreasing (b)
+Analysisof
+of pconstraints
+0 (0 iteration) until the sequence stabilizes. This method is
+
+an instance of a general Imprecision
+technique called widening,
+which enforces the convergence of
+due
+to
+Widening
+y
+abstract iterates. We denote this operator by widen:
+
+Imprecision due to widening
+over-approximates unions
+
+Widening:
+enforces convergence
+over-approximate UNION
+Stabilization
+holds
+when
+the
+concretization
+of
+the
+next
+iterate
+is
+included
+into
+that
+of
+Widening guarantees
+termination
+of the analysis.
+•
+enforces
+convergence
+the
+previous
+one.
+For
+all
+the
+abstract
+domains
+considered
+in
+this
+chapter,
+this
+inclusion
+x
+x
+42
+Chapter 2 A Gentle Introduction to Static Analysis
+may
+cause
+signi
+cant
+loss
+of
+precision
+can
+be
+decided
+in
+the
+abstract
+level
+simply
+by
+checking
+geometric
+inclusion. We thus let
+of p1 (up to 1 iteration)
+(d) Analysis of p2 (up to 2 iterations)
+
+s Times.cls LATEX Times operator
+A Priori Book
+Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:23pm
+widen
+
+However, it incurs significant precision loss.
+•
+inclusion denote a function that inputs two abstract elements a0 , a1 and returns true only
+y
+
+y
+
+y
+
+when it can prove that ⇥(a0 ) ⌃ ⇥(a1 ).
+operator inclusion
+
+y
+
+expected
+
+actual
+analysis
+
+returns true only when it succeeds checking inclusion
+
+fi
+
+As a conclusion, the following algorithm computes an abstract post-condition for the
+loop construction:
+⇥
+x
+x
+x
+x
+x
+⇧
+R
+a;
+⇧
+⇧
+111
+⇧
+of p (up to 3 iterations)
+(f) Expected(b)
+result
+(a) Iteration 0
+Iteration
+(c) Iteration 2 and limit
+⇧ 1
+
+===== slide 112 =====
+Loop unrolling technique
+iter {
+p
+}
+
+{ }
+or { p }
+or { p;p }
+or { p;p;p }
+or { p;p;p;p }
+or { p;p;p;p;p }
+...
+
+≈
+
+≈
+{ }
+or { p };
+iter { p }
+112
+
+===== slide 113 =====
+Loop unrolling technique
+init({(x, y) ∣ x ≤ 0.5 ∧ 0 ≤ y ≤ 2x});
+iter { translate(1,0.5) }
+
+≈
+
+init({(x, y) ∣ x ≤ 0.5 ∧ 0 ≤ y ≤ 2x});
+{ } or { translate(1,0.5) } ;
+iter { translate(1,0.5) }
+
+the analysis rst uses UNION
+then uses WIDEN
+fi
+
+113
+
+===== slide 114 =====
+Loop unrolling to increase precision
+Loop Unrolling for Precision Improvement
+
+Press Times.cls LATEX Times A Priori Book Style Typeset with PDFLaTeX Size: 7x9 February 27, 2019 2:
+
+init({(x, y) ∣ x ≤ 0.5 ∧ 0 ≤ y ≤ 2x});
+{ } or { translate(1,0.5) } ;
+2.3 A Computable Abstract Semantics: Compositional Style
+iter { translate(1,0.5) }
+y
+
+y
+
+y
+
+43
+
+2 iteration,
+WIDEN,
+limit
+
+1 iteration
+UNION
+0 iteration
+
+x
+(a) Iteration 0
+
+x
+(b) Iteration 114
+1, union
+
+x
+(c) Iteration 2, widen, limit
+
+===== slide 115 =====
+Abstract Semantics Function analysis At a Glance
+
+Analysis, at a glance
+
+The analysis(p, a) is finitely computable and sound.
+
+analysis(init(R), a) = best
+abstraction
+of
+the
+region
+R
+⇢
+return an abstract state that contains
+analysis(translation(u, v), a) =
+the
+translation
+of
+a
+⇢
+return an abstract state that contains
+analysis(rotation(u, v, ✓), a) =
+the rotation of a
+analysis({p0 }or{p1 }, a) = union(analysis(p1 , a), analysis(p0 , a))
+analysis(p0 ; p1 , a) = analysis(p
+,
+analysis(p
+,
+a))
+1
+0
+8
+R
+a;
+>
+>
+>
+>
+repeat
+>
+>
+<
+T
+R;
+analysis(iter{p}, a) =
+R
+widen(R,
+analysis(p,
+R));
+>
+>
+>
+>
+>
+until
+inclusion(R,
+T)
+>
+:
+return T;
+115

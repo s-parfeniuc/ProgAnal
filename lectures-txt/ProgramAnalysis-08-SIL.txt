@@ -1,0 +1,815 @@
+# ProgramAnalysis-08-SIL
+# auto-extracted from ProgramAnalysis-08-SIL.pdf (45 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #8
+Sufficient Incorrectness Logic
+
+===== slide 2 =====
+The taxonomy
+Forward
+
+Over
+
+Backward
+
+{HL} JcKP ✓ Q
+
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+[IL]
+
+Q✓P
+
+? Lecture #08
+
+JcKP ◆ Q
+<latexit sha1_base64="GWTIqoMfcoRbXpXafHnQClX3+HM=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrqONKAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A+YnpgU=</latexit>
+
+Under
+
+op
+
+(NC) JcK
+
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+2
+
+===== slide 3 =====
+The taxonomy
+Forward
+
+Over
+
+Backward
+
+{HL} JcKP ✓ Q
+
+<latexit sha1_base64="Lq82FMEoAhFI4/k4tfHNy4NZ/mY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujj0NCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF23QqF4=</latexit>
+
+[IL]
+
+<latexit sha1_base64="t+lsTdlCmPcdvaur/yby+5mWLjY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujiMNCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF4TWqGw=</latexit>
+
+op
+
+sufficient incorrectness logic
+exposes sources of errors
+3
+
+ffi
+
+Q✓P
+
+⟨SIL⟩ JcK Q ◆ P
+
+JcKP ◆ Q
+<latexit sha1_base64="GWTIqoMfcoRbXpXafHnQClX3+HM=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrqONKAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A+YnpgU=</latexit>
+
+Under
+
+op
+
+(NC) JcK
+
+<latexit sha1_base64="4uhPcI0nKkFO5HGwOUIiR7TvQC8=">AAACKXicbVBLTgJBFOzBH+IPdemmI5iYmJAZFuiS6MYlJPJJGEJ6mgd06PnY/caEEA7hOTyAWz2CO3XrwmvYwJgIWEknlar3Uq/Li6TQaNsfVmptfWNzK72d2dnd2z/IHh7VdRgrDjUeylA1PaZBigBqKFBCM1LAfE9CwxveTP3GAygtwuAORxG0fdYPRE9whkbqZC/yrpSeYnwISLmr1C+vUOrq2NOAcE+rNE8zmU42ZxfsGegqcRKSIwkqney32w157EOAXDKtW44dYXvMFAouYZJxYw2RiWN9aBkaMB90ezz71ISeGaVLe6EyLzC3TdW/G2Pmaz3yPTPpMxzoZW8q/ue1YuxdtcciiGKEgM+DerGkGNJpQ7QrFHCUI0MYV8LcSvmAmVrQ9LiQotFnaqS6E9OMs9zDKqkXC06pUKoWc+XrpKM0OSGn5Jw45JKUyS2pkBrh5JE8kxfyaj1Zb9a79TkfTVnJzjFZgPX1A88hpfc=</latexit>
+
+===== slide 4 =====
+Different logics for different
+purposes!
+
+4
+
+===== slide 5 =====
+Hoare Logic
+{P} c {Q}
+validity: [[c]]P ⊆ Q
+
+∀σ ∈ P . ∀δ ∈ [[c]]σ . δ ∈ Q
+can prove the absence of bugs
+(any execution of c from P is correct)
+5
+
+===== slide 6 =====
+Example: HL
+{x ≤ 0, y = 1}
+while (x ≤ 5) do x := x + y;
+
+{x = 6}
+
+6
+
+===== slide 7 =====
+Example: HL
+{x ≤ 0}
+while (x ≤ 5) do x := x + y;
+
+{x = 6}
+
+[x ↦ 8,y ↦ 8] is also reachable
+
+7
+
+===== slide 8 =====
+Example: HL
+{x ≤ 0}
+while (x ≤ 5) do x := x + y;
+
+{x ≥ 6}
+
+8
+
+===== slide 9 =====
+Example: HL
+{x ≤ 0}
+while (x ≤ 5) do x := x + y;
+
+{x ≥ 0}
+
+9
+
+===== slide 10 =====
+Necessary condition
+(P) c (Q)
+validity: P ⊇ [[ c ]]Q
+
+∀δ ∈ Q . ∀σ ∈ [[ c ]]δ . σ ∈ P
+express necessary conditions for correctness
+(any execution of c from outside P is incorrect)
+10
+
+===== slide 11 =====
+Example: NC
+(x ≤ 6 ∧ y = 6 − x)
+while (x ≤ 5) do x := x + y;
+
+(x = 6)
+
+11
+
+===== slide 12 =====
+Example: NC
+(x ≤ 6 ∧ ∃n . n × y = 6 − x)
+while (x ≤ 5) do x := x + y;
+
+(x = 6)
+
+12
+
+===== slide 13 =====
+Example: NC
+(x ≤ 6)
+while (x ≤ 5) do x := x + y;
+
+(x = 6)
+
+13
+
+===== slide 14 =====
+Incorrectness Logic
+[P] c [Q]
+validity: [[c]]P ⊇ Q
+
+∀δ ∈ Q . ∃σ ∈ P . δ ∈ [[c]]σ
+can prove the presence of bugs
+(any error in Q is reachable executing c)
+14
+
+===== slide 15 =====
+Example: IL
+[x ≤ 0]
+while (x ≤ 5) do x := x + y;
+
+[x = 6]
+
+[x ↦ 6,y ↦ − 1] is not reachable
+
+15
+
+===== slide 16 =====
+Example: IL
+[x ↦ − 4,y ↦ 10]
+
+[x ≤ 0]
+
+while (x ≤ 5) do x := x + y;
+
+[x ↦ 6,y ↦ 10]
+
+[x = 6 ∧ y > 0]
+
+16
+
+===== slide 17 =====
+Suf cient incorrectness logic
+(SIL)
+
+fi
+
+17
+
+===== slide 18 =====
+OOPSLA 2025
+Revealing Sources of (Memory) Errors via Backward Analysis
+FLAVIO ASCARI, University of Pisa, Italy
+ROBERTO BRUNI, University of Pisa, Italy
+ROBERTA GORI, University of Pisa, Italy
+FRANCESCO LOGOZZO, Meta Platforms, USA
+Sound over-approximation methods are e�ective for proving the absence of errors, but inevitably produce
+false alarms that can hamper programmers. In contrast, under-approximation methods focus on bug detection
+and are free from false alarms. In this work, we present two novel proof systems designed to locate the source
+of errors via backward under-approximation, namely Su�cient Incorrectness Logic (SIL) and its specialization
+for handling memory errors, called Separation SIL. The SIL proof system is minimal, sound and complete
+for Lisbon triples, enabling a detailed comparison of triple-based program logics across various dimensions,
+including negation, approximation, execution order, and analysis objectives. More importantly, SIL lays the
+foundation for our main technical contribution, by distilling the inference rules of Separation SIL, a sound and
+(relatively) complete proof system for automated backward reasoning in programs involving pointers and
+dynamic memory allocation. The completeness result for Separation SIL relies on a careful crafting of both
+the assertion language and the rules for atomic commands.
+
+“SIL can characterise the source of
+errors”
+
+CCS Concepts: • Theory of computation ! Logic and veri�cation; Proof theory; Hoare logic; Separation
+logic; Programming logic.
+Additional Key Words and Phrases: Su�cient Incorrectness Logic, Incorrectness Logic, Outcome Logic
+ACM Reference Format:
+Flavio Ascari, Roberto Bruni, Roberta Gori, and Francesco Logozzo. 2025. Revealing Sources of (Memory)
+Errors via Backward Analysis. Proc. ACM Program. Lang. 9, OOPSLA1, Article 127 (April 2025), 28 pages.
+https://doi.org/10.1145/3720486
+
+1
+
+Introduction
+
+Formal methods aim to automate the improvement of software reliability and security. Notable success stories are, e.g., the Astrée static analyzer [Blanchet et al. 2003], the SLAM model checker [Ball
+and Rajamani 2001], the certi�ed C compiler CompCert [Leroy 2009], VCC for safety properties
+veri�cation [Cohen et al. 2009], and the Frama-C platform for the integration of many C code
+analyses [Baudin et al. 2021]. Despite that, e�ective program correctness methods struggle to reach
+mainstream adoption, mostly because they exploit over-approximation to handle decidability issues
+and false positives are seen as a distraction by expert programmers. Being free from false positives
+is possibly the reason why under-approximation approaches for bug-�nding, such as testing and
+bounded model checking, are preferred in industrial applications. Incorrectness Logic (IL) [O’Hearn
+2020] is a new program logic for bug-�nding: any error state found in the post can be produced by
+some input states that satisfy the pre. However, IL triples are not able to characterize precisely the
+input states that are responsible for a given error. This is possibly rooted in the forward �avor of the
+under-approximation, which follows the ordinary direction of code execution.
+Authors’ Contact Information: Flavio Ascari, University of Pisa, Pisa, Italy, �avio.ascari@phd.unipi.it; Roberto Bruni,
+University of Pisa, Pisa, Italy, bruni@di.unipi.it; Roberta Gori, University of Pisa, Pisa, Italy, roberta.gori@unipi.it; Francesco
+Logozzo, Meta Platforms, Seattle, USA, logozzo@meta.com.
+
+This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+© 2025 Copyright held by the owner/author(s).
+ACM 2475-1421/2025/4-ART127
+https://doi.org/10.1145/3720486
+Proc. ACM Program. Lang., Vol. 9, No. OOPSLA1, Article 127. Publication date: April 2025.
+
+18
+
+===== slide 19 =====
+Suf cient Incorrectness Logic (SIL)
+Given a specification Q of the possible errors
+It is an under-approximation!
+
+⟨P⟩ c ⟨Q⟩
+P
+
+is valid when
+
+Q
+
+c
+
+op
+
+JcK Q ◆ P
+<latexit sha1_base64="BIaIZm/pXHfIE6cQtf6jY2XhzOY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwx6pLoxiUk8kkYJD3NAzr0fOx+Y0ImXMNzeAC3egQTF8alHsMGZiFgJZ1Uqt5LvS4vkkKjbX9YK6tr6xubma3s9s7u3n7u4LCuw1hxqPFQhqrpMQ1SBFBDgRKakQLmexIa3vBm4jceQWkRBnc4iqDts34geoIzNFInZxdcKT3F+BCQcleplN8nYTSmVUpdHUcaEB5ohRZoNtvJ5e2iPQVdJk5K8iRFpZP7drshj30IkEumdcuxI2wnTKHgEsZZN9YQmUzWh5ahAfNBt5Ppz8b01Chd2guVeYE5cKL+3UiYr/XI98ykz3CgF72J+J/XirF31U5EEMUIAZ8F9WJJMaSTmmhXKOAoR4YwroS5lfIBM92gKXMuRaPP1Eh1x6YZZ7GHZVIvFZ2L4nm1lC9fpx1lyDE5IWfEIZekTG5JhdQIJ0/khbySN+vZerc+ra/Z6IqV7hyROVg/v4QyqGo=</latexit>
+
+means
+
+∀σ ∈ P . ∃δ ∈ Q . δ ∈ [[c]]σ
+
+A backward under-approximation logic to expose some initial states leading to errors
+fi
+
+fi
+
+19
+
+===== slide 20 =====
+Suf cient Incorrectness Logic
+⟨P⟩ c ⟨Q⟩
+op
+
+validity: P ⊆ [[c]]
+
+Q
+
+∀σ ∈ P . ∃δ ∈ Q . δ ∈ [[c]]σ
+express sufficient conditions for incorrectness
+(any state in P can lead within er : Q)
+ffi
+
+fi
+
+20
+
+===== slide 21 =====
+Example: SIL
+⟨x ≤ 6 ∧ ∃n . n × y = 6 − x⟩
+while (x ≤ 5) do x := x + y;
+
+⟨x = 6⟩
+
+21
+
+===== slide 22 =====
+Example: SIL
+⟨x ≤ 6 ∧ y = 6 − x⟩
+while (x ≤ 5) do x := x + y;
+
+⟨x = 6⟩
+
+22
+
+===== slide 23 =====
+Example: SIL
+⟨x ≤ 6⟩
+
+[x ↦ 5,y ↦ − 1] cannot reach the post
+
+while (x ≤ 5) do x := x + y;
+
+⟨x = 6⟩
+
+23
+
+===== slide 24 =====
+Bug reporting
+Which errors should a tool report to programmers?
+We do not want false positives but for the others?
+Should the tool report all of them?
+int foo ( int * x)
+{ *x=32 }
+
+Pulse (based on IL) would nd
+
+Should the tool report this?
+
+fi
+
+24
+
+===== slide 25 =====
+Manifest errors
+An error is manifest if it occurs independently of the context
+It is therefore particularly interesting to point out to programmers
+int main() {
+printf("%d\n", f(5));
+return 0;}
+// no f defined
+
+Manifest errors cannot be characterised with IL
+
+[ true ] c [ Q ]
+But they can be easily characterised with SIL
+
+Q is a manifest error
+
+⇔
+
+fi
+
+25
+
+⟨ true ⟩ c ⟨ Q ⟩ is valid
+
+===== slide 26 =====
+SIL Rules
+The proof system favours backward analysis starting from the (error) postconditions
+backward oriented
+
+Hoare’s axiom for assignment
+
+hQ[a/x]i x := a hQi
+<latexit sha1_base64="CgdJflHFkebHNY/vcn9UrSHK3lY=">AAACLnicbVDLSgMxFM3UV62vqks3wSK4kDojRUUQim5ctmAf0BnKnTRtQzOZIclIS+lv+B1+gFv9BMGFuNTPMG0Hsa0HQk7OuZd7c/yIM6Vt+91KLS2vrK6l1zMbm1vbO9ndvaoKY0lohYQ8lHUfFOVM0IpmmtN6JCkEPqc1v3c79msPVCoWins9iKgXQEewNiOgjdTM2i4H0eEUlxtw2vdcOXm5J7h/dQ3m+rVxYjWzOTtvT4AXiZOQHEpQama/3FZI4oAKTTgo1XDsSHtDkJoRTkcZN1Y0AtKDDm0YKiCgyhtOfjbCR0Zp4XYozREaT9S/HUMIlBoEvqkMQHfVvDcW//MasW5fekMmolhTQaaD2jHHOsTjmHCLSUo0HxgCRDKzKyZdkEC0CXNmitIByIFsjUwyznwOi6R6lnfO84VyIVe8STJKowN0iI6Rgy5QEd2hEqoggh7RM3pBr9aT9WZ9WJ/T0pSV9OyjGVjfP70LqJ8=</latexit>
+
+⟨Hoare⟩
+
+⟨y > 0⟩ x := y − 1 ⟨x ≥ 0⟩
+⟨y ≠ 43⟩ x := y − 1 ⟨x ≠ 42⟩
+26
+
+===== slide 27 =====
+SIL Rules
+The proof system favours backward analysis starting from the (error) postconditions
+backward oriented
+
+hQ \ bi b? hQi
+<latexit sha1_base64="ccOUS3B4b1rZMUjNKLtJXdibxFQ=">AAACL3icbVDLSgMxFM34rPU16tJNsAguSpmRou4sunHZgn1Ap5Q7mUwbmskMSUYopd/hd/gBbvUTxI24E//CtB3Eth4IHM45l3tz/IQzpR3n3VpZXVvf2Mxt5bd3dvf27YPDhopTSWidxDyWLR8U5UzQumaa01YiKUQ+p01/cDvxmw9UKhaLez1MaCeCnmAhI6CN1LVdj4PocYpr2COQYB97ciZgr+hfe0X8G8iMrl1wSs4UeJm4GSmgDNWu/eUFMUkjKjThoFTbdRLdGYHUjHA6znupogmQAfRo21ABEVWd0fRrY3xqlACHsTRPaDxV/06MIFJqGPkmGYHuq0VvIv7ntVMdXnVGTCSppoLMFoUpxzrGk55wwCQlmg8NASKZuRWTPkgg2rQ5t0XpCORQBmPTjLvYwzJpnJfci1K5Vi5UbrKOcugYnaAz5KJLVEF3qIrqiKBH9Ixe0Kv1ZL1ZH9bnLLpiZTNHaA7W9w+xfqiM</latexit>
+
+27
+
+⟨assume⟩
+
+⟨∅⟩
+
+(x > 0)?
+
+⟨x = − 42⟩
+
+⟨x = 42⟩
+
+(x > 0)?
+
+⟨x = 42⟩
+
+===== slide 28 =====
+SIL Rules
+The proof system favours backward analysis starting from the (error) postconditions
+backward oriented
+
+Same conditions for both branches
+
+⟨P1⟩ c1 ⟨Q⟩ ⟨P2⟩ c2 ⟨Q⟩
+⟨choice⟩
+⟨P1 ∨ P2⟩ c1 + c2 ⟨Q⟩
+⟨y = 43 ∨ y = 42⟩
+
+(x := y − 1) + (x := y)
+
+⟨x = 42⟩
+
+⟨ true ⟩ = ⟨y ≠ 43 ∨ y ≠ 42⟩
+
+(x := y − 1) + (x := y)
+
+⟨x ≠ 42⟩
+
+⟨y ≠ 43⟩
+
+(x := y − 1) + (x := 42)
+
+⟨x ≠ 42⟩
+
+28
+
+===== slide 29 =====
+SIL Rules
+The proof system favours backward analysis starting from the (error) postconditions
+backward oriented
+
+Backward iteration starting from nal state Q0
+
+∀n ≥ 0. ⟨Qn+1⟩ c ⟨Qn⟩
+⋆
+⟨ ∃k . Qk⟩ c ⟨Q0⟩
+⟨x ≤ 42⟩ = ⟨ . . . ∨ x = 41 ∨ x = 42⟩
+
+fi
+
+29
+
+(x := x + 1)
+
+⋆
+
+⟨iter⟩
+
+⟨x = 42⟩
+
+===== slide 30 =====
+SIL Rules
+The proof system favours backward analysis starting from the (error) postconditions
+SIL can drop disjuncts going backward:
+
+⟨
+
+⟩ c ⟨Q⟩
+
+⟨P ∨ R⟩ c ⟨Q⟩
+⟨P⟩ c ⟨Q⟩
+
+⟨empty⟩
+
+e
+
+s
+
+l
+
+a
+
+f
+
+⟨x = 41 ∨ x = 42⟩
+30
+
+(x := x + 1)
+
+⋆
+
+⟨x = 42⟩
+
+⟨cons'⟩
+
+===== slide 31 =====
+Validity, soundness and
+completeness
+
+31
+
+===== slide 32 =====
+A proof system for SIL
+⟨⟨Q⟩⟩ stands for ⟨Q⟩
+
+32
+
+===== slide 33 =====
+Soundness and completeness
+Validity of a SIL triple ⟨P⟩ c ⟨Q⟩:
+Th. [Soundness]
+All provable SIL triples are valid
+
+op
+
+JcK Q ◆ P
+<latexit sha1_base64="t+lsTdlCmPcdvaur/yby+5mWLjY=">AAACLnicbVBLTgJBFOzxi/hDXbrpCCauyAwLdEl04xIS+SQMkp7mAR16Pna/MSETruE5PIBbPYKJC+NSj2EDsxCwkk4qVe+lXpcXSaHRtj+stfWNza3tzE52d2//4DB3dNzQYaw41HkoQ9XymAYpAqijQAmtSAHzPQlNb3Qz9ZuPoLQIgzscR9Dx2SAQfcEZGqmbswuulJ5ifARIuatUyu+TMJrQGqWujiMNCA+0Sgs0m+3m8nbRnoGuEicleZKi2s19u72Qxz4EyCXTuu3YEXYSplBwCZOsG2uITCYbQNvQgPmgO8nsZxN6bpQe7YfKvMAcOFX/biTM13rse2bSZzjUy95U/M9rx9i/6iQiiGKEgM+D+rGkGNJpTbQnFHCUY0MYV8LcSvmQmW7QlLmQotFnaqx6E9OMs9zDKmmUik65WK6V8pXrtKMMOSVn5II45JJUyC2pkjrh5Im8kFfyZj1b79an9TUfXbPSnROyAOvnF4TWqGw=</latexit>
+
+Th. [Completeness]
+All valid triples are provable (using the core rules)
+33
+
+===== slide 34 =====
+The taxonomy
+
+34
+
+===== slide 35 =====
+The taxonomy
+
+Over
+
+Forward
+
+Backward
+
+HL
+
+NC
+
+(P) c (Q)
+P ⊇ [[ c ]]Q
+
+{P} c {Q}
+[[c]]P ⊆ Q
+
+∀σ ∈ P . ∀δ ∈ [[c]]σ . δ ∈ Q
+
+∀δ ∈ Q . ∀σ ∈ [[ c ]]δ . σ ∈ P
+
+SIL
+
+IL
+
+Under
+
+[P] c [Q]
+[[c]]P ⊇ Q
+
+∀δ ∈ Q . ∃σ ∈ P . δ ∈ [[c]]σ
+35
+
+⟨P⟩ c ⟨Q⟩
+P ⊆ [[ c ]]Q
+
+∀σ ∈ P . ∃δ ∈ Q . δ ∈ [[c]]σ
+
+===== slide 36 =====
+Consequence rules
+
+Over
+
+Under
+
+Forward
+
+Backward
+
+HL
+
+NC
+
+{P} c {Q}
+[[c]]P ⊆ Q
+
+(P) c (Q)
+P ⊇ [[ c ]]Q
+
+IL
+
+SIL
+
+[P] c [Q]
+[[c]]P ⊇ Q
+
+⟨P⟩ c ⟨Q⟩
+P ⊆ [[ c ]]Q
+36
+
+===== slide 37 =====
+SIL vs IL
+
+c42 :
+
+if even (x) {
+if odd(y) { z := 42; }
+}
+Safe z ≠ 42
+e.g., x:=1/(42- z)
+
+Given a specification of the possible errors
+Q ≜ { z = 42 }
+With IL one can prove
+[ z=11 ] c42 [ z=42 ∧ odd(y) ∧ even(x) ]
+expressing that the postcondition is reachable
+With SIL one can prove
+
+⟨z=11 ∧ odd(y) ∧ even(x)⟩ c42 ⟨z=42⟩
+
+expressing a precondition that leads to error states
+fi
+
+37
+
+===== slide 38 =====
+SIL vs HL
+
+c42 :
+x := nondet( );
+
+if even (x) {
+if odd(y) { z := 42; }
+}
+Safe z ≠ 42
+e.g., x:=1/(42- z)
+
+Given a specification of the possible errors
+Q ≜ { z = 42 }
+With HL one can prove
+{ z=42 } c42 { z=42 }
+With SIL one can prove
+
+⟨odd(y)⟩ c42 ⟨z=42⟩
+
+expressing a precondition that leads to error states
+fi
+
+38
+
+===== slide 39 =====
+SIL vs HL
+If c is deterministic and terminating: SIL is equivalent to HL
+
+⟨P⟩ c ⟨Q⟩ ⇔ {P} c {Q}
+
+39
+
+===== slide 40 =====
+Exercises
+
+40
+
+===== slide 41 =====
+Validity
+Which SIL triples are valid for any c and R ?
+
+⟨
+
+⟩ c ⟨R⟩
+
+⟨
+
+⟩c⟨
+
+⟩
+
+⋆
+
+⟨R⟩ c ⟨R ∨ x = 0⟩
+
+e
+
+e
+
+e
+
+s
+
+l
+
+u
+
+u
+
+a
+
+r
+
+r
+
+f
+
+t
+
+t
+
+⟨wlp(c, R)⟩ c ⟨R⟩
+41
+
+===== slide 42 =====
+Soundness 1
+Prove that rule ⟨conj⟩ is unsound for SIL
+
+⟨P1⟩ c ⟨Q1⟩ ⟨P2⟩ c ⟨Q2⟩
+⟨P1 ∧ P2⟩ c ⟨Q1 ∧ Q2⟩
+
+42
+
+⟨conj⟩
+
+===== slide 43 =====
+Soundness 1
+Prove that rule ⟨conj⟩ is unsound for SIL
+
+⟨P1⟩ c ⟨Q1⟩ ⟨P2⟩ c ⟨Q2⟩
+⟨P1 ∧ P2⟩ c ⟨Q1 ∧ Q2⟩
+
+⟨conj⟩
+
+t
+
+t
+
+e
+
+e
+
+d
+
+d
+
+n
+
+n
+
+o
+
+o
+
+n
+
+n
+
+e
+
+s
+
+l
+
+a
+
+f
+
+( ) ⟨x = 0⟩
+Consider the triples ⟨x = 0⟩ x :=
+( ) ⟨x = 1⟩
+and ⟨x = 0⟩ x :=
+⟩
+By rule ⟨conj⟩ we could derive ⟨x = 0⟩ x := 1 ⟨
+which is not sound!
+43
+
+===== slide 44 =====
+Soundness 2
+Prove or disprove the validity of the following axiom in SIL
+
+⟨P⟩ b? ⟨P ∧ b⟩
+
+44
+
+===== slide 45 =====
+Soundness 2
+Prove or disprove the validity of the following axiom in SIL
+
+⟨P⟩ b? ⟨P ∧ b⟩
+
+Consider the following triple:
+
+⟨x ≥ 0⟩ (x > 1)? ⟨x ≥ 2⟩
+
+It is not valid, because from x = 0 we cannot reach x ≥ 2
+45

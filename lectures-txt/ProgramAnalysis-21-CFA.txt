@@ -1,0 +1,1870 @@
+# ProgramAnalysis-21-CFA
+# auto-extracted from ProgramAnalysis-21-CFA.pdf (45 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #21
+Control Flow Analysis
+
+===== slide 2 =====
+Abstract Values as Complete Lattices
+• Instead of using sets of concrete data, we can use structured abstract
+domains
+• We separate:
+• Term information
+Two components
+
+• Data information
+
+v̂ ∈ Vald ̂ = ℘(Term ∪ Data) ≡ ℘(Term) × ℘(Data)
+
+• replace ℘(Data) by a complete lattice L
+• and perform a development closely related to that of the (forward)
+Monotone Frameworks
+220
+
+===== slide 3 =====
+Abstract Values as Complete Lattices
+A monotone structure consists of:
+• a complete lattice L, and
+
+• a set F of monotone functions of L × L → L
+An instance of a monotone structure then consists of the structure (L, F)
+• a mapping ι . from the constants c ∈ Const to values in L, and
+
+• a mapping f . from the binary operators op ∈ Op to functions of F
+No need of ow component: it is up to the Control Flow Analysis to
+determine the ow
+
+fl
+
+fl
+
+221
+
+===== slide 4 =====
+Example
+Lift concrete operations to abstract values
+Take the following monotone structure:
+
+• L = ℘(Data)
+• F: monotone functions of L × L → L
+An instance of this monotone structure is obtained by taking
+• ιc = {dc} for each constant c ∈ Const (and with dc ∈ Data)
+
+Apply the
+operator to all
+pairs of possible
+values
+
+• fop(l1, l2) = ⋃ {dop(d1, d2) | d1 ∈ l1, d2 ∈ l2}
+for all op ∈ Op (and where dop : Data × Data → Data is like before)
+222
+
+===== slide 5 =====
+Example: Constant Propagation Analysis
+A monotone structure for Constant Propagation Analysis
+⊤
+×
+℘({
+,
+})
+Z
+with
+• L = Z⊤
+⊥
+⊥ is flat(Z) where ⊤ indicates
+
+that a variable is non constant
+• F: monotone functions of L × L → L
+An instance of this monotone structure is obtained by taking, e.g.,
+ιc = (7,∅) and ι = ( ⊥ , { })
+
+f
+
+i
+
+t
+
+f
+
+t
+
+f
+
+t
+
+t
+
+d
+
+n
+
+e
+
+u
+
+a
+
+r
+
+t
+
+e
+
+u
+
+r
+
+223
+t
+
+e
+
+s
+
+i
+
+w
+
+r
+
+f
+
+z2 = ⊥
+
+i
+
+) = ( ⊥ , ∅) since z1 ∈ Z
+
+e
+
+f+ propagates constants when possible,
+otherwise returns ⊥ (unknown)
+
+For example:
+
+f+(ιc, ι
+
+h
+
+o
+
+f+(l1, l2) =
+
+t
+
+(z1 + z2, ∅) l1 = (z1, . . . ), l2 = (z2, . . . )
+z1, z2 ∈ Z
+( ⊥ , ∅) l1 = (z1, . . . ), l2 = (z2, . . . )
+z1 = ⊥
+z2 = ⊥ ∈ Z
+( ⊤ , ∅)
+
+===== slide 6 =====
+We combine CFA and DFA information, by tracking both functions and
+data simultaneously
+Control- ow and dataVald ̂ = ℘(Term) × ℘(Data)
+ow are computed
+Abstract domains
+
+v̂ ∈ Val ̂ = ℘(Term)
+ρ ̂ ∈ Env ̂ : Var → Val ̂
+Ĉ ∈ Cachê : Lab → Val ̂
+CFA part
+
+decoupling
+
+together
+
+DFA part
+
+d ̂ ∈ Data ̂ = L
+δ ̂ ∈ DEnv̂ : Var → Data ̂
+D̂ ∈ DCachê : Lab → Data ̂
+
+Acceptability relation
+
+(C,̂ D,̂ ρ,̂ δ)̂ ⊧D e
+224
+
+fl
+
+fl
+
+New CFA
+
+===== slide 7 =====
+Clause for constants
+[con] (C,̂ D,̂ ρ,̂ δ)̂ ⊧D c l
+
+̂
+ιc ⊑ D(l)
+
+At label l, the abstract data value of c must be recorded
+
+Constants inject
+data- ow information
+into the analysis
+
+ι tells us which abstract value a constant contributes
+
+Example
+
+fl
+
+f
+
+f
+
+225
+i
+
+c=7
+ιc = { + }
+̂
+D(l)
+must contain { + }
+
+===== slide 8 =====
+Clause for binary operation
+[op] (C,̂ D,̂ ρ,̂ δ)̂ ⊧D (t1l1
+
+t2l2)l
+
+(C,̂ D,̂ ρ,̂ δ)̂ ⊧D t1l1 ∧ (C,̂ D,̂ ρ,̂ δ)̂ ⊧D t2l2 ∧
+̂ 1), D(l
+̂ 2)) ⊑ D(l)
+̂
+fop(D(l
+
+Now, we use the component f .
+
+Compute the abstract
+result of the operation
+and propagate it to the
+result label
+
+Example
+x ∈ {+, 0}, y ∈ {+}
+x + y ∈ {+, 0, −}
+
+̂
+D(l)
+must include {+, 0, −}
+f
+
+f
+
+i
+
+p
+
+o
+
+226
+
+===== slide 9 =====
+[if ] (C,̂ D,̂ ρ,̂ δ)̂ ⊧D ( t0l0
+t1l1
+(C,̂ D,̂ ρ,̂ δ)̂ ⊧D t l0 ∧
+(ι
+(ι
+
+t2l2)l
+
+0
+
+̂ 1) ⊆ C(l)
+̂ ∧ D(l
+̂ 0) ⇒ (C,̂ D,̂ ρ,̂ δ)̂ ⊧D t l1 ∧ C(l
+̂ 1) ⊑ D(l))
+̂
+⊑ D(l
+∧
+1
+̂ 2) ⊆ C(l)
+̂ ∧ D(l
+̂ 0) ⇒ (C,̂ D,̂ ρ,̂ δ)̂ ⊧D t l2 ∧ C(l
+̂ 2) ⊑ D(l))
+̂
+⊑ D(l
+2
+
+The clause [if]
+• analyze condition
+• use abstract boolean value and propagate only analysed branches
+
+l
+
+e
+
+n
+
+e
+
+f
+
+i
+
+e
+
+e
+
+e
+
+s
+
+s
+
+l
+
+u
+
+e
+
+l
+
+u
+
+a
+
+r
+
+a
+
+r
+
+t
+f
+
+f
+
+t
+
+f
+
+227
+
+̂
+⋢ D(3)
+⇒
+h
+
+̂ ⊆ C(8)
+̂ and D(5)
+̂
+̂
+̂ ...ι
+⊑ D(3)
+⇒ C(5)
+⊆ D(8)
+
+ι
+
+t
+
+Example
+e ≜ (if (31> 02)3 then (fn y => y4)5 else (fn z => z6)7)8
+
+f
+
+i
+
+Clause for conditional
+
+===== slide 10 =====
+CFA with abstract values as complete lattices
+
+228
+
+===== slide 11 =====
+Back to our Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+
+The last column describes the
+solution (C,̂ D,̂ ρ,̂ δ)̂ , where it is
+evident the splitting between
+• the control ow component (C,̂ ρ)̂
+• and the data ow component (D,̂ δ)̂
+Note, e.g., that
+̂ ={+}
+• x is always positive: δ(x)
+
+̂
+={ }
+• condition is always true: D(3)
+
+fl
+
+fl
+
+t
+
+t
+
+229
+
+Pure CFA CFA (powersets) CFA (complete lattices)
+
+===== slide 12 =====
+Correctness of the analysis
+The combined CFA + DFA is sound w.r.t. the operational semantics
+• Same proof techniques as before apply
+• The algorithm terminates if L satisfies the Ascending Chain Condition (ACC),
+as in the case for Monotone Frameworks
+no infinite strictly increasing sequences
+fixpoint computation terminates
+
+fi
+
+fi
+
+fi
+
+230
+
+===== slide 13 =====
+Staging the specification
+• If we change the [if] clause in such a way that the data ow component
+cannot in uence the control ow component, with a modi ed relation ⊧′D,
+then (C,̂ D,̂ ρ,̂ δ)̂ ⊧′D e guarantees that (C,̂ ρ)̂ ⊧ e
+
+We can solve:
+1. control- ow (Ĉ and ρ)̂ rst
+
+2. data- ow (D̂ and δ)̂ afterwards
+• The analysis still yields the least solution of the combined set of constraints
+
+fl
+
+fi
+
+￼
+fl
+
+fl
+
+fl
+
+￼
+
+231
+
+===== slide 14 =====
+Back to Example 3
+e ≜ (let f = (fn x => (if (x1 > 02)3 then (fn y => y4)5
+else (fn z => 256)7)8)9
+in ((f10 311)12 013)14)15
+
+If we modify the [if] clause as
+discussed above then Ĉ and ρ ̂ are as
+in pure CFA, while D̂ and δ ̂ associate
+slightly larger sets with some labels
+and variables
+
+̂
+={+}
+• D(6)
+
+̂
+= {0,+}
+• D(14)
+̂
+= {0,+}
+• D(15)
+̂ = {0}
+• δ(z)
+
+232
+
+Pure CFA
+
+CFA (powersets) CFA (complete lattices)
+
+===== slide 15 =====
+More instances and precision
+
+233
+
+===== slide 16 =====
+Example 4
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+̂ )
+The least O-CFA analysis is given by (Ĉid, ρid
+1
+6
+• Ĉid(1) = {fn x => x ,fn y => y }
+1
+• Ĉid(2) = {fn x => x }
+1
+• Ĉid(3) = {fn x => x }
+1
+• Ĉid(4) = {fn x => x }
+1
+6
+• Ĉid(5) = {fn x => x ,fn y => y }
+6
+• Ĉid(6) = {fn y => y }
+
+6
+• Ĉid(7) = {fn y => y }
+1
+6
+• Ĉid(8) = {fn x => x ,fn y => y }
+1
+6
+• Ĉid(9) = {fn x => x ,fn y => y }
+̂ ( ) = {fn x => x1}
+• ρid
+̂ ( ) = {fn x => x1),fn y => y6}
+• ρid
+̂ ( ) = {fn y => y6}
+• ρid
+
+Only fn y => y6 is a possible result of the evaluation of e
+0-CFA merges di erent calling contexts loss of precision
+
+ff
+
+y
+
+x
+
+f
+
+234
+
+===== slide 17 =====
+Example 4 bis
+Idea: duplicate functions per call site
+separate each use of f
+e’ ≜ (let f1 = (fn x1 => x11)2
+in (let f2 = (fn x2 => x23)4
+in ((f15 f26)7 (fn y => y8)9)10)11)12
+
+• ...
+
+8
+• Ĉid(12) = {fn y => y }
+̂ ( ) = {fn x2 => x23}
+• ρid
+̂ ( ) = {fn y => y8}
+• ρid
+
+Now each parameter is bound in a single context:
+3
+• x1 can only be bound to fn x2 => x2 and
+8
+• x2 can only be bound to fn y => y
+• so no merging of ows precise result: fn y => y8 only
+1
+
+fl
+
+fl
+
+x
+
+x
+
+2
+
+235
+
+precision comes from
+separating ows
+
+===== slide 18 =====
+Adding Context Information
+
+236
+
+===== slide 19 =====
+Uniform k-CFA Analysis
+
+237
+
+===== slide 20 =====
+Adding contexts
+• 0-CFA is a context-insensitive (or mono-variant) analysis
+• It does not distinguish various instances of program variables and program
+points from each other, in particular does not distinguish di erent calling
+contexts
+• Context-sensitive (or poly-variant) analysis does distinguish
+• Examples of such analyses include k-CFA analyses, uniform k-CFA
+analyses, polynomial k-CFA analyses and the Cartesian Product
+Algorithm
+• We focus on uniform k-CFA (“uniform” because environment and cache
+have the same precision)
+
+238
+
+===== slide 21 =====
+Abstract domains: contexts
+Idea: extend Val ̂to include context information
+Goal: distinguish di erent function calls
+
+• Contexts δ ̂ record the k last dynamic call sites, e.g., for k = 1, the context
+amounts just to the label of the expression that called the current function
+• In general, contexts are sequences of labels of length at most ≤ k
+
+δ ̂ ∈ Δ = Lab≤k
+
+We track information separately for di erent call strings*
+• Same function, di erent contexts di erent analyses
+*A call string is a list of labels l1, . . . , ln denoting that the last n calls were of the form
+
+(e1n e2n)ln . . . (e11 e21)l1 with (e11 e21)l1 being the most recent call; we write ε for the empty call string
+
+ff
+
+ff
+
+ff
+
+239
+
+===== slide 22 =====
+Abstract domains: context environment
+• A context environment records in which context each variable was defined
+• So we associate a context to each variable occurrence
+De nition points of free
+variables of terms
+
+ce ∈ Cenv = Var → Δ
+
+• The same variable may have di erent values in di erent contexts
+
+• The context environment will play a role similar to the environment of the
+semantics
+
+ff
+
+fi
+
+240
+
+===== slide 23 =====
+Context-sensitive abstract values
+In our set of values, instead of just the function abstractions, we need to
+track closures, i.e., a pair of a function label and a context environment
+• A value is paired with the context environment where it was created
+• We shall extend the abstract values as
+
+v̂ ∈ Val ̂ = ℘(Val × Cenv)
+
+241
+
+===== slide 24 =====
+Context-sensitive environments
+• Abstract environment ρ ̂ and abstract cache Ĉ will now map a variable (a
+label, resp.) and a context to an abstract value
+
+ρ ̂ ∈ Cenv ̂ = (Var × Δ) → Val ̂
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+
+• Values are now indexed by context
+• This treatment prevents merging values from di erent calls (as in the
+previous example)
+
+242
+
+===== slide 25 =====
+k-CFAs
+• In uniform k-CFA we have a cache for each possible context
+
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+
+where Δ: set of call strings (length ≤ k)
+• In the classical k-CFA, we have instead a cache for each possible full
+environment
+
+Ĉ ∈ Cachê = (Lab × CEnv) → Val ̂
+
+• In the polynomial k-CFA, instead of Val ̂ = ℘(Val × Cenv) we have
+more expensive
+
+v̂ ∈ Val ̂ = ℘(Val × Δ)
+243
+
+===== slide 26 =====
+To recap
+ce ∈ Cenv = Var → Δ
+δ ̂ ∈ Δ = Lab≤k
+v̂ ∈ Val ̂ = ℘(Val × Cenv)
+ρ ̂ ∈ Cenv ̂ = (Var × Δ) → Val ̂
+Ĉ ∈ Cachê = (Lab × Δ) → Val ̂
+
+244
+
+===== slide 27 =====
+Acceptability relation
+(C,̂ ρ)̂ ⊧ce
+δ e
+
+• ce is the current context environment:
+
+• it tracks the context in which each variable of e is bound
+• it changes when variables are bound
+• δ ̂ is the current calling context
+• it changes when functions are applied
+The formula expresses that (C,̂ ρ)̂ is an acceptable analysis of e in the
+context speci ed by ce and δ ̂
+
+Acceptability is now context-dependent: we analyse e in a specific calling
+context δ ̂
+
+fi
+
+245
+
+===== slide 28 =====
+l
+[var] (C,̂ ρ)̂ ⊧ce
+x
+δ
+
+̂ δ)
+̂ ce(x)) ⊆ C(l,
+ρ(x,
+
+We look up x in the context where it was bound and
+propagate it to the current context
+
+Same variable,
+different contexts → different values
+
+• ce(x) context where x was defined [definition context]
+• δ: current context (where we use x) [use context]
+
+A variable carries the context where it was created, but is used in the
+current context
+Example
+Suppose x was bound at call site 5, i.e., ce2( ) = 5, then
+2 1
+̂ (1,5) [see Example 4]
+̂ ) ⊧ce
+̂
+x
+(C′̂id, ρ′id
+ρ′
+(
+,5)
+⊆
+C′
+id
+id
+5
+f
+
+f
+
+fi
+
+￼
+
+￼
+
+x
+
+￼
+
+￼
+
+x
+
+f
+
+i
+
+246
+
+f
+
+i
+
+Clause for variables
+
+===== slide 29 =====
+[ fn] (C,̂ ρ)̂ ⊧ce
+δ (
+
+̂ δ)
+x ⇒ e0)l
+{( x ⇒ e0, ce0)} ⊆ C(l,
+where ce0 = ce | FV( x ⇒ e0)
+
+̂ δ) together with the
+x ⇒ e0 must be included in C(l,
+The functional term
+current context environment ce, restricted to the free variables of the
+function (denoted ce0)
+Functions are represented as closures: a function is paired with the context
+in which it is defined, restricted to its free variables
+∅,
+
+Example: Suppose Λ be the empty sequence of labels and ce = [x ↦ 5,y ↦ 3]
+12
+1
+environment at
+̂ ) ⊧ce
+(C′̂id, ρ′id
+(fn
+x
+=>
+x
+)
+{
+(fn
+x
+=>
+x
+, ce0)} ⊆ C′̂id(2,Λ)
+Λ
+application time
+
+1
+
+with ce0 = [] since FV(fn x => x ) = ∅ [see Example 4]
+Note that if the function were (fn x => y), then FV(fn x => y) = {y}
+
+fi
+
+￼
+
+￼
+
+￼
+
+f
+
+n
+
+n
+
+f
+
+f
+
+f
+
+i
+
+n
+
+f
+
+n
+
+f
+
+247
+
+f
+
+f
+
+i
+
+Clause for functions
+
+===== slide 30 =====
+[let] (C,̂ ρ)̂ ⊧ce
+δ (
+
+x = t1l1
+
+l1
+̂ ρ)̂ ⊧ce′ t l2 ∧
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+
+t2l2)l
+
+̂ 1, δ) ⊆ ρ(x,
+̂ 2, δ) ⊆ C(l,
+̂ δ)
+̂ δ) ∧ C(l
+C(l
+where ce′ = ce[x ↦ δ]
+we record that x is defined
+
+This clause
+in the current context δ
+• requires checking the sub-expressions
+• the definition context of the bound variable of the let-construct is the
+current context (as no application point is passed)
+Double ow: propagation of the values
+̂ 1, δ) to ρ(x,
+̂ δ) [binding]
+• from C(l
+̂ 2, δ) to C(l,
+̂ δ) [evaluation]
+• from C(l
+Example
+l2
+̂ ) ⊧[]Λ (let f = (fn x => x1)2 in (f3 34)5)6 (C,̂ ρ)̂ ⊧[]Λ t1l1 ∧ (C,̂ ρ)̂ ⊧[x↦δ]
+(C′̂id, ρ′id
+t
+∧
+δ
+2
+
+fi
+
+f
+fl
+
+￼
+fi
+
+￼
+
+f
+
+￼
+
+f
+
+i
+
+n
+
+i
+
+t
+
+e
+
+l
+
+̂
+̂
+̂
+C(2,Λ)
+⊆ ρ(̂ , Λ) and C(5,Λ)
+⊆ C(6,Λ)
+...
+248
+
+f
+
+i
+
+Clause for the let binding
+
+===== slide 31 =====
+Clause for function application
+l1 l2 l
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+t
+)
+δ
+1 2
+both subexpressions are
+analysed in the same context
+δ and environment ce
+operator may evaluate to a
+function closure
+
+l1
+̂ ρ)̂ ⊧ce t l2
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+l0
+̂ 1, δ) :
+( ∀( x ⇒ t0 , ce0) ∈ C(l
+0 l0
+(C,̂ ρ)̂ ⊧ce′
+t ∧
+δ0 0
+̂ 2, δ) ⊆ ρ(x,
+̂ 0, δ) ⊆ C(l,
+̂ δ))
+̂ δ) ∧ C(l
+C(l
+
+body analysed in the
+updated context δ0 using the
+closure environment
+
+where δ0 = ⌈δ, l⌉k and
+
+we extend the current
+context with the call site l
+
+∧ ...
+
+Propagation
+as before
+
+ce′0 = ce0[x ↦ δ0]
+
+x is now bound in the new
+calling context δ0 but using the
+
+fi
+
+f
+
+f
+
+249
+i
+
+￼
+
+n
+
+f
+
+￼
+
+definition environment ce0
+
+===== slide 32 =====
+Clause for function application
+l1 l2 l
+[app] (C,̂ ρ)̂ ⊧ce
+(t
+t
+)
+δ
+1 2
+
+• We proceed in a similar
+way
+• both f and x are bound in
+the new calling context δ0
+when analyzing the body
+
+l1
+̂ ρ)̂ ⊧ce t l2
+(C,̂ ρ)̂ ⊧ce
+t
+∧
+(
+C,
+δ 1
+δ 2
+
+∧ ...
+
+̂ 1, δ) :
+( ∀(
+x ⇒ t0l0, ce0) ∈ C(l
+0 l0
+(C,̂ ρ)̂ ⊧ce′
+t
+∧
+δ0 0
+̂ 2, δ) ⊆ ρ(x,
+̂ 0, δ) ⊆ C(l,
+̂ δ))
+̂ δ) ∧ C(l
+C(l
+{(
+x ⇒ t0l0, ce0)} ∈ ρ(̂ f, δ0) :
+where δ0 = ⌈δ, l⌉k and
+ce′0 = ce0[ f ↦ δ0, x ↦ δ0]
+∧ ...
+f
+
+f
+
+i
+￼
+
+f
+
+f
+
+n
+
+u
+
+n
+
+f
+
+￼
+
+u
+
+f
+
+250
+
+===== slide 33 =====
+Uniform k-CFA
+
+251
+
+===== slide 34 =====
+Back to Example 4: 0-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+̂ )
+The least O-CFA analysis is given by (Ĉid, ρid
+1
+6
+• Ĉid(1) = {fn x => x ,fn y => y }
+1
+• Ĉid(2) = {fn x => x }
+1
+• Ĉid(3) = {fn x => x }
+1
+• Ĉid(4) = {fn x => x }
+1
+6
+• Ĉid(5) = {fn x => x ,fn y => y }
+6
+• Ĉid(6) = {fn y => y }
+
+6
+• Ĉid(7) = {fn y => y }
+1
+6
+• Ĉid(8) = {fn x => x ,fn y => y }
+1
+6
+• Ĉid(9) = {fn x => x ,fn y => y }
+̂ ( ) = {fn x => x1}
+• ρid
+̂ ( ) = {fn x => x1),fn y => y6}
+• ρid
+̂ ( ) = {fn y => y6}
+• ρid
+
+Only fn y => y6 is a possible result of the evaluation of e
+0-CFA merges di erent calling contexts loss of precision
+
+ff
+
+y
+
+x
+
+f
+
+252
+
+===== slide 35 =====
+Back to Example 4: uniform 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+• The initial context will be Λ, the empty sequence of labels
+• In the course of the analysis the current context will be modi ed at the two
+application points with labels 5 and 8
+• since we only records call strings of length at most 1 the only contexts of
+interest will therefore be in {Λ, 5, 8}
+• In 0-CFA the two calls are merged
+• In 1-CFA they are instead separated because they have di erent call sites: this
+is enough to restore precision
+253
+
+===== slide 36 =====
+Back to Example 4: uniform 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+• Context environments generated during the analysis:
+• ce0 = [] initial (empty) context environment
+
+• ce1 = ce0[ f ↦ Λ] used for analyzing the body of the let: f is defined in context Λ
+• ce2 = ce0[x ↦ 5] used for analyzing the body of f: x bound at call site 5
+• ce3 = ce0[x ↦ 8] used for analyzing the body of f: x bound at call site 8
+
+We start from the closure environment ce0 (captured at definition time), not from
+the current ce
+
+254
+
+===== slide 37 =====
+Back to Example 4: uniform 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+̂ ) • C′̂id(1,5) = {(fn x => x1,ce0)} • ρ′id̂ ( , Λ) = {(fn x => x1,ce0)}
+Look at the solution (C′̂id, ρ′id
+1
+• C′̂id(2,Λ) = {(fn x => x ,ce0)} • ρ′̂ ( ,5) = {(fn x => x1,ce0)}
+id
+1
+• C′̂id(4,Λ) = {(fn x => x ,ce0)} • ρ′̂ ( ,8) = {(fn y => y6,ce0)}
+id
+With this CFA we can:
+6
+• C′̂id(7,Λ) = {(fn y => y ,ce0)}
+• distinguish the values of x
+6
+• C′̂id(9,Λ) = {(fn y => y ,ce0)}
+in the two calling contexts
+6
+̂
+• determine that fn y => y6 is • C′id(1,8) = {(fn y => y ,ce0)}
+1
+the only result possible
+• C′̂id(3,Λ) = {(fn x => x ,ce0)}
+1
+• C′̂ (5,Λ) = {(fn x => x ,ce0)}
+id
+
+6
+• C′̂id(8,Λ) = {(fn y => y ,ce0)}
+
+f
+
+x
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+255
+
+===== slide 38 =====
+Back to Example 4: 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+To check acceptability, i.e.,
+̂ ) ⊧ce0 e we proceed by
+(C′̂id, ρ′id
+Λ
+
+f
+
+x
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+clauses:
+• [let], to check the update of
+the context environment
+• [app] at label 8, to check
+check x1 in context 8 and
+• [app] at label 5, to check
+check x1 in context 8
+• for each closure, we check
+argument + body in updated
+context
+
+We check acceptability
+
+1
+• C′̂id(1,5) = {(fn x => x ,ce0)}
+1
+• C′̂id(2,Λ) = {(fn x => x ,ce0)}
+1
+• C′̂id(4,Λ) = {(fn x => x ,ce0)}
+6
+• C′̂id(7,Λ) = {(fn y => y ,ce0)}
+6
+• C′̂id(9,Λ) = {(fn y => y ,ce0)}
+6
+• C′̂id(1,8) = {(fn y => y ,ce0)}
+1
+• C′̂id(3,Λ) = {(fn x => x ,ce0)}
+1
+• C′̂id(5,Λ) = {(fn x => x ,ce0)}
+6
+• C′̂id(8,Λ) = {(fn y => y ,ce0)}
+
+256
+
+̂ ( , Λ) = {(fn x => x1,ce0)}
+• ρ′id
+̂ ( ,5) = {(fn x => x1,ce0)}
+• ρ′id
+̂ ( ,8) = {(fn y => y6,ce0)}
+• ρ′id
+
+===== slide 39 =====
+Back to Example 4: 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+We check acceptability
+
+0
+̂ ) ⊧ce
+[let]:To check (C′̂id, ρ′id
+e it su ces ([let]) to verify
+Λ
+
+ce0 = []
+
+ce1 3 4 5
+678
+0
+̂ ) ⊧ce
+̂
+(fn x => x1)2 and (C′̂id, ρ′id
+((f
+f
+)
+(fn
+y
+=>
+y
+) )
+(C′̂id, ρ′id
+)
+⊧
+Λ
+Λ
+
+because C′̂id(2,Λ) ⊆ ρ′id̂ ( , Λ) and C′̂id(8,Λ) ⊆ C′̂id(9,Λ)
+
+ce1 = ce0[ f ↦ Λ]
+
+[app] at label 8: Since C′̂id(5,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+678
+1
+̂ ) ⊧ce
+((f
+f
+)
+(fn
+y
+=>
+y
+) ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+
+ce3 = ce0[x ↦ 8]
+
+3 45
+1
+̂ , ρ′̂ ) ⊧ce1 (fn y => y6)7 and (C′̂ , ρ′̂ ) ⊧ce3 x1
+̂ ) ⊧ce
+(f
+f
+)
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+8
+
+̂ (x,8) ⊆ Ĉid(8,Λ)
+ρid
+
+because C′̂id(7,Λ) ⊆ ρ′id̂ ( ,8) and C′̂id(1,8) ⊆ C′̂id(8,Λ)
+
+δ0 = ⌈Λ,8⌉1 = 8
+
+[app] at label 5: Since C′̂id(3,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+1
+̂ ) ⊧ce
+(f
+f ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+1 3
+̂ , ρ′̂ ) ⊧ce1 f4 and (C′̂ , ρ′̂ ) ⊧ce2 x1
+̂ ) ⊧ce
+f
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+5
+
+because C′̂id(4,Λ) ⊆ ρ′id̂ ( ,5) and C′̂id(1,5) ⊆ C′̂id(5,Λ)
+
+ffi
+
+ffi
+
+ffi
+
+x
+
+f
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+δ0 = ⌈Λ,5⌉1 = 5
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+i
+
+257
+
+ce2 = ce0[x ↦ 5]
+
+===== slide 40 =====
+Back to Example 4: 1-CFA
+e ≜ (let f = (fn x => x1)2
+in ((f3 f4)5 (fn y => y6)7)8)9
+
+We check acceptability
+
+0
+̂ ) ⊧ce
+[let]:To check (C′̂id, ρ′id
+e it su ces ([let]) to verify
+Λ
+
+ce0 = []
+
+ce1 3 4 5
+678
+0
+̂ ) ⊧ce
+̂
+(fn x => x1)2 and (C′̂id, ρ′id
+((f
+f
+)
+(fn
+y
+=>
+y
+) )
+(C′̂id, ρ′id
+)
+⊧
+Λ
+Λ
+
+because C′̂id(2,Λ) ⊆ ρ′id̂ ( , Λ) and C′̂id(8,Λ) ⊆ C′̂id(9,Λ)
+
+ce1 = ce0[ f ↦ Λ]
+
+[app] at label 8: Since C′̂id(5,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+678
+1
+̂ ) ⊧ce
+((f
+f
+)
+(fn
+y
+=>
+y
+) ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+
+ce3 = ce0[x ↦ 8]
+
+3 45
+1
+̂ , ρ′̂ ) ⊧ce1 (fn y => y6)7 and (C′̂ , ρ′̂ ) ⊧ce3 x1
+̂ ) ⊧ce
+(f
+f
+)
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+8
+
+̂ (x,8) ⊆ Ĉid(8,Λ)
+ρid
+
+because C′̂id(7,Λ) ⊆ ρ′id̂ ( ,8) and C′̂id(1,8) ⊆ C′̂id(8,Λ)
+
+[app] at label 5: Since C′̂id(3,Λ) = {(fn x => x1,ce0)}, to check
+3 45
+1
+̂ ) ⊧ce
+(f
+f ) su ces ([app]) to verify
+(C′̂id, ρ′id
+Λ
+1 3
+̂ , ρ′̂ ) ⊧ce1 f4 and (C′̂ , ρ′̂ ) ⊧ce2 x1
+̂ ) ⊧ce
+f
+and
+(C′̂id, ρ′id
+(
+C′
+id id
+id id
+Λ
+Λ
+5
+
+because C′̂id(4,Λ) ⊆ ρ′id̂ ( ,5) and C′̂id(1,5) ⊆ C′̂id(5,Λ)
+
+only fn y => y6can ow to C′̂id(9,Λ)
+
+ffi
+
+ffi
+
+ffi
+
+fl
+
+x
+
+f
+
+x
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+f
+
+f
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+￼
+
+i
+
+￼
+
+258
+
+ce2 = ce0[x ↦ 5]
+
+===== slide 41 =====
+Correctness and implementation of the uniform k-CFA
+Soundness
+The analysis is sound w.r.t. the operational semantics
+Implementation
+Can be implemented via constraint solving / fixpoint iteration
+Trade-o
+• Higher k
+
+more precision
+
+• But exponential worst-case complexity
+
+ff
+
+259
+
+===== slide 42 =====
+Complexity of uniform k-CFA
+
+• even for k = 1: exponential worst case complexity
+Why? (intuition)
+• Program size: n, number of variables: p
+• Contexts:
+O(n ⋅ p) di erent pairs (x, δ) and
+• Δ has O(n) elements
+O(n 2) di erent pairs (l, δ)
+• Abstract states:
+closures
+• (C,̂ ρ)̂ ≈ O(n 2) of tuples of values from Val ̂
+
+• Val ̂ itself is a powerset of pairs of the form (t, ce)
+
+• Values:
+
+O(n ⋅ n p) such pairs,
+
+• Val ̂ has height O(n ⋅ n p) and, since p = O(n), we have the exponential
+
+complexity
+
+ff
+
+ff
+
+260
+
+===== slide 43 =====
+Complexity of 0-CFA
+• Here for k = 0: exponential worst case complexity
+Why? (intuition)
+• Program size: n, number of variables: p
+• No contexts:
+O(p) di erent pairs (x, δ) and
+• Δ is a singleton
+O(n) di erent pairs (l, δ)
+• (C,̂ ρ)̂ ≈ O(p + n) of tuples of values from Val ̂
+
+• Abstract states:
+
+• Val ̂ (powerset of pairs of the form (t, ce) )
+
+• Values:
+
+but here only (t, ce0)
+
+• Val ̂ has height O(n) and we have the polynomial complexity
+
+ff
+
+ff
+
+261
+
+O(n)
+
+===== slide 44 =====
+Possible improvements of complexity
+• In k-CFA, Val ̂ = ℘(Val × Cenv)
+• Context environments cause exponential blow-up
+Problem:
+
+• Using abstraction to limit Val ̂
+• (Standard abstract interpretation techniques)
+Idea 1: reduce lattice height
+
+262
+
+===== slide 45 =====
+Possible improvements of complexity
+Idea 2: simplify contexts Val ̂ = ℘(Val × Cenv)
+Replace context environments with contexts only
+• No full environment
+• Only call strings δ
+E ect:
+
+Val ̂ = ℘(Term × Δ)
+
+closures = function +
+call string
+
+• No combinations of variables inside ce
+• Number of abstract values drastically reduced
+• Lattice of polynomial height
+• Less precision, but much cheaper
+263
+
+ff
+
+closures = function +
+full environment

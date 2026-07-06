@@ -1,0 +1,1096 @@
+# ProgramAnalysis-06-RealIL
+# auto-extracted from ProgramAnalysis-06-RealIL.pdf (51 slides)
+# NOTE: text layer only — may reorder lines / drop ligatures / rasterize math.
+
+===== slide 1 =====
+Program Analysis 2025-26
+Lecture #6
+The Real IL
+
+===== slide 2 =====
+The Real Incorrectness Logic
+(IL)
+
+2
+
+===== slide 3 =====
+IL, as you have seen it
+Incorrectness Logic
+PETER W. O’HEARN, Facebook and University College London, UK
+Program correctness and incorrectness are two sides of the same coin. As a programmer, even if you would
+like to have correctness, you might find yourself spending most of your time reasoning about incorrectness.
+This includes informal reasoning that people do while looking at or thinking about their code, as well as that
+supported by automated testing and static analysis tools. This paper describes a simple logic for program
+incorrectness which is, in a sense, the other side of the coin to Hoare’s logic of correctness.
+
+10
+
+[P] c [Q]
+
+CCS Concepts: • Theory of computation → Programming logic.
+Additional Key Words and Phrases: Proofs, Bugs, Static Analysis
+ACM Reference Format:
+Peter W. O’Hearn. 2020. Incorrectness Logic. Proc. ACM Program. Lang. 4, POPL, Article 10 (January 2020),
+32 pages. https://doi.org/10.1145/3371078
+
+1
+
+INTRODUCTION
+
+When reasoning informally about a program, people make abstract inferences about what might
+go wrong, as well as about what must go right. A programmer might ask “will the program crash
+if we give it a large string?”, without saying which large string. In this paper we investigate the
+hypothesis that reasoning about the presence of bugs can be underpinned by sound techniques
+in a principled logical system, just as reasoning about correctness (absence of bugs) has been
+demonstrated to have sound logical principles in an extensive research literature. We also consider
+the relationship of the principles to automated reasoning tools for finding bugs in software.
+We explore our hypothesis by defining incorrectness logic, a formalism that is similar to Hoare’s
+logic of program correctness [Hoare 1969], except that it is oriented to proving incorrectness rather
+than correctness. Hoare’s theory is based on specifications of the form
+{pre-condition}code{post-condition}
+which say that the post-condition over-approximates (describes a superset of) the states reachable
+upon termination when the code is executed starting from states satisfying the pre-condition (the
+so-called strongest post). Conversely, we use a specification form
+[presumption]code[result]
+which says that the post-assertion result be an under-approximation (subset) of the final states that
+can be reached starting from states satisfying the presumption.
+The under-approximate triples were studied (with a different but equivalent definition) previously
+by de Vries and Koutavas [2011] in their reverse Hoare logic, which they used to specify randomized
+algorithms. Incorrectness logic adds post-assertions for errors as well as for normal termination, and
+these assertions describe erroneous states that can be reached by actual program executions. Dijkstra
+[1976] famously remarked that “testing can be quite effective for showing the presence of bugs, but
+is hopelessly inadequate for showing their absence,” and he made this remark while arguing for the
+Author’s address: Peter W. O’Hearn, Facebook and University College London, UK.
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+© 2020 Copyright held by the owner/author(s).
+2475-1421/2020/1-ART10
+https://doi.org/10.1145/3371078
+Proc. ACM Program. Lang., Vol. 4, No. POPL, Article 10. Publication date: January 2020.
+
+3
+
+===== slide 4 =====
+The real IL
+ε ∈ {ok , er}
+[P] c [ε : Q]
+
+Incorrectness Logic
+PETER W. O’HEARN, Facebook and University College London, UK
+Program correctness and incorrectness are two sides of the same coin. As a programmer, even if you would
+like to have correctness, you might find yourself spending most of your time reasoning about incorrectness.
+This includes informal reasoning that people do while looking at or thinking about their code, as well as that
+supported by automated testing and static analysis tools. This paper describes a simple logic for program
+incorrectness which is, in a sense, the other side of the coin to Hoare’s logic of correctness.
+
+10
+
+CCS Concepts: • Theory of computation → Programming logic.
+Additional Key Words and Phrases: Proofs, Bugs, Static Analysis
+ACM Reference Format:
+Peter W. O’Hearn. 2020. Incorrectness Logic. Proc. ACM Program. Lang. 4, POPL, Article 10 (January 2020),
+32 pages. https://doi.org/10.1145/3371078
+
+1
+
+INTRODUCTION
+
+When reasoning informally about a program, people make abstract inferences about what might
+go wrong, as well as about what must go right. A programmer might ask “will the program crash
+if we give it a large string?”, without saying which large string. In this paper we investigate the
+hypothesis that reasoning about the presence of bugs can be underpinned by sound techniques
+in a principled logical system, just as reasoning about correctness (absence of bugs) has been
+demonstrated to have sound logical principles in an extensive research literature. We also consider
+the relationship of the principles to automated reasoning tools for finding bugs in software.
+We explore our hypothesis by defining incorrectness logic, a formalism that is similar to Hoare’s
+logic of program correctness [Hoare 1969], except that it is oriented to proving incorrectness rather
+than correctness. Hoare’s theory is based on specifications of the form
+{pre-condition}code{post-condition}
+which say that the post-condition over-approximates (describes a superset of) the states reachable
+upon termination when the code is executed starting from states satisfying the pre-condition (the
+so-called strongest post). Conversely, we use a specification form
+[presumption]code[result]
+which says that the post-assertion result be an under-approximation (subset) of the final states that
+can be reached starting from states satisfying the presumption.
+The under-approximate triples were studied (with a different but equivalent definition) previously
+by de Vries and Koutavas [2011] in their reverse Hoare logic, which they used to specify randomized
+algorithms. Incorrectness logic adds post-assertions for errors as well as for normal termination, and
+these assertions describe erroneous states that can be reached by actual program executions. Dijkstra
+[1976] famously remarked that “testing can be quite effective for showing the presence of bugs, but
+is hopelessly inadequate for showing their absence,” and he made this remark while arguing for the
+Author’s address: Peter W. O’Hearn, Facebook and University College London, UK.
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+© 2020 Copyright held by the owner/author(s).
+2475-1421/2020/1-ART10
+https://doi.org/10.1145/3371078
+Proc. ACM Program. Lang., Vol. 4, No. POPL, Article 10. Publication date: January 2020.
+
+4
+
+===== slide 5 =====
+The real IL
+Incorrectness Logic
+PETER W. O’HEARN, Facebook and University College London, UK
+Program correctness and incorrectness are two sides of the same coin. As a programmer, even if you would
+like to have correctness, you might find yourself spending most of your time reasoning about incorrectness.
+This includes informal reasoning that people do while looking at or thinking about their code, as well as that
+supported by automated testing and static analysis tools. This paper describes a simple logic for program
+incorrectness which is, in a sense, the other side of the coin to Hoare’s logic of correctness.
+
+10
+
+CCS Concepts: • Theory of computation → Programming logic.
+Additional Key Words and Phrases: Proofs, Bugs, Static Analysis
+ACM Reference Format:
+Peter W. O’Hearn. 2020. Incorrectness Logic. Proc. ACM Program. Lang. 4, POPL, Article 10 (January 2020),
+32 pages. https://doi.org/10.1145/3371078
+
+1
+
+INTRODUCTION
+
+When reasoning informally about a program, people make abstract inferences about what might
+go wrong, as well as about what must go right. A programmer might ask “will the program crash
+if we give it a large string?”, without saying which large string. In this paper we investigate the
+hypothesis that reasoning about the presence of bugs can be underpinned by sound techniques
+in a principled logical system, just as reasoning about correctness (absence of bugs) has been
+demonstrated to have sound logical principles in an extensive research literature. We also consider
+the relationship of the principles to automated reasoning tools for finding bugs in software.
+We explore our hypothesis by defining incorrectness logic, a formalism that is similar to Hoare’s
+logic of program correctness [Hoare 1969], except that it is oriented to proving incorrectness rather
+than correctness. Hoare’s theory is based on specifications of the form
+{pre-condition}code{post-condition}
+which say that the post-condition over-approximates (describes a superset of) the states reachable
+upon termination when the code is executed starting from states satisfying the pre-condition (the
+so-called strongest post). Conversely, we use a specification form
+[presumption]code[result]
+which says that the post-assertion result be an under-approximation (subset) of the final states that
+can be reached starting from states satisfying the presumption.
+The under-approximate triples were studied (with a different but equivalent definition) previously
+by de Vries and Koutavas [2011] in their reverse Hoare logic, which they used to specify randomized
+algorithms. Incorrectness logic adds post-assertions for errors as well as for normal termination, and
+these assertions describe erroneous states that can be reached by actual program executions. Dijkstra
+[1976] famously remarked that “testing can be quite effective for showing the presence of bugs, but
+is hopelessly inadequate for showing their absence,” and he made this remark while arguing for the
+Author’s address: Peter W. O’Hearn, Facebook and University College London, UK.
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+© 2020 Copyright held by the owner/author(s).
+2475-1421/2020/1-ART10
+https://doi.org/10.1145/3371078
+Proc. ACM Program. Lang., Vol. 4, No. POPL, Article 10. Publication date: January 2020.
+
+5
+
+===== slide 6 =====
+Exit condition
+[P] c [ε : Q]
+ε ranges over exit conditions
+
+ok: normal (successful) execution
+er: erroneous execution
+
+[y = v] x := y [ok : x = y = v]
+
+[y = v] error( ) [er : y = v]
+6
+
+===== slide 7 =====
+Relational
+semantics
+[[skip]]ok ≜ {(σ, σ) ∣ σ ∈ Σ}
+
+from
+
+[[skip]]er ≜ ∅
+
+[[c]] ⊆ Σ × Σ
+
+[[b?]]ok ≜ {(σ, σ) ∣ σ ⊧ b}
+[[b?]]er ≜ ∅
+
+to
+
+[[x := a]]ok ≜ {(σ, σ[[[a]]σ/x]) ∣ σ ∈ Σ}
+[[x := a]]er ≜ ∅
+[[error( )]]ok ≜ ∅
+[[error( )]]er ≜ {(σ, σ) ∣ σ ∈ Σ}
+
+Main
+novelty!
+
+[[x := nondet( )]]ok ≜ {(σ, σ[x ↦ v]) ∣ σ ∈ Σ, v ∈ Z}
+[[x := nondet( )]]er ≜ ∅
+7
+
+[[c]]ok ⊆ Σ × Σ
+[[c]]er ⊆ Σ × Σ
+
+===== slide 8 =====
+Semantics: compositions
+
+[[c1 + c2]]ε ≜ [[c1]]ε ∪ [[c2]]ε
+⋆
+
+[[c ]]ε ≜
+
+⋃
+
+k
+
+[[c ]]ε
+
+where c
+
+k
+
+≜ c; ⋯; c
+
+k∈N
+
+k times
+
+[[c1; c2]]ok ≜ [[c2]]ok ∘ [[c1]]ok
+[[c1; c2]]er ≜ [[c1]]er ∪ ([[c2]]er ∘ [[c1]]ok)
+c1 fails
+
+c1 ok, but
+c2 fails
+
+S, T ⊆ Σ × Σ
+T ∘ S ≜ {(σ1, σ2) ∣ ∃σ . (σ1, σ) ∈ S ∧ (σ, σ2) ∈ T} ⊆ Σ × Σ
+8
+
+c1 ok,
+
+but ...
+
+[[c]]ok ⊆ Σ × Σ
+[[c]]er ⊆ Σ × Σ
+[[c]]ε ⊆ Σ × Σ
+any of
+ok, er
+
+===== slide 9 =====
+Shorthand notation
+[P] c [ok : Q1][er : Q2]
+stands for
+
+[P] c [ok : Q1] and [P] c [er : Q2]
+whose validity conditions are
+
+Q1 ⊆ [[c]]ok P and Q2 ⊆ [[c]]er P
+9
+
+===== slide 10 =====
+Real IL rules
+
+10
+
+===== slide 11 =====
+Atomic commands
+[P] x := a [ok : ∃x′ . P[x′/x] ∧ x = a[x′/x]][er : false]
+[skip]
+
+[P] skip [ok : P][er : false]
+
+[P] b? [ok : P ∧ b][er : false]
+[error]
+
+[Floyd]
+
+[assume]
+
+[P] error( ) [ok : false][er : P]
+
+[P] x := nondet( ) [ok : ∃x . P][er : false]
+11
+
+[nondet]
+
+Main
+novelty!
+
+===== slide 12 =====
+Real atomic commands
+...
+[skip]
+
+[skip]
+
+[P] skip [ok : P]
+
+[P] skip [er : false]
+...
+
+12
+
+===== slide 13 =====
+Sequence
+[seq]
+
+[seq_sc]
+
+[P] c1 [ok : R] [R] c2 [ε : Q]
+[P] c1; c2 [ε : Q]
+
+[P] c1 [er : Q]
+[P] c1; c2 [er : Q]
+Short circuiting of
+errors!
+
+[y = v] error( ); x := y [er : y = v]
+[y = v] x := y; error( ) [er : x = y = v]
+13
+
+===== slide 14 =====
+Choice: dropping disjuncts
+[choiceL]
+
+[choiceR]
+
+[P] c1 [ε : Q]
+[P] c1 + c2 [ε : Q]
+
+[P] c2 [ε : Q]
+[P] c1 + c2 [ε : Q]
+
+sound under-approximation!
+scalable bug detection
+
+[y = v] error( ) + x := y [er : y = v]
+[y = v] error( ) + x := y [ok : x = y = v]
+14
+
+===== slide 15 =====
+Example
+[y = x] if even(x) then error() [er : y = 42]
+is it a valid IL triple?
+(y = 42) ≜ {[x ↦ 0,y ↦ 42], [x ↦ 1,y ↦ 42], [x ↦ 2,y ↦ 42], ...}
+All the states above satisfy the post [y = 42] since it does not constrain x in any way.
+In particular, the condition is satisfied by states like δ below
+
+δ ≜ [x ↦ 1,y ↦ 42] ⊧ (y = 42)
+
+But δ is unreachable! Therefore the triple is not valid
+15
+
+===== slide 16 =====
+Example
+[y = x] if even(x) then error() [er : y = 42 ∧ even(x)]
+is it a valid IL triple?
+(y = 42) ≜ {[x ↦ 0,y ↦ 42], [x ↦ 2,y ↦ 42], ... , [x ↦ 42,y ↦ 42], ...}
+All the states above satisfy the post [y = 42] since it does not constrain x in any way.
+In particular, the condition is satisfied by states like δ below
+
+δ ≜ [x ↦ 0,y ↦ 42] ⊧ (y = 42)
+
+But δ is unreachable! Therefore the triple is not valid
+16
+
+===== slide 17 =====
+Example
+[y = x] if even(x) then error() [er : x = y = 42]
+is it a valid IL triple?
+(x = y = 42) ≜ {[x ↦ 42,y ↦ 42]}
+
+17
+
+===== slide 18 =====
+Dealing with division
+arithmetic
+expression
+
+a ::= n | x | a1 + a2 | ... | a1 /a2
+
+def(n) ≜ true
+def(x) ≜ true
+def(a1 + a2) ≜ def(a1) ∧ def(a2)
+...
+
+def(a1 /a2) ≜ def(a1) ∧ def(a2) ∧ a2 ≠ 0
+18
+
+===== slide 19 =====
+Dealing with division
+boolean
+expression
+
+b ::= a1 ≤ a2 | b1 ∧ b2 | ...
+...
+
+def(a1 ≤ a2) ≜ def(a1) ∧ def(a2)
+...
+
+def(b1 ∧ b2) ≜ def(b1) ∧ def(b2)
+19
+
+===== slide 20 =====
+Atomic commands
+[P] x := a [ok : ∃x′ . P[x′/x] ∧ def(a[x′/x]) ∧ x = a[x′/x]]
+[P] x := a [er : P ∧ ¬def(a)]
+[P] b? [ok : P ∧ def(b) ∧ b]
+[P] b? [er : P ∧ ¬def(b)]
+20
+
+===== slide 21 =====
+[y = 100x]
+if (y/x ≥ 10) then
+[ ... ]
+
+Example 1
+
+[y = 100x]
+(y/x ≥ 10)? ;
+[ ... ]
+
+y := y − x
+
+y := y − x
+
+[ ... ]
+
+[ ... ]
+
+else
+
++ (y/x < 10)? ;
+[ ... ]
+
+[ ... ]
+
+y := x
+
+y := x
+
+[ ... ]
+[ ok : ... ]
+
+[ ... ]
+[ ok : ... ]
+21
+
+===== slide 22 =====
+[y = 100x]
+if (y/x ≥ 10) then
+[ ... ]
+
+Example 1
+
+[y = 100x]
+(y/x ≥ 10)? ;
+[ y = 100x ∧ x ≠ 0 ]
+
+y := y − x
+
+y := y − x
+[ y = 99x ∧ x ≠ 0 ]
++ (y/x < 10)? ;
+
+[ ... ]
+
+else
+
+[ ... ]
+
+[ false ]
+
+y := x
+
+y := x
+
+[ ... ]
+[ ok : ... ]
+
+[ false ]
+
+[ ok : y = 99x ∧ x ≠ 0 ]
+22
+
+===== slide 23 =====
+[y = 100x]
+if (y/x ≥ 10) then
+[ ... ]
+
+Example 1
+
+[y = 100x]
+(y/x ≥ 10)? ;
+[ ... ]
+
+y := y − x
+
+y := y − x
+
+[ ... ]
+
+[ ... ]
+
+else
+
++ (y/x < 10)? ;
+[ ... ]
+
+[ ... ]
+
+y := x
+
+y := x
+
+[ ... ]
+[ er : ... ]
+
+[ ... ]
+[ er : ... ]
+23
+
+===== slide 24 =====
+[y = 100x]
+if (y/x ≥ 10) then
+[ ... ]
+
+Example 1
+
+[y = 100x]
+(y/x ≥ 10)? ;
+[ er : y = x = 0 ]
+
+y := y − x
+[ ... ]
+
+else
+
+[ ... ]
+
+y := x
+
+[ ... ]
+[ er : ... ]
+24
+
+y := y − x
+[ er : y = x = 0 ]
++ (y/x < 10)? ;
+[ er : y = x = 0 ]
+y := x
+[ er : y = x = 0 ]
+[ er : y = x = 0 ]
+
+===== slide 25 =====
+[y = i]
+while (i > 0) do
+[ ... ]
+y := y/2 ;
+[ ... ]
+
+Example 2
+
+[y = i]
+( (i > 0)? ;
+[ ... ]
+
+y := y/2 ;
+[ ... ]
+
+i := i/y )* ;
+
+i := i/y
+
+[ ... ]
+
+[ ... ]
+[ er : ... ]
+
+(i < 0)?
+[ ... ]
+[ er : ... ]
+25
+
+===== slide 26 =====
+[y = i]
+while (i > 0) do
+[ ... ]
+y := y/2 ;
+[ ... ]
+
+Example 2
+
+i := i/y
+
+[ ... ]
+[ er : ... ]
+
+26
+
+[y = i]
+( (i > 0)? ;
+[y=i>0]
+y := y/2 ;
+[ i > 0 ∧ y = i/2 ]
+i := i/y )* ;
+[ er : y = 0 ∧ i = 1 ]
+(i < 0)?
+[ er : y = 0 ∧ i = 1 ]
+[ er : y = 0 ∧ i = 1 ]
+
+===== slide 27 =====
+[y = i]
+while (i > 0) do
+[ ... ]
+y := y/2 ;
+[ ... ]
+
+Example 2
+
+[y = i]
+( (i > 0)? ;
+[ ... ]
+
+y := y/2 ;
+[ ... ]
+
+i := i/y )* ;
+
+i := i/y
+
+[ ... ]
+
+[ ... ]
+[ ok : ... ]
+
+(i < 0)?
+[ ... ]
+[ ok : ... ]
+27
+
+===== slide 28 =====
+[y = i]
+while (i > 0) do
+[ ... ]
+y := y/2 ;
+[ ... ]
+
+Example 2
+
+[y = i]
+( (i > 0)? ;
+[ ... ]
+
+y := y/2 ;
+[ ... ]
+
+i := i/y )* ;
+
+i := i/y
+
+[ ... ]
+
+[ ... ]
+[ ok : ... ]
+
+(i < 0)?
+[ ... ]
+
+[ ok : y = i ≤ 0 ]
+28
+
+===== slide 29 =====
+Procedural abstraction
+void foo( ) {
+% presumes {x ≥ 0}
+... % e.g. x := x + 1
+% achieves {x > 0}
+}
+
+Over-approximation
+void test( ) {
+x := 0 ;
+client( ) ;
+if (x < 2) then error()
+% do we have a warning?
+}
+
+void client( ) {
+% presumes {x ≥ 0}
+foo() ;
+% {x > 0} ⇒ {x ≥ 0}
+foo()
+% achieves {x > 0}
+}
+29
+
+===== slide 30 =====
+Procedural abstraction
+void foo( ) {
+% presumes {x ≥ 0}
+... % e.g. x := x + 1
+% achieves {x > 0}
+}
+
+Over-approximation
+void test( ) {
+{true}
+x := 0 ;
+
+{x = 0} ⇒ {x ≥ 0}
+
+client( ) ;
+
+void client( ) {
+% presumes {x ≥ 0}
+foo() ;
+% {x > 0} ⇒ {x ≥ 0}
+foo()
+% achieves {x > 0}
+}
+
+{x > 0}
+if (x < 2) then error()
+}
+30
+
+% do we have a warning?
+% yes: x = 1
+
+===== slide 31 =====
+Procedural abstraction
+void foo( ) {
+% presumes [x ≥ 0]
+... % e.g. x := x + 1
+% achieves [x > 0]
+}
+
+Under-approximation
+void test( ) {
+x := 0 ;
+client( ) ;
+if (x < 2) then error()
+% do we have a warning?
+% inconclusive...
+}
+
+void client( ) {
+% presumes [x ≥ 0]
+foo() ;
+% [x > 0] ⇒ [x ≥ 0] % under-approximations cannot be weakened!
+foo()
+% achieves: nothing known!
+}
+31
+
+===== slide 32 =====
+Frame
+assigned variables in c
+are disjoint from
+free variables in R
+
+[P] c [Q]
+[frame]
+[P ∧ R] c [Q ∧ R]
+
+[x ≠ y] x := y; error( ) [er : x = y]
+[x ≠ y ∧ y = 42] x := y; error( ) [er : x = y = 42]
+32
+
+===== slide 33 =====
+Ghost variables
+ghost variable
+
+[x = n ∧ n ≥ 0] foo( ) [x = n + 1 ∧ n ≥ 0]
+
+n can be m + 1
+
+[x = m + 1 ∧ m + 1 ≥ 0] foo( ) [x = m + 2 ∧ m + 1 ≥ 0]
+[x = m + 1 ∧ m ≥ 0] foo( ) [x = m + 2 ∧ m ≥ 0]
+framing with
+
+m≥0
+
+framing with
+
+m≥0
+
+33
+
+===== slide 34 =====
+Ghost variables + Frame
+
+void foo( ) {
+% presumes [x = n ∧ n ≥ 0]
+void
+test(
+)
+{
+%
+[x = m + 1 ∧ m ≥ 0]
+[true]
+... % e.g. x := x + 1
+x := 0 ;
+% achieves [x = n + 1 ∧ n ≥ 0]
+[x = 0] ≡ [x = n ∧ n ≥ 0 ∧ n = 0]
+%
+[x = m + 2 ∧ m ≥ 0]
+client( ) ;
+}
+[
+]
+x
+=
+n
++
+2
+∧
+n
+≥
+0
+∧
+n
+=
+0
+void client( ) {
+x
+<
+3
+if
+(
+)
+then
+error()
+% presumes [x = n ∧ n ≥ 0]
+%
+do
+we
+have
+a
+warning?
+foo() ;
+%
+yes:
+er
+:
+x
+=
+2
+% [x = n + 1 ∧ n ≥ 0]
+}
+foo()
+% achieves: [x = n + 2 ∧ n ≥ 0]
+}
+34
+
+===== slide 35 =====
+Valid presumptions need not exist
+HL: Given c and Q, there is a (weakest)
+precondition P such that {P} c {Q}
+proof: take P = wlp(c, Q)
+IL: Given c and Q, a (weakest) precondition P
+such that [P] c [Q] may not exist
+proof: take Q with some unreachable state
+e.g. [?] x := 42 [true]
+35
+
+===== slide 36 =====
+Exercises
+
+36
+
+===== slide 37 =====
+One from lecture #04
+Find a derivation for the HL triple
+
+{true} if x ≥ y then z := x else z := y {z = max(x, y)}
+{true}
+if x ≥ y then
+{{x. .≥. }y}
+z := x
+{{z. .=. }x ≥ y} ⇒ {z = max(x, y)}
+else
+{{x. .<. }y}
+z := y
+{{z. .=. }y > x} ⇒ {z = max(x, y)}
+{z = max(x, y)}
+
+===== slide 38 =====
+One from lecture #04
+Find a derivation for the HL triple
+
+{true} if x ≥ y then z := x else z := y {z = max(x, y)}
+{true}
+if x ≥ y then
+{x ≥ y}
+z := x
+{z = x ≥ y} ⇒ {z = max(x, y)}
+else
+{x >
+{y
+< x}
+y}
+z := y
+{z = y > x} ⇒ {z = max(x, y)}
+{z = max(x, y)}
+
+===== slide 39 =====
+Another one from lecture #04
+Prove that rule {conj} is sound {P1} c {Q1} {P2} c {Q2}
+
+{P1 ∧ P2} c {Q1 ∧ Q2}
+
+{conj}
+
+===== slide 40 =====
+Another one from lecture #04
+Prove that rule {conj} is sound {P1} c {Q1} {P2} c {Q2}
+
+{P1 ∧ P2} c {Q1 ∧ Q2}
+
+Assume [[c]]P1 ⊆ Q1 and [[c]]P2 ⊆ Q2
+By monotonicity of [[c]] we have:
+[[c]](P1 ∧ P2) ⊆ [[c]]P1 ⊆ Q1 and
+
+[[c]](P1 ∧ P2) ⊆ [[c]]P2 ⊆ Q2
+Therefore [[c]](P1 ∧ P2) ⊆ Q1 ∧ Q2
+
+{conj}
+
+===== slide 41 =====
+One more from lecture #04
+Show that the following rule for assignment is not sound
+
+{P} x := a {P[a/x]}
+syntax
+replacement
+
+===== slide 42 =====
+One more from lecture #04
+Show that the following rule for assignment is not sound
+
+{P} x := a {P[a/x]}
+syntax
+replacement
+
+Consider the instance {y = x} x := 0 {y = 0}
+then [[x := 0]][x ↦ 1,y ↦ 1] = [x ↦ 0,y ↦ 1] ⊧/ {y = 0}
+
+===== slide 43 =====
+Validity
+Which triples are valid for any c and R ?
+
+[R] c [ok : false][er : false]
+
+{R} c {false}
+
+[R] c [ok : true]
+
+{R} c {true}
+
+[true] c [ok : R]
+
+{false} c {R}
+
+[wlp(c, R)] c [ok : R]
+
+{wlp(c, R)} c {R}
+43
+
+===== slide 44 =====
+Derivation
+Find a derivation for the IL triple
+
+[true] if x ≥ y then z := x else z := y [ok : z = max(x, y)]
+[true]
+if x ≥ y then
+[x ≥ y]
+z := x
+[z = x ≥ y] ≡ [x ≥ y, z = max(x, y)]
+else
+[x < y]
+z := y
+[z = y > x] ≡ [y > x, z = max(x, y)]
+[ok : z = max(x, y)]
+44
+
+===== slide 45 =====
+Derivation
+Find a derivation for the IL triple
+
+[true] if x ≥ y then z := x else z := y [ok : z = max(x, y)]
+[true]
+if x ≥ y then
+[x ≥ y]
+z := x
+[z = x ≥ y] ≡ [x ≥ y, z = max(x, y)]
+else
+[y > x]
+z := y
+[z = y > x] ≡ [y > x, z = max(x, y)]
+[ok : z = max(x, y)]
+
+{true}
+if x ≥ y then
+{x ≥ y}
+z := x
+{z = x ≥ y} ⇒ {z = max(x, y)}
+else
+{y > x}
+z := y
+{z = y > x} ⇒ {z = max(x, y)}
+{z = max(x, y)}
+45
+
+===== slide 46 =====
+Soundness
+Prove that rule [conj] is not sound
+
+[P1] c [ε : Q1] [P2] c [ε : Q2]
+[conj]
+[P1 ∧ P2] c [ε : Q1 ∧ Q2]
+
+46
+
+===== slide 47 =====
+Soundness
+Prove that rule [conj] is not sound
+
+[P1] c [ε : Q1] [P2] c [ε : Q2]
+[conj]
+[P1 ∧ P2] c [ε : Q1 ∧ Q2]
+We need to find a counterexample.
+Take c ≜ x := 7, P1 ≜ (x = 0), P2 ≜ (x = 1), Qi ≜ (x = 7)
+Both the triples in the premises are valid, but with
+P1 ∧ P2 ≡ false, Q1 ∧ Q2 ≜ (x = 7)
+the triple [ false] x := 7 [ok : x = 7] is not valid
+because the premise is false and [[x := 7]]false ⊉ (x = 7).
+47
+
+===== slide 48 =====
+Soundness
+Show that the following rule for assignment is not sound
+
+[P] x := a [ok : P[a/x]]
+syntax
+replacement
+
+48
+
+===== slide 49 =====
+Soundness
+Show that the following rule for assignment is not sound
+
+[P] x := a [ok : P[a/x]]
+syntax
+replacement
+
+Consider the instance [x = y] x := 0 [ok : y = 0]
+then (x ↦ 1,y ↦ 0) ⊧ (y = 0) but is not a reachable state!
+49
+
+===== slide 50 =====
+Find the difference (bug)
+
+50
+
+===== slide 51 =====
+Find the typo (bug)
+
+51
