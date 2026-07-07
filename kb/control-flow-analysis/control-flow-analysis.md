@@ -1,25 +1,16 @@
 ---
 title: Control Flow Analysis (CFA)
-type: note
-status: stub
-source: "lectures/ProgramAnalysis-17..23-CFA*.pdf"
-tags: [static-analysis, cfa]
+type: pointer
 ---
 
 # Control Flow Analysis (CFA)
 
-> **One line.** Over-approximate, for higher-order / concurrent programs, "which
-> values (functions, channels) can flow to which program points."
+> **Consolidated.** Full treatment in **[`../../overviews/`](../../overviews/README.md) Part III**:
+> [13 motivation & 0-CFA spec](../../overviews/13-cfa-motivation-0cfa-specification.md) ·
+> [14 correctness](../../overviews/14-0cfa-semantic-correctness.md) ·
+> [15 least solution](../../overviews/15-0cfa-existence-least-solutions.md) ·
+> [16 constraints & solving](../../overviews/16-0cfa-constraint-based-solving.md) ·
+> [17 beyond 0-CFA (k-CFA, CPA)](../../overviews/17-beyond-0cfa-abstract-values-context.md).
+> These are the primary reference; this note is a pointer.
 
-## To capture
-- [ ] 0-CFA: acceptability judgement `(Ĉ, ρ̂) ⊨ e`, cache `Ĉ` and environment `ρ̂`.
-- [ ] Flow Logic style specification.
-- [ ] Constraint generation + least solution.
-- [ ] k-CFA / context sensitivity (if covered).
-
-## Sub-notes
-- [[cfa-for-fun]] — the functional language FUN.
-- [[cfa-for-pi]] — the π-calculus.
-
-## Links
-Static-analysis cousin of [[intro-abstract-interpretation]]. See [[glossary]].
+See also [[cfa-for-pi]] · [[glossary]].

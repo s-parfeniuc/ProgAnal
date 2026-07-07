@@ -44,12 +44,15 @@ Links use `[[wikilink]]` syntax (Obsidian / Foam VSCode extension).
 - [[galois-connections]] → **[overviews/09](../overviews/09-order-theory-galois-connections.md)** — posets/lattices/ACC, `α ⊣ γ`, Galois insertion, closures · *lect. 13*
 - [[abstract-domains]] → **[overviews/10](../overviews/10-abstract-domains-operators.md)** — transfer functions, BCA `f♯=α∘F∘γ`, completeness, products · *lect. 12/14/15*
 - [[abstract-analysis]] → **[overviews/11](../overviews/11-abstract-analysis-fixpoints-widening.md)** — analysis as fixpoint, fixpoint transfer, widening/narrowing · *lect. 12/15*
-- [[local-completeness-logic]] — LCL: correctness **and** incorrectness via AI 🟡 · *lect. 16* (not yet done)
+## Bridge — Local Completeness Logic (lect. 16) → [`../overviews/`](../overviews/README.md)
+- [[local-completeness-logic]] → **[overviews/12 LCL](../overviews/12-local-completeness-logic.md)** — correctness **and** incorrectness via *local* completeness of an abstraction · *lect. 16*
 
-## 5. Control Flow Analysis (CFA)
-- [[control-flow-analysis]] — 0-CFA, flow logic, acceptability judgements 🟡 · *lect. 17–23*
-- [[cfa-for-fun]] — CFA for the functional language FUN 🟡
-- [[cfa-for-pi]] — CFA for the π-calculus 🟡
+## 5. Control Flow Analysis (lect. 17–23) → consolidated in [`../overviews/`](../overviews/README.md) Part III
+- [[control-flow-analysis]] → **[overviews/13 0-CFA spec](../overviews/13-cfa-motivation-0cfa-specification.md)** — dynamic dispatch, FUN+labelling, `(Ĉ,ρ̂) ⊧ e` + clauses · *lect. 17*
+- **0-CFA theory** → [overviews/14 correctness](../overviews/14-0cfa-semantic-correctness.md) (SOS/subject reduction) · [overviews/15 least solution](../overviews/15-0cfa-existence-least-solutions.md) (Moore family) · [overviews/16 constraints](../overviews/16-0cfa-constraint-based-solving.md) (worklist, `O(n³)`) · *lect. 18–20*
+- **Beyond 0-CFA** → [overviews/17](../overviews/17-beyond-0cfa-abstract-values-context.md) — CFA+DFA, k-CFA, CPA · *lect. 21–22*
+- [[cfa-for-pi]] → **[overviews/18 π-calculus](../overviews/18-cfa-pi-calculus.md)** (0-CFA `(ρ̂,κ̂)`) + **[overviews/19 applications](../overviews/19-cfa-pi-applications.md)** (security/taint) · *lect. 22–23*
+- [[cfa-for-fun]] → covered by overviews/13–17.
 
 ---
 

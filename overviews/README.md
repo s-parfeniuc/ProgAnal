@@ -30,8 +30,22 @@ in [`../CLAUDE.md`](../CLAUDE.md); atomic notes/pointers in `../kb/`.
 
 > **Bridge:** AI is the **over-approximation** framework (sound for proving *absence* of
 > bugs, like HL/SL), made computable via abstract domains and fixpoints. Its dual under-approx
-> siblings are the incorrectness logics (Part I). Lecture 16 (LCL) ties correctness *and*
-> incorrectness back together via local completeness of abstractions.
+> siblings are the incorrectness logics (Part I).
+
+## Bridge — correctness ⟷ incorrectness (lect. 16)
+12. [Local Completeness Logic (LCL)](12-local-completeness-logic.md) — *lect. 16* — combines over- (AI) and under- (IL) approximation: prove a program **correct** *or* produce a **genuine bug**, when the abstraction is *locally* complete along the run.
+
+## Part III — Control Flow Analysis (lect. 17–23)
+*Strand A — CFA for the functional language FUN:*
+13. [CFA: Motivation & the 0-CFA Specification](13-cfa-motivation-0cfa-specification.md) — *lect. 17* — dynamic dispatch, FUN + labelling, abstract cache `Ĉ`/env `ρ̂`, the acceptability relation `(Ĉ,ρ̂) ⊧ e` + clauses
+14. [0-CFA: Semantic Correctness](14-0cfa-semantic-correctness.md) — *lect. 18* — SOS with closures, **subject reduction**
+15. [0-CFA: Existence & the Least Solution](15-0cfa-existence-least-solutions.md) — *lect. 19* — Moore family, coinduction, syntax-directed `⊧ₛ`
+16. [0-CFA: Constraint-Based Formulation & Solving](16-0cfa-constraint-based-solving.md) — *lect. 20* — (conditional) constraints, worklist solver, `O(n³)`
+17. [Beyond 0-CFA: Abstract Values & Context Sensitivity](17-beyond-0cfa-abstract-values-context.md) — *lect. 21–22* — CFA+DFA (constant propagation), **k-CFA**, Cartesian Product Algorithm
+
+*Strand B — CFA for the concurrent π-calculus:*
+18. [CFA for the π-calculus — the Calculus & 0-CFA](18-cfa-pi-calculus.md) — *lect. 22–23* — π-calculus, mobility, reduction; 0-CFA `(ρ̂,κ̂)` predicting communications
+19. [CFA for the π-calculus — Applications](19-cfa-pi-applications.md) — *lect. 23* — well-sortedness, **security** (secrecy, non-leaking), **taint**, CFA vs type systems
 
 ## Part I — the organizing picture
 

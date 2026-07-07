@@ -1,19 +1,13 @@
 ---
 title: CFA for FUN
-type: note
-status: stub
-source: "lectures/ProgramAnalysis-CFA-for-FUN.pdf, lectures/ProgramAnalysis-18..21-CFA*.pdf"
-tags: [static-analysis, cfa]
+type: pointer
 ---
 
 # CFA for FUN
 
-> **One line.** Instantiate [[control-flow-analysis]] on the functional language FUN.
+> **Consolidated.** The higher-order (functional) CFA is covered across
+> **[overviews/13–17](../../overviews/README.md)** — the primary reference
+> (0-CFA spec, correctness, least solution, constraints/solving, and k-CFA/CPA refinements).
+> This note is a pointer.
 
-## To capture
-- [ ] Syntax of FUN; labelled terms.
-- [ ] Acceptability rules for abstraction/application.
-- [ ] Worked example computing the abstract cache.
-
-## Links
-Instance of [[control-flow-analysis]]. Compare [[cfa-for-pi]].
+See also [[control-flow-analysis]] · [[glossary]].

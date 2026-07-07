@@ -115,7 +115,7 @@ $$a\ \text{over-approximates}\ S \iff S\subseteq\gamma(a).$$
 
 ### Soundness (per step and as an analysis)
 $$\llbracket p\rrbracket(\gamma(a))\subseteq\gamma(\llbracket p\rrbracket^\sharp a) \qquad\Longleftrightarrow\qquad \forall\sigma\in\gamma(a).\ \llbracket p\rrbracket\sigma\subseteq\gamma(\mathrm{analysis}(p,a)).$$
-Safety check: reachable$(p)\subseteq\gamma(a)$ and $\gamma(a)\cap E=\varnothing\ \Rightarrow\ p$ avoids $E$.
+Safety check: reachable $(p)\subseteq\gamma(a)$ and $\gamma(a)\cap E=\varnothing\ \Rightarrow\ p$ avoids $E$.
 
 ### Best abstraction
 $$a=\text{best of } S \iff S\subseteq\gamma(a)\ \wedge\ \big(S\subseteq\gamma(b)\Rightarrow\gamma(a)\subseteq\gamma(b)\big).\qquad \text{When it exists: } a=\alpha(S).$$
