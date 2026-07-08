@@ -28,7 +28,7 @@ A state is now $\sigma=\langle s,h\rangle$: a **store** $s:X\to\mathbb Z$
 - $P_1\ast P_2$ — **separating conjunction**: the heap **splits into two disjoint parts**,
   one satisfying $P_1$, the other $P_2$.
 
-The triple $\{P\}\,c\,\{Q\}$ keeps its HL meaning ($\llbracket c\rrbracket P\subseteq Q$),
+The triple $\{P\}\,c\,\{Q\}$ keeps its HL meaning ($[\![  c ]\!] P\subseteq Q$),
 now over heap-states. **Why $\ast$:** to say $x,y,z$ point to distinct cells, classical
 $\wedge$ needs all the pairwise $\neq$ disequations ($O(n^2)$); with $\ast$,
 $x\mapsto 1\ast y\mapsto 2\ast z\mapsto 3$ says it **for free** — disjointness is built in.
@@ -78,7 +78,7 @@ Disjointness $h_1\mathrel{\#}h_2\triangleq\mathrm{dom}(h_1)\cap\mathrm{dom}(h_2)
 $$P ::= \text{(pure: } a_1{<}a_2\mid a_1{=}a_2\mid\neg P\mid P_1\wedge P_2\mid\exists x.P\mid\dots\text{)}\ \mid\ \mathsf{emp}\ \mid\ a_1\mapsto a_2\ \mid\ P_1\ast P_2.$$
 
 ### Satisfaction (structural)
-$$\langle s,h\rangle\models a_1\mapsto a_2\iff\mathrm{dom}(h)=\{\llbracket a_1\rrbracket s\}\ \wedge\ h(\llbracket a_1\rrbracket s)=\llbracket a_2\rrbracket s$$
+$$\langle s,h\rangle\models a_1\mapsto a_2\iff\mathrm{dom}(h)=\{[\![  a_1 ]\!] s\}\ \wedge\ h([\![  a_1 ]\!] s)=[\![  a_2 ]\!] s$$
 $$\langle s,h\rangle\models\mathsf{emp}\iff h=[\,]\qquad\qquad \langle s,h\rangle\models P_1\ast P_2\iff\exists h_1,h_2.\ h=h_1\bullet h_2\wedge\langle s,h_1\rangle\models P_1\wedge\langle s,h_2\rangle\models P_2$$
 ($\ast$ **splits the heap but not the store**.)
 
@@ -99,7 +99,7 @@ $$P\ast\mathsf{emp}\equiv P,\qquad x\mapsto v\ast x\mapsto w\equiv\text{false},\
 $$\mathsf{ls}(a_1,a_2)\triangleq(a_1{=}a_2\wedge\mathsf{emp})\vee(a_1{\neq}a_2\wedge\exists l.\ a_1\mapsto l\ast\mathsf{ls}(l,a_2)),\qquad \mathsf{list}(a)\triangleq\mathsf{ls}(a,\mathsf{nil}).$$
 
 ### Theorems
-- **[Soundness]** $\vdash\{P\}\,c\,\{Q\}\Rightarrow\llbracket c\rrbracket P\subseteq Q$.
+- **[Soundness]** $\vdash\{P\}\,c\,\{Q\}\Rightarrow[\![  c ]\!] P\subseteq Q$.
 - **[Incompleteness]** footprint fails: e.g. $\{y\mapsto\_\}\ x{:=}\mathsf{alloc}();\mathsf{free}(x)\ \{y\mapsto\_\wedge y{\neq}x\}$ is valid but not derivable (info loss at $\mathsf{free}$).
 
 ### Consequence direction

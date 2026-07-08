@@ -48,19 +48,19 @@ b ::= a1 ≤ a2 | b1 ∧ b2 | ¬b | ...     (boolean,    Bexp)
 ```
 
 ### Arithmetic expressions — meaning is a *number* (a function of the state)
-$$\llbracket \cdot \rrbracket : \mathsf{Aexp} \to \Sigma \to \mathbb{Z}$$
+$$[\![  \cdot  ]\!] : \mathsf{Aexp} \to \Sigma \to \mathbb{Z}$$
 `⟦a⟧σ` evaluates `a` in state `σ`. Defined by structural recursion:
-$$\llbracket n\rrbracket\sigma \triangleq n \qquad \llbracket x\rrbracket\sigma \triangleq \sigma(x) \qquad \llbracket a_0\ \texttt{op}\ a_1\rrbracket\sigma \triangleq \llbracket a_0\rrbracket\sigma \;\mathit{op}\; \llbracket a_1\rrbracket\sigma$$
+$$[\![  n ]\!]\sigma \triangleq n \qquad [\![  x ]\!]\sigma \triangleq \sigma(x) \qquad [\![  a_0\ \texttt{op}\ a_1 ]\!]\sigma \triangleq [\![  a_0 ]\!]\sigma \;\mathit{op}\; [\![  a_1 ]\!]\sigma$$
 > [!note] Syntax vs meaning of operators
 > Left `op` is a **syntactic** symbol; right `op` (italic) is the **mathematical** operation. The brackets `⟦·⟧` translate one into the other.
 
 *Example:* `⟦2x²+3y+5xz⟧[x↦1,y↦2,z↦1] = 13`; the same expr on `[x↦1]` (others `0`) `= 2`.
 
 ### Boolean expressions — meaning is a *set of states* (collecting version)
-$$\llbracket \cdot \rrbracket : \mathsf{Bexp} \to \wp(\Sigma) \to \wp(\Sigma)$$
+$$[\![  \cdot  ]\!] : \mathsf{Bexp} \to \wp(\Sigma) \to \wp(\Sigma)$$
 `⟦b⟧P` = "**intuitively `b ∧ P`**": the states of `P` that also satisfy `b`. It *filters* `P`.
-$$\llbracket\texttt{true}\rrbracket P \triangleq P \qquad \llbracket\texttt{false}\rrbracket P \triangleq \varnothing \qquad \llbracket\texttt{not } b\rrbracket P \triangleq P \setminus (\llbracket b\rrbracket P)$$
-$$\llbracket a_0\ \texttt{cmp}\ a_1\rrbracket P \triangleq \{\, \sigma \in P \mid \llbracket a_0\rrbracket\sigma\ \mathit{cmp}\ \llbracket a_1\rrbracket\sigma \,\} \qquad \llbracket b_0\ \texttt{bop}\ b_1\rrbracket P \triangleq \llbracket b_0\rrbracket P\ \mathit{bop}\ \llbracket b_1\rrbracket P$$
+$$[\![ \texttt{true} ]\!] P \triangleq P \qquad [\![ \texttt{false} ]\!] P \triangleq \varnothing \qquad [\![ \texttt{not } b ]\!] P \triangleq P \setminus ([\![  b ]\!] P)$$
+$$[\![  a_0\ \texttt{cmp}\ a_1 ]\!] P \triangleq \{\, \sigma \in P \mid [\![  a_0 ]\!]\sigma\ \mathit{cmp}\ [\![  a_1 ]\!]\sigma \,\} \qquad [\![  b_0\ \texttt{bop}\ b_1 ]\!] P \triangleq [\![  b_0 ]\!] P\ \mathit{bop}\ [\![  b_1 ]\!] P$$
 > [!important] Lemma
 > `⟦b⟧P ⊆ P` — filtering never adds states. (Splits `P` into the `b` part and the `¬b` part.)
 
@@ -68,7 +68,7 @@ $$\llbracket a_0\ \texttt{cmp}\ a_1\rrbracket P \triangleq \{\, \sigma \in P \mi
 > **Intuition.** A logical predicate and "the set of states making it true" are **two views of the same thing**. We freely switch between them.
 
 **Formal.** A predicate `P` denotes the set of states satisfying it:
-$$\{\sigma \vDash P\} \;=\; \{\, \sigma \mid \llbracket P\rrbracket\sigma = \texttt{true} \,\}$$
+$$\{\sigma \vDash P\} \;=\; \{\, \sigma \mid [\![  P ]\!]\sigma = \texttt{true} \,\}$$
 Examples: `(x = 1) ↔ {σ | σ(x)=1}`, `(x ≤ y) ↔ {σ | σ(x) ≤ σ(y)}`. This is why in
 [[hoare-logic]] we can write `⟦c⟧P ⊆ Q` — pre/postconditions *are* sets of states.
 
@@ -89,7 +89,7 @@ A command's meaning is a **state transformer**. Three progressively richer views
 - **Nondeterministic:** a program may branch (lack of info, approximation, or the
   choice construct `c₁ + c₂`), so one input → a **set** of possible outputs; `∅` = never terminates.
 - **Collecting semantics:** run *all* input states of `P` at once —
-$$\llbracket c\rrbracket P \;=\; \bigcup_{\sigma \in P} \llbracket c\rrbracket \sigma$$
+$$[\![  c ]\!] P \;=\; \bigcup_{\sigma \in P} [\![  c ]\!] \sigma$$
   We write `⟦c⟧σ` as shorthand for `⟦c⟧{σ}`. This is the workhorse for [[hoare-logic]] and [[intro-abstract-interpretation]].
 
 > [!note] Regular commands (this course's syntax)
@@ -104,7 +104,7 @@ $$\llbracket c\rrbracket P \;=\; \bigcup_{\sigma \in P} \llbracket c\rrbracket \
 > run forever." Nothing is promised about termination; only that *if* it stops, it stops in a good state.
 
 **Formal.** Given precondition `P` and postcondition `Q` (a *correctness specification*):
-$$\{P\}\, c\, \{Q\} \quad\text{iff}\quad \llbracket c\rrbracket P \subseteq Q \quad\text{iff}\quad \forall \sigma \in P.\ \llbracket c\rrbracket\sigma \text{ either diverges or lands in } Q$$
+$$\{P\}\, c\, \{Q\} \quad\text{iff}\quad [\![  c ]\!] P \subseteq Q \quad\text{iff}\quad \forall \sigma \in P.\ [\![  c ]\!]\sigma \text{ either diverges or lands in } Q$$
 "No undesirable state is reached." This is exactly the [[hoare-logic]] triple. It is
 an **over-approximation** stance: `Q` is a superset of the reachable outputs.
 
@@ -116,11 +116,11 @@ an **over-approximation** stance: `Q` is a superset of the reachable outputs.
 > "Liberal" = divergence is tolerated (matches partial correctness).
 
 **Formal.**
-$$wlp(c, Q) \;\triangleq\; \{\, \sigma \mid \llbracket c\rrbracket\{\sigma\} \subseteq Q \,\}$$
+$$wlp(c, Q) \;\triangleq\; \{\, \sigma \mid [\![  c ]\!]\{\sigma\} \subseteq Q \,\}$$
 It is the set of **all and only** partially-correct input states. Key characterization:
-$$P \subseteq wlp(c, Q) \quad\Longleftrightarrow\quad \llbracket c\rrbracket P \subseteq Q$$
+$$P \subseteq wlp(c, Q) \quad\Longleftrightarrow\quad [\![  c ]\!] P \subseteq Q$$
 This is a **Galois-connection**-shaped adjunction between `⟦c⟧` and `wlp(c,·)` (foreshadows [[galois-connections]]):
-$$\llbracket c\rrbracket(wlp(c,Q)) \subseteq Q \qquad\qquad wlp(c, \llbracket c\rrbracket P) \supseteq P$$
+$$[\![  c ]\!](wlp(c,Q)) \subseteq Q \qquad\qquad wlp(c, [\![  c ]\!] P) \supseteq P$$
 `wlp` is **backward** (from `Q` to inputs); `⟦c⟧` is **forward** — cf. Floyd vs Hoare assignment in [[hoare-logic]].
 
 *Example (slide):* `⟦x := x+1⟧(x+1 > 30) ⊆ (x > 0)` because `{x | x+1 > 30} ⊆ {x | x+1 > 0}`.
@@ -139,7 +139,7 @@ Applied to a set, `⟦c⟧ᵒᵖ Q` is the **pre-image**: the inputs that *can* 
 > - `wlp` (Dijkstra, *liberal*): inputs whose computations are **all** successful (∀).
 > - `wpp` (Hoare, *possible*): inputs that have **a** successful computation (∃).
 
-$$wlp(c,Q) = \{\, \sigma \mid \llbracket c\rrbracket\{\sigma\} \subseteq Q \,\} \qquad\qquad wpp(c,Q) = \{\, \sigma \mid \llbracket c\rrbracket\sigma \cap Q \neq \varnothing \,\}$$
+$$wlp(c,Q) = \{\, \sigma \mid [\![  c ]\!]\{\sigma\} \subseteq Q \,\} \qquad\qquad wpp(c,Q) = \{\, \sigma \mid [\![  c ]\!]\sigma \cap Q \neq \varnothing \,\}$$
 
 - `wlp` = "largest set of inputs whose computations are **all** successful."
 - `wpp` = "largest set of inputs that have **a** successful computation reaching `Q`",

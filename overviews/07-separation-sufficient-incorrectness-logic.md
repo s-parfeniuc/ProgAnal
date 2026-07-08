@@ -24,7 +24,7 @@ per the paper, yields **more succinct postconditions** and **stronger guarantees
 ## 2. Basic definition
 A SepSIL triple is a SIL triple over heap-states, closed under the separating frame:
 
-$$\langle P\rangle\,c\,\langle Q\rangle\ \text{ valid}\iff P\subseteq\llbracket c\rrbracket^{op}Q,\qquad \dfrac{\langle P\rangle\,c\,\langle Q\rangle}{\langle P\ast R\rangle\,c\,\langle Q\ast R\rangle}\ [\textsf{frame}].$$
+$$\langle P\rangle\,c\,\langle Q\rangle\ \text{ valid}\iff P\subseteq[\![  c ]\!]^{op}Q,\qquad \dfrac{\langle P\rangle\,c\,\langle Q\rangle}{\langle P\ast R\rangle\,c\,\langle Q\ast R\rangle}\ [\textsf{frame}].$$
 
 Reading: **every** heap-state in $P$ has **at least one** execution reaching the memory
 error $Q$ — so $P$ characterises **sufficient sources** of the error. It reuses ISL's
@@ -49,7 +49,7 @@ than ISL's forward post: *any state in the precondition can lead to the error.*
 - Reuses SL's $\ast$/frame and ISL's $\not\mapsto$ (deallocated cells).
 
 ## 5. Properties: soundness & completeness (with *why*)
-- **Sound** (induction on the derivation): $\vdash\langle P\rangle\,c\,\langle Q\rangle\Rightarrow P\subseteq\llbracket c\rrbracket^{op}Q$.
+- **Sound** (induction on the derivation): $\vdash\langle P\rangle\,c\,\langle Q\rangle\Rightarrow P\subseteq[\![  c ]\!]^{op}Q$.
 - **(Relatively) complete.** Any valid SepSIL triple is derivable. **Why it is delicate:**
   completeness "relies on a careful crafting of **both the assertion language** (notably
   $\not\mapsto$, to keep the heap monotonic) **and the rules for atomic commands**" — the
@@ -68,7 +68,7 @@ than ISL's forward post: *any state in the precondition can lead to the error.*
 ## 📋 Cheatsheet (complete)
 
 ### Validity + frame
-$$\langle P\rangle\,c\,\langle Q\rangle\ \text{valid}\iff P\subseteq\llbracket c\rrbracket^{op}Q,\qquad \dfrac{\langle P\rangle\,c\,\langle Q\rangle}{\langle P\ast R\rangle\,c\,\langle Q\ast R\rangle}\ [\textsf{frame}]\ (\mathrm{FV}(R)\cap\mathrm{Mod}(c)=\varnothing).$$
+$$\langle P\rangle\,c\,\langle Q\rangle\ \text{valid}\iff P\subseteq[\![  c ]\!]^{op}Q,\qquad \dfrac{\langle P\rangle\,c\,\langle Q\rangle}{\langle P\ast R\rangle\,c\,\langle Q\ast R\rangle}\ [\textsf{frame}]\ (\mathrm{FV}(R)\cap\mathrm{Mod}(c)=\varnothing).$$
 Assertions include SL's $\mathsf{emp},\ \mapsto,\ \ast$ plus ISL's $x\not\mapsto$ (deallocated cell).
 
 ### Local axioms (backward / weakest-precondition style)
@@ -84,7 +84,7 @@ $$\text{ISL (fwd): }\ [v\mapsto a\ast a\mapsto\_]\,c\,[er:\exists a'.\ v\mapsto 
 $$\text{SepSIL (bwd): }\ \langle v\mapsto a\ast a\mapsto\_\ast\text{true}\rangle\,c\,\langle x\not\mapsto\_\ast\text{true}\rangle\quad(\text{more succinct; any pre-state leads to the error})$$
 
 ### Theorems
-- **[Soundness]** $\vdash\langle P\rangle\,c\,\langle Q\rangle\Rightarrow P\subseteq\llbracket c\rrbracket^{op}Q$.
+- **[Soundness]** $\vdash\langle P\rangle\,c\,\langle Q\rangle\Rightarrow P\subseteq[\![  c ]\!]^{op}Q$.
 - **[(Relative) completeness]** every valid SepSIL triple is derivable — relies on the crafted assertion language ($\not\mapsto$, monotonic heap) and atomic rules.
 
 ### Consequence direction

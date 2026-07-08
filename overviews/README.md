@@ -49,30 +49,30 @@ in [`../CLAUDE.md`](../CLAUDE.md); atomic notes/pointers in `../kb/`.
 
 ## Part I — the organizing picture
 
-One semantics, two axes. **Forward** uses the image $\llbracket c\rrbracket P$ (states
-reachable from $P$); **backward** uses the pre-image $\llbracket c\rrbracket^{op}Q$ (states
+One semantics, two axes. **Forward** uses the image $[\![  c ]\!] P$ (states
+reachable from $P$); **backward** uses the pre-image $[\![  c ]\!]^{op}Q$ (states
 that can reach $Q$; $=$ Hoare's *weakest possible precondition* $wpp$). **Over**
 ($\subseteq$, "$\forall$") is sound for proving **absence** of bugs but risks false
 positives; **under** ($\supseteq$ / $\subseteq$-with-"$\exists$") is sound for proving
 **presence** of bugs with no false positives but may miss bugs.
 
-| | **Forward** (image $\llbracket c\rrbracket P$) | **Backward** (pre-image $\llbracket c\rrbracket^{op}Q$) |
+| | **Forward** (image $[\![  c ]\!] P$) | **Backward** (pre-image $[\![  c ]\!]^{op}Q$) |
 |---|---|---|
-| **Over-approx** ($\subseteq$) | **HL** $\;\llbracket c\rrbracket P \subseteq Q$ | **NC** $\;\llbracket c\rrbracket^{op}Q \subseteq P$ |
-| **Under-approx** ($\supseteq$) | **IL** $\;\llbracket c\rrbracket P \supseteq Q$ | **SIL** $\;P \subseteq \llbracket c\rrbracket^{op}Q$ |
+| **Over-approx** ($\subseteq$) | **HL** $\;[\![  c ]\!] P \subseteq Q$ | **NC** $\;[\![  c ]\!]^{op}Q \subseteq P$ |
+| **Under-approx** ($\supseteq$) | **IL** $\;[\![  c ]\!] P \supseteq Q$ | **SIL** $\;P \subseteq [\![  c ]\!]^{op}Q$ |
 
 **Spatial lift** (add heap, separating conjunction $\ast$, frame rule → *local reasoning*):
 SL $=$ HL$+$heap, ISL $=$ IL$+$heap, SepSIL $=$ SIL$+$heap.
 
 | Logic | Triple | Validity | First-order reading | Dir. | Approx. |
 |---|---|---|---|---|---|
-| HL | $\{P\}\,c\,\{Q\}$ | $\llbracket c\rrbracket P \subseteq Q$ | $\forall\sigma{\in}P.\,\forall\delta{\in}\llbracket c\rrbracket\sigma.\,\delta{\in}Q$ | fwd | over |
-| IL | $[P]\,c\,[Q]$ | $\llbracket c\rrbracket P \supseteq Q$ | $\forall\delta{\in}Q.\,\exists\sigma{\in}P.\,\delta{\in}\llbracket c\rrbracket\sigma$ | fwd | under |
-| NC | $(P)\,c\,(Q)$ | $\llbracket c\rrbracket^{op}Q \subseteq P$ | $\forall\delta{\in}Q.\,\forall\sigma{\in}\llbracket c\rrbracket^{op}\delta.\,\sigma{\in}P$ | bwd | over |
-| SIL | $\langle P\rangle\,c\,\langle Q\rangle$ | $P \subseteq \llbracket c\rrbracket^{op}Q$ | $\forall\sigma{\in}P.\,\exists\delta{\in}Q.\,\delta{\in}\llbracket c\rrbracket\sigma$ | bwd | under |
-| SL | $\{P\}\,c\,\{Q\}$ | $\llbracket c\rrbracket P \subseteq Q$ (heap) | $+\ \ast$, frame | fwd | over |
-| ISL | $[P]\,c\,[\varepsilon{:}Q]$ | $\llbracket c\rrbracket_\varepsilon P \supseteq Q$ (heap) | $+\ \ast$, frame | fwd | under |
-| SepSIL | $\langle P\rangle\,c\,\langle Q\rangle$ | $P \subseteq \llbracket c\rrbracket^{op}Q$ (heap) | $+\ \ast$, frame | bwd | under |
+| HL | $\{P\}\,c\,\{Q\}$ | $[\![  c ]\!] P \subseteq Q$ | $\forall\sigma{\in}P.\,\forall\delta{\in}[\![  c ]\!]\sigma.\,\delta{\in}Q$ | fwd | over |
+| IL | $[P]\,c\,[Q]$ | $[\![  c ]\!] P \supseteq Q$ | $\forall\delta{\in}Q.\,\exists\sigma{\in}P.\,\delta{\in}[\![  c ]\!]\sigma$ | fwd | under |
+| NC | $(P)\,c\,(Q)$ | $[\![  c ]\!]^{op}Q \subseteq P$ | $\forall\delta{\in}Q.\,\forall\sigma{\in}[\![  c ]\!]^{op}\delta.\,\sigma{\in}P$ | bwd | over |
+| SIL | $\langle P\rangle\,c\,\langle Q\rangle$ | $P \subseteq [\![  c ]\!]^{op}Q$ | $\forall\sigma{\in}P.\,\exists\delta{\in}Q.\,\delta{\in}[\![  c ]\!]\sigma$ | bwd | under |
+| SL | $\{P\}\,c\,\{Q\}$ | $[\![  c ]\!] P \subseteq Q$ (heap) | $+\ \ast$, frame | fwd | over |
+| ISL | $[P]\,c\,[\varepsilon{:}Q]$ | $[\![  c ]\!]_\varepsilon P \supseteq Q$ (heap) | $+\ \ast$, frame | fwd | under |
+| SepSIL | $\langle P\rangle\,c\,\langle Q\rangle$ | $P \subseteq [\![  c ]\!]^{op}Q$ (heap) | $+\ \ast$, frame | bwd | under |
 
 **Consequence-rule directions:** $\{$HL, SIL$\}$ strengthen-pre / weaken-post; $\{$IL, NC$\}$
 weaken-pre / strengthen-post (governed by which side carries the $\forall$-over-a-set).

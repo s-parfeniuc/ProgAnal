@@ -22,7 +22,7 @@ theory behind industrial tools (Meta's Infer / Pulse).
 ## 2. Basic definition
 An **incorrectness triple** (O'Hearn calls $P$ the *presumption*, $Q$ the *result*):
 
-$$[P]\,c\,[Q]\ \text{ valid}\quad\overset{\triangle}{\iff}\quad \llbracket c\rrbracket P \supseteq Q \quad\iff\quad \forall\delta\in Q.\ \exists\sigma\in P.\ \delta\in\llbracket c\rrbracket\sigma.$$
+$$[P]\,c\,[Q]\ \text{ valid}\quad\overset{\triangle}{\iff}\quad [\![  c ]\!] P \supseteq Q \quad\iff\quad \forall\delta\in Q.\ \exists\sigma\in P.\ \delta\in[\![  c ]\!]\sigma.$$
 
 Read it as: *every state in the result $Q$ is genuinely reachable* by running $c$ from
 **some** presumption state. So if $Q$ describes an error and the triple is derivable, the
@@ -30,7 +30,7 @@ error is **real**. Compare HL's $\forall\sigma\forall\delta$ (every reachable st
 satisfies $Q$) with IL's $\forall\delta\exists\sigma$ (every $Q$-state is reachable).
 
 **The "real IL" (lect. 06)** tags the exit condition:
-$$[P]\,c\,[\varepsilon:Q],\qquad \varepsilon\in\{ok,er\},\qquad Q\subseteq\llbracket c\rrbracket_\varepsilon P.$$
+$$[P]\,c\,[\varepsilon:Q],\qquad \varepsilon\in\{ok,er\},\qquad Q\subseteq[\![  c ]\!]_\varepsilon P.$$
 $ok$ = normal termination, $er$ = **erroneous** termination (a crash). The $er$ channel is
 what makes IL *find* bugs: it under-approximates the reachable **crash** states.
 
@@ -46,7 +46,7 @@ may forget some paths.*
 **Propagation with $ok$/$er$ (the bug-finding engine).** $ok$ carries you **forward along
 the good prefix** to the crash site; $er$ **collects the reachable crash states**.
 Sequencing short-circuits errors:
-$$\llbracket c_1;c_2\rrbracket_{er}=\underbrace{\llbracket c_1\rrbracket_{er}}_{c_1\ \text{crashes}}\ \cup\ \underbrace{(\llbracket c_2\rrbracket_{er}\circ\llbracket c_1\rrbracket_{ok})}_{c_1\ ok,\ \text{then }c_2\ \text{crashes}}.$$
+$$[\![  c_1;c_2 ]\!]_{er}=\underbrace{[\![  c_1 ]\!]_{er}}_{c_1\ \text{crashes}}\ \cup\ \underbrace{([\![  c_2 ]\!]_{er}\circ[\![  c_1 ]\!]_{ok})}_{c_1\ ok,\ \text{then }c_2\ \text{crashes}}.$$
 A non-$\text{false}$ $er$ result is a **proof that a real bug is reachable**.
 
 > [!example] Loop unrolling to find a bug (no invariant)
@@ -62,7 +62,7 @@ A non-$\text{false}$ $er$ result is a **proof that a real bug is reachable**.
 ## 4. Peculiarities & differences vs siblings
 - **Reversed consequence.** You may **weaken the presumption** and **strengthen/shrink
   the result** — the mirror of HL. Crucially, the **result cannot be weakened** (enlarging
-  $Q$ could claim unreachable states, breaking $\llbracket c\rrbracket P\supseteq Q$). The
+  $Q$ could claim unreachable states, breaking $[\![  c ]\!] P\supseteq Q$). The
   *presumption* can be weakened.
 - **Floyd's forward assignment axiom is sound; Hoare's backward axiom is *unsound*** for IL
   (its post could name unreachable states, e.g. $[y{=}42]\,x{:=}42\,[y{=}x]$ "reaches" the
@@ -78,12 +78,12 @@ A non-$\text{false}$ $er$ result is a **proof that a real bug is reachable**.
 
 ## 5. Properties: soundness & completeness (with *why*)
 - **Soundness** — every derivable triple is valid. **Why:** induction on the derivation;
-  each rule preserves $\llbracket c\rrbracket P\supseteq Q$ (e.g. $[\textsf{seq}]$:
-  $\llbracket c_1;c_2\rrbracket P=\llbracket c_2\rrbracket(\llbracket c_1\rrbracket P)\supseteq\llbracket c_2\rrbracket R\supseteq Q$).
+  each rule preserves $[\![  c ]\!] P\supseteq Q$ (e.g. $[\textsf{seq}]$:
+  $[\![  c_1;c_2 ]\!] P=[\![  c_2 ]\!]([\![  c_1 ]\!] P)\supseteq[\![  c_2 ]\!] R\supseteq Q$).
 - **(Relative) completeness** — every valid triple is derivable (given an implication
   oracle). **Why it is *cleaner* than HL's:** assertions are just **sets of states** and
   implication is **set inclusion**, so the finiteness / Gödel obstructions that make HL
-  only *relatively* complete do not bite in the same way. Key lemma: $[P]\,c\,[\llbracket c\rrbracket P]$
+  only *relatively* complete do not bite in the same way. Key lemma: $[P]\,c\,[[\![  c ]\!] P]$
   is derivable for every $c,P$; then $[\textsf{cons}]$ shrinks the post to any valid $Q$.
 
 ## 6. Pros / cons / use cases
@@ -103,12 +103,12 @@ $$c ::= e \mid c_1;c_2 \mid c_1+c_2 \mid c^\star \mid \mathsf{error}() \mid x:=\
 with $\mathsf{if}\ b\ \mathsf{then}\ c_1\ \mathsf{else}\ c_2\triangleq(b?;c_1)+(\neg b?;c_2)$, $\mathsf{while}\ b\ \mathsf{do}\ c\triangleq(b?;c)^\star;\neg b?$.
 
 ### Validity
-$$[P]\,c\,[Q]\ \text{valid}\iff\llbracket c\rrbracket P\supseteq Q\iff\forall\delta\in Q.\ \exists\sigma\in P.\ \delta\in\llbracket c\rrbracket\sigma. \qquad [P]\,c\,[\varepsilon:Q]\ \text{valid}\iff Q\subseteq\llbracket c\rrbracket_\varepsilon P.$$
+$$[P]\,c\,[Q]\ \text{valid}\iff[\![  c ]\!] P\supseteq Q\iff\forall\delta\in Q.\ \exists\sigma\in P.\ \delta\in[\![  c ]\!]\sigma. \qquad [P]\,c\,[\varepsilon:Q]\ \text{valid}\iff Q\subseteq[\![  c ]\!]_\varepsilon P.$$
 
 ### Relational semantics with exit conditions ($\varepsilon\in\{ok,er\}$)
-$$\llbracket\mathsf{skip}\rrbracket_{ok}=\{(\sigma,\sigma)\},\quad \llbracket b?\rrbracket_{ok}=\{(\sigma,\sigma)\mid\sigma\models b\},\quad \llbracket x:=a\rrbracket_{ok}=\{(\sigma,\sigma[\llbracket a\rrbracket\sigma/x])\}$$
-$$\llbracket\mathsf{error}()\rrbracket_{ok}=\varnothing,\qquad \llbracket\mathsf{error}()\rrbracket_{er}=\{(\sigma,\sigma)\},\qquad (\text{normal commands have }\llbracket\cdot\rrbracket_{er}=\varnothing)$$
-$$\llbracket c_1;c_2\rrbracket_{ok}=\llbracket c_2\rrbracket_{ok}\circ\llbracket c_1\rrbracket_{ok},\qquad \llbracket c_1;c_2\rrbracket_{er}=\llbracket c_1\rrbracket_{er}\cup(\llbracket c_2\rrbracket_{er}\circ\llbracket c_1\rrbracket_{ok})$$
+$$[\![ \mathsf{skip} ]\!]_{ok}=\{(\sigma,\sigma)\},\quad [\![  b? ]\!]_{ok}=\{(\sigma,\sigma)\mid\sigma\models b\},\quad [\![  x:=a ]\!]_{ok}=\{(\sigma,\sigma[[\![  a ]\!]\sigma/x])\}$$
+$$[\![ \mathsf{error}() ]\!]_{ok}=\varnothing,\qquad [\![ \mathsf{error}() ]\!]_{er}=\{(\sigma,\sigma)\},\qquad (\text{normal commands have }[\![ \cdot ]\!]_{er}=\varnothing)$$
+$$[\![  c_1;c_2 ]\!]_{ok}=[\![  c_2 ]\!]_{ok}\circ[\![  c_1 ]\!]_{ok},\qquad [\![  c_1;c_2 ]\!]_{er}=[\![  c_1 ]\!]_{er}\cup([\![  c_2 ]\!]_{er}\circ[\![  c_1 ]\!]_{ok})$$
 **Definedness** (partial exprs, e.g. division): $\mathsf{def}(a_1/a_2)\triangleq\mathsf{def}(a_1)\wedge\mathsf{def}(a_2)\wedge a_2\neq 0$.
 
 ### Axioms & inference rules (single-exit form; add $ok:$/$er:$ analogously)
@@ -126,8 +126,8 @@ $$\dfrac{}{[P]\ c^\star\ [P]}\ [\textsf{iter0}] \qquad \dfrac{[P]\ c;c^\star\ [Q
 $$\dfrac{[P]\,c\,[Q]}{[P\wedge R]\,c\,[Q\wedge R]}\ [\textsf{frame}]\ (\mathrm{Mod}(c)\cap\mathrm{FV}(R)=\varnothing) \qquad \dfrac{[P_1]\,c\,[Q_1]\quad [P_2]\,c\,[Q_2]}{[P_1\vee P_2]\,c\,[Q_1\vee Q_2]}\ [\textsf{disj}]$$
 
 ### Theorems
-- **[Soundness]** $\vdash[P]\,c\,[Q]\Rightarrow\llbracket c\rrbracket P\supseteq Q$.
-- **[Relative completeness]** valid $\Rightarrow$ derivable (via lemma $[P]\,c\,[\llbracket c\rrbracket P]$ + $[\textsf{cons}]$); cleaner than HL (sets + inclusion).
+- **[Soundness]** $\vdash[P]\,c\,[Q]\Rightarrow[\![  c ]\!] P\supseteq Q$.
+- **[Relative completeness]** valid $\Rightarrow$ derivable (via lemma $[P]\,c\,[[\![  c ]\!] P]$ + $[\textsf{cons}]$); cleaner than HL (sets + inclusion).
 - **[Agreement]** if $[P']\,c\,[Q']$, $P'\Rightarrow P$, and $\{P\}\,c\,\{Q\}$, then $Q'\Rightarrow Q$.
 - **[Denial]** (contrapositive) if $[P']\,c\,[Q']$, $P'\Rightarrow P$, and $\neg(Q'\Rightarrow Q)$, then $\neg(\{P\}\,c\,\{Q\})$ — an IL proof refutes an HL spec.
 - **[$\textsf{conj}$ unsound]** counterexample $c\triangleq x:=7$, $P_1\equiv x{=}0$, $P_2\equiv x{=}1$, $Q_i\equiv x{=}7$: premises valid but $[\text{false}]\,x{:=}7\,[ok:x{=}7]$ invalid.

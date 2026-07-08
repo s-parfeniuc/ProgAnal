@@ -45,12 +45,12 @@ positive", "$x\in[1,4]$") that is guaranteed to **cover** all of them. The resul
 An abstract element $a$ **over-approximates** a set $S$ when $S\subseteq\gamma(a)$: every
 concrete state is covered. An analysis lifts this to whole programs. The **analysis
 function** takes a program $p$ and an abstract pre-state $a$ and returns an abstract
-post-state, written $\llbracket p\rrbracket^\sharp a$ (or $\mathrm{analysis}(p,a)$).
+post-state, written $[\![  p ]\!]^\sharp a$ (or $\mathrm{analysis}(p,a)$).
 
 > [!important] The soundness square (the one picture to remember)
 > *Abstracting then running (abstractly) must cover running then abstracting.* For every
 > concrete step $\sigma\xrightarrow{p}\sigma'$ and every abstract $a$ with $\sigma\in\gamma(a)$:
-> $$\sigma'\in\gamma\big(\llbracket p\rrbracket^\sharp a\big),\qquad\text{i.e.}\qquad \llbracket p\rrbracket\big(\gamma(a)\big)\ \subseteq\ \gamma\big(\llbracket p\rrbracket^\sharp a\big).$$
+> $$\sigma'\in\gamma\big([\![  p ]\!]^\sharp a\big),\qquad\text{i.e.}\qquad [\![  p ]\!]\big(\gamma(a)\big)\ \subseteq\ \gamma\big([\![  p ]\!]^\sharp a\big).$$
 > Concrete run **under** abstract run. This is what guarantees no reachable state escapes the analysis.
 
 **Compositionality.** A sound analysis of $p$ is built from sound abstract semantics of its
@@ -114,7 +114,7 @@ $$\text{concrete domain } (C,\subseteq)=(\wp(\Sigma),\subseteq);\quad \text{abst
 $$a\ \text{over-approximates}\ S \iff S\subseteq\gamma(a).$$
 
 ### Soundness (per step and as an analysis)
-$$\llbracket p\rrbracket(\gamma(a))\subseteq\gamma(\llbracket p\rrbracket^\sharp a) \qquad\Longleftrightarrow\qquad \forall\sigma\in\gamma(a).\ \llbracket p\rrbracket\sigma\subseteq\gamma(\mathrm{analysis}(p,a)).$$
+$$[\![  p ]\!](\gamma(a))\subseteq\gamma([\![  p ]\!]^\sharp a) \qquad\Longleftrightarrow\qquad \forall\sigma\in\gamma(a).\ [\![  p ]\!]\sigma\subseteq\gamma(\mathrm{analysis}(p,a)).$$
 Safety check: reachable $(p)\subseteq\gamma(a)$ and $\gamma(a)\cap E=\varnothing\ \Rightarrow\ p$ avoids $E$.
 
 ### Best abstraction

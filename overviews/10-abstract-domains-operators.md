@@ -48,8 +48,8 @@ The classic example is the **sign domain** $A=\{\mathbb Z_{<0},\mathbb Z_{=0},\m
 
 $$\mathbb Z_{>0}\times^\sharp\mathbb Z_{<0}=\mathbb Z_{<0},\quad \mathbb Z_{=0}\times^\sharp a=\mathbb Z_{=0},\quad \mathbb Z_{<0}\times^\sharp\mathbb Z_{<0}=\mathbb Z_{>0},\ \dots$$
 
-- **Correctness (soundness)** — for any expression $e$: $\sigma(e)=\mathbb Z_{>0}\Rightarrow\llbracket e\rrbracket>0$ (etc.), by structural induction. The abstract answer never lies.
-- **Completeness** — the converse $\llbracket e\rrbracket>0\Rightarrow\sigma(e)=\mathbb Z_{>0}$: the abstract computation loses **no** precision relative to the domain. Formally $F^\sharp$ is **(exactly) complete** when $\alpha\circ F=F^\sharp\circ\alpha$ (equality, not just $\sqsubseteq$). Sign-multiplication is complete; **sign-addition is *not*** (e.g. $\mathbb Z_{>0}+^\sharp\mathbb Z_{<0}=\top$), and $|\cdot|$ is not complete on Intervals — completeness is domain- and operator-specific.
+- **Correctness (soundness)** — for any expression $e$: $\sigma(e)=\mathbb Z_{>0}\Rightarrow[\![  e ]\!]>0$ (etc.), by structural induction. The abstract answer never lies.
+- **Completeness** — the converse $[\![  e ]\!]>0\Rightarrow\sigma(e)=\mathbb Z_{>0}$: the abstract computation loses **no** precision relative to the domain. Formally $F^\sharp$ is **(exactly) complete** when $\alpha\circ F=F^\sharp\circ\alpha$ (equality, not just $\sqsubseteq$). Sign-multiplication is complete; **sign-addition is *not*** (e.g. $\mathbb Z_{>0}+^\sharp\mathbb Z_{<0}=\top$), and $|\cdot|$ is not complete on Intervals — completeness is domain- and operator-specific.
 
 ## 5. The abstract domains
 | Domain | Abstract element $a$ | $\gamma(a)$ | Rel.? | ACC? |

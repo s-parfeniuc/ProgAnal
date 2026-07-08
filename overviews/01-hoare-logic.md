@@ -25,13 +25,13 @@ A **Hoare triple** $\{P\}\,c\,\{Q\}$ ($P$ = precondition, $Q$ = postcondition) m
 > *Whenever $c$ is executed in a state satisfying $P$, **if** it terminates, the final
 > state satisfies $Q$.*
 
-Viewing assertions as **sets of states** and $\llbracket c\rrbracket$ as the collecting
+Viewing assertions as **sets of states** and $[\![ c ]\!]$ as the collecting
 semantics (a map on sets of states):
 
-$$\{P\}\,c\,\{Q\} \ \text{ valid} \quad\overset{\triangle}{\iff}\quad \llbracket c\rrbracket P \subseteq Q \quad\iff\quad \forall\sigma\in P.\ \forall\delta\in\llbracket c\rrbracket\sigma.\ \delta\in Q.$$
+$$\{P\}\,c\,\{Q\} \ \text{ valid} \quad\overset{\triangle}{\iff}\quad [\![ c ]\!]  P \subseteq Q \quad\iff\quad \forall\sigma\in P.\ \forall\delta\in[\![ c ]\!] \sigma.\ \delta\in Q.$$
 
 This is **partial correctness**: it says nothing about termination (a diverging $c$ has
-$\llbracket c\rrbracket\sigma = \varnothing \subseteq Q$ trivially). **Total correctness**
+$[\![ c ]\!]\sigma = \varnothing \subseteq Q$ trivially). **Total correctness**
 $=$ partial correctness $+$ termination, proved by adding a **variant** (a ranking function).
 
 ## 3. Over/under-approximation & information propagation
@@ -43,11 +43,10 @@ positive** (a state in $Q$ that no real execution reaches).
 
 **Slogan (HL side of O'Hearn's duality):** *you may forget information along a path, but
 you must remember all the paths* — every branch must re-establish $Q$.
-
 > [!note] Weakening loses precision, never soundness
-> The precise forward step is the **strongest postcondition** $sp(c,P)=\llbracket c\rrbracket P$;
+> The precise forward step is the **strongest postcondition** $sp(c,P)=[\![  c ]\!] P$;
 > taking it always loses no information and commands compose exactly,
-> $sp(c_2,sp(c_1,P))=\llbracket c_1;c_2\rrbracket P$. Weakening (the consequence rule) is
+> $sp(c_2,sp(c_1,P))=[\![  c_1;c_2 ]\!] P$. Weakening (the consequence rule) is
 > *optional*. Even after weakening, the assertion $R$ still satisfies
 > $\text{reachable}\subseteq R$, so proving $R\cap\mathit{Bad}=\varnothing$ still yields
 > $\text{reachable}\cap\mathit{Bad}=\varnothing$ — a **genuine** safety proof. Over-weakening
@@ -55,20 +54,21 @@ you must remember all the paths* — every branch must re-establish $Q$.
 > prove safety), never a wrong "safe" verdict. Contrast [IL](02-incorrectness-logic.md):
 > there the *result* must **not** be weakened (a superset could claim unreachable states).
 
+
 ## 4. Peculiarities & differences vs siblings
 - **Two assignment axioms, opposite orientations.** *Floyd's* is **forward** (pushes a
   precondition to the strongest post); *Hoare's* is **backward** (pulls a postcondition
   back by substitution). Hoare's backward axiom is the practical one for proofs.
 - The **while rule needs a loop invariant** — the creative, hard part of an HL proof
   (McCarthy 91 needs a non-obvious invariant *and* a lexicographic variant).
-- Contrast the incorrectness world: HL's $\llbracket c\rrbracket P\subseteq Q$ becomes
+- Contrast the incorrectness world: HL's $[\![  c ]\!] P\subseteq Q$ becomes
   IL's $\supseteq$ ([IL](02-incorrectness-logic.md)); its backward mirror is
   [NC](03-necessary-conditions.md), via $\{P\}c\{Q\}\iff(\neg P)c(\neg Q)$.
 
 ## 5. Properties: soundness & completeness (with *why*)
 - **Soundness** — *every derivable triple is valid.* **Why:** induction on the derivation
-  tree; each rule preserves $\llbracket\cdot\rrbracket P\subseteq Q$ (e.g. $[\textsf{seq}]$:
-  $\llbracket c_1;c_2\rrbracket P=\llbracket c_2\rrbracket(\llbracket c_1\rrbracket P)\subseteq\llbracket c_2\rrbracket R\subseteq Q$).
+  tree; each rule preserves $[\![ \cdot ]\!] P\subseteq Q$ (e.g. $[\textsf{seq}]$:
+  $[\![  c_1;c_2 ]\!] P=[\![  c_2 ]\!]([\![  c_1 ]\!] P)\subseteq[\![  c_2 ]\!] R\subseteq Q$).
 - **Incompleteness (absolute)** — *not* every valid triple is derivable. **Why (two
   independent reasons):**
   1. $\{\text{true}\}\,c\,\{\text{false}\}$ is valid **iff** $c$ diverges on all inputs; the
@@ -101,7 +101,7 @@ $e ::= \mathsf{skip}\mid x:=a\mid b?$, with $\mathsf{if}\ b\ \mathsf{then}\ c_1\
 and $\mathsf{while}\ b\ \mathsf{do}\ c \triangleq (b?;c)^\star;\neg b?$.
 
 ### Validity
-$$\{P\}\,c\,\{Q\}\ \text{valid} \iff \llbracket c\rrbracket P\subseteq Q \iff \forall\sigma\in P.\ \forall\delta\in\llbracket c\rrbracket\sigma.\ \delta\in Q \qquad\text{(partial correctness)}$$
+$$\{P\}\,c\,\{Q\}\ \text{valid} \iff [\![  c ]\!] P\subseteq Q \iff \forall\sigma\in P.\ \forall\delta\in[\![  c ]\!]\sigma.\ \delta\in Q \qquad\text{(partial correctness)}$$
 
 ### Axioms & inference rules (partial correctness)
 
@@ -123,27 +123,27 @@ Obligations: (1) invariant preserved; (2) variant strictly decreases each iterat
 
 ### Regular-command proof system (minimal, lect. 04)
 
-$$\dfrac{}{\{P\}\,e\,\{\llbracket e\rrbracket P\}}\ [\textsf{atom}] \qquad \dfrac{\{P\}\,r_1\,\{R\}\quad \{R\}\,r_2\,\{Q\}}{\{P\}\,r_1;r_2\,\{Q\}}\ [\textsf{seq}] \qquad \dfrac{\forall i\in\{1,2\}.\ \{P\}\,r_i\,\{Q\}}{\{P\}\,r_1+r_2\,\{Q\}}\ [\textsf{choice}] \qquad \dfrac{\{P\}\,r\,\{P\}}{\{P\}\,r^\star\,\{P\}}\ [\textsf{iter}]$$
+$$\dfrac{}{\{P\}\,e\,\{[\![  e ]\!] P\}}\ [\textsf{atom}] \qquad \dfrac{\{P\}\,r_1\,\{R\}\quad \{R\}\,r_2\,\{Q\}}{\{P\}\,r_1;r_2\,\{Q\}}\ [\textsf{seq}] \qquad \dfrac{\forall i\in\{1,2\}.\ \{P\}\,r_i\,\{Q\}}{\{P\}\,r_1+r_2\,\{Q\}}\ [\textsf{choice}] \qquad \dfrac{\{P\}\,r\,\{P\}}{\{P\}\,r^\star\,\{P\}}\ [\textsf{iter}]$$
 
 Auxiliary: $[\textsf{disj}]$, $[\textsf{conj}]$, $[\textsf{frame}]$ (side cond. $\mathrm{Mod}(r)\cap\mathrm{FV}(R)=\varnothing$), $[\textsf{stren}]$, $[\textsf{weak}]$.
 
 ### Related state transformers (lect. 02 & 04)
-$$sp(c,P)=\llbracket c\rrbracket P \quad\text{(strongest post, forward)}$$
-$$wlp(c,Q)\triangleq\{\sigma\mid \llbracket c\rrbracket\{\sigma\}\subseteq Q\} \quad(\forall,\ \text{liberal — HL's backward precondition})$$
-$$wpp(c,Q)\triangleq\llbracket c\rrbracket^{op}Q=\{\sigma\mid \llbracket c\rrbracket\sigma\cap Q\neq\varnothing\} \quad(\exists,\ \text{possible — backward})$$
+$$sp(c,P)=[\![  c ]\!] P \quad\text{(strongest post, forward)}$$
+$$wlp(c,Q)\triangleq\{\sigma\mid [\![  c ]\!]\{\sigma\}\subseteq Q\} \quad(\forall,\ \text{liberal — HL's backward precondition})$$
+$$wpp(c,Q)\triangleq[\![  c ]\!]^{op}Q=\{\sigma\mid [\![  c ]\!]\sigma\cap Q\neq\varnothing\} \quad(\exists,\ \text{possible — backward})$$
 
 The **weakest possible precondition** $wpp$ is the backward analog of $sp$ and the transformer
 behind the backward logics: [NC](03-necessary-conditions.md) bounds $P$ *above* it
-($\llbracket c\rrbracket^{op}Q\subseteq P$), [SIL](04-sufficient-incorrectness-logic.md) bounds
-$P$ *below* it ($P\subseteq\llbracket c\rrbracket^{op}Q$).
+($[\![  c ]\!]^{op}Q\subseteq P$), [SIL](04-sufficient-incorrectness-logic.md) bounds
+$P$ *below* it ($P\subseteq[\![  c ]\!]^{op}Q$).
 
-**Adjunction (Galois):** $\;P\subseteq wlp(c,Q)\iff\llbracket c\rrbracket P\subseteq Q.$
+**Adjunction (Galois):** $\;P\subseteq wlp(c,Q)\iff[\![  c ]\!] P\subseteq Q.$
 
 ### Theorems
-- **[Soundness]** $\vdash\{P\}\,c\,\{Q\}\ \Rightarrow\ \llbracket c\rrbracket P\subseteq Q$. (induction on derivation)
+- **[Soundness]** $\vdash\{P\}\,c\,\{Q\}\ \Rightarrow\ [\![  c ]\!] P\subseteq Q$. (induction on derivation)
 - **[Incompleteness I]** $\{\text{true}\}\,c\,\{\text{false}\}$ valid iff $c$ diverges (halting not r.e.).
 - **[Incompleteness II]** $\{\text{true}\}\,\mathsf{skip}\,\{Q\}$ valid iff $Q$ a tautology (Gödel).
-- **[Relative completeness / Cook]** with an implication oracle, $\llbracket c\rrbracket P\subseteq Q\ \Rightarrow\ \vdash\{P\}\,c\,\{Q\}$.
+- **[Relative completeness / Cook]** with an implication oracle, $[\![  c ]\!] P\subseteq Q\ \Rightarrow\ \vdash\{P\}\,c\,\{Q\}$.
 
 ### Consequence direction
 Strengthen the precondition ($P\Rightarrow P'$), weaken the postcondition ($Q'\Rightarrow Q$).
