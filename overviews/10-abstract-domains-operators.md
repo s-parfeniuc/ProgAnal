@@ -10,10 +10,7 @@ render: "Notation is LaTeX math ($…$ / $$…$$). Preview with a KaTeX markdown
 
 # Abstract Domains & Operators
 
-**Theme:** the concrete numeric domains, and how to give each concrete operation a **sound
-abstract counterpart** (a *transfer function*). Builds on the Galois machinery of
-[09](09-order-theory-galois-connections.md); feeds the fixpoint analysis of
-[11](11-abstract-analysis-fixpoints-widening.md).
+**Theme:** the concrete numeric domains, and how to give each concrete operation a **sound abstract counterpart** (a *transfer function*). Builds on the Galois machinery of [09](09-order-theory-galois-connections.md); feeds the fixpoint analysis of [11](11-abstract-analysis-fixpoints-widening.md).
 
 ## 1. Purpose & core idea
 An abstract domain is only useful if we can **compute** in it. For every concrete operation
@@ -26,7 +23,7 @@ A **transfer function** says how the abstract state changes after an instruction
 concrete operator $F:C\to C$ we define $F^\sharp:A\to A$ and require **soundness**:
 
 > [!important] Sound abstract operator (three equivalent forms)
-> $$F^\sharp\text{ sound for }F \iff \underbrace{F(\gamma(a))\subseteq\gamma(F^\sharp(a))}_{\text{run then concretize} \subseteq \text{concretize then run}} \iff \alpha\circ F\circ\gamma\ \sqsubseteq\ F^\sharp \iff \alpha\circ F\ \sqsubseteq\ F^\sharp\circ\alpha.$$
+> $$F^\sharp\text{ sound for }F \iff \underbrace{F(\gamma(a))\subseteq\gamma(F^\sharp(a))}_{\text{concretize then run}\subseteq \text{run then concretize} } \iff \alpha\circ F\circ\gamma\ \sqsubseteq\ F^\sharp \iff \alpha\circ F\ \sqsubseteq\ F^\sharp\circ\alpha.$$
 > (The equivalences use the Galois biconditional $c\le\gamma(a)\iff\alpha(c)\sqsubseteq a$.)
 
 Lifted to $n$-ary operations: if each $a_i$ soundly abstracts $v_i$, then
@@ -73,7 +70,7 @@ containing $\bot$ to a single $\bot$.
 
 ## 6. Combining domains (deriving new lattices)
 - **Composition of Galois connections is a Galois connection** ($\gamma=\gamma_1\circ\gamma_2$, $\alpha=\alpha_2\circ\alpha_1$) — abstractions stack.
-- **Cartesian product** $A_1\times A_2$: componentwise order/lub/glb/$\bot$/$\top$; the
+- **Cartesian product** $A_1\times A_2$: componentwise order$\lub\glb$ $\bot$/$\top$; the
   product of two GCs is a GC with $\gamma(a_1,a_2)=\gamma_1(a_1)\cap\gamma_2(a_2)$. Lets one
   analysis track **conjunctive** properties (e.g. Intervals $\times$ Congruences:
   $([0,100],2\mathbb Z)$ means "even, $0..100$").

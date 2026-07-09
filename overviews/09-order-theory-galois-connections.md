@@ -17,12 +17,10 @@ Part II of the AI block — it formalises the `α`/`γ` sketched in
 [11 analysis & fixpoints](11-abstract-analysis-fixpoints-widening.md).
 
 ## 1. Purpose & core idea
-Concrete and abstract worlds are both **ordered by precision**. The **Galois connection**
-is the exact relationship $\alpha\dashv\gamma$ between them that guarantees: (i) every
-abstract answer is a **sound** over-approximation of the concrete one, and (ii) each
-concrete element has a **best** (most precise) abstraction. Order theory (posets, lattices,
-lubs/glbs) is the language; the Galois connection is the contract.
-
+Concrete and abstract worlds are both **ordered by precision**. The **Galois connection** is the exact relationship $\alpha\dashv\gamma$ between them that guarantees: 
+(i) every abstract answer is a **sound** over-approximation of the concrete one, and 
+(ii) each concrete element has a **best** (most precise) abstraction. Order theory (posets, lattices,lubs/glbs) is the language; the Galois connection is the contract.
+z
 ## 2. Order-theory prerequisites
 - **Poset** $(X,\sqsubseteq)$: a set with a reflexive, antisymmetric, transitive order.
   Here $\sqsubseteq$ reads as "more precise / more information than". See [[glossary]].
@@ -32,10 +30,7 @@ lubs/glbs) is the language; the Galois connection is the contract.
   *every* subset (incl. infinite) has a lub and glb; then $\bot=\bigsqcup\varnothing=\sqcap X$
   and $\top=\sqcap\varnothing=\bigsqcup X$. Example: $(\wp(\mathbb Z),\subseteq,\cup,\cap,\varnothing,\mathbb Z)$.
 - **CPO**: every ascending chain has a lub (pointed CPO also has $\bot$).
-- **Ascending Chain Condition (ACC)**: no infinite strictly-ascending chains — every
-  ascending chain eventually stabilises. **ACC domains guarantee the analysis terminates**
-  (its increasing fixpoint iteration converges). (Note: complete lattice $\not\Rightarrow$ ACC —
-  e.g. intervals are a complete lattice but not ACC.)
+- **Ascending Chain Condition (ACC)**: no infinite strictly-ascending chains — every ascending chain eventually stabilises. **ACC domains guarantee the analysis terminates** (its increasing fixpoint iteration converges). (Note: complete lattice $\not\Rightarrow$ ACC — e.g. intervals are a complete lattice but not ACC.)
 
 > [!note] CPO vs ACC — "the limit exists" vs "you reach it"
 > Both concern ascending chains $x_0\sqsubseteq x_1\sqsubseteq\cdots$. Read $\sqsubseteq$ as
@@ -121,19 +116,15 @@ it holds we have a **Galois insertion (= embedding)**.
 
 > [!note] Galois insertion — three equivalent conditions
 > A Galois connection is a **Galois insertion** iff any of:
-> (1) $\alpha$ is **surjective**; (2) $\gamma$ is **injective**; (3) $\alpha\circ\gamma=\mathrm{id}$.
-> Intuition: **no redundant abstract elements** — every abstract element is the best
-> abstraction of its own meaning.
+> (1) $\alpha$ is **surjective** (si trova sempre un elemento del dominio astratto); 
+> (2) $\gamma$ is **injective** (non ci sono elementi ridondanti); 
+> (3) $\alpha\circ\gamma=\mathrm{id}$.
+> Intuition: **no redundant abstract elements** — every abstract element is the best abstraction of its own meaning.
 
-- **GC but not GI:** if two abstract elements have the *same* meaning (say a spurious
-  $p$ with $\gamma(p)=\gamma(+)$), then $\gamma$ isn't injective and $\alpha$ isn't
-  surjective — $p$ is **useless** (some other element abstracts better). Removing such
-  redundancy turns a GC into a GI.
+- **GC but not GI:** if two abstract elements have the *same* meaning (say a spurious $p$ with $\gamma(p)=\gamma(+)$), then $\gamma$ isn't injective and $\alpha$ isn't surjective $p$ is **useless** (some other element abstracts better). Removing such redundancy turns a GC into a GI.
 - **Closure-operator view.** Write $A(c)\triangleq\gamma(\alpha(c))$. This is an **upper
-  closure operator**: **monotone, extensive, idempotent** ($A(A(c))=A(c)$). Its image
-  $A(C)=\gamma(A)$ is the set of **expressible elements** ($c$ with $c=\gamma(\alpha(c))$).
-  So an abstract domain can be identified with a **subset of the concrete domain** — no
-  symbolic representation needed to reason about it.
+  closure operator**: **monotone, extensive, idempotent** ($A(A(c))=A(c)$). Its image $A(C)=\gamma(A)$ is the set of **expressible elements** ($c$ with $c=\gamma(\alpha(c))$).
+  So an abstract domain can be identified with a **subset of the concrete domain** — no symbolic representation needed to reason about it.
 
 ## 5. Properties (why the Galois connection is exactly right)
 - **Soundness for free.** $c\le\gamma(\alpha(c))$ means $\alpha$ never under-reports; every
@@ -143,9 +134,7 @@ it holds we have a **Galois insertion (= embedding)**.
   the connection pins down a unique tightest abstract element per concrete element.
 - **Preservation.** $\alpha$ preserves lubs (joins) and $\gamma$ preserves glbs (meets) —
   which is what lets abstract operators be defined and lets fixpoints transfer (see [11](11-abstract-analysis-fixpoints-widening.md)).
-- **When there is no $\alpha$.** Some domains (e.g. Convex Polyhedra for curved sets) have
-  **no best abstraction**, hence **no Galois connection** — the framework then works with a
-  concretization $\gamma$ alone (a *concretization-only* / "$\gamma$-only" setting).
+- **When there is no $\alpha$.** Some domains (e.g. Convex Polyhedra for curved sets) have **no best abstraction**, hence **no Galois connection** — the framework then works with a concretization $\gamma$ alone (a *concretization-only* / "$\gamma$-only" setting).
 
 ## 6. Pros / cons / use cases
 - **Pros:** a clean, reusable contract giving soundness **and** best precision; either map
@@ -165,7 +154,12 @@ $$\text{poset }(X,\sqsubseteq);\quad \text{lub }\bigsqcup A\ (\sqcup),\ \text{gl
 $$\bot=\textstyle\bigsqcup\varnothing=\sqcap X,\quad \top=\sqcap\varnothing=\bigsqcup X;\qquad \textbf{ACC}:\ \text{no infinite ascending chain}\ \Rightarrow\ \text{analysis terminates}.$$
 
 ### Function properties
-$$\text{monotone: } x\sqsubseteq y\Rightarrow f(x)\sqsubseteq f(y);\quad \text{continuous: preserves chain lubs};\quad \text{extensive: } a\sqsubseteq f(a);\quad \text{reductive: } f(a)\sqsubseteq a.$$
+$$\begin{array}{}
+\text{monotone: } x\sqsubseteq y\Rightarrow f(x)\sqsubseteq f(y); \\
+\quad \text{continuous: preserves chain lubs}; \\
+\quad \text{extensive: } a\sqsubseteq f(a); \\
+\quad \text{reductive: } f(a)\sqsubseteq a.
+\end{array}$$
 
 ### Galois connection
 $$(C,\le)\ \xrightleftharpoons[\alpha]{\gamma}\ (A,\sqsubseteq)\quad\overset{\triangle}{\iff}\quad \forall c,a:\ \alpha(c)\sqsubseteq a\ \Longleftrightarrow\ c\le\gamma(a).$$
