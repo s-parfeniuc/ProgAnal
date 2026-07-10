@@ -24,16 +24,46 @@ the initial guess describes every reachable state.
 
 ## 2. Setup — a small-step semantics with explicit environments & closures
 To reason about correctness we give FUN a **small-step Structural Operational Semantics**
-$\rho\vdash ie\to ie'$ (one step of computing $ie$ under concrete environment $\rho$). Two
-deliberate design choices make the semantics **match the CFA abstraction**:
+$\rho\vdash ie\to ie'$: *"under concrete environment $\rho$, expression $ie$ does one step of
+computation, becoming $ie'$."* Iterating this ($\to^\ast$) runs the program. Two deliberate
+design choices make the semantics **match the CFA abstraction**:
 - **Explicit environments, not substitution.** A configuration carries a concrete environment
-  $\rho$; we *bind* variables rather than substitute. (Substitution would copy/rename function
-  terms and **lose the identity of functions** — but abstract values *are* sets of function
-  terms, so their identity must be preserved.)
-- **Closures.** A function evaluates to a **closure** $t^\rho$ = the function term $t$ together
-  with the environment $\rho$ capturing its free variables (static/lexical binding).
+  $\rho$ (a list of variable→value bindings); we *bind* variables rather than substitute. (The
+  usual textbook semantics would substitute the argument into the body. But substitution would
+  **copy and rename function terms**, destroying the **identity of functions** — and abstract
+  values *are* sets of function terms $\wp(\mathit{Term})$, so that identity is exactly what the
+  analysis tracks and must be preserved.)
+- **Closures.** A function definition evaluates to a **closure** $t^\rho$ = the function term
+  $t$ paired with the environment $\rho$ that captures the values of its **free variables** at
+  definition time (static/lexical scoping). A closure is a *value*, not something to reduce
+  further.
 
-$$v ::= c \mid t^\rho\ (\text{closure})\qquad \rho ::= [\,] \mid \rho[x\mapsto v]\qquad ie ::= it^l\ (\text{intermediate expressions/terms, incl. } \rho{:}ie\ \text{frames and closures}).$$
+**Values and environments.** A value is either a constant or a closure; an environment is a
+finite list of bindings, and $\operatorname{dom}(\rho)$ is the set of variables it binds:
+$$v ::= c \mid t^\rho\ (\text{closure})\qquad \rho ::= [\,] \mid \rho[x\mapsto v]$$
+$$\operatorname{dom}([\,]) = \emptyset\qquad \operatorname{dom}(\rho[x\mapsto v]) = \operatorname{dom}(\rho)\cup\{x\}.$$
+So $\operatorname{dom}(\rho)$ = the variables currently in scope. (It is used in the agreement
+relation §3, where we require $\operatorname{dom}(\rho)\subseteq\operatorname{dom}(\hat\rho)$:
+every concretely-bound variable is also described abstractly. $\hat\rho$ is a *total* abstract
+environment, so this is really "every in-scope variable has an abstract entry.")
+
+**What the intermediate expressions $ie$ represent.** Source expressions alone cannot describe a
+program *mid-execution*: once we start evaluating a function body we need to remember *which
+environment* it runs in, and a partly-evaluated function has become a closure. So we enlarge the
+syntax of source terms into **intermediate expressions** $ie = it^l$ (a labelled intermediate
+term) — the **runtime configurations** the small-step relation walks through. Beyond ordinary
+source constructs, $it$ adds two things:
+- **Closures $t^\rho$** — the *result* of evaluating a function definition (see above).
+- **Environment-binding frames $\rho{:}ie$** — read *"evaluate $ie$ under environment $\rho$."*
+  These appear when we enter a new scope without substituting: applying a closure
+  $(\lambda x. e_1)^{\rho_1}$ to a value $v_2$ steps to the frame $\big(\rho_1[x\mapsto v_2]\big){:}e_1$,
+  i.e. "run the body $e_1$ in the captured environment extended with $x\mapsto v_2$" (and a `let`
+  behaves the same way). The frame is exactly how explicit-environment semantics records a
+  binding that substitution would have performed by copying.
+
+So an $ie$ is a snapshot of the machine: a mix of not-yet-evaluated source subterms, already-computed
+closures/constants, and $\rho{:}ie$ frames marking which scope each subterm lives in. Correctness
+(§4) is the statement that an acceptable guess stays acceptable for *every* such snapshot.
 
 ## 3. The agreement relation between concrete and abstract environments
 Correctness needs the concrete environment $\rho$ and the abstract one $\hat\rho$ to **agree** —
@@ -81,6 +111,8 @@ computing the **least** one ([15](15-0cfa-existence-least-solutions.md)).
 
 ### Semantic objects
 $$v ::= c \mid t^\rho\ (\text{closure});\qquad \rho ::= [\,]\mid\rho[x\mapsto v];\qquad \rho\vdash ie\to ie'\ (\text{small-step, explicit environments}).$$
+$$ie ::= it^l\ \text{— runtime configs, adding closures } t^\rho \text{ and env-frames } \rho{:}ie\ (\text{"run } ie \text{ under } \rho\text{")}.$$
+$$\operatorname{dom}([\,]) = \emptyset;\qquad \operatorname{dom}(\rho[x\mapsto v]) = \operatorname{dom}(\rho)\cup\{x\}\quad(\text{variables in scope}).$$
 
 ### Agreement (concrete $\rho$ vs abstract $\hat\rho$)
 $$\rho\,\mathcal R\,\hat\rho \iff \mathrm{dom}(\rho)\subseteq\mathrm{dom}(\hat\rho)\ \wedge\ \forall x:\ \rho(x)=t_x^{\rho_x}\Rightarrow t_x\in\hat\rho(x)\wedge\rho_x\,\mathcal R\,\hat\rho.$$
