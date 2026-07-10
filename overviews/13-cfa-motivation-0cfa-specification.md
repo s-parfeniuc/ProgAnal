@@ -53,10 +53,72 @@ flow — one clause per syntactic form (each an inclusion the guess must satisfy
 > $$[\textsf{let}]\quad (\hat C,\hat\rho)\models(\mathsf{let}\ x{=}t_1^{l_1}\ \mathsf{in}\ t_2^{l_2})^l \iff (\hat C,\hat\rho)\models t_1^{l_1}\wedge(\hat C,\hat\rho)\models t_2^{l_2}\wedge \underbrace{\hat C(l_1)\subseteq\hat\rho(x)}_{\text{bind}}\wedge\underbrace{\hat C(l_2)\subseteq\hat C(l)}_{\text{result}}$$
 > $$[\textsf{app}]\quad (\hat C,\hat\rho)\models(t_1^{l_1}\,t_2^{l_2})^l \iff (\hat C,\hat\rho)\models t_1^{l_1}\wedge(\hat C,\hat\rho)\models t_2^{l_2}\ \wedge$$
 > $$\forall(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\hat C(l_1):\ (\hat C,\hat\rho)\models t_0^{l_0}\ \wedge\ \underbrace{\hat C(l_2)\subseteq\hat\rho(x)}_{\text{arg}\to\text{param}}\ \wedge\ \underbrace{\hat C(l_0)\subseteq\hat C(l)}_{\text{body}\to\text{call site}}\quad(\text{and analogously for }\mathsf{fun}).$$
+> $$[\textsf{op}]\quad (\hat C,\hat\rho)\models(t_1^{l_1}\,\mathsf{op}\,t_2^{l_2})^l \iff (\hat C,\hat\rho)\models t_1^{l_1}\wedge(\hat C,\hat\rho)\models t_2^{l_2}\quad(\text{result is a base value: no demand on }\hat C(l),\ \text{like }[\textsf{con}])$$
 
 The whole idea lives in **[app]**: for **every** function $t_1$ might be, push the argument into
 its parameter and its body's result back to the call site. That single clause is what threads
 values through higher-order calls.
+
+### 3a. Reading each clause intuitively — the plumbing picture
+**One mental model for all of it.** Picture two kinds of **buckets**, each holding a *set of
+functions*: a bucket $\hat C(l)$ for every program point $l$ ("what value comes out **here**")
+and a bucket $\hat\rho(x)$ for every variable $x$ ("what $x$ **holds**"). Every clause is just a
+**pipe** written as an inclusion `⊆`: *"everything in the left bucket must also be in the right
+bucket."* A guess is **acceptable** iff **all the pipes are installed** so no function can ever
+flow somewhere without being recorded there. Functions are **poured in** only by `[fn]/[fun]`;
+every other rule just **routes** them. `⊆` (not `=`) is what makes it an *over*-approximation:
+buckets are allowed to hold *extra* junk, they just may not **miss** anything real.
+
+- **[con] $c^l$ — nothing to track.** A constant evaluates to a *number*, never a function. Since
+  buckets only ever hold functions, there is nothing to pour into $\hat C(l)$, so the clause is
+  just `true` — no pipe, the bucket may stay empty. (Any guess is acceptable for a constant.)
+
+- **[var] $x^l$ — read the variable.** Evaluating $x$ yields whatever $x$ is currently bound to.
+  So whatever sits in $x$'s bucket must appear at this point: **$\hat\rho(x)\subseteq\hat C(l)$**.
+  One pipe, *variable-bucket → point-bucket*. This is where a stored function gets **read back
+  out** into the flow.
+
+- **[fn]/[fun] $(\mathsf{fn}\ x\Rightarrow e_0)^l$ — the only source.** A function *literal*
+  evaluates **to itself** (its closure). So the term itself must be dropped into this point's
+  bucket: **$\{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)$**. This is the **only** rule that
+  *introduces* a function into the analysis — every function in every bucket anywhere was
+  ultimately poured in here and then routed by the other rules. `[fun]` is identical but the
+  closure also carries its own recursive name $f$.
+
+- **[if] $\mathsf{if}\ t_0\ t_1\ t_2$ — merge both branches.** First the guard $t_0$ must itself
+  be acceptable (it may contain calls). The result of the `if` is the value of *whichever* branch
+  runs — but 0-CFA **can't tell which**, so it conservatively assumes **either** could, and pipes
+  **both** branch buckets into the result: **$\hat C(l_1)\subseteq\hat C(l)$ and
+  $\hat C(l_2)\subseteq\hat C(l)$**. (No pipe *from* the guard's value — a boolean isn't a
+  function.) Forgetting which branch is taken is exactly the imprecision you pay for decidability.
+
+- **[let] $\mathsf{let}\ x=t_1\ \mathsf{in}\ t_2$ — bind, then return.** Two pipes. **bind:** the
+  definition's value becomes $x$'s binding, **$\hat C(l_1)\subseteq\hat\rho(x)$** (fill $x$'s
+  bucket from $t_1$). **result:** the whole `let` returns the body's value,
+  **$\hat C(l_2)\subseteq\hat C(l)$**. Plus both sub-terms must be acceptable. It's `[var]` and
+  `[app]`'s binding logic in miniature: *definition → variable → (used later by `[var]`) → body.*
+
+- **[app] $t_1\ t_2$ — the heart, dynamic dispatch.** $t_1$ is the *function position*, $t_2$ the
+  *argument*. The bucket $\hat C(l_1)$ **is the analysis's answer** to "which functions might be
+  called here." For **each** candidate $\mathsf{fn}\ x\Rightarrow t_0^{l_0}$ found in that bucket,
+  install three things: (i) its **body is reached**, so $t_0^{l_0}$ must itself be acceptable;
+  (ii) **arg → param:** the argument flows into that function's parameter,
+  **$\hat C(l_2)\subseteq\hat\rho(x)$**; (iii) **body → call site:** the function's result flows
+  back out to this call, **$\hat C(l_0)\subseteq\hat C(l)$**. The subtlety: *which* functions you
+  quantify over is **not known from the syntax** — it depends on $\hat C(l_1)$, which the analysis
+  is itself computing. That self-reference ("the constraints depend on the current guess") is the
+  **coinductive/greatest-fixpoint** flavour noted in §4, and the reason CFA is more than a simple
+  syntactic walk.
+
+- **[op] $t_1\ \mathsf{op}\ t_2$ — like [con].** Arithmetic/comparison returns a *base value*, not
+  a function, so **no demand on $\hat C(l)$**. But unlike a bare constant, the operands are
+  arbitrary expressions that might build or call functions internally, so **both must be
+  acceptable** ($\models t_1\wedge\models t_2$) even though their result-buckets are ignored.
+
+**The through-line:** `[fn]/[fun]` are the *taps*, `[var]`/`[let]`/`[app]` are the *pipes* that
+carry functions from where they're created to where they're stored, read, and called, and
+`[con]`/`[op]` are *dead ends* (base values). "Acceptable" = you laid down enough pipe that the
+water level in every bucket is a safe over-estimate of what really flows there at runtime.
 
 ## 4. Properties — what "acceptable" means
 - **Soundness = over-approximation.** If at runtime $t^l$ evaluates to a function, that function
@@ -103,6 +165,7 @@ $$\hat C:\mathit{Lab}\to\widehat{\mathit{Val}}\ (\text{cache}),\quad \hat\rho:\m
 $$[\textsf{con}]\ \text{true}\qquad [\textsf{var}]\ \hat\rho(x)\subseteq\hat C(l)\qquad [\textsf{fn}/\textsf{fun}]\ \{\mathsf{fn}/\mathsf{fun}\dots\}\subseteq\hat C(l)$$
 $$[\textsf{if}]\ \models t_0\wedge\textstyle\bigwedge_{i}(\models t_i\wedge\hat C(l_i)\subseteq\hat C(l))\qquad [\textsf{let}]\ \models t_1\wedge\models t_2\wedge\hat C(l_1)\subseteq\hat\rho(x)\wedge\hat C(l_2)\subseteq\hat C(l)$$
 $$[\textsf{app}]\ \models t_1\wedge\models t_2\wedge\!\!\!\bigwedge_{(\mathsf{fn}\,x\Rightarrow t_0^{l_0})\in\hat C(l_1)}\!\!\!\big(\models t_0^{l_0}\wedge\hat C(l_2)\subseteq\hat\rho(x)\wedge\hat C(l_0)\subseteq\hat C(l)\big)$$
+$$[\textsf{op}]\ \models t_1\wedge\models t_2\quad(\text{no demand on }\hat C(l):\ \mathsf{op}\text{ returns a base value, like }[\textsf{con}])$$
 
 ### Keywords
 0-CFA = context-**insensitive**; result over-approximates reachable function flows; acceptable = conservative guess; specification (Flow Logic) not computation; coinductive.

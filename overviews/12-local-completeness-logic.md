@@ -40,7 +40,12 @@ inputs first loses nothing. That is rare. **Local completeness** requires it *on
 
 **Why completeness is what matters (for an expressible spec, $A(\mathit{Spec})=\mathit{Spec}$):**
 $$\llbracket c\rrbracket P\subseteq\mathit{Spec}\iff \llbracket c\rrbracket^\sharp_A A(P)\subseteq\mathit{Spec}\quad(\text{when complete}).$$
-So a *complete* abstract analysis decides correctness exactly — no false alarms.
+Here $\llbracket c\rrbracket^\sharp_A\triangleq A\circ\llbracket c\rrbracket\circ A$ is the **bca** (best
+correct approximation), an operator **on the concrete lattice** $C\to C$ — *not* a map on a
+separate abstract domain. Its input $A(P)\in A(C)$ is the concrete set of **expressible elements**;
+following the course convention (*"Galois insertion as closures"*, §[09](09-order-theory-galois-connections.md)),
+the abstract domain **is** $A(C)\subseteq C$, so feeding $\llbracket c\rrbracket^\sharp_A$ a concrete
+element is by design, not an abuse. So a *complete* abstract analysis decides correctness exactly — no false alarms.
 **Sources of incompleteness:** completeness is preserved by $;$, $\cup$, and fixpoints;
 **only atomic commands** $e$ introduce it. Assignments are complete in many domains;
 **guards are the troublesome case** ($b$ complete $\Rightarrow$ $b,\neg b$ expressible, and the
@@ -63,7 +68,7 @@ $$\dfrac{\mathcal C^A_P(e)}{\vdash_A [P]\ e\ [\llbracket e\rrbracket P]}\ [\text
 
 $$\dfrac{\vdash_A [P]\,c_1\,[R]\quad \vdash_A [R]\,c_2\,[Q]}{\vdash_A [P]\ c_1;c_2\ [Q]}\ [\textsf{seq}]\qquad \dfrac{\vdash_A [P]\,c_1\,[Q_1]\quad \vdash_A [P]\,c_2\,[Q_2]}{\vdash_A [P]\ c_1+c_2\ [Q_1\vee Q_2]}\ [\textsf{join}]$$
 
-$$\dfrac{\vdash_A [P]\,c\,[R]\quad \vdash_A [P\vee R]\,c\,[Q]}{\vdash_A [P]\ c^\star\ [Q]}\ [\textsf{rec}]\qquad \dfrac{\vdash_A [P]\,c\,[Q]\quad Q\Rightarrow A(P)}{\vdash_A [P]\ c^\star\ [P]}\ [\textsf{iterate}]\ (\text{fixpoint acceleration})$$
+$$\dfrac{\vdash_A [P]\,c\,[R]\quad \vdash_A [P\vee R]\,c^\star\,[Q]}{\vdash_A [P]\ c^\star\ [Q]}\ [\textsf{rec}]\qquad \dfrac{\vdash_A [P]\,c\,[Q]\quad Q\Rightarrow A(P)}{\vdash_A [P]\ c^\star\ [P \lor Q]}\ [\textsf{iterate}]\ (\text{fixpoint acceleration})$$
 
 $$\dfrac{P'\Rightarrow P\Rightarrow A(P')\quad \vdash_A [P']\,c\,[Q']\quad Q\Rightarrow Q'\Rightarrow A(Q)}{\vdash_A [P]\ c\ [Q]}\ [\textsf{relax}]$$
 
