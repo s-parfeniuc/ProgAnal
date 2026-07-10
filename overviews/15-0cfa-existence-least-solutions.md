@@ -29,15 +29,9 @@ $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2) \iff \forall l.\ \hat C_
 
 ## 3. Existence & the least CFA (Moore family)
 > [!important] Moore family ⟹ least solution
-<<<<<<< HEAD
-> A **Moore family** is a subset $Y$ of a complete lattice closed under **glbs**:
-> $\sqcap Y'\in Y$ for every $Y'\subseteq Y$. It always contains a **least** element
-> $\sqcap Y$ and a **greatest** $\sqcap\varnothing=\top$, and is **never empty**.
-=======
 > A **Moore family** (a.k.a. **closure system**) is a subset $Y$ of a complete lattice $L$ closed
 > under **glbs**: $\sqcap Y'\in Y$ for **every** $Y'\subseteq Y$. It always contains a **least**
 > element $\sqcap Y$ and a **greatest** $\top=\sqcap\varnothing$, and is **never empty**.
->>>>>>> 493feabaa3fe48e86d05d44da154d43ed6b90c6f
 >
 > **Theorem.** For every $ie$, the set $\{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}$ of
 > acceptable analyses **is a Moore family** (proof by coinduction on $ie$: if all
