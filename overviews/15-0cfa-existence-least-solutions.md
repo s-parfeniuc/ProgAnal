@@ -29,9 +29,15 @@ $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2) \iff \forall l.\ \hat C_
 
 ## 3. Existence & the least CFA (Moore family)
 > [!important] Moore family ⟹ least solution
+<<<<<<< HEAD
 > A **Moore family** is a subset $Y$ of a complete lattice closed under **glbs**:
 > $\sqcap Y'\in Y$ for every $Y'\subseteq Y$. It always contains a **least** element
 > $\sqcap Y$ and a **greatest** $\sqcap\varnothing=\top$, and is **never empty**.
+=======
+> A **Moore family** (a.k.a. **closure system**) is a subset $Y$ of a complete lattice $L$ closed
+> under **glbs**: $\sqcap Y'\in Y$ for **every** $Y'\subseteq Y$. It always contains a **least**
+> element $\sqcap Y$ and a **greatest** $\top=\sqcap\varnothing$, and is **never empty**.
+>>>>>>> 493feabaa3fe48e86d05d44da154d43ed6b90c6f
 >
 > **Theorem.** For every $ie$, the set $\{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}$ of
 > acceptable analyses **is a Moore family** (proof by coinduction on $ie$: if all
@@ -40,6 +46,103 @@ $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2) \iff \forall l.\ \hat C_
 > **Corollaries:** (i) taking $Y'=\varnothing$ gives $\top\models ie$ — **every expression admits
 > a CFA**; (ii) taking $Y'=$ all acceptable solutions gives $\sqcap Y'\models ie$ — the
 > **least (most precise) CFA exists**, and it is below every other acceptable solution.
+
+The callout is the headline; the rest of this section unpacks *why each clause of it is true*,
+because the subtleties (the empty-set corollary, the reason it is $\sqcap$ and not $\sqcup$, and
+why "least = best") are exactly what makes CFA a well-defined object rather than a heuristic.
+
+### 3.1 What a Moore family really is (and why it is never empty)
+Fix the complete lattice of proposed solutions $L=\widehat{\mathit{Cache}}\times\widehat{\mathit{Env}}$
+from §2, ordered pointwise. Because each coordinate is a powerset $\wp(\mathit{Term})$ and $L$ is a
+pointwise product of such, **all** glbs and lubs exist, computed coordinatewise:
+$$\textstyle\big(\sqcap_i(\hat C_i,\hat\rho_i)\big)=\big(\lambda l.\bigcap_i\hat C_i(l),\ \lambda x.\bigcap_i\hat\rho_i(x)\big),\qquad \top=\big(\lambda l.\mathit{Term},\ \lambda x.\mathit{Term}\big).$$
+A Moore family $Y\subseteq L$ is a subset that is **closed under taking glbs of arbitrary
+sub-collections** — including the two extreme sub-collections:
+
+- $Y'=\varnothing$. The glb of *no* constraints is the **greatest** element: $\sqcap\varnothing=\top$
+  (every element of $L$ is vacuously a lower bound of $\varnothing$, and $\top$ is the greatest of
+  them). Closure forces $\top\in Y$, so **a Moore family is automatically non-empty and has a top.**
+- $Y'=Y$ (the whole family). Closure forces $\sqcap Y\in Y$: the glb of *everything* in $Y$ is
+  itself in $Y$, hence is the **least** element of $Y$.
+
+So "Moore family" packs both existence facts into one closure property: a top always sits inside
+(nothing to prove — it exists), and a canonical bottom is manufactured by intersecting the whole
+set. Note $(Y,\sqsubseteq)$ is then itself a complete lattice, but a *subtle* one: it shares $L$'s
+meet, yet its join is $\bigsqcup^Y Z=\sqcap\{y\in Y\mid \forall z\in Z.\ z\sqsubseteq y\}$
+(least member of $Y$ above $Z$) — generally **not** $L$'s union. $Y$ is closed under meets, **not**
+under joins; that asymmetry is the whole story of §3.2.
+
+### 3.2 Why the acceptable solutions are closed under $\sqcap$ (the actual mechanism)
+The clauses of $\models$ (file [13](13-cfa-motivation-0cfa-specification.md)) are all of one shape:
+a **conjunction of conditional inclusions**
+$$\big(t\in\hat C(l')\big)\ \Rightarrow\ \big(\hat C(l_a)\subseteq\hat\rho(x)\ \wedge\ \hat C(l_b)\subseteq\hat C(l)\big),$$
+plus unconditional inclusions like $\hat\rho(x)\subseteq\hat C(l)$ for $[\textsf{var}]$. **Every such
+clause is preserved under coordinatewise intersection**, and this is the beating heart of the theorem.
+Take the hard case, $[\textsf{app}]$ on $(t_1^{l_1}\,t_2^{l_2})^l$, and suppose
+$(\hat C_i,\hat\rho_i)\models ie$ for all $i\in I$. Write $(\hat C,\hat\rho)=\sqcap_i(\hat C_i,\hat\rho_i)$.
+Let a closure $\mathsf{fn}\,x\Rightarrow t_0^{l_0}\in\hat C(l_1)=\bigcap_i\hat C_i(l_1)$. Then it lies
+in $\hat C_i(l_1)$ for **every** $i$ — this is the crucial step: *membership in the intersection is
+the strongest possible antecedent, so it fires the constraint in all copies at once.* Acceptability
+of each $(\hat C_i,\hat\rho_i)$ therefore gives, for every $i$,
+$$\hat C_i(l_2)\subseteq\hat\rho_i(x)\quad\text{and}\quad\hat C_i(l_0)\subseteq\hat C_i(l).$$
+Intersecting over $i$ (intersection is monotone, and $\bigcap_i A_i\subseteq\bigcap_i B_i$ whenever
+$A_i\subseteq B_i$ for all $i$):
+$$\hat C(l_2)=\textstyle\bigcap_i\hat C_i(l_2)\subseteq\bigcap_i\hat\rho_i(x)=\hat\rho(x),\qquad \hat C(l_0)\subseteq\hat C(l).$$
+The recursive obligation $(\hat C,\hat\rho)\models t_0^{l_0}$ is discharged by the **coinductive
+hypothesis** (below). All other clauses are easier: $[\textsf{var}]$'s $\hat\rho(x)\subseteq\hat C(l)$
+intersects the same way; $[\textsf{con}]$/$[\textsf{op}]$ are unconditionally true.
+
+**Why $\sqcap$ and not $\sqcup$.** Repeat the argument with unions. From
+$\mathsf{fn}\,x\Rightarrow t_0\in\bigcup_i\hat C_i(l_1)$ you only learn the closure is in *some*
+$\hat C_j(l_1)$, so you only get the consequent from that single $j$ — nothing forces
+$\hat C_k(l_2)\subseteq\hat\rho_k(x)$ for the other $k$, and the union of consequents can fail. Hence
+**acceptability is preserved by meets but not by joins** — precisely the closure-system asymmetry of
+§3.1, and the reason the acceptable set is a Moore family rather than a full sublattice.
+
+**Where coinduction enters.** For non-recursive constructs the above is plain structural induction.
+But $[\textsf{app}]$ recursively demands $\models t_0^{l_0}$ for *every* function reachable at the
+operator, and with $\mathsf{fun}$ / higher-order recursion the body $t_0$ can loop back to the same
+call — the "subterm" relation is not well-founded. So $\models$ is the **greatest fixed point** of
+the monotone functional built from these clauses (file [14](14-0cfa-semantic-correctness.md) reads
+the closure/agreement relations coinductively for the same reason). The Moore-family proof is
+therefore by **coinduction**: to show $\sqcap_i(\hat C_i,\hat\rho_i)\models ie$, exhibit the set
+$\{(\sqcap_i(\hat C_i,\hat\rho_i),\,ie)\mid \forall i.\,(\hat C_i,\hat\rho_i)\models ie\}$ and check it
+is a **post-fixed point** (closed under one unfolding of the functional) — which is exactly the
+clause-by-clause intersection check just done. The gfp then contains it, i.e. the meet is acceptable.
+
+### 3.3 The two corollaries, read out loud
+- **(i) $\top\models ie$ — existence.** Instantiating closure at $Y'=\varnothing$ hands us $\top\in Y$
+  for free. Concretely $\top=(\lambda l.\mathit{Term},\lambda x.\mathit{Term})$: "**every** program
+  point may hold **every** function, and every variable may be bound to every function." Every
+  inclusion $\hat C(\cdot)\subseteq\hat\rho(\cdot)$ etc. is trivially satisfied because the right-hand
+  side is already the whole universe. So the acceptability relation is **never vacuous** — CFA
+  *always* has at least one solution, no matter how tangled the program. This is the analysis-side
+  analogue of "the coarsest abstraction is always sound."
+- **(ii) $\sqcap Y\models ie$ — the best solution.** Instantiating closure at $Y'=Y$ gives the glb of
+  *all* acceptable solutions, and it is itself acceptable. Being the glb, it sits $\sqsubseteq$ every
+  other acceptable $(\hat C,\hat\rho)$. This is **the 0-CFA of $e$** — the canonical object that lets
+  us speak of "*the* control-flow analysis of a program" rather than "*an* acceptable guess."
+
+### 3.4 Why "least = most precise = best" (and still sound)
+Smaller in $\sqsubseteq$ means **fewer flows** at every point ($\subseteq$ pointwise, §2), i.e. each
+call site is claimed to reach a **smaller** set of functions — a **sharper** call graph. So among all
+acceptable analyses the least one is the **tightest**. Crucially it is still **sound**: semantic
+correctness (file [14](14-0cfa-semantic-correctness.md)) shows *every* acceptable solution
+over-approximates the real runtime flows, and acceptability is preserved under evaluation. The least
+acceptable solution is thus the **smallest sound over-approximation the 0-CFA specification admits** —
+it still lies *above* the (uncomputable) exact flow, but no acceptable analysis lies strictly below
+it. "Least in the lattice" and "most precise sound answer" are the same point, viewed from two sides.
+
+### 3.5 Closure-operator view & the bridge to computation
+Every Moore family $Y$ induces a **closure operator** $\gamma:L\to L$,
+$\gamma(\hat C,\hat\rho)=\sqcap\{(\hat C',\hat\rho')\in Y\mid(\hat C,\hat\rho)\sqsubseteq(\hat C',\hat\rho')\}$
+— the **least acceptable solution above a given guess**. Its fixed points are exactly $Y$. This is the
+same closure-operator/Galois-connection machinery that underlies abstract interpretation, and it says
+an arbitrary guess can always be *improved to* (not just checked against) the nearest acceptable
+solution. Because $\mathit{Term}$ restricted to a program's finitely many subterms is finite, $L$
+satisfies the ascending chain condition, so this least solution is not merely an existence statement:
+it is **computable by fixed-point iteration** — which, via the syntax-directed $\models_s$ of §5, is
+what the constraint solver of [16](16-0cfa-constraint-based-solving.md) actually does.
 
 ## 4. Why coinduction (not induction)
 Acceptability must be read as a **greatest fixpoint (coinductive)**, not a least one.
@@ -78,8 +181,13 @@ far more computational, and (semantic correctness already handled in
 $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2)\iff\forall l.\ \hat C_1(l)\subseteq\hat C_2(l)\wedge\forall x.\ \hat\rho_1(x)\subseteq\hat\rho_2(x)\quad(\text{complete lattice}).$$
 
 ### Moore family & existence
+<<<<<<< HEAD
 $$Y\ \text{Moore family}\iff\forall Y'\subseteq Y.\ \sqcap Y'\in Y.\qquad \{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}\ \text{is a Moore family}.$$
 $$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \sqcap\{\text{acceptable}\}\ \text{is the least (best) CFA}.$$
+=======
+$$Y\ \text{Moore family}\iff\forall Y'\subseteq Y.\ \textstyle\sqcap Y'\in Y.\qquad \{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}\ \text{is a Moore family}.$$
+$$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \textstyle\sqcap\{\text{acceptable}\}\ \text{is the least (best) CFA}.$$
+>>>>>>> 493feabaa3fe48e86d05d44da154d43ed6b90c6f
 
 ### Coinduction
 Acceptability = **greatest fixpoint**. Inductive $\models'$ ⟹ $\exists e^\ast$ whose acceptable set is **not** a Moore family (lfp gives $\varnothing$). Circular higher-order flows need gfp.
