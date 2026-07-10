@@ -29,6 +29,17 @@ z
 - **Lattice**: every pair has a lub and glb. **Complete lattice** $(X,\sqsubseteq,\sqcup,\sqcap,\bot,\top)$:
   *every* subset (incl. infinite) has a lub and glb; then $\bot=\bigsqcup\varnothing=\sqcap X$
   and $\top=\sqcap\varnothing=\bigsqcup X$. Example: $(\wp(\mathbb Z),\subseteq,\cup,\cap,\varnothing,\mathbb Z)$.
+
+> [!note] When is a lattice *not* complete?
+> A lattice only guarantees **finite** lubs/glbs (pairs); completeness fails when some
+> **infinite** subset has no lub. Either **unbounded** — $(\mathbb Z,\le)$: the chain
+> $0\sqsubset1\sqsubset\cdots$ has no upper bound (no $\top$) — or **bounded with a missing
+> limit** — $(\mathbb Q,\le)$: $\{q\mid q^2<2\}$ is bounded by $2$ but its lub $\sqrt2\notin\mathbb Q$.
+> **Course case:** intervals with *finite* bounds $\{[a,b]\mid a,b\in\mathbb Z\}\cup\{\bot\}$ are a
+> lattice but **not** complete — $\{[0,i]\mid i\ge0\}$ has no lub (it would be $[0,+\infty]$, outside
+> the domain); allowing $\pm\infty$ bounds completes it (then a complete lattice / CPO, but still
+> **not ACC** — the chain never stabilises, hence widening). **Finite lattices are always complete.**
+
 - **CPO**: every ascending chain has a lub (pointed CPO also has $\bot$).
 - **Ascending Chain Condition (ACC)**: no infinite strictly-ascending chains — every ascending chain eventually stabilises. **ACC domains guarantee the analysis terminates** (its increasing fixpoint iteration converges). (Note: complete lattice $\not\Rightarrow$ ACC — e.g. intervals are a complete lattice but not ACC.)
 
@@ -104,6 +115,17 @@ into two equivalent inequalities:
 $$c\ \le\ \gamma(\alpha(c))\quad(\text{abstract then concretize loses info — sound})\qquad \alpha(\gamma(a))\ \sqsubseteq\ a\quad(\text{concretize then abstract is at least as precise}).$$
 $\gamma\circ\alpha$ is **extensive** (over-approximates); $\alpha\circ\gamma$ is **reductive**.
 
+> [!note] What "$\alpha\circ\gamma$ reductive" really shrinks
+> It does **not** shrink the concrete *set*: reductive + extensive force the identity
+> $\gamma(\alpha(\gamma(a)))=\gamma(a)$ (the **$\gamma\alpha\gamma=\gamma$** law), so the *meaning*
+> is untouched. What can strictly shrink is the abstract **element**: $\alpha(\gamma(a))\sqsubset a$
+> happens exactly when $a$ is a **redundant** element ($\gamma$ non-injective) and a smaller one
+> denotes the same set — then $\alpha$ (which returns the *best* abstraction) maps $a$ **down to
+> that canonical representative**. E.g. a spurious $p$ with $\gamma(p)=\gamma(+)$ and $+\sqsubset p$:
+> $\alpha(\gamma(p))=\alpha(\text{positives})=+\sqsubset p$. **$\alpha\circ\gamma=\mathrm{id}$ exactly
+> in a Galois *insertion*** (no redundant elements); a plain GC only tightens redundant elements to
+> their canonical form.
+
 **Best abstraction.** In a Galois connection, $\alpha(c)$ is the **best** (most precise)
 sound over-approximation of $c$: $c\le\gamma(a)\iff\alpha(c)\sqsubseteq a$. For $\alpha$ to
 exist, the abstract domain must be **closed under meet** (else "the most precise element
@@ -121,7 +143,10 @@ it holds we have a **Galois insertion (= embedding)**.
 > (3) $\alpha\circ\gamma=\mathrm{id}$.
 > Intuition: **no redundant abstract elements** — every abstract element is the best abstraction of its own meaning.
 
-- **GC but not GI:** if two abstract elements have the *same* meaning (say a spurious $p$ with $\gamma(p)=\gamma(+)$), then $\gamma$ isn't injective and $\alpha$ isn't surjective $p$ is **useless** (some other element abstracts better). Removing such redundancy turns a GC into a GI.
+- **GC but not GI:** if two abstract elements have the *same* meaning (say a spurious
+  $p$ with $\gamma(p)=\gamma(+)$), then $\gamma$ isn't injective and $\alpha$ isn't
+  surjective — $p$ is **useless** (some other element abstracts better). Removing such
+  redundancy turns a GC into a GI.
 - **Closure-operator view.** Write $A(c)\triangleq\gamma(\alpha(c))$. This is an **upper
   closure operator**: **monotone, extensive, idempotent** ($A(A(c))=A(c)$). Its image $A(C)=\gamma(A)$ is the set of **expressible elements** ($c$ with $c=\gamma(\alpha(c))$).
   So an abstract domain can be identified with a **subset of the concrete domain** — no symbolic representation needed to reason about it.
@@ -134,7 +159,9 @@ it holds we have a **Galois insertion (= embedding)**.
   the connection pins down a unique tightest abstract element per concrete element.
 - **Preservation.** $\alpha$ preserves lubs (joins) and $\gamma$ preserves glbs (meets) —
   which is what lets abstract operators be defined and lets fixpoints transfer (see [11](11-abstract-analysis-fixpoints-widening.md)).
-- **When there is no $\alpha$.** Some domains (e.g. Convex Polyhedra for curved sets) have **no best abstraction**, hence **no Galois connection** — the framework then works with a concretization $\gamma$ alone (a *concretization-only* / "$\gamma$-only" setting).
+- **When there is no $\alpha$.** Some domains (e.g. Convex Polyhedra for curved sets) have
+  **no best abstraction**, hence **no Galois connection** — the framework then works with a
+  concretization $\gamma$ alone (a *concretization-only* / "$\gamma$-only" setting).
 
 ## 6. Pros / cons / use cases
 - **Pros:** a clean, reusable contract giving soundness **and** best precision; either map

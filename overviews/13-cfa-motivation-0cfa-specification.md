@@ -18,10 +18,9 @@ specification of **0-CFA**; correctness, least solutions, and solving come in fi
 ## 1. Purpose & core idea
 In first-order code the control-flow graph is explicit. With **higher-order functions**
 (functions passed/returned/stored) the target of a call is a *runtime value* — the **dynamic
-dispatch problem**. E.g. in `(f g) + (f h)`, which function does `f`'s parameter get applied
-to? **Control Flow Analysis** answers, for **each call site, a sound over-approximation of the
+dispatch problem**. E.g. in `(f g) + (f h)`, (where `+` is the arithmetic sum) which function does `f`'s parameter (`g` or `h`) get bound to? (We don't kbow what is either `f` nor `g`) **Control Flow Analysis** answers, for **each call site, a sound over-approximation of the
 set of functions it may call** — recovering an (approximate) call graph so that other analyses
-and optimisations become possible. **0-CFA** is the simplest form: **context-insensitive**
+and optimizations become possible. **0-CFA** is the simplest form: **context-insensitive**
 (one answer per program point, the same at all calls).
 
 ## 2. Setup — the language FUN, labelling, and the abstract domains

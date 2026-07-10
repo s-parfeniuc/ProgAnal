@@ -30,15 +30,15 @@ $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2) \iff \forall l.\ \hat C_
 ## 3. Existence & the least CFA (Moore family)
 > [!important] Moore family ⟹ least solution
 > A **Moore family** is a subset $Y$ of a complete lattice closed under **glbs**:
-> $\bigsqcap Y'\in Y$ for every $Y'\subseteq Y$. It always contains a **least** element
-> $\bigsqcap Y$ and a **greatest** $\bigsqcap\varnothing=\top$, and is **never empty**.
+> $\sqcap Y'\in Y$ for every $Y'\subseteq Y$. It always contains a **least** element
+> $\sqcap Y$ and a **greatest** $\sqcap\varnothing=\top$, and is **never empty**.
 >
 > **Theorem.** For every $ie$, the set $\{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}$ of
 > acceptable analyses **is a Moore family** (proof by coinduction on $ie$: if all
-> $(\hat C_i,\hat\rho_i)\models ie$ then $\bigsqcap_i(\hat C_i,\hat\rho_i)\models ie$).
+> $(\hat C_i,\hat\rho_i)\models ie$ then $\sqcap_i(\hat C_i,\hat\rho_i)\models ie$).
 >
 > **Corollaries:** (i) taking $Y'=\varnothing$ gives $\top\models ie$ — **every expression admits
-> a CFA**; (ii) taking $Y'=$ all acceptable solutions gives $\bigsqcap Y'\models ie$ — the
+> a CFA**; (ii) taking $Y'=$ all acceptable solutions gives $\sqcap Y'\models ie$ — the
 > **least (most precise) CFA exists**, and it is below every other acceptable solution.
 
 ## 4. Why coinduction (not induction)
@@ -78,8 +78,8 @@ far more computational, and (semantic correctness already handled in
 $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2)\iff\forall l.\ \hat C_1(l)\subseteq\hat C_2(l)\wedge\forall x.\ \hat\rho_1(x)\subseteq\hat\rho_2(x)\quad(\text{complete lattice}).$$
 
 ### Moore family & existence
-$$Y\ \text{Moore family}\iff\forall Y'\subseteq Y.\ \textstyle\bigsqcap Y'\in Y.\qquad \{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}\ \text{is a Moore family}.$$
-$$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \textstyle\bigsqcap\{\text{acceptable}\}\ \text{is the least (best) CFA}.$$
+$$Y\ \text{Moore family}\iff\forall Y'\subseteq Y.\ \sqcap Y'\in Y.\qquad \{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}\ \text{is a Moore family}.$$
+$$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \sqcap\{\text{acceptable}\}\ \text{is the least (best) CFA}.$$
 
 ### Coinduction
 Acceptability = **greatest fixpoint**. Inductive $\models'$ ⟹ $\exists e^\ast$ whose acceptable set is **not** a Moore family (lfp gives $\varnothing$). Circular higher-order flows need gfp.

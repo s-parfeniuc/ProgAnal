@@ -63,7 +63,7 @@ $$\dfrac{\mathcal C^A_P(e)}{\vdash_A [P]\ e\ [[\![  e ]\!] P]}\ [\textsf{transfe
 
 $$\dfrac{\vdash_A [P]\,c_1\,[R]\quad \vdash_A [R]\,c_2\,[Q]}{\vdash_A [P]\ c_1;c_2\ [Q]}\ [\textsf{seq}]\qquad \dfrac{\vdash_A [P]\,c_1\,[Q_1]\quad \vdash_A [P]\,c_2\,[Q_2]}{\vdash_A [P]\ c_1+c_2\ [Q_1\vee Q_2]}\ [\textsf{join}]$$
 
-$$\dfrac{\vdash_A [P]\,c\,[R]\quad \vdash_A [P\vee R]\,c\,[Q]}{\vdash_A [P]\ c^\star\ [Q]}\ [\textsf{rec}]\qquad \dfrac{\vdash_A [P]\,c\,[Q]\quad Q\Rightarrow A(P)}{\vdash_A [P]\ c^\star\ [P]}\ [\textsf{iterate}]\ (\text{fixpoint acceleration})$$
+$$\dfrac{\vdash_A [P]\,c\,[R]\quad \vdash_A [P\vee R]\,c^\star\,[Q]}{\vdash_A [P]\ c^\star\ [Q]}\ [\textsf{rec}]\qquad \dfrac{\vdash_A [P]\,c\,[Q]\quad Q\Rightarrow A(P)}{\vdash_A [P]\ c^\star\ [P \vee Q]}\ [\textsf{iterate}]\ (\text{fixpoint acceleration})$$
 
 $$\dfrac{P'\Rightarrow P\Rightarrow A(P')\quad \vdash_A [P']\,c\,[Q']\quad Q\Rightarrow Q'\Rightarrow A(Q)}{\vdash_A [P]\ c\ [Q]}\ [\textsf{relax}]$$
 

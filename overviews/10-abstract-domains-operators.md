@@ -23,7 +23,7 @@ A **transfer function** says how the abstract state changes after an instruction
 concrete operator $F:C\to C$ we define $F^\sharp:A\to A$ and require **soundness**:
 
 > [!important] Sound abstract operator (three equivalent forms)
-> $$F^\sharp\text{ sound for }F \iff \underbrace{F(\gamma(a))\subseteq\gamma(F^\sharp(a))}_{\text{concretize then run}\subseteq \text{run then concretize} } \iff \alpha\circ F\circ\gamma\ \sqsubseteq\ F^\sharp \iff \alpha\circ F\ \sqsubseteq\ F^\sharp\circ\alpha.$$
+> $$F^\sharp\text{ sound for }F \iff \underbrace{F(\gamma(a))\subseteq\gamma(F^\sharp(a))}_{\text{run then concretize} \subseteq \text{concretize then run}} \iff \alpha\circ F\circ\gamma\ \sqsubseteq\ F^\sharp \iff \alpha\circ F\ \sqsubseteq\ F^\sharp\circ\alpha.$$
 > (The equivalences use the Galois biconditional $c\le\gamma(a)\iff\alpha(c)\sqsubseteq a$.)
 
 Lifted to $n$-ary operations: if each $a_i$ soundly abstracts $v_i$, then
