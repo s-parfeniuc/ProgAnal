@@ -175,13 +175,8 @@ far more computational, and (semantic correctness already handled in
 $$(\hat C_1,\hat\rho_1)\sqsubseteq(\hat C_2,\hat\rho_2)\iff\forall l.\ \hat C_1(l)\subseteq\hat C_2(l)\wedge\forall x.\ \hat\rho_1(x)\subseteq\hat\rho_2(x)\quad(\text{complete lattice}).$$
 
 ### Moore family & existence
-<<<<<<< HEAD
-$$Y\ \text{Moore family}\iff\forall Y'\subseteq Y.\ \sqcap Y'\in Y.\qquad \{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}\ \text{is a Moore family}.$$
-$$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \sqcap\{\text{acceptable}\}\ \text{is the least (best) CFA}.$$
-=======
 $$Y\ \text{Moore family}\iff\forall Y'\subseteq Y.\ \textstyle\sqcap Y'\in Y.\qquad \{(\hat C,\hat\rho)\mid(\hat C,\hat\rho)\models ie\}\ \text{is a Moore family}.$$
 $$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \textstyle\sqcap\{\text{acceptable}\}\ \text{is the least (best) CFA}.$$
->>>>>>> 493feabaa3fe48e86d05d44da154d43ed6b90c6f
 
 ### Coinduction
 Acceptability = **greatest fixpoint**. Inductive $\models'$ ⟹ $\exists e^\ast$ whose acceptable set is **not** a Moore family (lfp gives $\varnothing$). Circular higher-order flows need gfp.
