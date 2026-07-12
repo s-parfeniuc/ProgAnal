@@ -158,6 +158,8 @@ far more computational, and (semantic correctness already handled in
 
 - New clause: $[\textsf{fn}]\ (\hat C,\hat\rho)\models_s(\mathsf{fn}\ x\Rightarrow e_0)^l \iff \{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)\ \wedge\ (\hat C,\hat\rho)\models_s e_0$ (body analysed at definition, even if never called).
 - **Preservation of solutions:** $(\hat C,\hat\rho)\models_s e^\ast\Rightarrow(\hat C,\hat\rho)\models e^\ast$ (on program terms) — $\models_s$ is a **safe approximation** of $\models$; restricting the range of $\hat C,\hat\rho$ to fragments of $e^\ast$, the two have the **same least solution**. This least $\models_s$ solution is what the constraint system of [16](16-0cfa-constraint-based-solving.md) computes.
+- **Definition-Application Decoupling:** $\models_s$ decouples the body analysis of a function from its application site. This is especially important for higher-order recursive functions.
+- **More Constrained Analysis**: since $\models_s$ requires to analyze the body of a function even in the case it will never be applied, it demands stricter constraints than $\models$ for dead code. However, if we restrict the analysis to only reachable fragments of the code then both analysis yields the same solution. This is also why the solution preservation and the constrains is defined on $ie$ expressions (so on program fragments).
 
 ## 6. Pros / cons / use cases
 - **Pros:** guarantees a canonical **best** analysis result; the Moore-family/lattice structure is

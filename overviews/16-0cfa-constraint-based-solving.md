@@ -25,8 +25,8 @@ constraints** that fire when a function is discovered to flow to a call site.
 ## 2. From rules to constraints
 Replace the unknowns $\hat C(l),\hat\rho(x)$ by **constraint variables** $C(l), r(x)$. Two
 constraint shapes:
-$$\underbrace{lhs\subseteq rhs}_{\text{unconditional}}\qquad\qquad \underbrace{\{t\}\subseteq rhs'\ \Rightarrow\ lhs\subseteq rhs}_{\text{conditional: "if }t\text{ may flow to }rhs',\text{ then }lhs\text{ flows to }rhs"}$$
-with $lhs::=C(l)\mid r(x)\mid\{t\}$ ($t$ a function abstraction) and $rhs::=C(l)\mid r(x)$. The
+$$\underbrace{\text{lhs}\subseteq \text{rhs}}_{\text{unconditional}}\qquad\qquad \underbrace{\{t\}\subseteq \text{rhs}'\ \Rightarrow\ \text{lhs}\subseteq \text{rhs}}_{\text{conditional: "if }t\text{ may flow to }\text{rhs}',\text{ then }\text{lhs}\text{ flows to }\text{rhs}"}$$
+with $\text{lhs}::=C(l)\mid r(x)\mid\{t\}$ ($t$ a function abstraction) and $\text{rhs}::=C(l)\mid r(x)$. The
 generator $\mathcal C^\ast[\![  e^\ast ]\!]$ collects all constraints by recursion on syntax.
 
 > [!important] The constraint clauses
