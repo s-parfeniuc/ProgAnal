@@ -32,8 +32,22 @@ generator $\mathcal C^\ast[\![  e^\ast ]\!]$ collects all constraints by recursi
 > [!important] The constraint clauses
 > $$\mathcal C^\ast[\![  c^l ]\!]=\varnothing\qquad \mathcal C^\ast[\![  x^l ]\!]=\{\,r(x)\subseteq C(l)\,\}$$
 > $$\mathcal C^\ast[\![ (\mathsf{fn}\ x\Rightarrow e_0)^l ]\!]=\{\,\{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq C(l)\,\}\cup\mathcal C^\ast[\![  e_0 ]\!]$$
+> $$\mathcal C^\ast\llbracket(\mathsf{fun}\ f\ x\Rightarrow e_0)^l\rrbracket=\{\,\{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq C(l),\ \ \{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq r(f)\,\}\cup\mathcal C^\ast\llbracket e_0\rrbracket$$
 > $$\mathcal C^\ast[\![ (t_1^{l_1}t_2^{l_2})^l ]\!]=\mathcal C^\ast[\![  t_1^{l_1} ]\!]\cup\mathcal C^\ast[\![  t_2^{l_2} ]\!]\ \cup\!\!\!\bigcup_{t=(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\mathit{Term}^\ast}\!\!\!\Big\{\ \{t\}\subseteq C(l_1)\Rightarrow C(l_2)\subseteq r(x),\ \ \{t\}\subseteq C(l_1)\Rightarrow C(l_0)\subseteq C(l)\ \Big\}$$
-> ($\mathit{Term}^\ast$ = the function abstractions occurring in $e^\ast$; `let`, `if`, `op`, `fun` are analogous). Only **application** produces conditional constraints.
+> $$\mathcal C^\ast\llbracket(\mathsf{if}\ t_0^{l_0}\ t_1^{l_1}\ t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_0^{l_0}\rrbracket\cup\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\ \cup\ \{\,C(l_1)\subseteq C(l),\ \ C(l_2)\subseteq C(l)\,\}$$
+> $$\mathcal C^\ast\llbracket(\mathsf{let}\ x{=}t_1^{l_1}\ \mathsf{in}\ t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\ \cup\ \{\,\underbrace{C(l_1)\subseteq r(x)}_{\text{bind}},\ \ \underbrace{C(l_2)\subseteq C(l)}_{\text{result}}\,\}$$
+> $$\mathcal C^\ast\llbracket(t_1^{l_1}\,\mathsf{op}\,t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\quad(\text{no constraint on }C(l):\ \mathsf{op}\text{ yields a base value, like }c^l)$$
+> ($\mathit{Term}^\ast$ = the function abstractions — both $\mathsf{fn}$ and $\mathsf{fun}$ — occurring in $e^\ast$.)
+> Only **application** produces conditional constraints; every other clause is a fixed, unconditional
+> inclusion, read straight off the corresponding $\models$ clause of the specification.
+
+Reading them: **`fun`** is `fn` plus one extra pipe — the closure also flows into the *recursion
+variable* $r(f)$, so a call to $f$ inside the body finds the function itself. **`if`** lays a pipe
+from *each* branch to the result point (0-CFA never inspects the guard, so both branches are taken
+to be possible), while the guard itself only has to be analysed. **`let`** is two pipes: bind
+$C(l_1)\subseteq r(x)$, then return $C(l_2)\subseteq C(l)$. **`op`** is a dead end like a constant:
+analyse the operands, demand nothing of $C(l)$, since an arithmetic/comparison result is never a
+function abstraction.
 
 ## 3. Solving — the worklist algorithm
 A solution assigns a **value set** (of function abstractions) to each variable $C(l)/r(x)$. Solve
