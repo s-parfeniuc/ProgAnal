@@ -31,8 +31,8 @@ from lecture 2. Reading: **every** state that can reach a good outcome lies in $
 Contrapositive: $\sigma\notin P \Rightarrow$ (ignoring divergence) *every* run from $\sigma$
 is bad. So $P$ is a **necessary** condition for correctness.
 
-Trace view: from $\sigma$, executions split into $G$ood (end in $Q$), $B$ad (assertion
-violation: div-by-zero, null, overflow…), $I$nfinite. NC says $G(\sigma)\neq\varnothing\Rightarrow\sigma\in P$.
+Trace view: from $\sigma$, executions split into $Good$ (end in $Q$), $Bad$ (assertion
+violation: div-by-zero, null, overflow…), $Infinite$. NC says $G(\sigma)\neq\varnothing\Rightarrow\sigma\in P$.
 
 ## 3. Over/under-approximation & information propagation
 **Backward, over-approximation.** You start from the postcondition $Q$ and pull back a
