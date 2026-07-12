@@ -127,6 +127,26 @@ $$\dfrac{}{\{P\}\,e\,\{[\![  e ]\!] P\}}\ [\textsf{atom}] \qquad \dfrac{\{P\}\,r
 
 Auxiliary: $[\textsf{disj}]$, $[\textsf{conj}]$, $[\textsf{frame}]$ (side cond. $\mathrm{Mod}(r)\cap\mathrm{FV}(R)=\varnothing$), $[\textsf{stren}]$, $[\textsf{weak}]$.
 
+### Structural rules $[\textsf{disj}]$ / $[\textsf{conj}]$ (both sound in HL)
+
+$$\dfrac{\{P_1\}\,c\,\{Q_1\}\quad \{P_2\}\,c\,\{Q_2\}}{\{P_1\vee P_2\}\,c\,\{Q_1\vee Q_2\}}\ [\textsf{disj}] \qquad\qquad \dfrac{\{P_1\}\,c\,\{Q_1\}\quad \{P_2\}\,c\,\{Q_2\}}{\{P_1\wedge P_2\}\,c\,\{Q_1\wedge Q_2\}}\ [\textsf{conj}]$$
+
+**Why both hold.** The image of a relation is *exact* on unions but only *sub-distributes*
+over intersections:
+$$\llbracket c\rrbracket(P_1\cup P_2)=\llbracket c\rrbracket P_1\cup\llbracket c\rrbracket P_2, \qquad \llbracket c\rrbracket(P_1\cap P_2)\ \subseteq\ \llbracket c\rrbracket P_1\cap\llbracket c\rrbracket P_2 \quad(\text{inclusion generally }\textbf{strict}).$$
+HL validity is $\llbracket c\rrbracket P\subseteq Q$, so it only ever needs the $\subseteq$
+direction — and that is exactly the direction intersection gives. Hence $[\textsf{conj}]$ is
+sound here. The under-approximate logics need the *reverse* inclusion, which is false, so
+$[\textsf{conj}]$ **fails** in [IL](02-incorrectness-logic.md),
+[SIL](04-sufficient-incorrectness-logic.md) ($\langle\textsf{conj}\rangle$) and
+[ISL](06-incorrectness-separation-logic.md) ($[\ast\textsf{conj}]$). $[\textsf{disj}]$, resting
+on the *equality*, is sound in **all** of them.
+
+> [!tip] Slogan
+> In HL a precondition is an **obligation you discharge**, so shrinking it can only make the
+> triple easier. In IL/SIL a precondition is a **supply of witnesses** for the states you claim
+> are reachable, and intersecting two supplies can leave you with none.
+
 ### Related state transformers (lect. 02 & 04)
 $$sp(c,P)=[\![  c ]\!] P \quad\text{(strongest post, forward)}$$
 $$wlp(c,Q)\triangleq\{\sigma\mid [\![  c ]\!]\{\sigma\}\subseteq Q\} \quad(\forall,\ \text{liberal — HL's backward precondition})$$

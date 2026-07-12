@@ -151,15 +151,54 @@ Acceptability must be read as a **greatest fixpoint (coinductive)**, not a least
   [14](14-0cfa-semantic-correctness.md) is coinductive.)
 
 ## 5. Toward computation — the syntax-directed specification $\models_s$
-The plain $\models$ re-analyses a function body **each time it might be applied**. The
-**syntax-directed 0-CFA** $\models_s$ analyses each body **exactly once, at its definition** —
-far more computational, and (semantic correctness already handled in
-[14](14-0cfa-semantic-correctness.md)) it needs no intermediate expressions.
+The plain $\models$ (file [13](13-cfa-motivation-0cfa-specification.md)) analyses a function body
+**inside `[app]`, once per call site the function may reach** — so the *same* body is re-visited
+every time a fresh closure flows to an operator, and (with recursion) potentially without end.
+The **syntax-directed 0-CFA** $\models_s$ instead analyses each body **exactly once, at its
+definition**. This is not a single new clause bolted on: **moving body-analysis to the definition
+forces a matching change in `[app]`**, and it makes `fun` (recursive) genuinely different from
+`fn`. The point is that $\models_s$ becomes purely **structural** (one clause per syntactic form,
+each recursing only into immediate subterms) — so it is decided by a terminating walk over the
+finite syntax tree, needing neither coinduction nor intermediate expressions (semantic correctness
+was already settled in [14](14-0cfa-semantic-correctness.md)).
 
-- New clause: $[\textsf{fn}]\ (\hat C,\hat\rho)\models_s(\mathsf{fn}\ x\Rightarrow e_0)^l \iff \{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)\ \wedge\ (\hat C,\hat\rho)\models_s e_0$ (body analysed at definition, even if never called).
+**The two clauses that move body-analysis.** Contrast $\models$ and $\models_s$ side by side:
+
+- **$[\textsf{fn}]$ — gains the body obligation.** In $\models$ the abstraction clause *only*
+  recorded the closure, $\{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)$, and never touched
+  $e_0$. In $\models_s$ it also descends into the body:
+  $$[\textsf{fn}]_s\quad (\hat C,\hat\rho)\models_s(\mathsf{fn}\ x\Rightarrow e_0)^l \iff \{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)\ \wedge\ (\hat C,\hat\rho)\models_s e_0,$$
+  so the body is analysed **at the definition, even if the function is never called**.
+
+- **$[\textsf{app}]$ — loses the body obligation (this is the clause the change also touches).**
+  In $\models$, `[app]` had *three* duties per candidate closure: analyse the body
+  $(\hat C,\hat\rho)\models t_0^{l_0}$, wire arg→param, wire body→call-site. In $\models_s$ the
+  first duty is **dropped** — the body is already covered by $[\textsf{fn}]_s$ — leaving only the
+  two flow constraints:
+  $$[\textsf{app}]_s\quad (\hat C,\hat\rho)\models_s(t_1^{l_1}\,t_2^{l_2})^l \iff (\hat C,\hat\rho)\models_s t_1^{l_1}\wedge(\hat C,\hat\rho)\models_s t_2^{l_2}\ \wedge$$
+  $$\forall(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\hat C(l_1):\ \underbrace{\hat C(l_2)\subseteq\hat\rho(x)}_{\text{arg}\to\text{param}}\ \wedge\ \underbrace{\hat C(l_0)\subseteq\hat C(l)}_{\text{body}\to\text{call site}}\quad(\text{no }\models_s t_0^{l_0}\text{ here}).$$
+  This is exactly why $\models_s$ is cheaper: `[app]` no longer recurses into bodies (the source of
+  the re-analysis and of the non-well-founded recursion), so the specification is well-founded on
+  the syntax.
+
+**Why `fun` (recursive) is not the same as `fn`.** A recursive closure $\mathsf{fun}\ f\ x\Rightarrow e_0$
+binds its own name $f$ inside the body, so analysing the body at its definition requires $f$'s
+binding to *already* hold the closure. Hence $[\textsf{fun}]_s$ carries an **extra** conjunct that
+$[\textsf{fn}]_s$ does not:
+$$[\textsf{fun}]_s\quad (\hat C,\hat\rho)\models_s(\mathsf{fun}\ f\ x\Rightarrow e_0)^l \iff \{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq\hat C(l)\ \wedge\ \underbrace{\{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq\hat\rho(f)}_{\text{recursive self-binding}}\ \wedge\ (\hat C,\hat\rho)\models_s e_0.$$
+The self-binding $\{\mathsf{fun}\dots\}\subseteq\hat\rho(f)$ is what lets a recursive call to $f$
+in the body resolve to the function itself. (In $\models$ this self-binding was likewise generated
+inside `[app]`, once per reaching call site rather than once at the definition.) All the remaining
+clauses — $[\textsf{con}],[\textsf{var}],[\textsf{if}],[\textsf{let}],[\textsf{op}]$ — are
+**unchanged**: they were already structural in $\models$, recursing only into immediate subterms.
+
 - **Preservation of solutions:** $(\hat C,\hat\rho)\models_s e^\ast\Rightarrow(\hat C,\hat\rho)\models e^\ast$ (on program terms) — $\models_s$ is a **safe approximation** of $\models$; restricting the range of $\hat C,\hat\rho$ to fragments of $e^\ast$, the two have the **same least solution**. This least $\models_s$ solution is what the constraint system of [16](16-0cfa-constraint-based-solving.md) computes.
 - **Definition-Application Decoupling:** $\models_s$ decouples the body analysis of a function from its application site. This is especially important for higher-order recursive functions.
 - **More Constrained Analysis**: since $\models_s$ requires to analyze the body of a function even in the case it will never be applied, it demands stricter constraints than $\models$ for dead code. However, if we restrict the analysis to only reachable fragments of the code then both analysis yields the same solution. This is also why the solution preservation and the constrains is defined on $ie$ expressions (so on program fragments).
+
+  **What "restricting to fragments" means.** Read two **finite** sets off the syntax tree: $\mathbf{Lab}_\ast$ (labels occurring in $e^\ast$) and $\mathbf{Var}_\ast$ (its variables); the only values are the finitely many $\mathsf{fn}/\mathsf{fun}$ subterms $\mathbf{Term}_\ast$. Since $\models_s$ is syntax-directed — each clause constrains only the label/variable at that node and recurses into immediate subterms — a full derivation **only ever mentions indices in $\mathbf{Lab}_\ast,\mathbf{Var}_\ast$**. So we may take $\hat C:\mathbf{Lab}_\ast\to\wp(\mathbf{Term}_\ast)$, $\hat\rho:\mathbf{Var}_\ast\to\wp(\mathbf{Term}_\ast)$ — finite domain and codomain, hence ACC, hence the least solution is **computable** (§3.5). The abstract $\models$ is instead stated over all intermediate expressions $\mathbf{IExp}$ (needed by the correctness proof of [14](14-0cfa-semantic-correctness.md), where evaluation substitutes into bodies), so its $\hat C,\hat\rho$ range over all of $\mathbf{Lab},\mathbf{Var}$; on a genuine program term the extra range is sent to $\varnothing$ and the two least solutions coincide.
+
+  **Example.** $e^\ast\equiv\big((\mathsf{fn}\ x\Rightarrow x^1)^2\,(\mathsf{fn}\ y\Rightarrow y^3)^4\big)^5$ gives $\mathbf{Lab}_\ast=\{1,2,3,4,5\}$, $\mathbf{Var}_\ast=\{x,y\}$, $\mathbf{Term}_\ast=\{C_x,C_y\}$ with $C_x=\mathsf{fn}\,x\Rightarrow x^1$, $C_y=\mathsf{fn}\,y\Rightarrow y^3$. The walk fires each clause once: $[\textsf{fn}]_s$ at $2,4$ give $C_x\in\hat C(2),\,C_y\in\hat C(4)$; $[\textsf{var}]$ at $1,3$ give $\hat\rho(x)\subseteq\hat C(1),\,\hat\rho(y)\subseteq\hat C(3)$; $[\textsf{app}]_s$ at $5$ fires on $C_x$: $\hat C(4)\subseteq\hat\rho(x)\wedge\hat C(1)\subseteq\hat C(5)$. Least solution: $\hat\rho(x)=\hat C(1)=\hat C(5)=\{C_y\}$, $\hat C(2)=\{C_x\}$, $\hat C(4)=\{C_y\}$, $\hat\rho(y)=\hat C(3)=\varnothing$ — every index lies in $\mathbf{Lab}_\ast\cup\mathbf{Var}_\ast$, nothing outside the tree is ever manufactured. Here $\models$ would additionally re-impose $\models x^1$ at the call site, but $x^1$ is already a fragment (covered by $[\textsf{fn}]_s$), so it adds nothing.
 
 ## 6. Pros / cons / use cases
 - **Pros:** guarantees a canonical **best** analysis result; the Moore-family/lattice structure is
@@ -184,4 +223,7 @@ $$\Rightarrow\ \top\ \text{is acceptable (CFA exists)};\quad \textstyle\sqcap\{\
 Acceptability = **greatest fixpoint**. Inductive $\models'$ ⟹ $\exists e^\ast$ whose acceptable set is **not** a Moore family (lfp gives $\varnothing$). Circular higher-order flows need gfp.
 
 ### Syntax-directed $\models_s$
-Analyse each body **once at definition**: $[\textsf{fn}]\ \{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)\wedge\models_s e_0$. Preservation: $\models_s\ \Rightarrow\ \models$ (same least solution on program terms) → solved in [16](16-0cfa-constraint-based-solving.md).
+Analyse each body **once at definition**, so two clauses move relative to $\models$ and one gets an extra conjunct:
+$$[\textsf{fn}]_s\ \{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq\hat C(l)\wedge\models_s e_0\qquad[\textsf{fun}]_s\ \text{same}+\{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq\hat\rho(f)\ (\text{self-bind})$$
+$$[\textsf{app}]_s\ \models_s t_1\wedge\models_s t_2\wedge\forall(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\hat C(l_1):\hat C(l_2)\subseteq\hat\rho(x)\wedge\hat C(l_0)\subseteq\hat C(l)\quad(\textbf{no}\ \models_s t_0)$$
+Others ($[\textsf{con}],[\textsf{var}],[\textsf{if}],[\textsf{let}],[\textsf{op}]$) unchanged. Now **structural/well-founded** — no coinduction. Preservation: $\models_s\ \Rightarrow\ \models$ (same least solution on program terms) → solved in [16](16-0cfa-constraint-based-solving.md).

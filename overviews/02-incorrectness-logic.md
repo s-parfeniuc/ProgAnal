@@ -68,7 +68,25 @@ A non-$\text{false}$ $er$ result is a **proof that a real bug is reachable**.
   (its post could name unreachable states, e.g. $[y{=}42]\,x{:=}42\,[y{=}x]$ "reaches" the
   unreachable $[x{\mapsto}3,y{\mapsto}3]$).
 - **No invariants** — loops handled by finite **unrolling**.
-- **$[\textsf{conj}]$ is unsound**; $[\textsf{disj}]$ is sound.
+- **$[\textsf{conj}]$ is unsound; $[\textsf{disj}]$ is sound.** This is *the* structural
+  asymmetry with HL, and it is worth understanding rather than memorising — the same failure
+  recurs in [SIL](04-sufficient-incorrectness-logic.md) ($\langle\textsf{conj}\rangle$) and
+  [ISL](06-incorrectness-separation-logic.md) ($[\ast\textsf{conj}]$), i.e. in *every*
+  under-approximate logic. See the worked counterexample in the cheatsheet below.
+  - **Root cause.** The image is *exact* on unions but only *sub-distributes* over
+    intersections: $\llbracket c\rrbracket(P_1\cup P_2)=\llbracket c\rrbracket P_1\cup\llbracket c\rrbracket P_2$
+    but merely $\llbracket c\rrbracket(P_1\cap P_2)\subseteq\llbracket c\rrbracket P_1\cap\llbracket c\rrbracket P_2$,
+    with the inclusion generally **strict**. IL validity is $\llbracket c\rrbracket P\supseteq Q$,
+    so it needs the *reverse* inclusion — which does not hold. HL, needing only $\subseteq$,
+    gets $[\textsf{conj}]$ for free. $[\textsf{disj}]$ rests on the *equality*, so it feeds both
+    directions and is sound in both logics.
+  - **Intuition.** Conjoining presumptions **shrinks the pre** (possibly to $\varnothing$) while
+    the result **stays the same size**. In an under-approximate logic the presumption is the
+    *supply of witnesses* for the states you claim are reachable: every $\delta\in Q$ needs some
+    $\sigma\in P$ with $\delta\in\llbracket c\rrbracket\sigma$. Intersecting two presumptions can
+    destroy every witness — the state justifying $Q$ on the left and the one justifying it on the
+    right are *different states*, and no single state does both jobs. In HL, by contrast, the
+    precondition is an *obligation you discharge*, so shrinking it only ever helps.
 - **Frame & ghost variables (compositionality).** The $\wedge$-frame
   $[P]\,c\,[Q]\Rightarrow[P\wedge R]\,c\,[Q\wedge R]$ (when $R$'s free variables are not
   modified by $c$) carries untouched facts through; **ghost / logical variables** (never
@@ -130,7 +148,45 @@ $$\dfrac{[P]\,c\,[Q]}{[P\wedge R]\,c\,[Q\wedge R]}\ [\textsf{frame}]\ (\mathrm{M
 - **[Relative completeness]** valid $\Rightarrow$ derivable (via lemma $[P]\,c\,[[\![  c ]\!] P]$ + $[\textsf{cons}]$); cleaner than HL (sets + inclusion).
 - **[Agreement]** if $[P']\,c\,[Q']$, $P'\Rightarrow P$, and $\{P\}\,c\,\{Q\}$, then $Q'\Rightarrow Q$.
 - **[Denial]** (contrapositive) if $[P']\,c\,[Q']$, $P'\Rightarrow P$, and $\neg(Q'\Rightarrow Q)$, then $\neg(\{P\}\,c\,\{Q\})$ — an IL proof refutes an HL spec.
-- **[$\textsf{conj}$ unsound]** counterexample $c\triangleq x:=7$, $P_1\equiv x{=}0$, $P_2\equiv x{=}1$, $Q_i\equiv x{=}7$: premises valid but $[\text{false}]\,x{:=}7\,[ok:x{=}7]$ invalid.
+
+### $[\textsf{conj}]$ is unsound — worked counterexample
+
+The rule that *would* be sound in HL but is **not** admissible in IL:
+
+$$\dfrac{[P_1]\,c\,[ok:Q_1]\qquad [P_2]\,c\,[ok:Q_2]}{[P_1\wedge P_2]\,c\,[ok:Q_1\wedge Q_2]}\ [\textsf{conj}]\quad\text{\Large ✗}$$
+
+Take $c\triangleq x:=7$, $\;P_1\equiv x{=}0$, $\;P_2\equiv x{=}1$, $\;Q_1=Q_2\equiv x{=}7$.
+
+- **Both premises are valid.** $\llbracket x{:=}7\rrbracket\{x{=}0\}=\{x{=}7\}\supseteq\{x{=}7\}$,
+  so $[x{=}0]\,x{:=}7\,[ok:x{=}7]$ holds; identically $[x{=}1]\,x{:=}7\,[ok:x{=}7]$ holds. Every
+  state of the result is genuinely reached.
+- **The conclusion is invalid.** $P_1\wedge P_2\equiv x{=}0\wedge x{=}1\equiv\text{false}$, so
+  the rule yields $[\text{false}]\,x{:=}7\,[ok:x{=}7]$. But the presumption denotes the **empty
+  set of states**, hence $\llbracket x{:=}7\rrbracket\varnothing=\varnothing\not\supseteq\{x{=}7\}$.
+  The triple asserts $x{=}7$ is reachable when **there is no initial state to run from at all**.
+
+**What went wrong.** Intersecting the presumptions annihilated the witnesses. $x{=}7$ was reached
+from $x{=}0$ in one premise and from $x{=}1$ in the other — *different* states, and no state
+satisfies both. The rule silently assumes the two supplies of witnesses can be merged; they cannot.
+
+**Contrast with $[\textsf{disj}]$ (sound).** $\llbracket c\rrbracket(P_1\cup P_2)=\llbracket c\rrbracket P_1\cup\llbracket c\rrbracket P_2$
+is an **equality**, so it supports both the $\subseteq$ reading (HL) and the $\supseteq$ reading
+(IL). Intersection only gives $\llbracket c\rrbracket(P_1\cap P_2)\subseteq\llbracket c\rrbracket P_1\cap\llbracket c\rrbracket P_2$
+— the direction HL needs, and the opposite of the one IL needs.
+
+| rule | HL ($\llbracket c\rrbracket P\subseteq Q$) | IL ($\llbracket c\rrbracket P\supseteq Q$) |
+|---|---|---|
+| $[\textsf{disj}]$ | ✔ sound | ✔ sound |
+| $[\textsf{conj}]$ | ✔ sound | ✘ **unsound** |
+
+**Why $[\textsf{frame}]$ survives.** IL's $\wedge$-frame $[P]\,c\,[Q]\Rightarrow[P\wedge R]\,c\,[Q\wedge R]$
+*is* a restricted $[\textsf{conj}]$ (take the second premise to be $[R]\,c\,[R]$). What saves it is
+precisely the side condition $\mathrm{Mod}(c)\cap\mathrm{FV}(R)=\varnothing$: $R$ talks only about
+variables $c$ never touches, so conjoining it cannot invalidate a witness — every $\sigma\in P$ that
+reached $\delta\in Q$ and also satisfies $R$ still reaches $\delta$, which still satisfies $R$. The
+counterexample violates the side condition head-on ($R\equiv x{=}1$ constrains $x$, which $x{:=}7$
+modifies). Same story one level up in [ISL](06-incorrectness-separation-logic.md): the $\ast$-frame
+is sound (disjointness plays the role of the side condition) while $[\ast\textsf{conj}]$ is not.
 
 ### Consequence direction
 Weaken the presumption ($P'\Rightarrow P$), **strengthen/shrink** the result ($Q\Rightarrow Q'$). The result is **never** weakened.

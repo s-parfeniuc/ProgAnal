@@ -32,12 +32,18 @@ structure** is a complete lattice $L$ plus a set $F$ of monotone functions $L\ti
 *instance* fixes $\iota_c\in L$ for each constant and $f_{\mathsf{op}}\in F$ for each operator. No
 flow component is needed — CFA supplies the flow.
 
-> [!example] Constant propagation as a CFA+DFA instance
-> $L=\mathbb Z^\top_\bot$ (flat integers: $\top$ = "non-constant"), $F$ = monotone lifts of the
-> arithmetic ops, e.g. $f_{\mathsf{op}}(l_1,l_2)=\bigsqcup\{d_1\,\mathsf{op}\,d_2\mid d_i\in l_i\}$,
-> $\iota_c=$ the constant's value. Now $\hat C$ tracks *both* which functions and which constant
-> values reach each point; $[\textsf{con}]/[\textsf{op}]$ use $L$, $[\textsf{if}]$ joins branches.
-> Correctness is proved by **staging** the specification (CFA layer + data layer).
+> [!example] Constant propagation as a CFA+DFA instance (lect. 21)
+> The lecture first gives the **generic powerset instance** — $L=\wp(\mathit{Data})$, $\iota_c=\{d_c\}$, and
+> $f_{\mathsf{op}}(l_1,l_2)=\bigcup\{d_{\mathsf{op}}(d_1,d_2)\mid d_1\in l_1,\,d_2\in l_2\}$ (apply the op to *all pairs
+> of possible values*; here the members $d_i\in l_i$ make sense because elements **are** sets). Constant
+> propagation is then a different, **flat-lattice** instance:
+> $$L=\mathbb Z^\top_\bot\times\wp(\mathbb B)\quad(\text{flat integers, }\top=\text{``non-constant''; paired with a set of booleans}),$$
+> $\iota_7=(7,\varnothing)$, $\iota_{\mathit{true}}=(\bot,\{\mathit{true}\})$. Its $f_+$ is defined **by cases on the pair**,
+> *not* by a comprehension (elements are lattice points, not sets):
+> $$f_+(l_1,l_2)=\begin{cases}(z_1+z_2,\varnothing)&l_1=(z_1,\_),\,l_2=(z_2,\_),\ z_1,z_2\in\mathbb Z\\ (\bot,\varnothing)&z_1=\bot\ \text{or}\ z_2=\bot\\ (\top,\varnothing)&\text{otherwise}\end{cases}$$
+> i.e. propagate the constant when both operands are known, else fall to $\top$ ("non-constant"). Now $\hat C$/$\hat D$
+> track *both* which functions and which constant values reach each point; $[\textsf{con}]/[\textsf{op}]$ use $L$,
+> $[\textsf{if}]$ joins branches. Correctness is proved by **staging** the specification (CFA layer + data layer).
 
 ## 3. Context sensitivity — k-CFA
 Add a **context** $\delta\in\Delta$ recording *how* a point was reached (classically the last $k$
@@ -87,7 +93,7 @@ higher-order/OO analyses (Self, etc.).
 
 ### CFA + DFA (abstract values as a lattice)
 $$\widehat{\mathit{Val}}_d\equiv\wp(\mathit{Term})\times L\ (L\text{ a complete lattice});\quad \textbf{monotone structure }(L,F),\ F\subseteq[L\times L\to L]\text{ monotone};\quad \text{instance: }\iota_c\in L,\ f_{\mathsf{op}}\in F.$$
-Constant propagation: $L=\mathbb Z^\top_\bot$ (flat), $f_{\mathsf{op}}(l_1,l_2)=\bigsqcup\{d_1\,\mathsf{op}\,d_2\}$.
+Powerset instance: $L=\wp(\mathit{Data})$, $f_{\mathsf{op}}(l_1,l_2)=\bigcup\{d_{\mathsf{op}}(d_1,d_2)\mid d_i\in l_i\}$. Constant propagation instance: $L=\mathbb Z^\top_\bot\times\wp(\mathbb B)$ (flat), $\iota_7=(7,\varnothing)$; $f_+((z_1,\_),(z_2,\_))=(z_1{+}z_2,\varnothing)$ if $z_1,z_2\in\mathbb Z$, $(\bot,\varnothing)$ if either is $\bot$, else $(\top,\varnothing)$.
 
 ### Context sensitivity (k-CFA)
 $$\delta\in\Delta\ (\text{last }k\text{ call sites});\quad \hat\rho:(\mathit{Var}\times\Delta)\to\widehat{\mathit{Val}},\ \hat C:(\mathit{Lab}\times\Delta)\to\widehat{\mathit{Val}};\quad k{=}0:\text{0-CFA},\ k{=}1:\text{split by call site}.$$
