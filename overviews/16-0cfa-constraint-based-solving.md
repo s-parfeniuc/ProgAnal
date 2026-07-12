@@ -38,14 +38,57 @@ generator $\mathcal C^\ast\llbracket e^\ast\rrbracket$ collects all constraints 
 ## 3. Solving — the worklist algorithm
 A solution assigns a **value set** (of function abstractions) to each variable $C(l)/r(x)$. Solve
 by least-fixpoint propagation:
-1. Build a **graph**: one node per constraint variable; an unconditional $lhs\subseteq rhs$ is an
-   edge along which values flow; each conditional constraint is attached to the node $C(l_1)$ it
-   watches.
-2. Initialise each node's value set from the base constraints ($\{t\}\subseteq C(l)$).
-3. **Worklist propagation:** repeatedly take a node whose set grew, push its values along outgoing
-   edges (monotonically enlarging targets), and **whenever a watched function $t$ appears in
-   $C(l_1)$, activate** that conditional constraint's edge (arg → param, body → call site).
+1. Build a **graph**: one node $q$ per constraint variable, holding a current value set $D[q]$ and
+   a **watch-list** $E[q]$ of constraints to replay when $D[q]$ grows. An unconditional
+   $lhs\subseteq rhs$ is an edge along which values flow; each conditional constraint is attached to
+   the node(s) it watches.
+2. Initialise: $D[q]:=\varnothing$, then apply the base constraints $\{t\}\subseteq C(l)$ (seed
+   $D[C(l)]$ with $t$ and enqueue $C(l)$).
+3. **Worklist propagation:** repeatedly take a node whose set grew, and replay every constraint on
+   its watch-list — pushing values along outgoing edges (monotonically enlarging targets), and
+   **whenever a watched function $t$ appears in $C(l_1)$, activating** that conditional constraint's
+   edge (arg → param, body → call site).
 4. Stop at the least fixpoint (no set changes) — that assignment is the least CFA.
+
+### 3.1 The data structures and the loop (NNH, Table 3.7)
+Concretely the solver keeps, per node $q$: a set $D[q]$ (current value set) and a list $E[q]$ (the
+constraints to re-examine when $D[q]$ changes). Growth is funnelled through one helper, which is the
+**only** place the worklist $W$ grows:
+$$\textbf{add}(q,d):\quad \text{if } d\not\subseteq D[q]\ \text{then } D[q]:=D[q]\cup d;\ W:=q::W.$$
+Building the graph registers each constraint on the watch-list(s) of the node(s) that can *trigger*
+it — and this registration is where the subtlety lives:
+$$\begin{aligned}
+\{t\}\subseteq p&:&&\textbf{add}(p,\{t\})\quad(\text{seed, no watch})\\
+p_1\subseteq p_2&:&&E[p_1]\mathrel{+}=cc\\
+\{t\}\subseteq p\Rightarrow p_1\subseteq p_2&:&&E[p_1]\mathrel{+}=cc\ \textbf{ and }\ E[p]\mathrel{+}=cc\quad(\textbf{both}).
+\end{aligned}$$
+Then iterate: dequeue $q$ from $W$ and, for each $cc\in E[q]$,
+$$p_1\subseteq p_2\ \leadsto\ \textbf{add}(p_2,D[p_1]);\qquad
+\{t\}\subseteq p\Rightarrow p_1\subseteq p_2\ \leadsto\ \textbf{if } t\in D[p]\ \textbf{then } \textbf{add}(p_2,D[p_1]).$$
+
+### 3.2 The subtle case: activate an edge on the source's *existing* contents
+A conditional $\{t\}\subseteq C(l_1)\Rightarrow C(l_3)\subseteq C(l_4)$ has **three** points, and the
+guard token $t$ may reach the watched node $C(l_1)$ **after** the source $C(l_3)$ already holds
+values. At that instant the edge $C(l_3)\to C(l_4)$ switches on and $C(l_3)$'s **already-present**
+contents must flow to $C(l_4)$ — even though nothing *new* just entered $C(l_3)$. A naïve loop that
+only re-scans a node when it grows would miss exactly this.
+
+The dual registration in §3.1 is what prevents the miss. Because $cc$ sits on **both** $E[C(l_1)]$
+(the guard) **and** $E[C(l_3)]$ (the source), whichever of the two events happens second re-fires it:
+- the **source** $C(l_3)$ grows first, guard not yet set → firing finds $t\notin D[C(l_1)]$, does
+  nothing; later $t$ arrives at $C(l_1)$ → dequeuing $C(l_1)$ replays $cc$, now $t\in D[C(l_1)]$, so
+  $\textbf{add}(C(l_4),D[C(l_3)])$ copies $C(l_3)$'s **current** set across;
+- the **guard** $t$ arrives first → the edge is live, and any *future* growth of $C(l_3)$ replays
+  $cc$ from $E[C(l_3)]$ and pushes the new values on.
+
+> [!note] The invariant to remember
+> **An edge that becomes active must fire on the source's values already present, not only on values
+> that arrive afterwards.** Registering each conditional on *both* the guard node and the source node
+> guarantees it, whichever event is second — and dequeuing the **guard** node propagates
+> $D[\text{source}]$ **directly** to the target (the source node is *not* re-enqueued; enqueuing it
+> would reach the same fixpoint but redundantly re-scan its whole watch-list). Because every
+> $D[q]\subseteq\mathit{Term}^\ast$ is finite and $\textbf{add}$ only ever enlarges sets, the loop is
+> monotone and terminates at the least fixpoint.
 
 ## 4. Properties — preservation & complexity (with *why*)
 - **Preservation of solutions.** For $(\hat C,\hat\rho)\sqsubseteq(\hat C_\top,\hat\rho_\top)$:
@@ -86,7 +129,7 @@ $$c^l\mapsto\varnothing,\quad x^l\mapsto\{r(x)\subseteq C(l)\},\quad (\mathsf{fn
 $$(t_1^{l_1}t_2^{l_2})^l\mapsto\mathcal C^\ast\llbracket t_1\rrbracket\cup\mathcal C^\ast\llbracket t_2\rrbracket\cup\{\{t\}\subseteq C(l_1)\Rightarrow C(l_2)\subseteq r(x),\ \{t\}\subseteq C(l_1)\Rightarrow C(l_0)\subseteq C(l)\mid t=(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\mathit{Term}^\ast\}.$$
 
 ### Solving
-Graph of value sets + worklist; unconditional = static edge; conditional = edge activated when watched function reaches $C(l_1)$; iterate to least fixpoint = least CFA.
+Per node $q$: value set $D[q]$ + watch-list $E[q]$; growth only via $\textbf{add}(q,d)$ (enlarge $D[q]$, enqueue $q$). Unconditional = static edge; conditional $\{t\}\subseteq p\Rightarrow p_1\subseteq p_2$ registered on **both** $E[p]$ (guard) **and** $E[p_1]$ (source), fires $\textbf{add}(p_2,D[p_1])$ when $t\in D[p]$. Dual registration ⇒ a newly-activated edge propagates the source's **already-present** contents, not just future arrivals. Iterate to least fixpoint = least CFA.
 
 ### Theorems
 - **[Preservation]** least solution of $\mathcal C^\ast\llbracket e^\ast\rrbracket$ = least CFA ($\models_s$/$\models$).
