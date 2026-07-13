@@ -71,6 +71,8 @@ every concrete binding is reflected abstractly. Define $\rho\,\mathcal R\,\hat\r
 
 $$\rho\,\mathcal R\,\hat\rho \iff \mathrm{dom}(\rho)\subseteq\mathrm{dom}(\hat\rho)\ \wedge\ \forall x\in\mathrm{dom}(\rho):\ \rho(x)=t_x^{\rho_x}\ \Rightarrow\ \big(t_x\in\hat\rho(x)\ \wedge\ \rho_x\,\mathcal R\,\hat\rho\big).$$
 
+In this context $\text{dom}$ is the function that records each variable which possesses an association in the domain $\rho$ or $\hat{\rho}$
+
 I.e. if $x$ is concretely bound to a closure over term $t_x$, then $t_x$ is in $\hat\rho(x)$ and
 the captured environment also agrees (a coinductive/recursive condition on closures).
 

@@ -18,10 +18,9 @@ specification of **0-CFA**; correctness, least solutions, and solving come in fi
 ## 1. Purpose & core idea
 In first-order code the control-flow graph is explicit. With **higher-order functions**
 (functions passed/returned/stored) the target of a call is a *runtime value* — the **dynamic
-dispatch problem**. E.g. in `(f g) + (f h)`, which function does `f`'s parameter get applied
-to? **Control Flow Analysis** answers, for **each call site, a sound over-approximation of the
+dispatch problem**. E.g. in `(f g) + (f h)`, (where `+` is the arithmetic sum) which function does `f`'s parameter (`g` or `h`) get bound to? (We don't kbow what is either `f` nor `g`) **Control Flow Analysis** answers, for **each call site, a sound over-approximation of the
 set of functions it may call** — recovering an (approximate) call graph so that other analyses
-and optimisations become possible. **0-CFA** is the simplest form: **context-insensitive**
+and optimizations become possible. **0-CFA** is the simplest form: **context-insensitive**
 (one answer per program point, the same at all calls).
 
 ## 2. Setup — the language FUN, labelling, and the abstract domains
@@ -54,6 +53,7 @@ flow — one clause per syntactic form (each an inclusion the guess must satisfy
 > $$[\textsf{app}]\quad (\hat C,\hat\rho)\models(t_1^{l_1}\,t_2^{l_2})^l \iff (\hat C,\hat\rho)\models t_1^{l_1}\wedge(\hat C,\hat\rho)\models t_2^{l_2}\ \wedge$$
 > $$\forall(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\hat C(l_1):\ (\hat C,\hat\rho)\models t_0^{l_0}\ \wedge\ \underbrace{\hat C(l_2)\subseteq\hat\rho(x)}_{\text{arg}\to\text{param}}\ \wedge\ \underbrace{\hat C(l_0)\subseteq\hat C(l)}_{\text{body}\to\text{call site}}\quad(\text{and analogously for }\mathsf{fun}).$$
 > $$[\textsf{op}]\quad (\hat C,\hat\rho)\models(t_1^{l_1}\,\mathsf{op}\,t_2^{l_2})^l \iff (\hat C,\hat\rho)\models t_1^{l_1}\wedge(\hat C,\hat\rho)\models t_2^{l_2}\quad(\text{result is a base value: no demand on }\hat C(l),\ \text{like }[\textsf{con}])$$
+><br>
 
 The whole idea lives in **[app]**: for **every** function $t_1$ might be, push the argument into
 its parameter and its body's result back to the call site. That single clause is what threads

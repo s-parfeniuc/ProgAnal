@@ -19,10 +19,7 @@ over-approximate the (uncomputable) exact behaviour by computing in a simpler
 
 ## 1. Purpose & core idea
 A program has, in general, **infinitely many** executions, and by **Rice's theorem**
-every non-trivial semantic property is **undecidable** — so we cannot compute the exact
-set of reachable states. Abstract Interpretation (Cousot & Cousot, POPL 1977) makes the
-problem tractable by **replacing exact sets of states with abstract properties** and
-computing with those. The guiding equation:
+every non-trivial semantic property is **undecidable** — so we cannot compute the exact set of reachable states. Abstract Interpretation (Cousot & Cousot, POPL 1977) makes the problem tractable by **replacing exact sets of states with abstract properties** and computing with those. The guiding equation:
 
 $$\textbf{abstraction} \neq \textbf{omission}.$$
 
@@ -33,28 +30,21 @@ positive", "$x\in[1,4]$") that is guaranteed to **cover** all of them. The resul
 ## 2. Basic definitions
 - **Concrete domain** $C$ — the exact information, typically $\wp(\Sigma)$ (sets of program
   states), ordered by $\subseteq$. See [[denotational-semantics]].
-- **Abstract element / abstract domain** — an **abstract element** is a logical property of
-  states; the set of them is the **abstract domain** $A$, ordered by a precision order
-  $\sqsubseteq$ (lower = more precise).
+- **Abstract element / abstract domain** — an **abstract element** is a logical property of states; the set of them is the **abstract domain** $A$, ordered by a precision order $\sqsubseteq$ (lower = more precise).
 - **Concretization** $\gamma:A\to C$ — $\gamma(a)$ is the **set of states that satisfy $a$**
   (its meaning). E.g. $\gamma(\mathit{even})=\{0,2,4,\dots\}$.
-- **Abstraction** $\alpha:C\to A$ — maps a set of states to the abstract element describing
-  it (developed formally in [09](09-order-theory-galois-connections.md)).
+- **Abstraction** $\alpha:C\to A$ — maps a set of states to the abstract element describing it (developed formally in [09](09-order-theory-galois-connections.md)).
 
 ## 3. Over-approximation & the soundness principle
 An abstract element $a$ **over-approximates** a set $S$ when $S\subseteq\gamma(a)$: every
-concrete state is covered. An analysis lifts this to whole programs. The **analysis
-function** takes a program $p$ and an abstract pre-state $a$ and returns an abstract
-post-state, written $\llbracket p\rrbracket^\sharp a$ (or $\mathrm{analysis}(p,a)$).
+concrete state is covered. An analysis lifts this to whole programs. The **analysis function** takes a program $p$ and an abstract pre-state $a$ and returns an abstract post-state, written $[\![  p ]\!]^\sharp a$ (or $\mathrm{analysis}(p,a)$).
 
 > [!important] The soundness square (the one picture to remember)
-> *Abstracting then running (abstractly) must cover running then abstracting.* For every
-> concrete step $\sigma\xrightarrow{p}\sigma'$ and every abstract $a$ with $\sigma\in\gamma(a)$:
-> $$\sigma'\in\gamma\big(\llbracket p\rrbracket^\sharp a\big),\qquad\text{i.e.}\qquad \llbracket p\rrbracket\big(\gamma(a)\big)\ \subseteq\ \gamma\big(\llbracket p\rrbracket^\sharp a\big).$$
+> *Abstracting then running (abstractly) must cover running then abstracting.* For every concrete step $\sigma\xrightarrow{p}\sigma'$ and every abstract $a$ with $\sigma\in\gamma(a)$:
+> $$\sigma'\in\gamma\big([\![  p ]\!]^\sharp a\big),\qquad\text{i.e.}\qquad [\![  p ]\!]\big(\gamma(a)\big)\ \subseteq\ \gamma\big([\![  p ]\!]^\sharp a\big).$$
 > Concrete run **under** abstract run. This is what guarantees no reachable state escapes the analysis.
 
-**Compositionality.** A sound analysis of $p$ is built from sound abstract semantics of its
-components — so soundness is proved once per language construct and composes.
+**Compositionality.** A sound analysis of $p$ is built from sound abstract semantics of its components — so soundness is proved once per language construct and composes.
 
 **Analysis goal — safety.** Given an **error zone** $E$, compute an over-approximation
 $\gamma(a)$ of the reachable states and check $\gamma(a)\cap E=\varnothing$. If it holds,
@@ -75,23 +65,16 @@ The chosen abstract domain trades **precision** for **cost**:
 (Octagons, Polyhedra) capture links between variables (e.g. $x\le y$).
 
 **Best abstraction.** $a$ is the *best* (most precise) over-approximation of $S$ iff
-(1) $S\subseteq\gamma(a)$ and (2) any other over-approximation is coarser:
-$S\subseteq\gamma(b)\Rightarrow\gamma(a)\subseteq\gamma(b)$. A best abstraction **need not
-exist** (e.g. a disk has no smallest enclosing convex polyhedron) or may be too expensive —
-then we use an abstraction *as precise as practical*, not necessarily the best. (When it
-exists it is $\gamma(\alpha(S))$ — see [09](09-order-theory-galois-connections.md).)
+(1) $S\subseteq\gamma(a)$ 
+and 
+(2) any other over-approximation is coarser: $S\subseteq\gamma(b)\Rightarrow\gamma(a)\subseteq\gamma(b)$. 
+A best abstraction **need not exist** (e.g. a disk has no smallest enclosing convex polyhedron) or may be too expensive — then we use an abstraction *as precise as practical*, not necessarily the best. (When it exists it is $\gamma(\alpha(S))$ — see [09](09-order-theory-galois-connections.md).)
 
 ## 5. Properties: soundness vs precision (why sound-but-incomplete)
-- **Soundness (never lie about safety).** By Rice/undecidability we cannot be exact, so we
-  choose to be **sound**: *if the analysis says "safe/YES", the property truly holds*;
-  otherwise the answer is **"don't know"**. An analysis that can answer "safe" when it isn't
-  (a **false negative**) is **unsound** and worthless for verification.
-- **Incompleteness (false alarms).** Over-approximation means the analysis may report a
-  **false positive** — flag a state that is not actually reachable. More precise domains
-  reduce false alarms at higher cost.
-- This is the deliberate opposite of the under-approximation logics ([IL](02-incorrectness-logic.md)/[SIL](04-sufficient-incorrectness-logic.md)),
-  which are complete-for-bugs (no false positives) but may miss bugs. AI is the
-  **over-approximation** stance: sound for proving **absence** of bugs.
+- **Soundness (never lie about safety).** By Rice/undecidability we cannot be exact, so we choose to be **sound**: *if the analysis says "safe/YES", the property truly holds*;
+  otherwise the answer is **"don't know"**. An analysis that can answer "safe" when it isn't (a **false negative**) is **unsound** and worthless for verification.
+- **Incompleteness (false alarms).** Over-approximation means the analysis may report a **false positive** — flag a state that is not actually reachable. More precise domains reduce false alarms at higher cost.
+- This is the deliberate opposite of the under-approximation logics ([IL](02-incorrectness-logic.md)/[SIL](04-sufficient-incorrectness-logic.md)), which are complete-for-bugs (no false positives) but may miss bugs. AI is the **over-approximation** stance: sound for proving **absence** of bugs.
 
 ## 6. Pros / cons / use cases
 - **Pros:** **sound by construction**; fully **automatic** (no annotations/invariants);
@@ -106,15 +89,20 @@ exists it is $\gamma(\alpha(S))$ — see [09](09-order-theory-galois-connections
 
 ## 📋 Cheatsheet (complete)
 
-### The AI recipe
+### The Abstract Interpretation recipe
 $$\underbrace{\wp(\Sigma)}_{\text{concrete } C}\ \xrightleftharpoons[\ \gamma\ ]{\ \alpha\ }\ \underbrace{A}_{\text{abstract}} \qquad\text{compute in } A,\ \text{read back with } \gamma.$$
 
 ### Key objects
-$$\text{concrete domain } (C,\subseteq)=(\wp(\Sigma),\subseteq);\quad \text{abstract domain } (A,\sqsubseteq);\quad \gamma:A\to C\ (\text{meaning});\quad \alpha:C\to A\ (\text{best descriptor}).$$
+$$\begin{array}{}
+\text{concrete domain } (C,\subseteq)=(\wp(\Sigma),\subseteq); \\
+\quad \text{abstract domain } (A,\sqsubseteq); \\
+\quad \gamma:A\to C\ (\text{meaning}); \\
+\quad \alpha:C\to A\ (\text{best descriptor}).
+\end{array}$$
 $$a\ \text{over-approximates}\ S \iff S\subseteq\gamma(a).$$
 
 ### Soundness (per step and as an analysis)
-$$\llbracket p\rrbracket(\gamma(a))\subseteq\gamma(\llbracket p\rrbracket^\sharp a) \qquad\Longleftrightarrow\qquad \forall\sigma\in\gamma(a).\ \llbracket p\rrbracket\sigma\subseteq\gamma(\mathrm{analysis}(p,a)).$$
+$$[\![  p ]\!](\gamma(a))\subseteq\gamma([\![  p ]\!]^\sharp a) \qquad\Longleftrightarrow\qquad \forall\sigma\in\gamma(a).\ [\![  p ]\!]\sigma\subseteq\gamma(\mathrm{analysis}(p,a)).$$
 Safety check: reachable $(p)\subseteq\gamma(a)$ and $\gamma(a)\cap E=\varnothing\ \Rightarrow\ p$ avoids $E$.
 
 ### Best abstraction

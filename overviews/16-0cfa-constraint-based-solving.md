@@ -25,15 +25,15 @@ constraints** that fire when a function is discovered to flow to a call site.
 ## 2. From rules to constraints
 Replace the unknowns $\hat C(l),\hat\rho(x)$ by **constraint variables** $C(l), r(x)$. Two
 constraint shapes:
-$$\underbrace{lhs\subseteq rhs}_{\text{unconditional}}\qquad\qquad \underbrace{\{t\}\subseteq rhs'\ \Rightarrow\ lhs\subseteq rhs}_{\text{conditional: "if }t\text{ may flow to }rhs',\text{ then }lhs\text{ flows to }rhs"}$$
-with $lhs::=C(l)\mid r(x)\mid\{t\}$ ($t$ a function abstraction) and $rhs::=C(l)\mid r(x)$. The
-generator $\mathcal C^\ast\llbracket e^\ast\rrbracket$ collects all constraints by recursion on syntax.
+$$\underbrace{\text{lhs}\subseteq \text{rhs}}_{\text{unconditional}}\qquad\qquad \underbrace{\{t\}\subseteq \text{rhs}'\ \Rightarrow\ \text{lhs}\subseteq \text{rhs}}_{\text{conditional: "if }t\text{ may flow to }\text{rhs}',\text{ then }\text{lhs}\text{ flows to }\text{rhs}"}$$
+with $\text{lhs}::=C(l)\mid r(x)\mid\{t\}$ ($t$ a function abstraction) and $\text{rhs}::=C(l)\mid r(x)$. The
+generator $\mathcal C^\ast[\![  e^\ast ]\!]$ collects all constraints by recursion on syntax.
 
 > [!important] The constraint clauses
-> $$\mathcal C^\ast\llbracket c^l\rrbracket=\varnothing\qquad \mathcal C^\ast\llbracket x^l\rrbracket=\{\,r(x)\subseteq C(l)\,\}$$
-> $$\mathcal C^\ast\llbracket(\mathsf{fn}\ x\Rightarrow e_0)^l\rrbracket=\{\,\{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq C(l)\,\}\cup\mathcal C^\ast\llbracket e_0\rrbracket$$
+> $$\mathcal C^\ast[\![  c^l ]\!]=\varnothing\qquad \mathcal C^\ast[\![  x^l ]\!]=\{\,r(x)\subseteq C(l)\,\}$$
+> $$\mathcal C^\ast[\![ (\mathsf{fn}\ x\Rightarrow e_0)^l ]\!]=\{\,\{\mathsf{fn}\ x\Rightarrow e_0\}\subseteq C(l)\,\}\cup\mathcal C^\ast[\![  e_0 ]\!]$$
 > $$\mathcal C^\ast\llbracket(\mathsf{fun}\ f\ x\Rightarrow e_0)^l\rrbracket=\{\,\{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq C(l),\ \ \{\mathsf{fun}\ f\ x\Rightarrow e_0\}\subseteq r(f)\,\}\cup\mathcal C^\ast\llbracket e_0\rrbracket$$
-> $$\mathcal C^\ast\llbracket(t_1^{l_1}t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\ \cup\!\!\!\bigcup_{t=(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\mathit{Term}^\ast}\!\!\!\Big\{\ \{t\}\subseteq C(l_1)\Rightarrow C(l_2)\subseteq r(x),\ \ \{t\}\subseteq C(l_1)\Rightarrow C(l_0)\subseteq C(l)\ \Big\}$$
+> $$\mathcal C^\ast[\![ (t_1^{l_1}t_2^{l_2})^l ]\!]=\mathcal C^\ast[\![  t_1^{l_1} ]\!]\cup\mathcal C^\ast[\![  t_2^{l_2} ]\!]\ \cup\!\!\!\bigcup_{t=(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\mathit{Term}^\ast}\!\!\!\Big\{\ \{t\}\subseteq C(l_1)\Rightarrow C(l_2)\subseteq r(x),\ \ \{t\}\subseteq C(l_1)\Rightarrow C(l_0)\subseteq C(l)\ \Big\}$$
 > $$\mathcal C^\ast\llbracket(\mathsf{if}\ t_0^{l_0}\ t_1^{l_1}\ t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_0^{l_0}\rrbracket\cup\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\ \cup\ \{\,C(l_1)\subseteq C(l),\ \ C(l_2)\subseteq C(l)\,\}$$
 > $$\mathcal C^\ast\llbracket(\mathsf{let}\ x{=}t_1^{l_1}\ \mathsf{in}\ t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\ \cup\ \{\,\underbrace{C(l_1)\subseteq r(x)}_{\text{bind}},\ \ \underbrace{C(l_2)\subseteq C(l)}_{\text{result}}\,\}$$
 > $$\mathcal C^\ast\llbracket(t_1^{l_1}\,\mathsf{op}\,t_2^{l_2})^l\rrbracket=\mathcal C^\ast\llbracket t_1^{l_1}\rrbracket\cup\mathcal C^\ast\llbracket t_2^{l_2}\rrbracket\quad(\text{no constraint on }C(l):\ \mathsf{op}\text{ yields a base value, like }c^l)$$
@@ -106,7 +106,7 @@ The dual registration in §3.1 is what prevents the miss. Because $cc$ sits on *
 
 ## 4. Properties — preservation & complexity (with *why*)
 - **Preservation of solutions.** For $(\hat C,\hat\rho)\sqsubseteq(\hat C_\top,\hat\rho_\top)$:
-  $(\hat C,\hat\rho)\models_c\mathcal C^\ast\llbracket e^\ast\rrbracket\iff(\hat C,\hat\rho)\models_s e^\ast$
+  $(\hat C,\hat\rho)\models_c\mathcal C^\ast[\![  e^\ast ]\!]\iff(\hat C,\hat\rho)\models_s e^\ast$
   (on program terms). **Hence the least constraint solution *is* the least CFA** of
   [15](15-0cfa-existence-least-solutions.md). *Why:* by structural induction; the application case
   uses $\hat C(l_1)\subseteq\mathit{Term}^\ast$ so only real program functions are ever propagated.
@@ -136,15 +136,15 @@ The dual registration in §3.1 is what prevents the miss. Because $cc$ sits on *
 
 ### Constraint language
 $$lhs\subseteq rhs\qquad\text{and}\qquad \{t\}\subseteq rhs'\Rightarrow lhs\subseteq rhs;\qquad lhs::=C(l)\mid r(x)\mid\{t\},\quad rhs::=C(l)\mid r(x).$$
-Satisfaction $\models_c$: $(\hat C,\hat\rho)\models_c(lhs\subseteq rhs)\iff\llbracket lhs\rrbracket\subseteq\llbracket rhs\rrbracket$; a conditional holds iff $t\in\llbracket rhs'\rrbracket\Rightarrow$ its body holds.
+Satisfaction $\models_c$: $(\hat C,\hat\rho)\models_c(lhs\subseteq rhs)\iff[\![  lhs ]\!]\subseteq[\![  rhs ]\!]$; a conditional holds iff $t\in[\![  rhs' ]\!]\Rightarrow$ its body holds.
 
-### Generation $\mathcal C^\ast\llbracket\cdot\rrbracket$
-$$c^l\mapsto\varnothing,\quad x^l\mapsto\{r(x)\subseteq C(l)\},\quad (\mathsf{fn}\ x\Rightarrow e_0)^l\mapsto\{\{\mathsf{fn}\dots\}\subseteq C(l)\}\cup\mathcal C^\ast\llbracket e_0\rrbracket$$
-$$(t_1^{l_1}t_2^{l_2})^l\mapsto\mathcal C^\ast\llbracket t_1\rrbracket\cup\mathcal C^\ast\llbracket t_2\rrbracket\cup\{\{t\}\subseteq C(l_1)\Rightarrow C(l_2)\subseteq r(x),\ \{t\}\subseteq C(l_1)\Rightarrow C(l_0)\subseteq C(l)\mid t=(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\mathit{Term}^\ast\}.$$
+### Generation $\mathcal C^\ast[\![ \cdot ]\!]$
+$$c^l\mapsto\varnothing,\quad x^l\mapsto\{r(x)\subseteq C(l)\},\quad (\mathsf{fn}\ x\Rightarrow e_0)^l\mapsto\{\{\mathsf{fn}\dots\}\subseteq C(l)\}\cup\mathcal C^\ast[\![  e_0 ]\!]$$
+$$(t_1^{l_1}t_2^{l_2})^l\mapsto\mathcal C^\ast[\![  t_1 ]\!]\cup\mathcal C^\ast[\![  t_2 ]\!]\cup\{\{t\}\subseteq C(l_1)\Rightarrow C(l_2)\subseteq r(x),\ \{t\}\subseteq C(l_1)\Rightarrow C(l_0)\subseteq C(l)\mid t=(\mathsf{fn}\ x\Rightarrow t_0^{l_0})\in\mathit{Term}^\ast\}.$$
 
 ### Solving
 Per node $q$: value set $D[q]$ + watch-list $E[q]$; growth only via $\textbf{add}(q,d)$ (enlarge $D[q]$, enqueue $q$). Unconditional = static edge; conditional $\{t\}\subseteq p\Rightarrow p_1\subseteq p_2$ registered on **both** $E[p]$ (guard) **and** $E[p_1]$ (source), fires $\textbf{add}(p_2,D[p_1])$ when $t\in D[p]$. Dual registration ⇒ a newly-activated edge propagates the source's **already-present** contents, not just future arrivals. Iterate to least fixpoint = least CFA.
 
 ### Theorems
-- **[Preservation]** least solution of $\mathcal C^\ast\llbracket e^\ast\rrbracket$ = least CFA ($\models_s$/$\models$).
+- **[Preservation]** least solution of $\mathcal C^\ast[\![  e^\ast ]\!]$ = least CFA ($\models_s$/$\models$).
 - **[Complexity]** $O(n)$ constraints, $O(n^2)$ conditional; **$O(n^3)$** worst-case solving — polynomial despite higher-order functions.

@@ -26,10 +26,10 @@ many steps).
 ## 2. Analysis as a fixpoint
 Attach to each program point $i$ a **transfer function** $F_i$; the concrete invariants
 $S_i$ are the smallest solution of the equation system. For a loop this is a fixpoint:
-$$\text{reachable} = \mathrm{lfp}\ \lambda X.\ S_0\cup\llbracket c\rrbracket X \qquad(\text{by Kleene: } \textstyle\bigcup_{k\ge 0}(\lambda X.\dots)^k(\varnothing)).$$
+$$\text{reachable} = \mathrm{lfp}\ \lambda X.\ S_0\cup[\![  c ]\!] X \qquad(\text{by Kleene: } \textstyle\bigcup_{k\ge 0}(\lambda X.\dots)^k(\varnothing)).$$
 This **strongest invariant is not computable in general**. The **abstract interpreter**
 mirrors the concrete one construct-by-construct on the abstract domain:
-$$\llbracket c_1;c_2\rrbracket^\sharp=\llbracket c_2\rrbracket^\sharp\circ\llbracket c_1\rrbracket^\sharp,\quad \llbracket c_1{+}c_2\rrbracket^\sharp=\llbracket c_1\rrbracket^\sharp\sqcup\llbracket c_2\rrbracket^\sharp,\quad \llbracket c^\star\rrbracket^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\sqcup\llbracket c\rrbracket^\sharp X.$$
+$$[\![  c_1;c_2 ]\!]^\sharp=[\![  c_2 ]\!]^\sharp\circ[\![  c_1 ]\!]^\sharp,\quad [\![  c_1{+}c_2 ]\!]^\sharp=[\![  c_1 ]\!]^\sharp\sqcup[\![  c_2 ]\!]^\sharp,\quad [\![  c^\star ]\!]^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\sqcup[\![  c ]\!]^\sharp X.$$
 The analysis result at a loop is $\mathrm{lfp}\,F^\sharp$, computed by **Kleene iteration**
 $\bot\sqsubseteq F^\sharp(\bot)\sqsubseteq F^\sharp{}^2(\bot)\sqsubseteq\dots$ The **take-home**:
 the whole interpreter is *induced by the atomic operations* — pick the domain and its atomic
@@ -115,11 +115,7 @@ post-fixpoint in finitely many steps.
 > (ii) **Enforces termination:** for *any* increasing sequence $x_0\sqsubseteq x_1\sqsubseteq\dots$,
 > the *widened* sequence $y_0=x_0,\ y_{i+1}=y_i\nabla x_{i+1}$ **stabilises** after finitely many steps.
 >
-> The loop is then computed as $\llbracket c^\star\rrbracket^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\,\nabla\,\llbracket c\rrbracket^\sharp X$ — the iterates jump to a **stable over-approximation** (a post-fixpoint) instead of climbing forever. Widening **loses precision** to buy termination, and it is deliberately **non-monotone** (property (i) lets us build converging sequences by iterating operators that need not be monotone).
-
-The limit $x^\nabla$ of the widened iteration is a **sound post-fixpoint**:
-$F^\sharp(x^\nabla)\sqsubseteq x^\nabla$, so $\mathrm{lfp}\,F\le\gamma(x^\nabla)$ — a correct
-(if coarse) invariant.
+> The loop is then computed as $\llbracket c^\star\rrbracket^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\,\nabla\,\llbracket c\rrbracket^\sharp X$ — the iterates jump to a **stable over-approximation** (a post-fixpoint) instead of climbing forever. Widening **loses precision** to buy termination.
 
 **Interval widening** (the canonical instance): **unstable bounds are pushed to infinity**,
 $$[a,b]\ \nabla\ [a',b']\ =\ [\,(a'<a)\,?\,-\infty:a,\ \ (b'>b)\,?\,+\infty:b\,].$$
@@ -251,7 +247,7 @@ This is the payoff of the Congruence domain: it proves **alignment/parity** inva
 
 ### Analysis = fixpoint
 $$\text{concrete reachable} = \mathrm{lfp}\ \lambda X.\ S_0\cup\llbracket c\rrbracket X\ \ (\text{strongest invariant, uncomputable});\qquad \text{analysis} = \mathrm{lfp}\,F^\sharp.$$
-Abstract interpreter (induced by atomic ops): $\llbracket c_1;c_2\rrbracket^\sharp=\llbracket c_2\rrbracket^\sharp\circ\llbracket c_1\rrbracket^\sharp$, $\ \llbracket c_1{+}c_2\rrbracket^\sharp=\llbracket c_1\rrbracket^\sharp\sqcup\llbracket c_2\rrbracket^\sharp$, $\ \llbracket c^\star\rrbracket^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\sqcup\llbracket c\rrbracket^\sharp X$.
+Abstract interpreter: $\llbracket c_1;c_2\rrbracket^\sharp=\llbracket c_2\rrbracket^\sharp\circ\llbracket c_1\rrbracket^\sharp$, $\ \llbracket c_1{+}c_2\rrbracket^\sharp=\llbracket c_1\rrbracket^\sharp\sqcup\llbracket c_2\rrbracket^\sharp$, $\ \llbracket c^\star\rrbracket^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\sqcup\llbracket c\rrbracket^\sharp X$.
 Kleene: $\mathrm{lfp}\,F^\sharp=\bigsqcup_{k\ge 0}(F^\sharp)^k(\bot)$ (terminates iff ACC).
 
 ### Building the abstract state
@@ -263,9 +259,8 @@ $$\text{Abstract store }X\to A_1 = \underbrace{\wp(X{\to}\mathbb Z)\to(X{\to}\wp
 $$F\text{ monotone},\ \alpha\circ F\sqsubseteq F^\sharp\circ\alpha\ \Longrightarrow\ \alpha(\mathrm{lfp}\,F)\sqsubseteq\mathrm{lfp}\,F^\sharp\ \Longleftrightarrow\ \mathrm{lfp}\,F\le\gamma(\mathrm{lfp}\,F^\sharp).$$
 
 ### Widening $\nabla$ (termination for non-ACC domains)
-$$a\sqsubseteq a\nabla b,\quad b\sqsubseteq a\nabla b\ (\Rightarrow a\sqcup b\sqsubseteq a\nabla b);\qquad y_0=x_0,\ y_{i+1}=y_i\nabla x_{i+1}\ \text{stabilises for every increasing }(x_i).$$
+$$a\sqsubseteq a\nabla b,\quad b\sqsubseteq a\nabla b;\qquad y_0=x_0,\ y_{i+1}=y_i\nabla x_{i+1}\ \text{stabilises for every increasing }(x_i).$$
 $$\llbracket c^\star\rrbracket^\sharp=\lambda S.\ \mathrm{lfp}\ \lambda X.\ S\,\nabla\,\llbracket c\rrbracket^\sharp X;\qquad [a,b]\nabla[a',b']=[\,a'<a?\,{-\infty}:a,\ b'>b?\,{+\infty}:b\,].$$
-Naive: $x\nabla y=x$ if $y\sqsubseteq x$ else $\top$. Knobs: **delay** ($k$ exact steps first), **thresholds** (extrapolate to guard constants).
 
 ### Narrowing $\triangle$ (recover precision)
 $$b\sqsubseteq a\ \Rightarrow\ b\sqsubseteq a\triangle b\sqsubseteq a;\quad\text{decreasing iteration terminates};\qquad [a,b]\triangle[a',b']=[\,a{=}{-\infty}?\,a':a,\ b{=}{+\infty}?\,b':b\,].$$

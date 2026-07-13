@@ -17,12 +17,10 @@ Part II of the AI block — it formalises the `α`/`γ` sketched in
 [11 analysis & fixpoints](11-abstract-analysis-fixpoints-widening.md).
 
 ## 1. Purpose & core idea
-Concrete and abstract worlds are both **ordered by precision**. The **Galois connection**
-is the exact relationship $\alpha\dashv\gamma$ between them that guarantees: (i) every
-abstract answer is a **sound** over-approximation of the concrete one, and (ii) each
-concrete element has a **best** (most precise) abstraction. Order theory (posets, lattices,
-lubs/glbs) is the language; the Galois connection is the contract.
-
+Concrete and abstract worlds are both **ordered by precision**. The **Galois connection** is the exact relationship $\alpha\dashv\gamma$ between them that guarantees: 
+(i) every abstract answer is a **sound** over-approximation of the concrete one, and 
+(ii) each concrete element has a **best** (most precise) abstraction. Order theory (posets, lattices,lubs/glbs) is the language; the Galois connection is the contract.
+z
 ## 2. Order-theory prerequisites
 - **Poset** $(X,\sqsubseteq)$: a set with a reflexive, antisymmetric, transitive order.
   Here $\sqsubseteq$ reads as "more precise / more information than". See [[glossary]].
@@ -43,10 +41,7 @@ lubs/glbs) is the language; the Galois connection is the contract.
 > **not ACC** — the chain never stabilises, hence widening). **Finite lattices are always complete.**
 
 - **CPO**: every ascending chain has a lub (pointed CPO also has $\bot$).
-- **Ascending Chain Condition (ACC)**: no infinite strictly-ascending chains — every
-  ascending chain eventually stabilises. **ACC domains guarantee the analysis terminates**
-  (its increasing fixpoint iteration converges). (Note: complete lattice $\not\Rightarrow$ ACC —
-  e.g. intervals are a complete lattice but not ACC.)
+- **Ascending Chain Condition (ACC)**: no infinite strictly-ascending chains — every ascending chain eventually stabilises. **ACC domains guarantee the analysis terminates** (its increasing fixpoint iteration converges). (Note: complete lattice $\not\Rightarrow$ ACC — e.g. intervals are a complete lattice but not ACC.)
 
 > [!note] CPO vs ACC — "the limit exists" vs "you reach it"
 > Both concern ascending chains $x_0\sqsubseteq x_1\sqsubseteq\cdots$. Read $\sqsubseteq$ as
@@ -143,29 +138,18 @@ it holds we have a **Galois insertion (= embedding)**.
 
 > [!note] Galois insertion — three equivalent conditions
 > A Galois connection is a **Galois insertion** iff any of:
-> (1) $\alpha$ is **surjective**; (2) $\gamma$ is **injective**; (3) $\alpha\circ\gamma=\mathrm{id}$.
-> Intuition: **no redundant abstract elements** — every abstract element is the best
-> abstraction of its own meaning.
+> (1) $\alpha$ is **surjective** (si trova sempre un elemento del dominio astratto); 
+> (2) $\gamma$ is **injective** (non ci sono elementi ridondanti); 
+> (3) $\alpha\circ\gamma=\mathrm{id}$.
+> Intuition: **no redundant abstract elements** — every abstract element is the best abstraction of its own meaning.
 
-- **GI = "no spurious elements" — all three conditions are the same statement.** A
-  **spurious** element $p$ is one that is **no set's best abstraction**; equivalently
-  $p\notin\mathrm{image}(\alpha)$ ($\alpha$ not surjective), $\exists a'\sqsubset p$ with
-  $\gamma(a')=\gamma(p)$ ($\gamma$ not injective), or $\alpha(\gamma(p))\neq p$
-  ($\alpha\circ\gamma\neq\mathrm{id}$). Surjectivity is **not** the odd one out: since $\alpha$
-  returns the *tightest* abstraction, a too-loose $p$ is simply never produced by $\alpha$.
-- **Non-trivial GC-not-GI — the (non-reduced) Cartesian product** (see
-  [10 §combining domains](10-abstract-domains-operators.md)). Intervals $\times$ Congruences is
-  a GC (product of GCs), but **not** a GI: $([1,5],2\mathbb Z)$ and $([2,4],2\mathbb Z)$ both mean
-  $\{2,4\}$ (and every $(\bot,\cdot)/(\cdot,\bot)$ means $\varnothing$), so $\gamma$ isn't
-  injective and $([1,5],2\mathbb Z)$ is spurious ($\alpha(\{2,4\})=([2,4],2\mathbb Z)$). The
-  **reduced product** collapses equal-$\gamma$ elements onto their tightest representative
-  (the reduction $\rho=\alpha\circ\gamma$), restoring a GI. **Any GC reduces to a GI this way**,
-  which is why "assume a GI" is w.l.o.g.
+- **GC but not GI:** if two abstract elements have the *same* meaning (say a spurious
+  $p$ with $\gamma(p)=\gamma(+)$), then $\gamma$ isn't injective and $\alpha$ isn't
+  surjective — $p$ is **useless** (some other element abstracts better). Removing such
+  redundancy turns a GC into a GI.
 - **Closure-operator view.** Write $A(c)\triangleq\gamma(\alpha(c))$. This is an **upper
-  closure operator**: **monotone, extensive, idempotent** ($A(A(c))=A(c)$). Its image
-  $A(C)=\gamma(A)$ is the set of **expressible elements** ($c$ with $c=\gamma(\alpha(c))$).
-  So an abstract domain can be identified with a **subset of the concrete domain** — no
-  symbolic representation needed to reason about it.
+  closure operator**: **monotone, extensive, idempotent** ($A(A(c))=A(c)$). Its image $A(C)=\gamma(A)$ is the set of **expressible elements** ($c$ with $c=\gamma(\alpha(c))$).
+  So an abstract domain can be identified with a **subset of the concrete domain** — no symbolic representation needed to reason about it.
 
 ## 5. Properties (why the Galois connection is exactly right)
 - **Soundness for free.** $c\le\gamma(\alpha(c))$ means $\alpha$ never under-reports; every
@@ -173,27 +157,11 @@ it holds we have a **Galois insertion (= embedding)**.
   requirement, now guaranteed by the adjunction.
 - **Optimal precision.** $\alpha(c)$ is not just *a* sound abstraction but the **best** one —
   the connection pins down a unique tightest abstract element per concrete element.
-- **Preservation (a free theorem).** $\alpha$ preserves **joins**, $\gamma$ preserves **meets**:
-  $\alpha(X\cup Y)=\alpha(X)\sqcup\alpha(Y)$, $\gamma(a\sqcap b)=\gamma(a)\cap\gamma(b)$ — and *only*
-  these directions ($\gamma$ does **not** preserve joins: $\gamma([1,2]\sqcup[7,8])=\{1..8\}\neq\{1,2,7,8\}$,
-  and that gap *is* the abstract join's imprecision). Two payoffs: **(i) abstract operators** —
-  the concrete semantics merges by $\cup$ (branches) and $\cap$ (guards), so $\sqcup$/$\sqcap$ are
-  their *faithful* abstract images and $f^\sharp=\alpha\circ f\circ\gamma$ composes soundly;
-  **(ii) fixpoint transfer** — since $\mathrm{lfp}\,F=\bigsqcup_n F^n(\bot)$, $\alpha$ sliding through
-  the join gives $\alpha(\mathrm{lfp}\,F)=\bigsqcup_n\alpha(F^n(\bot))\sqsubseteq\bigsqcup_n(F^\sharp)^n(\bot^\sharp)=\mathrm{lfp}\,F^\sharp$
-  — the soundness theorem of the analysis ([11](11-abstract-analysis-fixpoints-widening.md)).
-- **When there is no $\alpha$ (Convex Polyhedra — *not* a Galois insertion).** A GC requires
-  $\alpha$ to be a **total** function returning the best abstraction of *every* set. For
-  **Convex Polyhedra** this fails: a **disk has no smallest enclosing polyhedron** (any polygon
-  can be tightened by another facet — no minimum), so $\alpha(\text{disk})$ **doesn't exist**.
-  Hence polyhedra are **not a Galois connection at all** — and *a fortiori not a Galois insertion*
-  (an insertion is a special GC). The framework instead uses **concretization alone** ($\gamma$-only):
-  $\gamma:A\to C$ injective, soundness defined directly as $c\le\gamma(a)$, no $\alpha$, no adjunction.
-  > [!warning] Common misconception
-  > "$\gamma$ injective and $\alpha\circ\gamma=\mathrm{id}$" hold only on the sets that *already are*
-  > polyhedra — but abstraction must handle *arbitrary* sets, where $\alpha$ breaks. And note a GI
-  > needs $\alpha$ **surjective** (not "non-surjective"). So the non-total $\alpha$ is the disqualifier,
-  > not evidence of an insertion.
+- **Preservation.** $\alpha$ preserves lubs (joins) and $\gamma$ preserves glbs (meets) —
+  which is what lets abstract operators be defined and lets fixpoints transfer (see [11](11-abstract-analysis-fixpoints-widening.md)).
+- **When there is no $\alpha$.** Some domains (e.g. Convex Polyhedra for curved sets) have
+  **no best abstraction**, hence **no Galois connection** — the framework then works with a
+  concretization $\gamma$ alone (a *concretization-only* / "$\gamma$-only" setting).
 
 ## 6. Pros / cons / use cases
 - **Pros:** a clean, reusable contract giving soundness **and** best precision; either map
@@ -213,7 +181,12 @@ $$\text{poset }(X,\sqsubseteq);\quad \text{lub }\bigsqcup A\ (\sqcup),\ \text{gl
 $$\bot=\textstyle\bigsqcup\varnothing=\sqcap X,\quad \top=\sqcap\varnothing=\bigsqcup X;\qquad \textbf{ACC}:\ \text{no infinite ascending chain}\ \Rightarrow\ \text{analysis terminates}.$$
 
 ### Function properties
-$$\text{monotone: } x\sqsubseteq y\Rightarrow f(x)\sqsubseteq f(y);\quad \text{continuous: preserves chain lubs};\quad \text{extensive: } a\sqsubseteq f(a);\quad \text{reductive: } f(a)\sqsubseteq a.$$
+$$\begin{array}{}
+\text{monotone: } x\sqsubseteq y\Rightarrow f(x)\sqsubseteq f(y); \\
+\quad \text{continuous: preserves chain lubs}; \\
+\quad \text{extensive: } a\sqsubseteq f(a); \\
+\quad \text{reductive: } f(a)\sqsubseteq a.
+\end{array}$$
 
 ### Galois connection
 $$(C,\le)\ \xrightleftharpoons[\alpha]{\gamma}\ (A,\sqsubseteq)\quad\overset{\triangle}{\iff}\quad \forall c,a:\ \alpha(c)\sqsubseteq a\ \Longleftrightarrow\ c\le\gamma(a).$$

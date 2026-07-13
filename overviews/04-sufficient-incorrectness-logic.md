@@ -24,7 +24,7 @@ which inputs cause the bug. SIL reasons **backward from the error**, so its prec
 ## 2. Basic definition
 Taking $Q$ = the set of **error** states:
 
-$$\langle P\rangle\,c\,\langle Q\rangle\ \text{ valid}\quad\overset{\triangle}{\iff}\quad P\subseteq\llbracket c\rrbracket^{op}Q \quad\iff\quad \forall\sigma\in P.\ \exists\delta\in Q.\ \delta\in\llbracket c\rrbracket\sigma.$$
+$$\langle P\rangle\,c\,\langle Q\rangle\ \text{ valid}\quad\overset{\triangle}{\iff}\quad P\subseteq[\![  c ]\!]^{op}Q \quad\iff\quad \forall\sigma\in P.\ \exists\delta\in Q.\ \delta\in[\![  c ]\!]\sigma.$$
 
 Reading: **every** state in $P$ has **at least one** execution reaching an error in $Q$.
 So each state of $P$ is a **sufficient condition for incorrectness** — a genuine trigger.
@@ -73,8 +73,8 @@ $\sigma\in P$ really can crash.
 ## 📋 Cheatsheet (complete)
 
 ### Validity
-$$\langle P\rangle\,c\,\langle Q\rangle\ \text{valid}\iff P\subseteq\llbracket c\rrbracket^{op}Q\iff\forall\sigma\in P.\ \exists\delta\in Q.\ \delta\in\llbracket c\rrbracket\sigma.$$
-where $\llbracket c\rrbracket^{op}Q=\{\sigma\mid\llbracket c\rrbracket\sigma\cap Q\neq\varnothing\}=wpp(c,Q)$ (backward / weakest possible precondition).
+$$\langle P\rangle\,c\,\langle Q\rangle\ \text{valid}\iff P\subseteq[\![  c ]\!]^{op}Q\iff\forall\sigma\in P.\ \exists\delta\in Q.\ \delta\in[\![  c ]\!]\sigma.$$
+where $[\![  c ]\!]^{op}Q=\{\sigma\mid[\![  c ]\!]\sigma\cap Q\neq\varnothing\}=wpp(c,Q)$ (backward / weakest possible precondition).
 
 ### Axioms & inference rules (backward-oriented, from the error post)
 
@@ -90,7 +90,7 @@ $$\dfrac{\langle P\rangle\,c\,\langle Q\rangle}{\langle P\vee R\rangle\,c\,\lang
 $$Q\ \text{is a manifest error}\quad\iff\quad \langle\text{true}\rangle\,c\,\langle Q\rangle\ \text{is valid}.$$
 
 ### Theorems / key facts
-- **[Soundness]** $\vdash\langle P\rangle\,c\,\langle Q\rangle\Rightarrow P\subseteq\llbracket c\rrbracket^{op}Q$.
+- **[Soundness]** $\vdash\langle P\rangle\,c\,\langle Q\rangle\Rightarrow P\subseteq[\![  c ]\!]^{op}Q$.
 - **[Completeness]** every valid Lisbon triple is derivable (minimal core rules).
 - **[HL equivalence]** if $c$ deterministic and terminating: $\langle P\rangle\,c\,\langle Q\rangle\iff\{P\}\,c\,\{Q\}$.
 - **[$\langle\textsf{conj}\rangle$ unsound]**; **[forward assume $\langle P\rangle b?\langle P\wedge b\rangle$ invalid]**.

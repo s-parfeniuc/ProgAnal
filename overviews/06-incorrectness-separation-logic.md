@@ -23,7 +23,7 @@ every reported bug is real. It is the theory behind Meta's Pulse.
 ## 2. Basic definition
 An ISL triple is an IL triple over heap-states, closed under the separating frame:
 
-$$[P]\,c\,[\varepsilon:Q]\ \text{ valid}\iff Q\subseteq\llbracket c\rrbracket_\varepsilon P,\qquad \dfrac{[P]\,c\,[\varepsilon:Q]}{[P\ast R]\,c\,[\varepsilon:Q\ast R]}\ [\textsf{frame}].$$
+$$[P]\,c\,[\varepsilon:Q]\ \text{ valid}\iff Q\subseteq[\![  c ]\!]_\varepsilon P,\qquad \dfrac{[P]\,c\,[\varepsilon:Q]}{[P\ast R]\,c\,[\varepsilon:Q\ast R]}\ [\textsf{frame}].$$
 
 $\varepsilon\in\{ok,er\}$ as in IL. The key new **assertion is $x\not\mapsto$**: "$x$ points
 to a **deallocated** cell" ($\mathrm{dom}(h)=\{s(x)\}$, $h(s(x))=\bot$). Tracking
@@ -49,7 +49,7 @@ untouched heap. A non-$\text{false}$ $er$ result proves a **real, reachable** me
   speak *precisely*** (a minimal, exact footprint), unlike SL's axioms which "can speak broadly."
 
 ## 5. Properties: soundness & completeness (with *why*)
-- **Sound** (induction on the derivation): $\vdash[P]\,c\,[\varepsilon:Q]\Rightarrow Q\subseteq\llbracket c\rrbracket_\varepsilon P$.
+- **Sound** (induction on the derivation): $\vdash[P]\,c\,[\varepsilon:Q]\Rightarrow Q\subseteq[\![  c ]\!]_\varepsilon P$.
 - **Complete (footprint theorem).** Any valid ISL triple $[\sigma_P]\,c\,[\varepsilon:\sigma_Q]$
   is derivable. **Why it holds here but *fails* in plain SL:** the $x\not\mapsto$ predicate
   keeps the heap **monotonic** (no information lost at $\mathsf{free}$), which is exactly the
@@ -75,7 +75,7 @@ $$P ::= \dots\mid\mathsf{emp}\mid a_1\mapsto a_2\mid P_1\ast P_2\mid \boxed{x\no
 Notable: $x\mapsto v\ast x\not\mapsto\equiv\text{false}$, and $y\mapsto v\ast x\not\mapsto\equiv y\mapsto v\ast x\not\mapsto\wedge\,x{\neq}y$.
 
 ### Validity + frame
-$$[P]\,c\,[\varepsilon:Q]\ \text{valid}\iff Q\subseteq\llbracket c\rrbracket_\varepsilon P,\qquad \dfrac{[P]\,c\,[\varepsilon:Q]}{[P\ast R]\,c\,[\varepsilon:Q\ast R]}\ [\textsf{frame}]\ (\mathrm{Mod}(c)\cap\mathrm{FV}(R)=\varnothing).$$
+$$[P]\,c\,[\varepsilon:Q]\ \text{valid}\iff Q\subseteq[\![  c ]\!]_\varepsilon P,\qquad \dfrac{[P]\,c\,[\varepsilon:Q]}{[P\ast R]\,c\,[\varepsilon:Q\ast R]}\ [\textsf{frame}]\ (\mathrm{Mod}(c)\cap\mathrm{FV}(R)=\varnothing).$$
 
 ### Local axioms (with exit conditions)
 $$\dfrac{}{[x\mapsto v]\ [x]:=y\ [ok:x\mapsto y]}\ [\textsf{write}] \qquad \dfrac{}{[x{=}\mathsf{nil}]\ [x]:=y\ [er:x{=}\mathsf{nil}]}\ [\textsf{write-null}]$$
@@ -91,7 +91,7 @@ $$\underbrace{[x\mapsto v]\,\mathsf{free}(x)\,[ok:\mathsf{emp}]}_{\text{SL-style
 $$\underbrace{[x\mapsto v]\,\mathsf{free}(x)\,[ok:x\not\mapsto]}_{\text{ISL: keeps the (dead) cell}}\ \Rightarrow\ \text{monotonic heap}\ \Rightarrow\ \text{sound frame + footprint (completeness).}$$
 
 ### Theorems
-- **[Soundness]** $\vdash[P]\,c\,[\varepsilon:Q]\Rightarrow Q\subseteq\llbracket c\rrbracket_\varepsilon P$.
+- **[Soundness]** $\vdash[P]\,c\,[\varepsilon:Q]\Rightarrow Q\subseteq[\![  c ]\!]_\varepsilon P$.
 - **[Footprint / completeness]** any valid ISL triple $[\sigma_P]\,c\,[\varepsilon:\sigma_Q]$ is derivable.
 - **[$\ast\textsf{conj}$ unsound]**; **[no-false-positives]** every derivable $er$ triple is a real bug.
 
