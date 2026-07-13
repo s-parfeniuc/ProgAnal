@@ -8,6 +8,9 @@
 > explainer + complete LaTeX-math cheatsheet per logic (HL, IL, NC, SIL, SL, ISL, SepSIL).
 > This file is the terse cross-cutting map. Atomic notes/pointers in `kb/`
 > (see `kb/index.md`); searchable slide text in `lectures-txt/`.
+>
+> **Metatheory:** every proof from the slides, by macro-topic and tagged by importance,
+> in [`proofs/`](proofs/README.md). Exercises in [`exercises/`](exercises/README.md).
 
 ---
 

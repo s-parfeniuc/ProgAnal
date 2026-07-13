@@ -100,12 +100,106 @@ while (n > 0) do
 ```
 Complete the postcondition `[?]` and prove the IL triple.
 
+**Solution.** The postcondition is `[ok: x ≥ 0 ∧ n ≤ 0]`, which is *exactly*
+`⟦c⟧true` (the strongest post — hence the triple is simultaneously HL-valid).
+
+*Why this set.* The loop exits only through `¬b ≡ n ≤ 0`, and the last thing the
+body does is `n := nondet()`, so on exit `n` is any value `≤ 0`. `x` accumulates
+a sum of strictly positive values: `0` iterations gives `x = 0`; one iteration
+gives *any* `x > 0` (choose `n₀ = x`); further iterations add nothing new. So the
+reachable set is exactly `x ≥ 0 ∧ n ≤ 0`.
+
+*Derivation.* Write `b ≜ (n > 0)` and `c_body ≜ (x := x + n; n := nondet())`.
+
+```
+[true]
+n := nondet();                     [nondet]  [∃n. true] ≡ [true]
+x := 0;                            [Floyd]   [∃x′. true ∧ x = 0] ≡ [x = 0] ≜ P₀
+while (n > 0) do
+   x := x + n;
+   n := nondet();
+[ok: x ≥ 0 ∧ n ≤ 0]                [iter]
+```
+
+Take the family (**no invariant needed** — one assertion per unrolling depth):
+
+```
+P₀ ≜ (x = 0)            P_k ≜ (x ≥ k)   for k ≥ 1
+```
+
+and discharge every premise `[P_k ∧ b] c_body [P_{k+1}]` by Floyd + `[nondet]`:
+
+```
+k = 0:  [x = 0 ∧ n > 0]  x := x+n  [∃x′. x′=0 ∧ n>0 ∧ x = x′+n] ≡ [x = n ∧ n > 0]
+                         n := *    [∃n. x = n ∧ n > 0]           ≡ [x ≥ 1] = P₁ ✔
+
+k ≥ 1:  [x ≥ k ∧ n > 0]  x := x+n  [∃x′. x′≥k ∧ n>0 ∧ x = x′+n] ≡ [x ≥ k+1 ∧ 0 < n ≤ x−k]
+                         n := *    [∃n. …]                       ≡ [x ≥ k+1] = P_{k+1} ✔
+```
+
+(Each step is an *equality* with the image, so the IL side condition `Q ⊆ ⟦c⟧P`
+holds trivially.) The iteration rule then yields
+
+```
+[P₀] while b do c_body [ok: (∃k. P_k) ∧ ¬b]
+   with  ∃k. P_k  ≡  (x = 0) ∨ (x ≥ 1)  ≡  x ≥ 0
+   and   ¬b       ≡  n ≤ 0
+```
+
+Sequencing with the two initial assignments gives `[true] c [ok: x ≥ 0 ∧ n ≤ 0]`. ∎
+
+*Shortcut.* The one-unrolling derived rule `[P₀ ∧ b] c [P₁] ⟹ [P₀] while b do c
+[(P₀ ∨ P₁) ∧ ¬b]` already suffices here: with `P₀ ≜ (x = 0)` and `P₁ ≜ (x > 0)`
+it gives `[(x = 0 ∨ x > 0) ∧ n ≤ 0] ≡ [x ≥ 0 ∧ n ≤ 0]` directly.
+
+*Remarks.*
+- Any **subset** of the image is also a valid IL post (`[cons]` may shrink the
+  post): `[ok: x > 0 ∧ n ≤ 0]` and even `[ok: false]` are valid but uninformative.
+  The exercise asks for the *strongest* one.
+- Dropping the `n ≤ 0` conjunct makes the triple **invalid**: `[ok: x ≥ 0]` would
+  claim states with `n > 0` are reachable at exit, and they are not.
+
 ### IL.2 Which triples are valid (for any `c`, `R`)?  `[lec 06 / slide 43]`
 Compare each IL triple with the analogous HL triple:
 - `[R] c [ok:false][er:false]`   vs `{R} c {false}`
 - `[R] c [ok:true]`              vs `{R} c {true}`
 - `[true] c [ok:R]`              vs `{false} c {R}`
 - `[wlp(c,R)] c [ok:R]`          vs `{wlp(c,R)} c {R}`
+
+**Solution.** Recall `[P] c [ε:Q]` valid iff `Q ⊆ ⟦c⟧ε P`, and `{P} c {Q}` valid
+iff `⟦c⟧P ⊆ Q`. **Three of the four HL triples are universally valid; only one of
+the IL ones is.**
+
+| # | IL triple | valid? | HL triple | valid? |
+|---|---|---|---|---|
+| 1 | `[R] c [ok:false][er:false]` | **always** | `{R} c {false}` | iff `c` never terminates from `R` |
+| 2 | `[R] c [ok:true]` | iff `⟦c⟧ok R = Σ` (≈ never) | `{R} c {true}` | **always** |
+| 3 | `[true] c [ok:R]` | iff `R ⊆ ⟦c⟧ok Σ` | `{false} c {R}` | **always** |
+| 4 | `[wlp(c,R)] c [ok:R]` | **no** (in general) | `{wlp(c,R)} c {R}` | **always** |
+
+1. `false ≡ ∅ ⊆ ⟦c⟧ε R` holds for every `c, R, ε`: an IL triple with a `false`
+   post is **trivially valid and says nothing**. (This is why an `er` post must be
+   *satisfiable* to prove a bug.) In HL the same post is the *strongest* possible
+   claim: `⟦c⟧R ⊆ ∅` says `c` diverges (or errors) on all of `R`.
+2. Mirror image. `true ≡ Σ ⊆ ⟦c⟧ok R` demands that **every** state be reachable —
+   false e.g. for `c ≜ skip`, `R ≜ false` (`⟦skip⟧∅ = ∅ ⊉ Σ`). In HL `{R} c {true}`
+   is the trivially-valid one.
+3. `[true] c [ok:R]` requires every state of `R` to be reachable from *some* input.
+   Counterexample: `c ≜ x := 0`, `R ≜ (x = 1)` — nothing reaches `x = 1`. In HL,
+   `{false} c {R}` is trivially valid (`⟦c⟧∅ = ∅ ⊆ R`).
+4. `{wlp(c,R)} c {R}` is valid **by definition** of `wlp` (the weakest pre
+   guaranteeing `R`). The IL reading needs `R ⊆ ⟦c⟧(wlp(c,R))`, which fails:
+   take `c ≜ x := 0` and `R ≜ (x = 0 ∨ x = 1)`. Then `wlp(c,R) = true`, but
+   `⟦c⟧true = (x = 0) ⊉ R` — the state `x = 1` satisfies the post and is
+   **unreachable**. (Simpler still: `c` diverging ⇒ `wlp(c,R) = true` and
+   `⟦c⟧true = ∅`.) `wlp` is *not* the IL precondition; the IL-side analogue is the
+   **weakest possible precondition** `wpp = ⟦c⟧ᵒᵖR` (see NC.1), and even
+   `[⟦c⟧ᵒᵖR] c [ok:R]` is valid only when every state of `R` has a predecessor —
+   i.e. condition 3 again.
+
+**Slogan.** HL is trivialised by a `false` **pre** or a `true` **post**; IL is
+trivialised only by a `false` **post**. In IL a `true` pre is the *hardest* claim
+to make, not the easiest — exactly the reversal of `[cons]`.
 
 ### IL.3 Derivation: max  `[lec 06 / slide 44–45]`
 Find a derivation for `[true] if x ≥ y then z := x else z := y [ok: z = max(x,y)]`.
